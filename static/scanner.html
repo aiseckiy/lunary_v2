@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Сканер — Lunary</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
+
+.header { padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid #27272a; }
+.header h1 { font-size:17px; font-weight:700; }
+.header p { font-size:12px; color:#71717a; }
+
+.tabs { display:flex; border-bottom:1px solid #27272a; }
+.tab { flex:1; padding:12px; text-align:center; font-size:14px; font-weight:500; color:#71717a; cursor:pointer; border-bottom:2px solid transparent; transition:.2s; }
+.tab.active { color:#6366f1; border-bottom-color:#6366f1; }
+
+/* СКАНЕР */
+.scanner-section { padding:16px; display:none; }
+.scanner-section.active { display:block; }
+#reader { width:100%; max-width:400px; margin:0 auto 12px; border-radius:12px; overflow:hidden; }
+.scan-hint { text-align:center; color:#52525b; font-size:13px; margin-bottom:16px; }
+.btn-start { width:100%; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:14px; font-size:15px; font-weight:600; cursor:pointer; }
+.btn-start:active { opacity:.85; }
+
+/* РУЧНОЙ ВВОД */
+.manual-section { padding:16px; display:none; }
+.manual-section.active { display:block; }
+.input-group { margin-bottom:14px; }
+.input-label { font-size:13px; color:#71717a; margin-bottom:6px; }
+.input-field { width:100%; background:#18181b; border:1px solid #27272a; border-radius:10px; padding:12px 14px; color:#e4e4e7; font-size:15px; outline:none; }
+.input-field:focus { border-color:#6366f1; }
+.search-results { margin-top:8px; }
+.result-item { background:#18181b; border:1px solid #27272a; border-radius:10px; padding:14px; margin-bottom:8px; cursor:pointer; }
+.result-item:active { border-color:#6366f1; }
+.result-name { font-size:14px; font-weight:500; }
+.result-meta { font-size:12px; color:#71717a; margin-top:4px; }
+.result-stock { font-size:20px; font-weight:700; }
+.result-stock.low { color:#ef4444; }
+.result-stock.ok { color:#22c55e; }
+
+/* КАРТОЧКА ТОВАРА */
+.product-card { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:18px; margin-bottom:14px; display:none; }
+.product-card.show { display:block; }
+.product-card.low { border-color:#ef4444; }
+.p-name { font-size:16px; font-weight:600; margin-bottom:4px; }
+.p-sku { font-size:12px; color:#52525b; font-family:monospace; margin-bottom:14px; }
+.p-stock-big { font-size:44px; font-weight:800; line-height:1; margin-bottom:4px; }
+.p-unit { font-size:13px; color:#71717a; margin-bottom:18px; }
+
+.qty-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.qty-label { font-size:13px; color:#71717a; white-space:nowrap; }
+.qty-btn { width:42px; height:42px; background:#27272a; border:none; border-radius:8px; color:#fff; font-size:22px; cursor:pointer; flex-shrink:0; }
+.qty-input { flex:1; background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px; color:#fff; font-size:18px; text-align:center; outline:none; }
+
+.actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.act-btn { padding:14px 8px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
+.act-sale { background:#ef44441a; color:#ef4444; }
+.act-income { background:#22c55e1a; color:#22c55e; }
+.act-writeoff { background:#f9731620; color:#f97316; }
+.act-return { background:#6366f11a; color:#6366f1; }
+.btn-reset { width:100%; background:#27272a; color:#a1a1aa; border:none; border-radius:10px; padding:12px; font-size:14px; cursor:pointer; }
+
+/* Уведомление */
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; transition:opacity .3s; z-index:999; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; }
+.toast.error { background:#ef4444; }
+
+/* Https warning */
+.https-warn { background:#f9731620; border:1px solid #f97316; border-radius:10px; padding:14px; margin:16px; font-size:13px; color:#f97316; line-height:1.5; display:none; }
+.https-warn.show { display:block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📷 Сканер Lunary</h1>
+    <p id="status-text">Готов к работе</p>
+  </div>
+</div>
+
+<div class="https-warn" id="https-warn">
+  ⚠️ Камера требует HTTPS. Используй вкладку <strong>Ввод вручную</strong> — введи штрихкод с упаковки или артикул.
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-scan" onclick="switchTab('scan')">📷 Камера</div>
+  <div class="tab" id="tab-manual" onclick="switchTab('manual')">⌨️ Ввод вручную</div>
+</div>
+
+<!-- СКАНЕР КАМЕРА -->
+<div class="scanner-section active" id="section-scan">
+  <div id="reader"></div>
+  <p class="scan-hint" id="scan-hint">Нажми кнопку, наведи камеру на штрихкод</p>
+  <button class="btn-start" id="btn-start" onclick="startCamera()">▶ Запустить камеру</button>
+</div>
+
+<!-- РУЧНОЙ ВВОД -->
+<div class="manual-section" id="section-manual">
+  <div class="input-group">
+    <div class="input-label">Артикул или название товара:</div>
+    <input class="input-field" id="manual-input" type="text" placeholder="Например: TYT_SIL_010 или герметик"
+      oninput="onManualInput()" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <div class="search-results" id="search-results"></div>
+</div>
+
+<!-- КАРТОЧКА ТОВАРА (общая для обоих режимов) -->
+<div style="padding:0 16px" id="card-wrap">
+  <div class="product-card" id="product-card">
+    <div class="p-name" id="p-name">—</div>
+    <div class="p-sku" id="p-sku">—</div>
+    <div class="p-stock-big ok" id="p-stock">0</div>
+    <div class="p-unit" id="p-unit">шт в наличии</div>
+
+    <div class="qty-row">
+      <span class="qty-label">Количество:</span>
+      <button class="qty-btn" onclick="chQty(-1)">−</button>
+      <input class="qty-input" type="number" id="qty" value="1" min="1">
+      <button class="qty-btn" onclick="chQty(1)">+</button>
+    </div>
+
+    <div class="actions">
+      <button class="act-btn act-sale"    onclick="doMove('sale')">🛒 Продажа</button>
+      <button class="act-btn act-income"  onclick="doMove('income')">📦 Приход</button>
+      <button class="act-btn act-writeoff" onclick="doMove('writeoff')">🗑 Списание</button>
+      <button class="act-btn act-return"  onclick="doMove('return')">↩️ Возврат</button>
+    </div>
+    <button class="btn-reset" onclick="resetCard()">🔄 Другой товар</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let scanner = null;
+let currentProduct = null;
+let searchTimer = null;
+
+// ── Переключение вкладок ──────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tab-scan').classList.toggle('active', tab === 'scan');
+  document.getElementById('tab-manual').classList.toggle('active', tab === 'manual');
+  document.getElementById('section-scan').classList.toggle('active', tab === 'scan');
+  document.getElementById('section-manual').classList.toggle('active', tab === 'manual');
+  if (tab === 'manual') {
+    setTimeout(() => document.getElementById('manual-input').focus(), 100);
+  }
+}
+
+// ── Камера ────────────────────────────────────────────
+function startCamera() {
+  if (!window.isSecureContext) {
+    document.getElementById('https-warn').classList.add('show');
+    switchTab('manual');
+    return;
+  }
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('scan-hint').textContent = 'Наводи на штрихкод...';
+
+  scanner = new Html5Qrcode('reader');
+  scanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 280, height: 150 } },
+    onBarcode, () => {}
+  ).catch(() => {
+    document.getElementById('https-warn').classList.add('show');
+    switchTab('manual');
+    document.getElementById('btn-start').style.display = 'block';
+  });
+}
+
+async function onBarcode(code) {
+  await scanner.stop();
+  document.getElementById('reader').innerHTML = '';
+  document.getElementById('scan-hint').textContent = '';
+  await loadProductByBarcode(code);
+}
+
+// ── Ручной поиск ──────────────────────────────────────
+function onManualInput() {
+  clearTimeout(searchTimer);
+  const q = document.getElementById('manual-input').value.trim();
+  if (q.length < 2) {
+    document.getElementById('search-results').innerHTML = '';
+    return;
+  }
+  searchTimer = setTimeout(() => searchProducts(q), 300);
+}
+
+async function searchProducts(q) {
+  const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
+  const products = await res.json();
+  const container = document.getElementById('search-results');
+
+  if (!products.length) {
+    container.innerHTML = '<div style="color:#52525b;font-size:13px;padding:8px 0">Ничего не найдено</div>';
+    return;
+  }
+
+  container.innerHTML = products.slice(0, 8).map(p => `
+    <div class="result-item" onclick="selectProduct(${p.id})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1">
+          <div class="result-name">${p.name}</div>
+          <div class="result-meta">${p.sku}${p.barcode ? ' • ' + p.barcode : ''}</div>
+        </div>
+        <div class="result-stock ${p.stock <= 5 ? 'low' : 'ok'}" style="margin-left:12px">${p.stock}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function selectProduct(id) {
+  const res = await fetch(`/api/products/${id}/stock`);
+  const p = await res.json();
+  // get full product data
+  const allRes = await fetch(`/api/products/search?q=${p.name.substring(0,10)}`);
+  const all = await allRes.json();
+  const full = all.find(x => x.id === id) || p;
+  showCard({ ...full, ...p });
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('manual-input').value = '';
+}
+
+async function loadProductByBarcode(barcode) {
+  try {
+    const res = await fetch(`/api/products/barcode/${encodeURIComponent(barcode)}`);
+    if (!res.ok) {
+      showNotFound(barcode);
+      return;
+    }
+    showCard(await res.json());
+  } catch {
+    showNotFound(barcode);
+  }
+}
+
+// ── Карточка товара ───────────────────────────────────
+function showCard(p) {
+  currentProduct = p;
+  document.getElementById('p-name').textContent = p.name;
+  document.getElementById('p-sku').textContent = p.sku + (p.barcode ? ' • ' + p.barcode : '');
+  document.getElementById('p-stock').textContent = p.stock;
+  document.getElementById('p-stock').className = 'p-stock-big ' + (p.stock <= (p.min_stock || 5) ? 'low' : 'ok');
+  document.getElementById('p-unit').textContent = (p.unit || 'шт') + ' в наличии';
+  document.getElementById('qty').value = 1;
+
+  const card = document.getElementById('product-card');
+  card.className = 'product-card show' + (p.stock <= (p.min_stock || 5) ? ' low' : '');
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showNotFound(code) {
+  toast(`❌ Штрихкод ${code} не найден`, true);
+  resetCamera();
+}
+
+async function doMove(type) {
+  if (!currentProduct) return;
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  const labels = { sale: 'Продажа', income: 'Приход', writeoff: 'Списание', return: 'Возврат' };
+
+  const res = await fetch(`/api/products/${currentProduct.id}/movement`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quantity: qty, type, source: 'scanner' })
+  });
+  const data = await res.json();
+
+  toast(`✅ ${labels[type]}: ${qty} шт → остаток ${data.new_stock}`);
+
+  // Обновляем карточку
+  currentProduct.stock = data.new_stock;
+  document.getElementById('p-stock').textContent = data.new_stock;
+}
+
+function resetCard() {
+  currentProduct = null;
+  document.getElementById('product-card').className = 'product-card';
+  resetCamera();
+}
+
+function resetCamera() {
+  document.getElementById('reader').innerHTML = '';
+  document.getElementById('btn-start').style.display = 'block';
+  document.getElementById('scan-hint').textContent = 'Нажми кнопку, наведи камеру на штрихкод';
+}
+
+function chQty(d) {
+  const inp = document.getElementById('qty');
+  inp.value = Math.max(1, (parseInt(inp.value) || 1) + d);
+}
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+// Автоопределение HTTPS
+if (!window.isSecureContext) {
+  document.getElementById('https-warn').classList.add('show');
+}
+</script>
+</body>
+</html>

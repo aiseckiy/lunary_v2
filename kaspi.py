@@ -118,41 +118,49 @@ def sync_kaspi_products() -> str:
 # ── Заказы ────────────────────────────────────────────────────
 
 def get_kaspi_orders(state: str = "NEW", page: int = 0, size: int = 100) -> dict:
-    """Получить заказы из Kaspi через Supabase прокси"""
+    """Получить все заказы из Kaspi через Supabase прокси (все страницы)"""
     date_ge, date_le = _date_range_ms(14)
-    data = _proxy("get_orders", {
-        "state": state,
-        "page": page,
-        "size": size,
-        "creationDateGe": str(date_ge),
-        "creationDateLe": str(date_le),
-    })
-    if not data:
-        return {"orders": [], "total": 0, "error": "Нет ответа от Kaspi API"}
+    all_orders = []
+    current_page = 0
 
-    orders = []
-    for item in data.get("data", []):
-        attr = item.get("attributes", {})
-        customer = attr.get("customer", {})
-        name = f"{customer.get('firstName', '')} {customer.get('lastName', '')}".strip() or "—"
-        orders.append({
-            "id": item.get("id"),
-            "code": attr.get("code", ""),
-            "state": attr.get("state", "—"),
-            "status": attr.get("status", "—"),
-            "total": attr.get("totalPrice", 0),
-            "date": attr.get("creationDate", ""),
-            "customer": name,
-            "phone": customer.get("cellPhone", ""),
-            "deliveryMode": attr.get("deliveryMode", ""),
-            "paymentMode": attr.get("paymentMode", ""),
-            "deliveryAddress": attr.get("deliveryAddress"),
-            "plannedDeliveryDate": attr.get("plannedDeliveryDate"),
-            "entries": [],
+    while True:
+        data = _proxy("get_orders", {
+            "state": state,
+            "page": current_page,
+            "size": 100,
+            "creationDateGe": str(date_ge),
+            "creationDateLe": str(date_le),
         })
+        if not data:
+            break
 
-    total = data.get("meta", {}).get("totalCount", len(orders))
-    return {"orders": orders, "total": total, "error": None}
+        items = data.get("data", [])
+        for item in items:
+            attr = item.get("attributes", {})
+            customer = attr.get("customer", {})
+            name = f"{customer.get('firstName', '')} {customer.get('lastName', '')}".strip() or "—"
+            all_orders.append({
+                "id": item.get("id"),
+                "code": attr.get("code", ""),
+                "state": attr.get("state", "—"),
+                "status": attr.get("status", "—"),
+                "total": attr.get("totalPrice", 0),
+                "date": attr.get("creationDate", ""),
+                "customer": name,
+                "phone": customer.get("cellPhone", ""),
+                "deliveryMode": attr.get("deliveryMode", ""),
+                "paymentMode": attr.get("paymentMode", ""),
+                "deliveryAddress": attr.get("deliveryAddress"),
+                "plannedDeliveryDate": attr.get("plannedDeliveryDate"),
+                "entries": [],
+            })
+
+        total_pages = data.get("meta", {}).get("pageCount", 1)
+        if current_page + 1 >= total_pages or len(items) < 100:
+            break
+        current_page += 1
+
+    return {"orders": all_orders, "total": len(all_orders), "error": None}
 
 
 def format_orders_text(orders: list) -> str:

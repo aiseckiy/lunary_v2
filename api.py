@@ -478,27 +478,69 @@ def _send_tg_notification(text: str):
 
 
 def _format_order_notification(o: dict) -> str:
+    from datetime import datetime
     STATE_LABELS = {
-        "ACCEPTED": "🟡 Новый заказ",
-        "KASPI_DELIVERY": "🚚 Доставка Kaspi",
+        "NEW": "🟡 Новый заказ",
+        "KASPI_DELIVERY": "🚚 Kaspi Доставка",
+        "DELIVERY": "🚛 Ваша доставка",
         "PICKUP": "🏪 Самовывоз",
         "COMPLETED": "✅ Выполнен",
         "CANCELLED": "❌ Отменён",
+        "SIGN_REQUIRED": "✍️ Нужна подпись",
     }
+    DELIVERY_LABELS = {
+        "DELIVERY_LOCAL": "по городу",
+        "DELIVERY_PICKUP": "самовывоз",
+        "DELIVERY_REGIONAL_TODOOR": "Kaspi Доставка",
+        "DELIVERY_REGIONAL_PICKUP": "до склада",
+    }
+    PAYMENT_LABELS = {
+        "PAY_WITH_CREDIT": "Кредит",
+        "PREPAID": "Безналичная",
+    }
+
     state = o.get("state", "")
     label = STATE_LABELS.get(state, state)
     customer = o.get("customer") or "Покупатель"
     total = int(o.get("total", 0))
     entries = o.get("entries", [])
+    code = o.get("code") or o.get("id", "")
+    delivery_mode = DELIVERY_LABELS.get(o.get("deliveryMode", ""), o.get("deliveryMode", ""))
+    payment = PAYMENT_LABELS.get(o.get("paymentMode", ""), "")
+    address = o.get("deliveryAddress") or {}
+    addr_str = address.get("formattedAddress", "")
+    planned = o.get("plannedDeliveryDate")
+    planned_str = ""
+    if planned:
+        try:
+            planned_str = datetime.fromtimestamp(int(planned) / 1000).strftime("%d.%m.%Y")
+        except Exception:
+            pass
 
     lines = [
         f"<b>{label}</b>",
-        f"🛒 Заказ #{o.get('id')}",
+        f"🛒 Заказ <b>{code}</b>",
         f"👤 {customer}",
-        "",
     ]
-    for e in entries:
-        lines.append(f"  • {e.get('name', '—')} — {e.get('qty', 1)} шт × {int(e.get('price', 0) / max(e.get('qty', 1), 1)):,} ₸".replace(",", " "))
+    if delivery_mode:
+        lines.append(f"📦 Доставка: {delivery_mode}")
+    if addr_str:
+        lines.append(f"📍 {addr_str}")
+    if planned_str:
+        lines.append(f"📅 Планируемая дата: {planned_str}")
+    if payment:
+        lines.append(f"💳 Оплата: {payment}")
+    lines.append("")
+
+    if entries:
+        for e in entries:
+            qty = e.get('qty', 1)
+            price = int(e.get('basePrice', e.get('price', 0)))
+            name = e.get('name', '—')
+            lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
+    else:
+        lines.append("  (состав заказа загружается отдельно)")
+
     lines.append("")
     lines.append(f"<b>Итого: {total:,} ₸</b>".replace(",", " "))
     return "\n".join(lines)

@@ -208,7 +208,7 @@ async function loadOrders() {
     const orders = (data.orders || []).sort((a, b) => (Number(b.date) || 0) - (Number(a.date) || 0));
     document.getElementById('orders-count').textContent = `${orders.length} из ${data.total} заказов`;
     if (orders[0]?.synced_at) document.getElementById('sync-time').textContent = `Синхронизировано: ${orders[0].synced_at}`;
-    else document.getElementById('sync-time').textContent = 'Запусти kaspi_sync.py на компьютере';
+    else document.getElementById('sync-time').textContent = 'Синхронизация каждые 5 минут';
 
     if (!orders.length) {
       container.innerHTML = '<div class="loading">📭 Заказов в этом статусе нет</div>';

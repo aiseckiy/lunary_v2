@@ -126,6 +126,7 @@ def get_kaspi_orders(state: str = "NEW", page: int = 0, size: int = 100) -> dict
             "total": attr.get("totalPrice", 0),
             "date": attr.get("creationDate", ""),
             "customer": name,
+            "phone": customer.get("cellPhone", ""),
             "deliveryMode": attr.get("deliveryMode", ""),
             "paymentMode": attr.get("paymentMode", ""),
             "deliveryAddress": attr.get("deliveryAddress"),

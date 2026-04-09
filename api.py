@@ -517,11 +517,23 @@ def _format_order_notification(o: dict) -> str:
         except Exception:
             pass
 
+    phone_raw = o.get("phone", "").strip()
+    # Приводим к формату 7XXXXXXXXXX для WhatsApp
+    phone_wa = ""
+    if phone_raw:
+        digits = "".join(c for c in phone_raw if c.isdigit())
+        if digits.startswith("8") and len(digits) == 11:
+            digits = "7" + digits[1:]
+        if len(digits) >= 10:
+            phone_wa = digits if digits.startswith("7") else "7" + digits[-10:]
+
     lines = [
         f"<b>{label}</b>",
         f"🛒 Заказ <b>{code}</b>",
         f"👤 {customer}",
     ]
+    if phone_wa:
+        lines.append(f"📞 <a href='https://wa.me/{phone_wa}'>WhatsApp {phone_raw}</a>")
     if delivery_mode:
         lines.append(f"📦 Доставка: {delivery_mode}")
     if addr_str:

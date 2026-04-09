@@ -2,6 +2,8 @@
 Запуск системы: python run.py
 """
 import threading
+import signal
+import sys
 import uvicorn
 from dotenv import load_dotenv
 load_dotenv()
@@ -26,6 +28,10 @@ if __name__ == "__main__":
     api_thread = threading.Thread(target=run_api, daemon=True)
     api_thread.start()
     print("✅ API запущен на порту 8000")
+
+    # Дать старому боту время завершиться перед запуском нового
+    import time
+    time.sleep(5)
 
     print("🤖 Запуск Telegram бота...")
     run_bot()

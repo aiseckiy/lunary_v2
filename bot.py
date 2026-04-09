@@ -910,4 +910,4 @@ def run_bot():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     logger.info("🤖 Бот запущен v2")
-    app.run_polling(drop_pending_updates=True)
+    app.run_polling(drop_pending_updates=True, stop_signals=None)

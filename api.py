@@ -390,6 +390,20 @@ def get_kaspi_states():
     return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
 
 
+@app.get("/api/kaspi/test")
+def kaspi_test():
+    """Тест прямого запроса к Kaspi API с Railway"""
+    import requests as req
+    token = os.getenv("KASPI_TOKEN")
+    headers = {"X-Auth-Token": token, "Content-Type": "application/vnd.api+json", "Accept": "*/*"}
+    params = {"page[number]": 0, "page[size]": 5, "filter[orders][state]": "NEW"}
+    try:
+        r = req.get("https://kaspi.kz/shop/api/v2/orders", headers=headers, params=params, timeout=20, verify=False)
+        return {"status": r.status_code, "body": r.text[:500]}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 class KaspiOrdersPayload(BaseModel):
     orders: list
 

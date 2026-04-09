@@ -131,7 +131,10 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
   </div>
 
   <div class="orders-header">
-    <div class="orders-count" id="orders-count">—</div>
+    <div>
+      <div class="orders-count" id="orders-count">—</div>
+      <div style="font-size:11px;color:#52525b;margin-top:2px" id="sync-time"></div>
+    </div>
     <button class="btn-refresh" onclick="loadOrders()">🔄 Обновить</button>
   </div>
 
@@ -182,7 +185,7 @@ async function loadOrders() {
   container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка...</div>';
 
   try {
-    const res = await fetch(`/api/kaspi/orders?state=${currentStatus}&size=50`);
+    const res = await fetch(`/api/kaspi/orders/local?state=${currentStatus}`);
     const data = await res.json();
 
     if (data.error) {
@@ -203,6 +206,8 @@ async function loadOrders() {
     document.getElementById('config-panel').style.display = 'none';
     const orders = data.orders || [];
     document.getElementById('orders-count').textContent = `${orders.length} из ${data.total} заказов`;
+    if (orders[0]?.synced_at) document.getElementById('sync-time').textContent = `Синхронизировано: ${orders[0].synced_at}`;
+    else document.getElementById('sync-time').textContent = 'Запусти kaspi_sync.py на компьютере';
 
     if (!orders.length) {
       container.innerHTML = '<div class="loading">📭 Заказов в этом статусе нет</div>';

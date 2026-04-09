@@ -354,6 +354,59 @@ def get_kaspi_states():
     return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
 
 
+@app.post("/api/kaspi/orders/sync")
+def kaspi_orders_sync(orders: list, db: Session = Depends(get_db)):
+    """Принимает заказы от локального sync скрипта и сохраняет в БД"""
+    from database import KaspiOrder
+    import json
+    added = 0
+    updated = 0
+    for o in orders:
+        existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+        if existing:
+            existing.state = o.get("state", existing.state)
+            updated += 1
+        else:
+            db.add(KaspiOrder(
+                order_id=str(o["id"]),
+                state=o.get("state", ""),
+                total=int(o.get("total", 0)),
+                customer=o.get("customer", ""),
+                entries=json.dumps(o.get("entries", []), ensure_ascii=False),
+                order_date=str(o.get("date", ""))
+            ))
+            added += 1
+    db.commit()
+    return {"added": added, "updated": updated}
+
+
+@app.get("/api/kaspi/orders/local")
+def kaspi_orders_local(state: Optional[str] = None, db: Session = Depends(get_db)):
+    """Возвращает заказы из локальной БД (сохранённые sync скриптом)"""
+    from database import KaspiOrder
+    import json
+    q = db.query(KaspiOrder)
+    if state:
+        q = q.filter(KaspiOrder.state == state)
+    orders = q.order_by(KaspiOrder.id.desc()).limit(200).all()
+    return {
+        "orders": [
+            {
+                "id": o.order_id,
+                "state": o.state,
+                "total": o.total,
+                "customer": o.customer,
+                "entries": json.loads(o.entries or "[]"),
+                "date": o.order_date,
+                "synced_at": o.created_at.strftime("%d.%m %H:%M")
+            }
+            for o in orders
+        ],
+        "total": len(orders),
+        "error": None
+    }
+
+
 @app.get("/api/kaspi/debug")
 def kaspi_debug():
     """Отладка Kaspi API — показывает сырой ответ"""

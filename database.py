@@ -24,6 +24,19 @@ class Product(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class KaspiOrder(Base):
+    __tablename__ = "kaspi_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(String, unique=True, nullable=False)
+    state = Column(String, nullable=False)
+    total = Column(Integer, default=0)
+    customer = Column(String, nullable=True)
+    entries = Column(String, nullable=True)  # JSON
+    order_date = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class Movement(Base):
     __tablename__ = "movements"
 

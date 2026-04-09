@@ -19,6 +19,7 @@ class Product(Base):
     category = Column(String, default="Общее")
     unit = Column(String, default="шт")
     min_stock = Column(Integer, default=5)
+    brand = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

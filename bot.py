@@ -33,7 +33,7 @@ def get_db():
 # ══════════════════════════════════════════════════════
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("📦 Все товары", callback_data="menu:list"),
+        [InlineKeyboardButton("📦 Товары по категориям", callback_data="menu:list"),
          InlineKeyboardButton("⚠️ Заканчивается", callback_data="menu:low")],
         [InlineKeyboardButton("➕ Добавить товар", callback_data="menu:add"),
          InlineKeyboardButton("📊 Статистика", callback_data="menu:stats")],
@@ -47,34 +47,101 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ══════════════════════════════════════════════════════
-# /list — Все товары
+# Утилита: определить бренд по названию
+# ══════════════════════════════════════════════════════
+BRANDS = ["TYTAN", "AKFIX", "TULEX", "ЭКСПЕРТ"]
+
+def detect_brand(name: str) -> str:
+    n = name.upper()
+    for b in BRANDS:
+        if b in n:
+            return b
+    return "Другое"
+
+
+# ══════════════════════════════════════════════════════
+# /list — Главное меню фильтрации
 # ══════════════════════════════════════════════════════
 async def cmd_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = get_db()
     try:
         stocks = crud.get_all_stocks(db)
         if not stocks:
-            text = "📭 Товаров нет. Добавь командой /add"
-            await _reply(update, text)
+            await _reply(update, "📭 Товаров нет. Добавь командой /add")
             return
 
-        categories = {}
+        # Считаем категории с количеством
+        cat_count: dict = {}
         for s in stocks:
             cat = s["product"].category or "Общее"
-            categories.setdefault(cat, []).append(s)
+            cat_count[cat] = cat_count.get(cat, 0) + 1
 
-        lines = ["📦 *Все товары:*\n"]
-        for cat, items in categories.items():
-            lines.append(f"*— {cat} —*")
-            for s in items:
-                p, stock = s["product"], s["stock"]
-                icon = "🔴" if stock <= p.min_stock else "🟢"
-                lines.append(f"{icon} {p.name}\n    {stock} {p.unit} | `{p.sku}`")
-            lines.append("")
+        # Считаем бренды
+        brand_count: dict = {}
+        for s in stocks:
+            b = detect_brand(s["product"].name)
+            brand_count[b] = brand_count.get(b, 0) + 1
 
-        await _reply(update, "\n".join(lines))
+        total = len(stocks)
+        low = sum(1 for s in stocks if s["stock"] <= s["product"].min_stock)
+
+        text = (
+            f"📦 *Склад: {total} позиций*\n"
+            f"{'⚠️ Заканчивается: ' + str(low) + ' позиций' if low else '✅ Все в норме'}\n\n"
+            f"Выбери фильтр:"
+        )
+
+        # Кнопки категорий
+        cat_buttons = []
+        for cat, cnt in sorted(cat_count.items(), key=lambda x: -x[1]):
+            cat_buttons.append(InlineKeyboardButton(f"{cat} ({cnt})", callback_data=f"cat:{cat}"))
+
+        # Разбиваем по 2 в ряд
+        keyboard = [cat_buttons[i:i+2] for i in range(0, len(cat_buttons), 2)]
+
+        # Кнопки брендов
+        brand_buttons = []
+        for brand, cnt in sorted(brand_count.items(), key=lambda x: -x[1]):
+            brand_buttons.append(InlineKeyboardButton(f"{brand} ({cnt})", callback_data=f"brand:{brand}"))
+        keyboard.extend([brand_buttons[i:i+2] for i in range(0, len(brand_buttons), 2)])
+
+        # Доп кнопки
+        keyboard.append([
+            InlineKeyboardButton("🔴 Заканчивается", callback_data="menu:low"),
+            InlineKeyboardButton("📊 Статистика", callback_data="menu:stats"),
+        ])
+
+        msg = update.message or (update.callback_query.message if update.callback_query else None)
+        if update.callback_query:
+            await update.callback_query.edit_message_text(text, parse_mode="Markdown",
+                                                           reply_markup=InlineKeyboardMarkup(keyboard))
+        else:
+            await msg.reply_text(text, parse_mode="Markdown",
+                                 reply_markup=InlineKeyboardMarkup(keyboard))
     finally:
         db.close()
+
+
+async def _show_filtered(query, db, title: str, stocks: list):
+    """Показать отфильтрованный список товаров"""
+    if not stocks:
+        await query.edit_message_text(f"📭 {title}: ничего не найдено")
+        return
+
+    lines = [f"📦 *{title}* ({len(stocks)} позиций):\n"]
+    for s in stocks[:40]:
+        p, stock = s["product"], s["stock"]
+        icon = "🔴" if stock <= p.min_stock else "🟢"
+        lines.append(f"{icon} {p.name[:45]}\n    {stock} {p.unit} | `{p.sku}`")
+
+    if len(stocks) > 40:
+        lines.append(f"\n_...и ещё {len(stocks) - 40}. Используй /find для поиска_")
+
+    keyboard = [[InlineKeyboardButton("◀️ Назад", callback_data="menu:list")]]
+    await query.edit_message_text(
+        "\n".join(lines), parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
 
 # ══════════════════════════════════════════════════════
@@ -526,6 +593,37 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
     text_lower = text.lower()
+
+    # Режим редактирования товара
+    if "editing" in context.user_data:
+        ed = context.user_data.pop("editing")
+        db = get_db()
+        try:
+            p = crud.get_product_by_id(ed["pid"], db)
+            field = ed["field"]
+            val = text.strip()
+            if field == "min_stock":
+                try:
+                    val = int(val)
+                except ValueError:
+                    await update.message.reply_text("❌ Введи число")
+                    context.user_data["editing"] = ed
+                    return
+            elif field == "sku":
+                val = val.upper()
+            crud.update_product(ed["pid"], db, **{field: val})
+            field_names = {
+                "name": "Название", "sku": "Артикул", "category": "Категория",
+                "unit": "Единица", "min_stock": "Мин. остаток", "barcode": "Штрихкод"
+            }
+            await update.message.reply_text(
+                f"✅ *{p.name}*\n{field_names[field]} изменён на: `{val}`",
+                parse_mode="Markdown"
+            )
+        finally:
+            db.close()
+        return
+
     db = get_db()
     try:
         # Быстрые команды без AI (мгновенно)
@@ -625,6 +723,18 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif data == "menu:add":
             await q.edit_message_text("Напиши команду /add чтобы добавить товар пошагово")
 
+        elif data.startswith("cat:"):
+            cat_name = data[4:]
+            stocks = crud.get_all_stocks(db)
+            filtered = [s for s in stocks if (s["product"].category or "Общее") == cat_name]
+            await _show_filtered(q, db, cat_name, filtered)
+
+        elif data.startswith("brand:"):
+            brand_name = data[6:]
+            stocks = crud.get_all_stocks(db)
+            filtered = [s for s in stocks if detect_brand(s["product"].name) == brand_name]
+            await _show_filtered(q, db, f"Бренд: {brand_name}", filtered)
+
         elif data.startswith("detail:"):
             pid = int(data.split(":")[1])
             p = crud.get_product_by_id(pid, db)
@@ -632,17 +742,53 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             icon = "🔴" if stock <= p.min_stock else "🟢"
             mvs = crud.get_movements(pid, db, 3)
             hist = "  ".join([f"{'📦+' if m.quantity>0 else '🛒-'}{abs(m.quantity)}({m.created_at.strftime('%d.%m')})" for m in mvs]) or "—"
-            kb = [[
-                InlineKeyboardButton("🛒-1", callback_data=f"qs:{pid}"),
-                InlineKeyboardButton("📦+1", callback_data=f"qi:{pid}"),
-                InlineKeyboardButton("🗑-1", callback_data=f"qw:{pid}"),
-            ]]
+            kb = [
+                [
+                    InlineKeyboardButton("🛒-1", callback_data=f"qs:{pid}"),
+                    InlineKeyboardButton("📦+1", callback_data=f"qi:{pid}"),
+                    InlineKeyboardButton("🗑-1", callback_data=f"qw:{pid}"),
+                ],
+                [InlineKeyboardButton("✏️ Редактировать", callback_data=f"edit_prod:{pid}")],
+            ]
             await q.edit_message_text(
                 f"{icon} *{p.name}*\nАрт: `{p.sku}` | Кат: {p.category}\n"
                 f"Остаток: *{stock} {p.unit}* (мин: {p.min_stock})\n"
                 f"Штрихкод: `{p.barcode or 'не задан'}`\n\n"
                 f"Последние: {hist}",
                 parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(kb)
+            )
+
+        elif data.startswith("edit_prod:"):
+            pid = int(data.split(":")[1])
+            p = crud.get_product_by_id(pid, db)
+            kb = [
+                [InlineKeyboardButton("📝 Название", callback_data=f"ef:{pid}:name"),
+                 InlineKeyboardButton("🔖 Артикул", callback_data=f"ef:{pid}:sku")],
+                [InlineKeyboardButton("🗂 Категория", callback_data=f"ef:{pid}:category"),
+                 InlineKeyboardButton("📏 Единица", callback_data=f"ef:{pid}:unit")],
+                [InlineKeyboardButton("⚠️ Мин. остаток", callback_data=f"ef:{pid}:min_stock"),
+                 InlineKeyboardButton("📷 Штрихкод", callback_data=f"ef:{pid}:barcode")],
+                [InlineKeyboardButton("◀️ Назад", callback_data=f"detail:{pid}")],
+            ]
+            await q.edit_message_text(
+                f"✏️ *{p.name}*\n\nЧто изменить?",
+                parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(kb)
+            )
+
+        elif data.startswith("ef:"):
+            _, pid, field = data.split(":")
+            pid = int(pid)
+            p = crud.get_product_by_id(pid, db)
+            field_names = {
+                "name": "название", "sku": "артикул", "category": "категорию",
+                "unit": "единицу измерения", "min_stock": "минимальный остаток", "barcode": "штрихкод"
+            }
+            current = getattr(p, field, "—") or "—"
+            context.user_data["editing"] = {"pid": pid, "field": field}
+            await q.edit_message_text(
+                f"✏️ *{p.name}*\n\nСейчас *{field_names[field]}*: `{current}`\n\nВведи новое значение:",
+                parse_mode="Markdown",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Отмена", callback_data=f"edit_prod:{pid}")]])
             )
 
         elif data.startswith("qs:"):

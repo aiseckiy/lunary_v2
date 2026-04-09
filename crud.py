@@ -3,6 +3,18 @@ from sqlalchemy import func
 from database import Product, Movement
 from datetime import datetime
 
+# Известные бренды — порядок важен (проверяем сверху вниз)
+KNOWN_BRANDS = ["TYTAN", "AKFIX", "TULEX", "ЭКСПЕРТ", "CAPSTONE"]
+
+
+def detect_brand(name: str) -> str:
+    """Определяет бренд по названию товара"""
+    n = name.upper()
+    for b in KNOWN_BRANDS:
+        if b in n:
+            return b
+    return ""
+
 
 # ─── Остаток ────────────────────────────────────────────────
 def get_stock(product_id: int, db: Session) -> int:
@@ -62,8 +74,12 @@ def get_all_products(db: Session):
 
 
 # ─── Добавить товар ──────────────────────────────────────────
-def create_product(name: str, sku: str, db: Session, barcode=None, category="Общее", unit="шт", min_stock=5):
-    product = Product(name=name, sku=sku, barcode=barcode, category=category, unit=unit, min_stock=min_stock)
+def create_product(name: str, sku: str, db: Session, barcode=None, category="Общее", unit="шт", min_stock=5, brand=None):
+    product = Product(
+        name=name, sku=sku, barcode=barcode, category=category,
+        unit=unit, min_stock=min_stock,
+        brand=brand if brand is not None else detect_brand(name)
+    )
     db.add(product)
     db.commit()
     db.refresh(product)
@@ -132,6 +148,24 @@ def get_all_stocks(db: Session):
         stock = get_stock(p.id, db)
         result.append({"product": p, "stock": stock})
     return result
+
+
+# ─── Обновить товар ──────────────────────────────────────────
+def update_product(product_id: int, db: Session, **kwargs):
+    p = db.query(Product).filter(Product.id == product_id).first()
+    if not p:
+        return None
+    for key, val in kwargs.items():
+        if val is not None and hasattr(p, key):
+            setattr(p, key, val)
+    # Если бренд явно не передан, но изменилось название — переопределяем
+    if "name" in kwargs and "brand" not in kwargs:
+        auto = detect_brand(kwargs["name"])
+        if auto:
+            p.brand = auto
+    db.commit()
+    db.refresh(p)
+    return p
 
 
 # ─── История движений ────────────────────────────────────────

@@ -21,6 +21,17 @@ class ProductCreate(BaseModel):
     category: str = "Общее"
     unit: str = "шт"
     min_stock: int = 5
+    brand: Optional[str] = None  # если пусто — определяется автоматически
+
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    sku: Optional[str] = None
+    barcode: Optional[str] = None
+    category: Optional[str] = None
+    unit: Optional[str] = None
+    min_stock: Optional[int] = None
+    brand: Optional[str] = None
 
 
 class MovementCreate(BaseModel):
@@ -58,7 +69,8 @@ def list_products(db: Session = Depends(get_db)):
             "unit": s["product"].unit,
             "min_stock": s["product"].min_stock,
             "stock": s["stock"],
-            "low": s["stock"] <= s["product"].min_stock
+            "low": s["stock"] <= s["product"].min_stock,
+            "brand": s["product"].brand or ""
         }
         for s in stocks
     ]
@@ -69,7 +81,7 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
     p = crud.create_product(
         name=data.name, sku=data.sku, db=db,
         barcode=data.barcode, category=data.category,
-        unit=data.unit, min_stock=data.min_stock
+        unit=data.unit, min_stock=data.min_stock, brand=data.brand
     )
     return {"id": p.id, "name": p.name, "sku": p.sku}
 
@@ -104,6 +116,18 @@ def get_by_barcode(barcode: str, db: Session = Depends(get_db)):
         "unit": p.unit,
         "min_stock": p.min_stock
     }
+
+
+@app.put("/api/products/{product_id}")
+def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
+    p = crud.get_product_by_id(product_id, db)
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    updates = {k: v for k, v in data.model_dump().items() if v is not None}
+    if "sku" in updates:
+        updates["sku"] = updates["sku"].upper()
+    p = crud.update_product(product_id, db, **updates)
+    return {"id": p.id, "name": p.name, "sku": p.sku}
 
 
 @app.get("/api/products/{product_id}/stock")

@@ -28,12 +28,19 @@ header { padding:16px 24px; border-bottom:1px solid #27272a; display:flex; align
 .stat-value.purple { color:#6366f1; }
 
 /* Toolbar */
-.toolbar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.toolbar { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
 .search-input { flex:1; min-width:200px; background:#18181b; border:1px solid #27272a; border-radius:8px; padding:10px 14px; color:#e4e4e7; font-size:14px; outline:none; }
 .search-input:focus { border-color:#6366f1; }
-.filter-pill { background:#18181b; border:1px solid #27272a; border-radius:20px; padding:8px 14px; font-size:13px; color:#71717a; cursor:pointer; white-space:nowrap; }
+.filter-pill { background:#18181b; border:1px solid #27272a; border-radius:20px; padding:7px 13px; font-size:13px; color:#71717a; cursor:pointer; white-space:nowrap; user-select:none; transition:all .15s; flex-shrink:0; }
+.filter-pill:hover { border-color:#52525b; color:#e4e4e7; }
 .filter-pill.active { background:#6366f1; border-color:#6366f1; color:#fff; }
+.filter-pill.active-brand { background:#f59e0b; border-color:#f59e0b; color:#000; }
 .btn-add { background:#22c55e; color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; }
+
+/* Filter rows */
+.filter-row { display:flex; gap:8px; margin-bottom:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+.filter-row::-webkit-scrollbar { display:none; }
+.filter-row-label { font-size:11px; color:#52525b; text-transform:uppercase; letter-spacing:.05em; align-self:center; flex-shrink:0; min-width:60px; }
 
 /* Products grid */
 .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
@@ -95,6 +102,12 @@ header { padding:16px 24px; border-bottom:1px solid #27272a; display:flex; align
 .move-btn.ret { background:#6366f11a; color:#6366f1; }
 .btn-cancel-move { width:100%; background:#27272a; color:#a1a1aa; border:none; border-radius:10px; padding:12px; cursor:pointer; font-size:14px; }
 
+/* Edit modal */
+.edit-modal .field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tab-btns { display:flex; border-bottom:1px solid #27272a; margin-bottom:16px; }
+.tab-btn { padding:10px 16px; background:none; border:none; color:#71717a; font-size:14px; cursor:pointer; border-bottom:2px solid transparent; }
+.tab-btn.active { color:#6366f1; border-bottom-color:#6366f1; }
+
 /* Toast */
 .toast-container { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; }
 .toast { background:#27272a; color:#fff; padding:11px 18px; border-radius:10px; font-size:14px; font-weight:500; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; }
@@ -121,10 +134,27 @@ header { padding:16px 24px; border-bottom:1px solid #27272a; display:flex; align
   <div class="stats" id="stats"></div>
 
   <div class="toolbar">
-    <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу..." oninput="render()">
-    <span class="filter-pill active" id="f-all" onclick="setFilter('all')">Все</span>
-    <span class="filter-pill" id="f-low" onclick="setFilter('low')">⚠️ Заканчивается</span>
+    <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу, штрихкоду..." oninput="render()">
+    <select class="filter-pill" id="sort-select" onchange="render()" style="cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:28px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2371717a' d='M6 8L1 3h10z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center">
+      <option value="default">По категориям</option>
+      <option value="stock-asc">Остаток ↑</option>
+      <option value="stock-desc">Остаток ↓</option>
+      <option value="name-asc">Название А-Я</option>
+    </select>
+    <span class="filter-pill active" id="f-low" onclick="toggleLow()">⚠️ Заканчивается</span>
     <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
+  </div>
+
+  <!-- Строка категорий -->
+  <div class="filter-row" id="cat-row">
+    <span class="filter-row-label">Категория</span>
+    <span class="filter-pill active" id="cat-all" onclick="setCat(null)">Все</span>
+  </div>
+
+  <!-- Строка брендов -->
+  <div class="filter-row" id="brand-row">
+    <span class="filter-row-label">Бренд</span>
+    <span class="filter-pill active" id="brand-all" onclick="setBrand(null)">Все</span>
   </div>
 
   <div class="products-grid" id="grid">
@@ -198,6 +228,10 @@ header { padding:16px 24px; border-bottom:1px solid #27272a; display:flex; align
           </select>
         </div>
         <div class="form-group">
+          <label class="form-label">Бренд <span style="color:#52525b">(авто если пусто)</span></label>
+          <input class="form-input" id="f-brand" placeholder="TYTAN, AKFIX, TULEX...">
+        </div>
+        <div class="form-group">
           <label class="form-label">Единица</label>
           <select class="form-input form-select" id="f-unit">
             <option>шт</option><option>кг</option><option>л</option><option>м</option><option>уп</option>
@@ -219,17 +253,77 @@ header { padding:16px 24px; border-bottom:1px solid #27272a; display:flex; align
   </div>
 </div>
 
+<!-- Модал: редактировать товар -->
+<div class="overlay edit-modal" id="edit-modal" onclick="closeEditModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">✏️ Редактировать товар</div>
+        <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="em-sku-label">—</div>
+      </div>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Название</label>
+        <input class="form-input" id="em-name">
+      </div>
+      <div class="edit-modal field-row">
+        <div class="form-group">
+          <label class="form-label">Артикул</label>
+          <input class="form-input" id="em-sku" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Штрихкод</label>
+          <input class="form-input" id="em-barcode" placeholder="—">
+        </div>
+      </div>
+      <div class="edit-modal field-row">
+        <div class="form-group">
+          <label class="form-label">Категория</label>
+          <input class="form-input" id="em-category">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Единица</label>
+          <select class="form-input form-select" id="em-unit">
+            <option>шт</option><option>кг</option><option>л</option><option>м</option><option>уп</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-modal field-row">
+        <div class="form-group">
+          <label class="form-label">Мин. остаток</label>
+          <input class="form-input" id="em-min" type="number" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Бренд <span style="color:#52525b">(авто если пусто)</span></label>
+          <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX...">
+        </div>
+      </div>
+      <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
+      <button class="btn-cancel-move" style="margin-top:8px" onclick="closeEditModal()">Отмена</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container"><div class="toast" id="toast"></div></div>
 
 <script>
 let allProducts = [];
-let currentFilter = 'all';
+let activeCat = null;
+let activeBrand = null;
+let showLow = false;
 let selectedId = null;
+
+function getBrand(p) {
+  return p.brand || 'Не указан';
+}
 
 async function load() {
   const res = await fetch('/api/products');
   allProducts = await res.json();
   renderStats();
+  buildFilters();
   render();
 }
 
@@ -244,53 +338,124 @@ function renderStats() {
   `;
 }
 
+function buildFilters() {
+  // Категории: считаем
+  const catCount = {};
+  allProducts.forEach(p => {
+    const c = p.category || 'Общее';
+    catCount[c] = (catCount[c] || 0) + 1;
+  });
+  const catRow = document.getElementById('cat-row');
+  // Удаляем старые (кроме "Все" и label)
+  [...catRow.querySelectorAll('.cat-pill')].forEach(el => el.remove());
+  Object.entries(catCount).sort((a,b) => b[1]-a[1]).forEach(([cat, cnt]) => {
+    const el = document.createElement('span');
+    el.className = 'filter-pill cat-pill';
+    el.textContent = `${cat} (${cnt})`;
+    el.onclick = () => setCat(cat);
+    el.dataset.cat = cat;
+    catRow.appendChild(el);
+  });
+
+  // Бренды: считаем
+  const brandCount = {};
+  allProducts.forEach(p => {
+    const b = getBrand(p);
+    brandCount[b] = (brandCount[b] || 0) + 1;
+  });
+  const brandRow = document.getElementById('brand-row');
+  [...brandRow.querySelectorAll('.brand-pill')].forEach(el => el.remove());
+  Object.entries(brandCount).sort((a,b) => b[1]-a[1]).forEach(([brand, cnt]) => {
+    const el = document.createElement('span');
+    el.className = 'filter-pill brand-pill';
+    el.textContent = `${brand} (${cnt})`;
+    el.onclick = () => setBrand(brand);
+    el.dataset.brand = brand;
+    brandRow.appendChild(el);
+  });
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  document.getElementById('cat-all').classList.toggle('active', !cat);
+  document.querySelectorAll('.cat-pill').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  render();
+}
+
+function setBrand(brand) {
+  activeBrand = brand;
+  document.getElementById('brand-all').classList.toggle('active', !brand);
+  document.querySelectorAll('.brand-pill').forEach(el => {
+    el.classList.toggle('active-brand', el.dataset.brand === brand);
+    el.classList.remove('active');
+  });
+  render();
+}
+
+function toggleLow() {
+  showLow = !showLow;
+  document.getElementById('f-low').classList.toggle('active', showLow);
+  render();
+}
+
 function render() {
   const q = document.getElementById('search').value.toLowerCase();
   let list = allProducts.filter(p => {
-    const ms = !q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q) || (p.barcode||'').includes(q);
-    const mf = currentFilter === 'all' || (currentFilter === 'low' && p.low);
-    return ms && mf;
+    if (q && !p.name.toLowerCase().includes(q) && !p.sku.toLowerCase().includes(q) && !(p.barcode||'').includes(q)) return false;
+    if (showLow && !p.low) return false;
+    if (activeCat && (p.category || 'Общее') !== activeCat) return false;
+    if (activeBrand && getBrand(p) !== activeBrand) return false;
+    return true;
   });
 
   const grid = document.getElementById('grid');
   if (!list.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
 
-  // Группируем по категориям
-  const cats = {};
-  list.forEach(p => { const c = p.category||'Общее'; (cats[c]=cats[c]||[]).push(p); });
+  const sort = document.getElementById('sort-select').value;
+
+  // Сортировка
+  if (sort === 'stock-asc')  list.sort((a, b) => a.stock - b.stock);
+  else if (sort === 'stock-desc') list.sort((a, b) => b.stock - a.stock);
+  else if (sort === 'name-asc')  list.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
   let html = '';
-  for (const [cat, items] of Object.entries(cats)) {
-    html += `<div class="cat-header">${cat}</div>`;
-    items.forEach(p => {
-      html += `
-        <div class="product-card ${p.low?'low':''}" onclick="openMoveModal(${p.id})">
-          <div class="card-top">
-            <div class="card-name">${p.name}</div>
-            <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️ Мало':'✓'}</span>
-          </div>
-          <div class="card-sku">${p.sku}${p.barcode?' · '+p.barcode:''}</div>
-          <div class="card-bottom">
-            <div>
-              <div class="card-stock ${p.low?'low':'ok'}">${p.stock}</div>
-              <div class="card-unit">${p.unit}</div>
-            </div>
-            <div class="card-actions" onclick="event.stopPropagation()">
-              <button class="card-btn red" onclick="quickMove(${p.id},'sale')" title="Продажа">🛒-1</button>
-              <button class="card-btn green" onclick="quickMove(${p.id},'income')" title="Приход">📦+1</button>
-            </div>
-          </div>
-        </div>
-      `;
-    });
+  // При сортировке по остаткам — без группировки по категориям
+  if (sort !== 'default' || activeCat) {
+    list.forEach(p => { html += productCard(p); });
+  } else {
+    const cats = {};
+    list.forEach(p => { const c = p.category||'Общее'; (cats[c]=cats[c]||[]).push(p); });
+    for (const [cat, items] of Object.entries(cats)) {
+      html += `<div class="cat-header">${cat} — ${items.length} шт</div>`;
+      items.forEach(p => { html += productCard(p); });
+    }
   }
   grid.innerHTML = html;
 }
 
-function setFilter(f) {
-  currentFilter = f;
-  ['all','low'].forEach(x => document.getElementById('f-'+x).classList.toggle('active', x===f));
-  render();
+function productCard(p) {
+  return `
+    <div class="product-card ${p.low?'low':''}" onclick="openMoveModal(${p.id})">
+      <div class="card-top">
+        <div class="card-name">${p.name}</div>
+        <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️':'✓'}</span>
+      </div>
+      <div class="card-sku">${p.sku}${p.barcode?' · '+p.barcode:''}</div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-stock ${p.low?'low':'ok'}">${p.stock}</div>
+          <div class="card-unit">${p.unit}</div>
+        </div>
+        <div class="card-actions" onclick="event.stopPropagation()">
+          <button class="card-btn red" onclick="quickMove(${p.id},'sale')" title="Продажа">🛒-1</button>
+          <button class="card-btn green" onclick="quickMove(${p.id},'income')" title="Приход">📦+1</button>
+          <button class="card-btn" onclick="openEditModal(${p.id})" title="Редактировать">✏️</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 // ── Move modal ──────────────────────────────────────────
@@ -358,12 +523,14 @@ async function submitAdd() {
   const stock = parseInt(document.getElementById('f-stock').value) || 0;
   const min_stock = parseInt(document.getElementById('f-min').value) || 5;
 
+  const brand = document.getElementById('f-brand').value.trim() || null;
+
   if (!name || !sku) { toast('Заполни название и артикул', 'error'); return; }
 
   // Создать товар
   const r1 = await fetch('/api/products', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({name, sku, barcode, category, unit, min_stock})
+    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand})
   });
   if (!r1.ok) { toast('Ошибка: артикул уже занят', 'error'); return; }
   const p = await r1.json();
@@ -378,6 +545,53 @@ async function submitAdd() {
 
   closeAddModal();
   toast(`✅ ${name} добавлен`, 'success');
+  load();
+}
+
+// ── Edit modal ──────────────────────────────────────────
+let editId = null;
+
+function openEditModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  editId = id;
+  document.getElementById('em-sku-label').textContent = p.sku;
+  document.getElementById('em-name').value = p.name;
+  document.getElementById('em-sku').value = p.sku;
+  document.getElementById('em-barcode').value = p.barcode || '';
+  document.getElementById('em-category').value = p.category || '';
+  document.getElementById('em-unit').value = p.unit || 'шт';
+  document.getElementById('em-min').value = p.min_stock ?? 5;
+  document.getElementById('em-brand').value = p.brand || '';
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal(e) {
+  if (!e || e.target === document.getElementById('edit-modal'))
+    document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function submitEdit() {
+  const name = document.getElementById('em-name').value.trim();
+  const sku = document.getElementById('em-sku').value.trim().toUpperCase();
+  const barcode = document.getElementById('em-barcode').value.trim() || null;
+  const category = document.getElementById('em-category').value.trim();
+  const unit = document.getElementById('em-unit').value;
+  const min_stock = parseInt(document.getElementById('em-min').value) || 0;
+
+  if (!name || !sku) { toast('Название и артикул обязательны', 'error'); return; }
+
+  const brand = document.getElementById('em-brand').value.trim() || null;
+
+  const res = await fetch(`/api/products/${editId}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand})
+  });
+
+  if (!res.ok) { toast('Ошибка сохранения', 'error'); return; }
+  const data = await res.json();
+  closeEditModal();
+  toast(`✅ ${data.name} сохранён`, 'success');
   load();
 }
 

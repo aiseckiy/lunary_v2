@@ -123,7 +123,8 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
 
   <!-- Статусы -->
   <div class="status-tabs">
-    <div class="stab active" onclick="setStatus('ACCEPTED')" data-s="ACCEPTED">🟡 Новые</div>
+    <div class="stab active" onclick="setStatus('')" data-s="">📋 Все</div>
+    <div class="stab" onclick="setStatus('ACCEPTED')" data-s="ACCEPTED">🟡 Новые</div>
     <div class="stab" onclick="setStatus('KASPI_DELIVERY')" data-s="KASPI_DELIVERY">🚚 Доставка</div>
     <div class="stab" onclick="setStatus('PICKUP')" data-s="PICKUP">🏪 Самовывоз</div>
     <div class="stab" onclick="setStatus('COMPLETED')" data-s="COMPLETED">✅ Выполнены</div>
@@ -154,7 +155,7 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
 </nav>
 
 <script>
-let currentStatus = 'ACCEPTED';
+let currentStatus = '';
 
 const STATE_LABELS = {
   ACCEPTED: 'Новый',

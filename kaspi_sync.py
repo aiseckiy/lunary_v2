@@ -55,6 +55,8 @@ PRESETS = [
     ("NEW",        "ACCEPTED"),
     ("PICKUP",     "PICKUP"),
     ("DELIVERY",   "KASPI_DELIVERY"),
+    ("COMPLETED",  "COMPLETED"),
+    ("CANCELLED",  "CANCELLED"),
 ]
 
 def log(msg):

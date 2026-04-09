@@ -62,6 +62,59 @@ class AISuggestRequest(BaseModel):
 def startup():
     init_db()
     _auto_import_if_empty()
+    _start_kaspi_sync_loop()
+
+
+def _start_kaspi_sync_loop():
+    """Фоновая синхронизация заказов Kaspi каждые 5 минут"""
+    import threading, time, json
+    from database import KaspiOrder, SessionLocal as SL
+
+    STATES = ["NEW", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE"]
+
+    def sync():
+        while True:
+            try:
+                db = SL()
+                all_orders = []
+                for state in STATES:
+                    result = kaspi_module.get_kaspi_orders(state=state, size=100)
+                    if result.get("orders"):
+                        all_orders.extend(result["orders"])
+
+                added = 0
+                new_orders = []
+                for o in all_orders:
+                    existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+                    if existing:
+                        existing.state = o.get("state", existing.state)
+                    else:
+                        db.add(KaspiOrder(
+                            order_id=str(o["id"]),
+                            state=o.get("state", ""),
+                            total=int(o.get("total", 0)),
+                            customer=o.get("customer", ""),
+                            entries=json.dumps(o.get("entries", []), ensure_ascii=False),
+                            order_date=str(o.get("date", ""))
+                        ))
+                        added += 1
+                        new_orders.append(o)
+                db.commit()
+                db.close()
+
+                notify_states = {"NEW", "PICKUP", "KASPI_DELIVERY", "DELIVERY"}
+                for o in new_orders:
+                    if o.get("state") in notify_states:
+                        _send_tg_notification(_format_order_notification(o))
+
+                if added:
+                    print(f"✅ Kaspi sync: +{added} новых заказов")
+            except Exception as e:
+                print(f"⚠️ Kaspi sync error: {e}")
+            time.sleep(300)  # каждые 5 минут
+
+    t = threading.Thread(target=sync, daemon=True)
+    t.start()
 
 
 def _auto_import_if_empty():

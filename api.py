@@ -615,7 +615,7 @@ def kaspi_orders_local(state: Optional[str] = None, db: Session = Depends(get_db
                 "customer": o.customer,
                 "entries": json.loads(o.entries or "[]"),
                 "date": o.order_date,
-                "synced_at": o.created_at.strftime("%d.%m %H:%M")
+                "synced_at": (o.created_at.replace(tzinfo=__import__('datetime').timezone.utc).astimezone(__import__('datetime').timezone(__import__('datetime').timedelta(hours=5)))).strftime("%d.%m %H:%M")
             }
             for o in orders
         ],

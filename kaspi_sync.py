@@ -52,11 +52,12 @@ query getOrders($merchantUid: String!, $input: MerchantOrderInput!, $page: Int!,
 """
 
 PRESETS = [
-    ("NEW",        "ACCEPTED"),
-    ("PICKUP",     "PICKUP"),
-    ("DELIVERY",   "KASPI_DELIVERY"),
-    ("COMPLETED",  "COMPLETED"),
-    ("CANCELLED",  "CANCELLED"),
+    ("NEW",         "ACCEPTED"),
+    ("PICKUP",      "PICKUP"),
+    ("DELIVERY",    "KASPI_DELIVERY"),
+    ("DONE",        "COMPLETED"),
+    ("CANCEL",      "CANCELLED"),
+    ("SIGN",        "SIGNING"),
 ]
 
 def log(msg):
@@ -96,7 +97,7 @@ def fetch_orders(preset: str, state: str) -> list:
         data = r.json()
 
         if "errors" in data:
-            log(f"⚠️ GraphQL ошибка ({preset}): {data['errors'][0].get('message', '')}")
+            # Тихо пропускаем неизвестные пресеты
             return []
 
         raw_orders = (

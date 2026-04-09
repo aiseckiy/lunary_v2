@@ -390,8 +390,13 @@ def get_kaspi_states():
     return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
 
 
+class KaspiOrdersPayload(BaseModel):
+    orders: list
+
+
 @app.post("/api/kaspi/orders/sync")
-def kaspi_orders_sync(orders: list, db: Session = Depends(get_db)):
+def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)):
+    orders = payload.orders
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
     from database import KaspiOrder
     import json

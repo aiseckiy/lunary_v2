@@ -354,6 +354,24 @@ def get_kaspi_states():
     return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
 
 
+@app.get("/api/kaspi/debug")
+def kaspi_debug():
+    """Отладка Kaspi API — показывает сырой ответ"""
+    import requests, os
+    token = os.getenv("KASPI_TOKEN", "")
+    shop_id = os.getenv("KASPI_SHOP_ID", "")
+    if not token or not shop_id:
+        return {"error": "токены не заданы", "token_set": bool(token), "shop_id_set": bool(shop_id)}
+    url = f"https://kaspi.kz/shop/api/v2/orders/merchant/{shop_id}/"
+    try:
+        r = requests.get(url, headers={"X-Auth-Token": token, "Content-Type": "application/json"},
+                        params={"page[number]": 0, "page[size]": 5, "filter[orders][state]": "ACCEPTED"},
+                        timeout=15, verify=False)
+        return {"status_code": r.status_code, "url": url, "shop_id": shop_id, "response": r.text[:500]}
+    except Exception as e:
+        return {"error": str(e), "url": url}
+
+
 @app.post("/api/kaspi/sync-products")
 def sync_kaspi_products_endpoint():
     """Синхронизировать товары из Kaspi в склад"""

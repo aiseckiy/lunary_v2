@@ -8,6 +8,7 @@ import os
 
 from database import get_db, init_db
 import crud
+import kaspi as kaspi_module
 
 app = FastAPI(title="Lunary OS", version="1.0")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -21,7 +22,8 @@ class ProductCreate(BaseModel):
     category: str = "Общее"
     unit: str = "шт"
     min_stock: int = 5
-    brand: Optional[str] = None  # если пусто — определяется автоматически
+    brand: Optional[str] = None
+    price: Optional[int] = None
 
 
 class ProductUpdate(BaseModel):
@@ -32,6 +34,7 @@ class ProductUpdate(BaseModel):
     unit: Optional[str] = None
     min_stock: Optional[int] = None
     brand: Optional[str] = None
+    price: Optional[int] = None
 
 
 class MovementCreate(BaseModel):
@@ -47,6 +50,11 @@ class StockAdjust(BaseModel):
     type: str
     source: str = "manual"
     note: Optional[str] = None
+
+
+class AISuggestRequest(BaseModel):
+    name: str
+    barcode: Optional[str] = None
 
 
 # ─── Startup ─────────────────────────────────────────────────
@@ -70,7 +78,8 @@ def list_products(db: Session = Depends(get_db)):
             "min_stock": s["product"].min_stock,
             "stock": s["stock"],
             "low": s["stock"] <= s["product"].min_stock,
-            "brand": s["product"].brand or ""
+            "brand": s["product"].brand or "",
+            "price": s["product"].price
         }
         for s in stocks
     ]
@@ -85,7 +94,7 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
     p = crud.create_product(
         name=data.name, sku=sku, db=db,
         barcode=data.barcode, category=data.category,
-        unit=data.unit, min_stock=data.min_stock, brand=data.brand
+        unit=data.unit, min_stock=data.min_stock, brand=data.brand, price=data.price
     )
     return {"id": p.id, "name": p.name, "sku": p.sku}
 
@@ -285,6 +294,80 @@ def scanner():
 @app.get("/history", response_class=HTMLResponse)
 def history_page():
     with open("static/history.html") as f:
+        return f.read()
+
+
+# ─── AI автозаполнение ───────────────────────────────────────
+@app.post("/api/ai/suggest")
+def ai_suggest(data: AISuggestRequest):
+    """AI подсказывает категорию, бренд, единицу и артикул по названию товара"""
+    import os, json
+    from openai import OpenAI
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="OpenAI не настроен")
+    client = OpenAI(api_key=api_key)
+
+    prompt = (
+        f"Товар: «{data.name}»\n"
+        "Это товар из строительной химии / инструментов / крепежа.\n"
+        "Определи и верни JSON с полями:\n"
+        "- category: одно из [Герметики, Пены монтажные, Дюбели и крепёж, Инструменты, Химия, Лента и скотч, Клей, Краски, Другое]\n"
+        "- brand: бренд если есть в названии, иначе ''\n"
+        "- unit: одно из [шт, кг, л, м, уп, рул]\n"
+        "- sku_hint: короткий артикул латиницей (макс 15 символов), например TYT_SIL_280\n"
+        "Верни только JSON без пояснений."
+    )
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            max_tokens=200
+        )
+        result = json.loads(resp.choices[0].message.content)
+        return {
+            "category": result.get("category", "Другое"),
+            "brand": result.get("brand", ""),
+            "unit": result.get("unit", "шт"),
+            "sku_hint": result.get("sku_hint", "")
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Kaspi заказы ────────────────────────────────────────────
+@app.get("/api/kaspi/orders")
+def get_kaspi_orders_endpoint(state: str = "ACCEPTED", page: int = 0, size: int = 20):
+    """Получить заказы из Kaspi API"""
+    token = os.getenv("KASPI_TOKEN")
+    shop_id = os.getenv("KASPI_SHOP_ID")
+    if not token or not shop_id:
+        return {"orders": [], "total": 0, "error": "KASPI_TOKEN и KASPI_SHOP_ID не заданы в настройках"}
+    result = kaspi_module.get_kaspi_orders(state=state, page=page, size=size)
+    return result
+
+
+@app.get("/api/kaspi/states")
+def get_kaspi_states():
+    """Возможные статусы заказов Kaspi"""
+    return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
+
+
+@app.post("/api/kaspi/sync-products")
+def sync_kaspi_products_endpoint():
+    """Синхронизировать товары из Kaspi в склад"""
+    token = os.getenv("KASPI_TOKEN")
+    shop_id = os.getenv("KASPI_SHOP_ID")
+    if not token or not shop_id:
+        raise HTTPException(status_code=400, detail="KASPI_TOKEN и KASPI_SHOP_ID не заданы")
+    result = kaspi_module.sync_kaspi_products()
+    return {"message": result}
+
+
+@app.get("/kaspi", response_class=HTMLResponse)
+def kaspi_page():
+    with open("static/kaspi.html") as f:
         return f.read()
 
 

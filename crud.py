@@ -74,11 +74,12 @@ def get_all_products(db: Session):
 
 
 # ─── Добавить товар ──────────────────────────────────────────
-def create_product(name: str, sku: str, db: Session, barcode=None, category="Общее", unit="шт", min_stock=5, brand=None):
+def create_product(name: str, sku: str, db: Session, barcode=None, category="Общее", unit="шт", min_stock=5, brand=None, price=None):
     product = Product(
         name=name, sku=sku, barcode=barcode, category=category,
         unit=unit, min_stock=min_stock,
-        brand=brand if brand is not None else detect_brand(name)
+        brand=brand if brand is not None else detect_brand(name),
+        price=price
     )
     db.add(product)
     db.commit()

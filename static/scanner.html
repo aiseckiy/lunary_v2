@@ -50,10 +50,10 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 .p-stock-big { font-size:44px; font-weight:800; line-height:1; margin-bottom:4px; }
 .p-unit { font-size:13px; color:#71717a; margin-bottom:18px; }
 
-.qty-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-.qty-label { font-size:13px; color:#71717a; white-space:nowrap; }
-.qty-btn { width:42px; height:42px; background:#27272a; border:none; border-radius:8px; color:#fff; font-size:22px; cursor:pointer; flex-shrink:0; }
-.qty-input { flex:1; background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px; color:#fff; font-size:18px; text-align:center; outline:none; }
+.qty-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; width:100%; }
+.qty-label { font-size:13px; color:#71717a; white-space:nowrap; flex-shrink:0; }
+.qty-btn { width:44px; height:44px; min-width:44px; background:#27272a; border:none; border-radius:8px; color:#fff; font-size:22px; cursor:pointer; flex-shrink:0; }
+.qty-input { flex:1; min-width:0; background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px 6px; color:#fff; font-size:18px; text-align:center; outline:none; }
 
 .actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
 .act-btn { padding:14px 8px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
@@ -71,6 +71,14 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 /* Https warning */
 .https-warn { background:#f9731620; border:1px solid #f97316; border-radius:10px; padding:14px; margin:16px; font-size:13px; color:#f97316; line-height:1.5; display:none; }
 .https-warn.show { display:block; }
+
+/* Bottom nav */
+.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#18181b; border-top:1px solid #27272a; z-index:200; }
+.nav-items { display:flex; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#71717a; font-size:10px; gap:2px; }
+.nav-item.cur { color:#6366f1; }
+.nav-icon { font-size:22px; line-height:1; }
+@media(max-width:768px) { .app-nav{display:block;} body{padding-bottom:70px;} .header nav{display:none;} }
 </style>
 </head>
 <body>
@@ -116,7 +124,7 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 </div>
 
 <!-- КАРТОЧКА ТОВАРА (общая для обоих режимов) -->
-<div style="padding:0 16px" id="card-wrap">
+<div style="padding:0 16px;box-sizing:border-box;width:100%" id="card-wrap">
   <div class="product-card" id="product-card">
     <div class="p-name" id="p-name">—</div>
     <div class="p-sku" id="p-sku">—</div>
@@ -144,6 +152,16 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Bottom nav -->
+<nav class="app-nav">
+  <div class="nav-items">
+    <a class="nav-item" href="/"><span class="nav-icon">🏠</span>Склад</a>
+    <a class="nav-item cur" href="/scanner"><span class="nav-icon">📷</span>Сканер</a>
+    <a class="nav-item" href="/history"><span class="nav-icon">📋</span>История</a>
+    <a class="nav-item" href="/kaspi"><span class="nav-icon">🛒</span>Kaspi</a>
+  </div>
+</nav>
 
 <script>
 let scanner = null;
@@ -352,7 +370,7 @@ async function doMove(type) {
     body: JSON.stringify({ quantity: qty, type, source: 'scanner' })
   });
   const data = await res.json();
-
+  beep();
   toast(`✅ ${labels[type]}: ${qty} шт → остаток ${data.new_stock}`);
 
   // Обновляем карточку

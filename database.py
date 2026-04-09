@@ -20,6 +20,7 @@ class Product(Base):
     unit = Column(String, default="шт")
     min_stock = Column(Integer, default=5)
     brand = Column(String, nullable=True)
+    price = Column(Integer, nullable=True)  # цена в тенге
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -46,3 +47,10 @@ def get_db():
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Миграция: добавить колонку price если нет
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE products ADD COLUMN price INTEGER"))
+            conn.commit()
+        except Exception:
+            pass

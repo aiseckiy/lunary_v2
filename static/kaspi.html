@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Kaspi — Lunary</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:70px; }
+
+header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#0f0f13; z-index:50; }
+.logo { font-size:18px; font-weight:800; color:#fff; }
+.logo span { color:#6366f1; }
+.header-links { display:flex; gap:8px; }
+.hlink { background:#18181b; border:1px solid #27272a; border-radius:8px; padding:6px 12px; font-size:13px; color:#a1a1aa; text-decoration:none; }
+
+.container { max-width:900px; margin:0 auto; padding:20px; }
+.page-title { font-size:22px; font-weight:800; margin-bottom:6px; }
+.page-sub { font-size:13px; color:#71717a; margin-bottom:20px; }
+
+/* Status tabs */
+.status-tabs { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+.status-tabs::-webkit-scrollbar { display:none; }
+.stab { background:#18181b; border:1px solid #27272a; border-radius:20px; padding:7px 14px; font-size:13px; color:#71717a; cursor:pointer; white-space:nowrap; transition:all .15s; }
+.stab.active { background:#6366f1; border-color:#6366f1; color:#fff; }
+
+/* Config panel */
+.config-panel { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:20px; margin-bottom:20px; }
+.config-title { font-size:14px; font-weight:600; margin-bottom:12px; }
+.config-row { display:flex; gap:10px; margin-bottom:10px; }
+.config-input { flex:1; background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px 12px; color:#e4e4e7; font-size:14px; outline:none; }
+.config-input:focus { border-color:#6366f1; }
+.btn-save { background:#6366f1; color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; }
+.config-hint { font-size:12px; color:#52525b; line-height:1.5; }
+
+/* Orders */
+.orders-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.orders-count { font-size:13px; color:#71717a; }
+.btn-refresh { background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:8px 14px; color:#a1a1aa; font-size:13px; cursor:pointer; }
+.btn-refresh:hover { background:#3f3f46; }
+
+.order-card { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:18px; margin-bottom:12px; }
+.order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.order-id { font-size:15px; font-weight:700; }
+.order-date { font-size:12px; color:#71717a; margin-top:2px; }
+.order-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
+.badge-accepted { background:#6366f11a; color:#6366f1; }
+.badge-completed { background:#22c55e1a; color:#22c55e; }
+.badge-cancelled { background:#ef44441a; color:#ef4444; }
+.badge-delivery { background:#f9731620; color:#f97316; }
+.badge-pickup { background:#eab3081a; color:#eab308; }
+
+.order-customer { font-size:13px; color:#a1a1aa; margin-bottom:10px; }
+.order-items { border-top:1px solid #27272a; padding-top:10px; }
+.order-item { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #1f1f23; }
+.order-item:last-child { border-bottom:none; }
+.item-name { font-size:13px; flex:1; }
+.item-sku { font-size:11px; color:#52525b; font-family:monospace; }
+.item-qty { font-size:13px; font-weight:600; color:#6366f1; white-space:nowrap; margin-left:8px; }
+.item-price { font-size:13px; color:#a1a1aa; white-space:nowrap; margin-left:8px; }
+.order-total { display:flex; justify-content:flex-end; margin-top:10px; font-size:15px; font-weight:700; color:#22c55e; }
+
+.no-config { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:40px; text-align:center; }
+.no-config .icon { font-size:48px; margin-bottom:12px; }
+.no-config h3 { font-size:16px; font-weight:700; margin-bottom:8px; }
+.no-config p { font-size:13px; color:#71717a; line-height:1.6; }
+
+.loading { text-align:center; padding:40px; color:#52525b; }
+.spinner { display:inline-block; width:24px; height:24px; border:2px solid #27272a; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:8px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.error-box { background:#ef44441a; border:1px solid #ef444440; border-radius:12px; padding:16px; color:#ef4444; font-size:14px; }
+
+/* Stats row */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
+.stat { background:#18181b; border:1px solid #27272a; border-radius:12px; padding:14px; }
+.stat-label { font-size:11px; color:#71717a; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
+.stat-value { font-size:24px; font-weight:800; }
+.stat-value.purple { color:#6366f1; }
+.stat-value.green { color:#22c55e; }
+
+/* Bottom nav */
+.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#18181b; border-top:1px solid #27272a; z-index:200; }
+.nav-items { display:flex; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#71717a; font-size:10px; gap:2px; transition:color .15s; }
+.nav-item.cur { color:#6366f1; }
+.nav-icon { font-size:22px; line-height:1; }
+@media(max-width:768px) { .app-nav{display:block;} .header-links{display:none;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lunary <span>OS</span></div>
+  <div class="header-links">
+    <a class="hlink" href="/">🏠 Склад</a>
+    <a class="hlink" href="/scanner">📷 Сканер</a>
+    <a class="hlink" href="/history">📋 История</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-title">🛒 Kaspi заказы</div>
+  <div class="page-sub">Просмотр заказов из Kaspi.kz в реальном времени</div>
+
+  <!-- Настройки (показываем если нет токена) -->
+  <div class="config-panel" id="config-panel" style="display:none">
+    <div class="config-title">⚙️ Настройки Kaspi API</div>
+    <div class="config-row">
+      <input class="config-input" id="cfg-token" type="password" placeholder="X-Auth-Token (KASPI_TOKEN)">
+    </div>
+    <div class="config-row">
+      <input class="config-input" id="cfg-shop" placeholder="Shop ID (KASPI_SHOP_ID)">
+      <button class="btn-save" onclick="saveConfig()">Сохранить</button>
+    </div>
+    <div class="config-hint">
+      Токен и Shop ID можно получить в личном кабинете Kaspi.kz → Магазин → API.<br>
+      Или добавьте KASPI_TOKEN и KASPI_SHOP_ID в переменные окружения Railway.
+    </div>
+  </div>
+
+  <div id="stats-row" class="stats-row" style="display:none"></div>
+
+  <!-- Статусы -->
+  <div class="status-tabs">
+    <div class="stab active" onclick="setStatus('ACCEPTED')" data-s="ACCEPTED">🟡 Новые</div>
+    <div class="stab" onclick="setStatus('KASPI_DELIVERY')" data-s="KASPI_DELIVERY">🚚 Доставка</div>
+    <div class="stab" onclick="setStatus('PICKUP')" data-s="PICKUP">🏪 Самовывоз</div>
+    <div class="stab" onclick="setStatus('COMPLETED')" data-s="COMPLETED">✅ Выполнены</div>
+    <div class="stab" onclick="setStatus('CANCELLED')" data-s="CANCELLED">❌ Отменены</div>
+  </div>
+
+  <div class="orders-header">
+    <div class="orders-count" id="orders-count">—</div>
+    <button class="btn-refresh" onclick="loadOrders()">🔄 Обновить</button>
+  </div>
+
+  <div id="orders-container">
+    <div class="loading"><div class="spinner"></div><br>Загрузка...</div>
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="app-nav">
+  <div class="nav-items">
+    <a class="nav-item" href="/"><span class="nav-icon">🏠</span>Склад</a>
+    <a class="nav-item" href="/scanner"><span class="nav-icon">📷</span>Сканер</a>
+    <a class="nav-item" href="/history"><span class="nav-icon">📋</span>История</a>
+    <a class="nav-item cur" href="/kaspi"><span class="nav-icon">🛒</span>Kaspi</a>
+  </div>
+</nav>
+
+<script>
+let currentStatus = 'ACCEPTED';
+
+const STATE_LABELS = {
+  ACCEPTED: 'Новый',
+  COMPLETED: 'Выполнен',
+  CANCELLED: 'Отменён',
+  KASPI_DELIVERY: 'Доставка Kaspi',
+  PICKUP: 'Самовывоз',
+};
+
+const STATE_BADGE = {
+  ACCEPTED: 'badge-accepted',
+  COMPLETED: 'badge-completed',
+  CANCELLED: 'badge-cancelled',
+  KASPI_DELIVERY: 'badge-delivery',
+  PICKUP: 'badge-pickup',
+};
+
+function setStatus(s) {
+  currentStatus = s;
+  document.querySelectorAll('.stab').forEach(el => {
+    el.classList.toggle('active', el.dataset.s === s);
+  });
+  loadOrders();
+}
+
+async function loadOrders() {
+  const container = document.getElementById('orders-container');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка...</div>';
+
+  try {
+    const res = await fetch(`/api/kaspi/orders?state=${currentStatus}&size=50`);
+    const data = await res.json();
+
+    if (data.error) {
+      if (data.error.includes('не заданы')) {
+        document.getElementById('config-panel').style.display = 'block';
+        container.innerHTML = `
+          <div class="no-config">
+            <div class="icon">🔑</div>
+            <h3>Нужны учётные данные Kaspi</h3>
+            <p>Добавьте KASPI_TOKEN и KASPI_SHOP_ID в переменные Railway,<br>или заполните форму выше.</p>
+          </div>`;
+        return;
+      }
+      container.innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`;
+      return;
+    }
+
+    document.getElementById('config-panel').style.display = 'none';
+    const orders = data.orders || [];
+    document.getElementById('orders-count').textContent = `${orders.length} из ${data.total} заказов`;
+
+    if (!orders.length) {
+      container.innerHTML = '<div class="loading">📭 Заказов в этом статусе нет</div>';
+      return;
+    }
+
+    // Stats
+    const total = orders.reduce((s, o) => s + (o.total || 0), 0);
+    const items = orders.reduce((s, o) => s + (o.entries || []).reduce((a, e) => a + e.qty, 0), 0);
+    document.getElementById('stats-row').style.display = 'grid';
+    document.getElementById('stats-row').innerHTML = `
+      <div class="stat"><div class="stat-label">Заказов</div><div class="stat-value purple">${orders.length}</div></div>
+      <div class="stat"><div class="stat-label">Позиций</div><div class="stat-value">${items}</div></div>
+      <div class="stat"><div class="stat-label">Сумма</div><div class="stat-value green">${total.toLocaleString('ru')} ₸</div></div>
+    `;
+
+    container.innerHTML = orders.map(o => {
+      const badge = STATE_BADGE[o.state] || 'badge-accepted';
+      const label = STATE_LABELS[o.state] || o.state;
+      const dateStr = formatDate(o.date);
+      const entries = (o.entries || []).map(e => `
+        <div class="order-item">
+          <div>
+            <div class="item-name">${e.name}</div>
+            <div class="item-sku">${e.sku}</div>
+          </div>
+          <div class="item-qty">${e.qty} шт</div>
+          <div class="item-price">${(e.price || 0).toLocaleString('ru')} ₸</div>
+        </div>
+      `).join('');
+      return `
+        <div class="order-card">
+          <div class="order-top">
+            <div>
+              <div class="order-id">Заказ #${o.id}</div>
+              <div class="order-date">${dateStr}</div>
+            </div>
+            <span class="order-badge ${badge}">${label}</span>
+          </div>
+          <div class="order-customer">👤 ${o.customer || 'Покупатель'}</div>
+          <div class="order-items">${entries}</div>
+          <div class="order-total">Итого: ${(o.total || 0).toLocaleString('ru')} ₸</div>
+        </div>`;
+    }).join('');
+
+  } catch (e) {
+    container.innerHTML = `<div class="error-box">⚠️ Ошибка загрузки: ${e.message}</div>`;
+  }
+}
+
+function formatDate(ts) {
+  if (!ts || ts === '—') return '—';
+  try {
+    const d = new Date(typeof ts === 'number' ? ts : ts);
+    return d.toLocaleString('ru', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+  } catch { return ts; }
+}
+
+function saveConfig() {
+  alert('Добавьте KASPI_TOKEN и KASPI_SHOP_ID в переменные окружения Railway.\nПерезапустите сервис после добавления.');
+}
+
+loadOrders();
+</script>
+</body>
+</html>

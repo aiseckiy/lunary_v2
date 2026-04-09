@@ -868,6 +868,15 @@ async def _reply(update, text):
 # ══════════════════════════════════════════════════════
 # Запуск
 # ══════════════════════════════════════════════════════
+async def cmd_myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    await update.message.reply_text(
+        f"Твой Chat ID: <code>{chat_id}</code>\n\n"
+        f"Добавь в Railway переменную:\n<code>ADMIN_CHAT_ID={chat_id}</code>",
+        parse_mode="HTML"
+    )
+
+
 def run_bot():
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -897,6 +906,7 @@ def run_bot():
     app.add_handler(add_conv)
     app.add_handler(bc_conv)
     app.add_handler(CommandHandler("start", cmd_start))
+    app.add_handler(CommandHandler("myid", cmd_myid))
     app.add_handler(CommandHandler("log", cmd_log))
     app.add_handler(CommandHandler("kaspi", cmd_kaspi_orders))
     app.add_handler(CommandHandler("kaspi_sync", cmd_kaspi_sync))

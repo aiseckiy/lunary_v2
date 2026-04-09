@@ -394,14 +394,58 @@ class KaspiOrdersPayload(BaseModel):
     orders: list
 
 
+def _send_tg_notification(text: str):
+    """Отправить сообщение в Telegram через Bot API напрямую (без polling)."""
+    bot_token = os.getenv("BOT_TOKEN")
+    chat_id = os.getenv("ADMIN_CHAT_ID")
+    if not bot_token or not chat_id:
+        return
+    try:
+        import urllib.request
+        import urllib.parse
+        params = urllib.parse.urlencode({"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage?{params}"
+        urllib.request.urlopen(url, timeout=10)
+    except Exception as e:
+        print(f"⚠️ TG уведомление ошибка: {e}")
+
+
+def _format_order_notification(o: dict) -> str:
+    STATE_LABELS = {
+        "ACCEPTED": "🟡 Новый заказ",
+        "KASPI_DELIVERY": "🚚 Доставка Kaspi",
+        "PICKUP": "🏪 Самовывоз",
+        "COMPLETED": "✅ Выполнен",
+        "CANCELLED": "❌ Отменён",
+    }
+    state = o.get("state", "")
+    label = STATE_LABELS.get(state, state)
+    customer = o.get("customer") or "Покупатель"
+    total = int(o.get("total", 0))
+    entries = o.get("entries", [])
+
+    lines = [
+        f"<b>{label}</b>",
+        f"🛒 Заказ #{o.get('id')}",
+        f"👤 {customer}",
+        "",
+    ]
+    for e in entries:
+        lines.append(f"  • {e.get('name', '—')} — {e.get('qty', 1)} шт × {int(e.get('price', 0) / max(e.get('qty', 1), 1)):,} ₸".replace(",", " "))
+    lines.append("")
+    lines.append(f"<b>Итого: {total:,} ₸</b>".replace(",", " "))
+    return "\n".join(lines)
+
+
 @app.post("/api/kaspi/orders/sync")
 def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)):
-    orders = payload.orders
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
+    orders = payload.orders
     from database import KaspiOrder
     import json
     added = 0
     updated = 0
+    new_orders = []
     for o in orders:
         existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
         if existing:
@@ -417,7 +461,15 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
                 order_date=str(o.get("date", ""))
             ))
             added += 1
+            new_orders.append(o)
     db.commit()
+
+    # Уведомления о новых заказах (только ACCEPTED/PICKUP/KASPI_DELIVERY)
+    notify_states = {"ACCEPTED", "PICKUP", "KASPI_DELIVERY"}
+    for o in new_orders:
+        if o.get("state") in notify_states:
+            _send_tg_notification(_format_order_notification(o))
+
     return {"added": added, "updated": updated}
 
 

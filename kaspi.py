@@ -1,9 +1,10 @@
 """
-Kaspi.kz интеграция — только чтение (просмотр товаров и заказов)
+Kaspi.kz интеграция через Supabase Edge Function (прокси)
 """
 import os
 import logging
 import requests
+import time
 from database import SessionLocal
 import crud
 
@@ -11,58 +12,36 @@ logger = logging.getLogger(__name__)
 
 KASPI_TOKEN = os.getenv("KASPI_TOKEN")
 KASPI_SHOP_ID = os.getenv("KASPI_SHOP_ID")
-BASE_URL = "https://kaspi.kz/shop/api/v2"
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://cmbdlnpvsbxplispwlvr.supabase.co")
+PROXY_URL = f"{SUPABASE_URL}/functions/v1/kaspi-proxy"
 
 
-def _headers():
-    return {
-        "X-Auth-Token": KASPI_TOKEN,
-        "Content-Type": "application/json"
-    }
-
-
-def _get(path: str, params: dict = None):
-    """GET-запрос к Kaspi API"""
-    url = f"{BASE_URL}{path}"
+def _proxy(action: str, params: dict = None) -> dict:
+    """Запрос к Kaspi через Supabase Edge Function"""
     try:
-        r = requests.get(url, headers=_headers(), params=params, timeout=30, verify=False)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.Timeout:
-        logger.error(f"Kaspi API timeout: {url}")
-        return None
-    except requests.exceptions.HTTPError as e:
-        logger.error(f"Kaspi API error {e.response.status_code}: {url}")
+        r = requests.post(PROXY_URL, json={"action": action, "params": params or {}}, timeout=30)
+        data = r.json()
+        if data.get("success"):
+            return data.get("data")
+        logger.error(f"Kaspi proxy error: {data}")
         return None
     except Exception as e:
-        logger.error(f"Kaspi API exception: {e}")
+        logger.error(f"Kaspi proxy exception: {e}")
         return None
+
+
+def _date_range_ms(days: int = 14):
+    """Возвращает диапазон дат в миллисекундах (последние N дней)"""
+    now = int(time.time() * 1000)
+    start = now - days * 24 * 60 * 60 * 1000
+    return start, now
 
 
 # ── Товары ────────────────────────────────────────────────────
 
 def get_kaspi_products(page: int = 0, size: int = 50) -> dict:
     """Получить список товаров из Kaspi"""
-    data = _get(f"/masterdata/{KASPI_SHOP_ID}/skus", {
-        "page[number]": page,
-        "page[size]": size
-    })
-    if not data:
-        return {"products": [], "total": 0, "error": "Нет ответа от Kaspi API"}
-
-    products = []
-    for item in data.get("data", []):
-        attr = item.get("attributes", {})
-        products.append({
-            "kaspi_id": item.get("id"),
-            "name": attr.get("name", "—"),
-            "sku": attr.get("code", "—"),
-            "barcode": attr.get("ean", None),
-            "category": "Kaspi",
-        })
-
-    total = data.get("meta", {}).get("total", len(products))
-    return {"products": products, "total": total, "error": None}
+    return {"products": [], "total": 0, "error": "Не поддерживается"}
 
 
 def sync_kaspi_products() -> str:
@@ -121,12 +100,15 @@ def sync_kaspi_products() -> str:
 
 # ── Заказы ────────────────────────────────────────────────────
 
-def get_kaspi_orders(state: str = "ACCEPTED", page: int = 0, size: int = 20) -> dict:
-    """Получить заказы из Kaspi"""
-    data = _get(f"/orders/merchant/{KASPI_SHOP_ID}/", {
-        "page[number]": page,
-        "page[size]": size,
-        "filter[orders][state]": state
+def get_kaspi_orders(state: str = "NEW", page: int = 0, size: int = 100) -> dict:
+    """Получить заказы из Kaspi через Supabase прокси"""
+    date_ge, date_le = _date_range_ms(14)
+    data = _proxy("get_orders", {
+        "state": state,
+        "page": page,
+        "size": size,
+        "creationDateGe": str(date_ge),
+        "creationDateLe": str(date_le),
     })
     if not data:
         return {"orders": [], "total": 0, "error": "Нет ответа от Kaspi API"}
@@ -134,24 +116,20 @@ def get_kaspi_orders(state: str = "ACCEPTED", page: int = 0, size: int = 20) -> 
     orders = []
     for item in data.get("data", []):
         attr = item.get("attributes", {})
-        entries = []
-        for entry in attr.get("entries", []):
-            entries.append({
-                "name": entry.get("name", "—"),
-                "sku": entry.get("merchantSku", "—"),
-                "qty": entry.get("quantity", 0),
-                "price": entry.get("basePrice", 0),
-            })
+        customer = attr.get("customer", {})
+        name = f"{customer.get('firstName', '')} {customer.get('lastName', '')}".strip() or "—"
         orders.append({
             "id": item.get("id"),
+            "code": attr.get("code", ""),
             "state": attr.get("state", "—"),
+            "status": attr.get("status", "—"),
             "total": attr.get("totalPrice", 0),
-            "date": attr.get("creationDate", "—"),
-            "customer": attr.get("customer", {}).get("name", "—"),
-            "entries": entries,
+            "date": attr.get("creationDate", ""),
+            "customer": name,
+            "entries": [],
         })
 
-    total = data.get("meta", {}).get("total", len(orders))
+    total = data.get("meta", {}).get("totalCount", len(orders))
     return {"orders": orders, "total": total, "error": None}
 
 

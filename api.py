@@ -70,7 +70,7 @@ def _start_kaspi_sync_loop():
     import threading, time, json
     from database import KaspiOrder, SessionLocal as SL
 
-    STATES = ["NEW", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE"]
+    STATES = ["NEW", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
 
     def sync():
         while True:

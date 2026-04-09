@@ -37,6 +37,23 @@ def _date_range_ms(days: int = 14):
     return start, now
 
 
+def get_order_entries(order_id: str) -> list:
+    """Получить состав заказа"""
+    data = _proxy("get_order_entries", {"orderId": order_id})
+    if not data:
+        return []
+    entries = []
+    for item in data.get("data", []):
+        attr = item.get("attributes", {})
+        entries.append({
+            "name": attr.get("name") or attr.get("category", {}).get("title", "—"),
+            "qty": attr.get("quantity", 1),
+            "basePrice": int(attr.get("basePrice", 0)),
+            "price": int(attr.get("totalPrice", 0)),
+        })
+    return entries
+
+
 # ── Товары ────────────────────────────────────────────────────
 
 def get_kaspi_products(page: int = 0, size: int = 50) -> dict:

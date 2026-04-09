@@ -89,12 +89,15 @@ def _start_kaspi_sync_loop():
                     if existing:
                         existing.state = o.get("state", existing.state)
                     else:
+                        # Загружаем состав заказа
+                        entries = kaspi_module.get_order_entries(str(o["id"]))
+                        o["entries"] = entries
                         db.add(KaspiOrder(
                             order_id=str(o["id"]),
                             state=o.get("state", ""),
                             total=int(o.get("total", 0)),
                             customer=o.get("customer", ""),
-                            entries=json.dumps(o.get("entries", []), ensure_ascii=False),
+                            entries=json.dumps(entries, ensure_ascii=False),
                             order_date=str(o.get("date", ""))
                         ))
                         added += 1

@@ -124,10 +124,11 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
   <!-- Статусы -->
   <div class="status-tabs">
     <div class="stab active" onclick="setStatus('')" data-s="">📋 Все</div>
-    <div class="stab" onclick="setStatus('ACCEPTED')" data-s="ACCEPTED">🟡 Новые</div>
-    <div class="stab" onclick="setStatus('KASPI_DELIVERY')" data-s="KASPI_DELIVERY">🚚 Доставка</div>
+    <div class="stab" onclick="setStatus('NEW')" data-s="NEW">🟡 Новые</div>
+    <div class="stab" onclick="setStatus('DELIVERY')" data-s="DELIVERY">🚛 Доставка</div>
+    <div class="stab" onclick="setStatus('KASPI_DELIVERY')" data-s="KASPI_DELIVERY">🚚 Kaspi</div>
     <div class="stab" onclick="setStatus('PICKUP')" data-s="PICKUP">🏪 Самовывоз</div>
-    <div class="stab" onclick="setStatus('COMPLETED')" data-s="COMPLETED">✅ Выполнены</div>
+    <div class="stab" onclick="setStatus('ARCHIVE')" data-s="ARCHIVE">✅ Архив</div>
     <div class="stab" onclick="setStatus('CANCELLED')" data-s="CANCELLED">❌ Отменены</div>
   </div>
 
@@ -158,19 +159,27 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
 let currentStatus = '';
 
 const STATE_LABELS = {
+  NEW: 'Новый',
   ACCEPTED: 'Новый',
   COMPLETED: 'Выполнен',
   CANCELLED: 'Отменён',
-  KASPI_DELIVERY: 'Доставка Kaspi',
+  KASPI_DELIVERY: 'Kaspi Доставка',
+  DELIVERY: 'Доставка',
   PICKUP: 'Самовывоз',
+  ARCHIVE: 'Архив',
+  SIGN_REQUIRED: 'Подпись',
 };
 
 const STATE_BADGE = {
+  NEW: 'badge-accepted',
   ACCEPTED: 'badge-accepted',
   COMPLETED: 'badge-completed',
   CANCELLED: 'badge-cancelled',
   KASPI_DELIVERY: 'badge-delivery',
+  DELIVERY: 'badge-delivery',
   PICKUP: 'badge-pickup',
+  ARCHIVE: 'badge-completed',
+  SIGN_REQUIRED: 'badge-pickup',
 };
 
 function setStatus(s) {
@@ -232,11 +241,11 @@ async function loadOrders() {
       const entries = (o.entries || []).map(e => `
         <div class="order-item">
           <div>
-            <div class="item-name">${e.name}</div>
-            <div class="item-sku">${e.sku}</div>
+            <div class="item-name">${e.name || '—'}</div>
+            ${e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : ''}
           </div>
           <div class="item-qty">${e.qty} шт</div>
-          <div class="item-price">${(e.price || 0).toLocaleString('ru')} ₸</div>
+          <div class="item-price">${(e.basePrice || e.price || 0).toLocaleString('ru')} ₸</div>
         </div>
       `).join('');
       return `
@@ -262,9 +271,11 @@ async function loadOrders() {
 function formatDate(ts) {
   if (!ts || ts === '—') return '—';
   try {
-    const d = new Date(typeof ts === 'number' ? ts : ts);
+    const num = Number(ts);
+    const d = new Date(num > 1e10 ? num : num * 1000);
+    if (isNaN(d.getTime())) return '—';
     return d.toLocaleString('ru', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  } catch { return ts; }
+  } catch { return '—'; }
 }
 
 function saveConfig() {

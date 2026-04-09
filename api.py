@@ -61,6 +61,42 @@ class AISuggestRequest(BaseModel):
 @app.on_event("startup")
 def startup():
     init_db()
+    _auto_import_if_empty()
+
+
+def _auto_import_if_empty():
+    """Если база пустая — автоматически импортируем товары из export_products.json"""
+    import json, os
+    from database import Product as _P, SessionLocal
+    db = SessionLocal()
+    try:
+        count = db.query(_P).count()
+        if count > 0:
+            return
+        path = os.path.join(os.path.dirname(__file__), 'export_products.json')
+        if not os.path.exists(path):
+            return
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+        added = 0
+        for p in data:
+            sku = p['sku'].upper()
+            if db.query(_P).filter(_P.sku == sku).first():
+                continue
+            new_p = crud.create_product(
+                name=p['name'], sku=sku, db=db,
+                barcode=p.get('barcode'), category=p.get('category', 'Общее'),
+                unit=p.get('unit', 'шт'), min_stock=p.get('min_stock', 5),
+                brand=p.get('brand'), price=p.get('price')
+            )
+            if p.get('stock', 0) > 0:
+                crud.set_initial_stock(new_p.id, p['stock'], db)
+            added += 1
+        print(f"✅ Автоимпорт: {added} товаров загружено из export_products.json")
+    except Exception as e:
+        print(f"⚠️ Автоимпорт ошибка: {e}")
+    finally:
+        db.close()
 
 
 # ─── Товары ──────────────────────────────────────────────────

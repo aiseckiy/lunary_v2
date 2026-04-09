@@ -1,5 +1,10 @@
 __pycache__/
 *.pyc
 *.db
+*.db-shm
+*.db-wal
 .claude/
 .env
+.venv/
+venv/
+*.egg-info/

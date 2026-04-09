@@ -76,10 +76,17 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 <body>
 
 <div class="header">
-  <div>
-    <h1>📷 Сканер Lunary</h1>
-    <p id="status-text">Готов к работе</p>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/" style="color:#71717a;font-size:20px;text-decoration:none;line-height:1">←</a>
+    <div>
+      <h1>📷 Сканер</h1>
+      <p id="status-text">Готов к работе</p>
+    </div>
   </div>
+  <nav style="display:flex;gap:8px">
+    <a href="/" style="background:#18181b;border:1px solid #27272a;border-radius:8px;padding:6px 12px;font-size:13px;color:#a1a1aa;text-decoration:none">🏠 Склад</a>
+    <a href="/history" style="background:#18181b;border:1px solid #27272a;border-radius:8px;padding:6px 12px;font-size:13px;color:#a1a1aa;text-decoration:none">📋 История</a>
+  </nav>
 </div>
 
 <div class="https-warn" id="https-warn">
@@ -129,7 +136,10 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
       <button class="act-btn act-writeoff" onclick="doMove('writeoff')">🗑 Списание</button>
       <button class="act-btn act-return"  onclick="doMove('return')">↩️ Возврат</button>
     </div>
-    <button class="btn-reset" onclick="resetCard()">🔄 Другой товар</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <button class="btn-reset" onclick="scanAgain()">📷 Сканировать ещё</button>
+      <a href="/" style="background:#27272a;color:#a1a1aa;border:none;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;text-decoration:none;text-align:center;display:block">🏠 На склад</a>
+    </div>
   </div>
 </div>
 
@@ -173,7 +183,40 @@ function startCamera() {
   });
 }
 
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const t = ctx.currentTime;
+
+    // Буфер белого шума для "щелчка" на атаке
+    const bufSize = ctx.sampleRate * 0.01;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.3;
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const nGain = ctx.createGain();
+    nGain.gain.setValueAtTime(1, t);
+    nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.01);
+    noise.connect(nGain); nGain.connect(ctx.destination);
+    noise.start(t); noise.stop(t + 0.01);
+
+    // Основной тон — 2050 Гц, короткий и чёткий
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(2050, t);
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.linearRampToValueAtTime(0.9, t + 0.003);
+    g.gain.setValueAtTime(0.9, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + 0.22);
+  } catch {}
+}
+
 async function onBarcode(code) {
+  beep();
   await scanner.stop();
   document.getElementById('reader').innerHTML = '';
   document.getElementById('scan-hint').textContent = '';
@@ -255,7 +298,46 @@ function showCard(p) {
 }
 
 function showNotFound(code) {
-  toast(`❌ Штрихкод ${code} не найден`, true);
+  // Показываем сообщение без создания товара
+  document.getElementById('scan-hint').textContent = '';
+  document.getElementById('btn-start').style.display = 'none';
+
+  const wrap = document.getElementById('card-wrap');
+  wrap.innerHTML = `
+    <div style="background:#ef44441a;border:1px solid #ef4444;border-radius:14px;padding:20px;margin-bottom:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">❌</div>
+      <div style="font-weight:600;margin-bottom:4px">Штрихкод не найден</div>
+      <div style="font-size:13px;color:#71717a;font-family:monospace;margin-bottom:16px">${code}</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button onclick="retryCamera()" style="background:#27272a;color:#e4e4e7;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer">🔄 Сканировать снова</button>
+        <a href="/?open_add=1&barcode=${encodeURIComponent(code)}" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block">➕ Добавить товар</a>
+      </div>
+    </div>
+  `;
+}
+
+function retryCamera() {
+  const wrap = document.getElementById('card-wrap');
+  wrap.innerHTML = `<div class="product-card" id="product-card">
+    <div class="p-name" id="p-name">—</div>
+    <div class="p-sku" id="p-sku">—</div>
+    <div class="p-stock-big ok" id="p-stock">0</div>
+    <div class="p-unit" id="p-unit">шт в наличии</div>
+    <div class="qty-row">
+      <span class="qty-label">Количество:</span>
+      <button class="qty-btn" onclick="chQty(-1)">−</button>
+      <input class="qty-input" type="number" id="qty" value="1" min="1">
+      <button class="qty-btn" onclick="chQty(1)">+</button>
+    </div>
+    <div class="actions">
+      <button class="act-btn act-sale" onclick="doMove('sale')">🛒 Продажа</button>
+      <button class="act-btn act-income" onclick="doMove('income')">📦 Приход</button>
+      <button class="act-btn act-writeoff" onclick="doMove('writeoff')">🗑 Списание</button>
+      <button class="act-btn act-return" onclick="doMove('return')">↩️ Возврат</button>
+    </div>
+    <button class="btn-reset" onclick="resetCard()">🔄 Другой товар</button>
+  </div>`;
+  currentProduct = null;
   resetCamera();
 }
 
@@ -276,6 +358,13 @@ async function doMove(type) {
   // Обновляем карточку
   currentProduct.stock = data.new_stock;
   document.getElementById('p-stock').textContent = data.new_stock;
+}
+
+function scanAgain() {
+  currentProduct = null;
+  document.getElementById('product-card').className = 'product-card';
+  switchTab('scan');
+  startCamera();
 }
 
 function resetCard() {

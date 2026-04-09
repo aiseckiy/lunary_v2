@@ -78,8 +78,12 @@ def list_products(db: Session = Depends(get_db)):
 
 @app.post("/api/products")
 def create_product(data: ProductCreate, db: Session = Depends(get_db)):
+    from database import Product as _P
+    sku = data.sku.upper()
+    if db.query(_P).filter(_P.sku == sku).first():
+        raise HTTPException(status_code=409, detail="Артикул уже занят")
     p = crud.create_product(
-        name=data.name, sku=data.sku, db=db,
+        name=data.name, sku=sku, db=db,
         barcode=data.barcode, category=data.category,
         unit=data.unit, min_stock=data.min_stock, brand=data.brand
     )
@@ -116,6 +120,18 @@ def get_by_barcode(barcode: str, db: Session = Depends(get_db)):
         "unit": p.unit,
         "min_stock": p.min_stock
     }
+
+
+@app.delete("/api/products/{product_id}")
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    from database import Product as _P, Movement as _M
+    p = db.query(_P).filter(_P.id == product_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    db.query(_M).filter(_M.product_id == product_id).delete()
+    db.delete(p)
+    db.commit()
+    return {"ok": True}
 
 
 @app.put("/api/products/{product_id}")
@@ -184,6 +200,65 @@ def get_history(product_id: int, db: Session = Depends(get_db)):
     ]
 
 
+# ─── Журнал всех операций ────────────────────────────────────
+@app.get("/api/history")
+def get_all_history(
+    limit: int = 100,
+    offset: int = 0,
+    type: Optional[str] = None,
+    source: Optional[str] = None,
+    product_id: Optional[int] = None,
+    db: Session = Depends(get_db)
+):
+    from database import Movement, Product
+    from sqlalchemy import desc
+
+    q = db.query(Movement, Product).join(Product, Movement.product_id == Product.id)
+    if type:
+        q = q.filter(Movement.type == type)
+    if source:
+        q = q.filter(Movement.source == source)
+    if product_id:
+        q = q.filter(Movement.product_id == product_id)
+
+    total = q.count()
+    rows = q.order_by(desc(Movement.created_at)).offset(offset).limit(limit).all()
+
+    type_labels = {"income": "Приход", "sale": "Продажа", "writeoff": "Списание",
+                   "return": "Возврат", "adjustment": "Корректировка"}
+    return {
+        "total": total,
+        "items": [
+            {
+                "id": m.id,
+                "product_id": p.id,
+                "product_name": p.name,
+                "product_sku": p.sku,
+                "type": m.type,
+                "type_label": type_labels.get(m.type, m.type),
+                "quantity": m.quantity,
+                "source": m.source or "manual",
+                "note": m.note or "",
+                "date": m.created_at.strftime("%d.%m.%Y"),
+                "time": m.created_at.strftime("%H:%M"),
+                "datetime_iso": m.created_at.isoformat(),
+            }
+            for m, p in rows
+        ]
+    }
+
+
+@app.delete("/api/history/{movement_id}")
+def delete_movement(movement_id: int, db: Session = Depends(get_db)):
+    from database import Movement
+    m = db.query(Movement).filter(Movement.id == movement_id).first()
+    if not m:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+    db.delete(m)
+    db.commit()
+    return {"ok": True}
+
+
 # ─── Алерты ──────────────────────────────────────────────────
 @app.get("/api/alerts/low-stock")
 def low_stock(db: Session = Depends(get_db)):
@@ -204,4 +279,10 @@ def dashboard():
 @app.get("/scanner", response_class=HTMLResponse)
 def scanner():
     with open("static/scanner.html") as f:
+        return f.read()
+
+
+@app.get("/history", response_class=HTMLResponse)
+def history_page():
+    with open("static/history.html") as f:
         return f.read()

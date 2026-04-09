@@ -379,7 +379,9 @@ async def add_get_sku(update, context):
     sku = update.message.text.strip().upper().replace(" ", "_")
     db = get_db()
     try:
-        if any(p.sku == sku for p in crud.find_product(sku, db)):
+        from database import Product as _P
+        existing = db.query(_P).filter(_P.sku == sku).first()
+        if existing:
             await update.message.reply_text(f"⚠️ Артикул `{sku}` занят. Введи другой:", parse_mode="Markdown")
             return ADD_SKU
     finally:
@@ -748,7 +750,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     InlineKeyboardButton("📦+1", callback_data=f"qi:{pid}"),
                     InlineKeyboardButton("🗑-1", callback_data=f"qw:{pid}"),
                 ],
-                [InlineKeyboardButton("✏️ Редактировать", callback_data=f"edit_prod:{pid}")],
+                [
+                    InlineKeyboardButton("✏️ Редактировать", callback_data=f"edit_prod:{pid}"),
+                    InlineKeyboardButton("🗑 Удалить", callback_data=f"del_prod:{pid}"),
+                ],
             ]
             await q.edit_message_text(
                 f"{icon} *{p.name}*\nАрт: `{p.sku}` | Кат: {p.category}\n"
@@ -768,12 +773,35 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                  InlineKeyboardButton("📏 Единица", callback_data=f"ef:{pid}:unit")],
                 [InlineKeyboardButton("⚠️ Мин. остаток", callback_data=f"ef:{pid}:min_stock"),
                  InlineKeyboardButton("📷 Штрихкод", callback_data=f"ef:{pid}:barcode")],
+                [InlineKeyboardButton("🗑 Удалить товар", callback_data=f"del_prod:{pid}")],
                 [InlineKeyboardButton("◀️ Назад", callback_data=f"detail:{pid}")],
             ]
             await q.edit_message_text(
                 f"✏️ *{p.name}*\n\nЧто изменить?",
                 parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(kb)
             )
+
+        elif data.startswith("del_prod:"):
+            pid = int(data.split(":")[1])
+            p = crud.get_product_by_id(pid, db)
+            kb = [[
+                InlineKeyboardButton("✅ Да, удалить", callback_data=f"del_confirm:{pid}"),
+                InlineKeyboardButton("❌ Отмена", callback_data=f"edit_prod:{pid}"),
+            ]]
+            await q.edit_message_text(
+                f"🗑 Удалить *{p.name}*?\n\nВся история движений тоже удалится.",
+                parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(kb)
+            )
+
+        elif data.startswith("del_confirm:"):
+            pid = int(data.split(":")[1])
+            p = crud.get_product_by_id(pid, db)
+            name = p.name if p else "Товар"
+            from database import Movement as _Mov, Product as _Prod
+            db.query(_Mov).filter(_Mov.product_id == pid).delete()
+            db.query(_Prod).filter(_Prod.id == pid).delete()
+            db.commit()
+            await q.edit_message_text(f"🗑 *{name}* удалён", parse_mode="Markdown")
 
         elif data.startswith("ef:"):
             _, pid, field = data.split(":")

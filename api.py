@@ -286,3 +286,31 @@ def scanner():
 def history_page():
     with open("static/history.html") as f:
         return f.read()
+
+
+@app.post("/api/import-products")
+def import_products(db: Session = Depends(get_db)):
+    """Одноразовый импорт товаров из export_products.json"""
+    import json, os
+    path = os.path.join(os.path.dirname(__file__), 'export_products.json')
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="export_products.json не найден")
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    from database import Product as _P
+    added = skipped = 0
+    for p in data:
+        sku = p['sku'].upper()
+        if db.query(_P).filter(_P.sku == sku).first():
+            skipped += 1
+            continue
+        new_p = crud.create_product(
+            name=p['name'], sku=sku, db=db,
+            barcode=p.get('barcode'), category=p.get('category', 'Общее'),
+            unit=p.get('unit', 'шт'), min_stock=p.get('min_stock', 5),
+            brand=p.get('brand')
+        )
+        if p.get('stock', 0) > 0:
+            crud.set_initial_stock(new_p.id, p['stock'], db)
+        added += 1
+    return {"added": added, "skipped": skipped}

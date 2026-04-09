@@ -1,0 +1,7332 @@
+[
+  {
+    "name": "Герметик TYTAN Универсальный, цвет белый 280 мл",
+    "sku": "TYT_SIL_008",
+    "barcode": "5902120007899",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 10,
+    "brand": "TYTAN",
+    "stock": 46
+  },
+  {
+    "name": "Герметик TYTAN Универсальный, цвет серый 280 мл",
+    "sku": "TYT_SIL_009",
+    "barcode": "5902120015405",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 10,
+    "brand": "TYTAN",
+    "stock": 45
+  },
+  {
+    "name": "Герметик TYTAN Универсальный, цвет черный 280 мл",
+    "sku": "TYT_SIL_010",
+    "barcode": "5902120159390",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 10,
+    "brand": "TYTAN",
+    "stock": 68
+  },
+  {
+    "name": "Герметик TYTAN Универсальный, цвет коричневый 280 мл",
+    "sku": "TYT_SIL_011",
+    "barcode": "5902120159413",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 10,
+    "brand": "TYTAN",
+    "stock": 21
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour темно-зеленый RAL6005, 400 мл",
+    "sku": "TYT_ART_001",
+    "barcode": "5902120093687",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 8
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour мятно-зеленый, RAL6029 400 мл",
+    "sku": "TYT_ART_002",
+    "barcode": "8711347252381",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 32
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour желтый, RAL1018, 400 мл",
+    "sku": "TYT_ART_003",
+    "barcode": "5902120093601",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 24
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour красный, RAL3020, 400 мл",
+    "sku": "TYT_ART_004",
+    "barcode": "5902120093649",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 31
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour матовый белый, RAL9003M, 400 мл",
+    "sku": "TYT_ART_005",
+    "barcode": "9902140161331",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 59
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour глянец белый, RAL9003, 400 мл",
+    "sku": "TYT_ART_006",
+    "barcode": "5902120161317",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 113
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour серый, RAL7015, 400 мл",
+    "sku": "TYT_ART_007",
+    "barcode": "5902120093724",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 27
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour синий, RAL5010, 400 мл",
+    "sku": "TYT_ART_008",
+    "barcode": "5902120093663",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 37
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour черный матовый, RAL9004, 400 мл",
+    "sku": "TYT_ART_009",
+    "barcode": "5902120093885",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 191
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour черный глянец, RAL9005, 400 мл",
+    "sku": "TYT_ART_010",
+    "barcode": "5902120093809",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 69
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour серебро металлик, RAL9006, 400 мл",
+    "sku": "TYT_ART_011",
+    "barcode": "5902120093762",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 51
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour морской синий, RAL5002, 400 мл",
+    "sku": "TYT_ART_012",
+    "barcode": "8711347252374",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 45
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour золото металлик, RAL260M, 400 мл",
+    "sku": "TYT_ART_013",
+    "barcode": "5902120093847",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 68
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour золото глянец, RAL270M, 400 мл",
+    "sku": "TYT_ART_014",
+    "barcode": "5902120093823",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 61
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour серебро хром, RAL318, 400 мл",
+    "sku": "TYT_ART_015",
+    "barcode": "5902120164745",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 47
+  },
+  {
+    "name": "TYTAN краска Art Of The Colour тон голубой, 400 мл",
+    "sku": "TYT_ART_016",
+    "barcode": "8711347264049",
+    "category": "Краски",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 40
+  },
+  {
+    "name": "TYTAN пена 70 ULTRA FAST, 870 мл 1 шт",
+    "sku": "TYT_PEN_001",
+    "barcode": "5902120166534",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 63
+  },
+  {
+    "name": "TYTAN клей-пена Универсальный, 750 мл 1 шт (без трубочки)",
+    "sku": "TYT_PEN_002",
+    "barcode": "5902120197804",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 67
+  },
+  {
+    "name": "TYTAN клей-пена Универсальный, 750 мл 1 шт (с трубочкой)",
+    "sku": "TYT_PEN_003",
+    "barcode": "5902120111695",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 89
+  },
+  {
+    "name": "TYTAN пена Professional STD монтажная всесезонная, 750 мл 1 шт",
+    "sku": "TYT_PEN_004",
+    "barcode": "5902120196548",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 59
+  },
+  {
+    "name": "TYTAN клей-пена 60 секунд, 750 мл 1 шт (без трубочки)",
+    "sku": "TYT_PEN_005",
+    "barcode": "5902120026296",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 53
+  },
+  {
+    "name": "TYTAN пена-клей ПРОФ быстрый, универсальный, 60 сек, 750 мл (с трубочкой)",
+    "sku": "TYT_PEN_006",
+    "barcode": "5902120119738",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 71
+  },
+  {
+    "name": "TYTAN пена ПРОФ 65 О2, 750 мл 1 шт",
+    "sku": "TYT_PEN_007",
+    "barcode": "5902120008285",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 58
+  },
+  {
+    "name": "TYTAN пена Professional 65 зимняя, 750 мл 1 шт",
+    "sku": "TYT_PEN_008",
+    "barcode": "5907516996443",
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 3
+  },
+  {
+    "name": "Герметик TYTAN Силиконовый санитарный, цвет белый 280 мл",
+    "sku": "TYT_SIL_001",
+    "barcode": "5902120007974",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 32
+  },
+  {
+    "name": "Герметик TYTAN Силиконовый санитарный, цвет прозрачный 280 мл",
+    "sku": "TYT_SIL_002",
+    "barcode": "5902120007998",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 37
+  },
+  {
+    "name": "Герметик TYTAN малярный, цвет белый 280 мл",
+    "sku": "TYT_SIL_003",
+    "barcode": "5902120174737",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 36
+  },
+  {
+    "name": "TYTAN Герметик для кровли, цвет прозрачный (до -10, красная упаковка)",
+    "sku": "TYT_SIL_004",
+    "barcode": "5907516993824",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 21
+  },
+  {
+    "name": "Герметик TYTAN Универсальный, цвет прозрачный 280 мл",
+    "sku": "TYT_SIL_005",
+    "barcode": "5902120007912",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 192
+  },
+  {
+    "name": "Герметик TYTAN битумно-каучуковый для кровли, цвет черный 310 (зеленая упаковка)",
+    "sku": "TYT_SIL_006",
+    "barcode": "5907516999963",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 22
+  },
+  {
+    "name": "Герметик TYTAN для экстренного ремонта кровли X-Treme, цвет прозрачный 310 мл (розовая упаковка)",
+    "sku": "TYT_SIL_007",
+    "barcode": "5907516991776",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 17
+  },
+  {
+    "name": "TYTAN монтажный Декор Экспресс Fix 310 мл, акриловый",
+    "sku": "TYT_SIL_012",
+    "barcode": "5907516996269",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 38
+  },
+  {
+    "name": "TYTAN монтажный Classic Fix 310 мл",
+    "sku": "TYT_SIL_013",
+    "barcode": "5902120162949",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 14
+  },
+  {
+    "name": "Герметик TYTAN высоко-температурный, цвет черный 280 мл",
+    "sku": "TYT_SIL_014",
+    "barcode": "5902120159611",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 25
+  },
+  {
+    "name": "Герметик TYTAN высоко-температурный, цвет красный 280 мл",
+    "sku": "TYT_SIL_015",
+    "barcode": "5902120159598",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 13
+  },
+  {
+    "name": "TYTAN монтажный Fix 2 290 мл (белый)",
+    "sku": "TYT_SIL_016",
+    "barcode": "5902120173891",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 20
+  },
+  {
+    "name": "TYTAN монтажный для Зеркал 310 мл",
+    "sku": "TYT_SIL_017",
+    "barcode": "5907516996221",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 33
+  },
+  {
+    "name": "TYTAN монтажный Instant invisible 290 мл",
+    "sku": "TYT_SIL_018",
+    "barcode": "5902120185597",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 36
+  },
+  {
+    "name": "Герметик TYTAN для аквариумов и стекла, цвет прозрачный 280 мл",
+    "sku": "TYT_SIL_019",
+    "barcode": "5902120159574",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "TYTAN",
+    "stock": 23
+  },
+  {
+    "name": "AKFIX Проф Огнеупорная пена 750 мл",
+    "sku": "FA025",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Проф монтажная пена Mega 850 ML",
+    "sku": "FA070S",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX ПРОФ.МОНТАЖНАЯ ПЕНА MEGA 850 МЛ",
+    "sku": "FA007W",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Термоклей 25 кг",
+    "sku": "GA274",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 1
+  },
+  {
+    "name": "Эпоксидный клей для металла AKFIX E",
+    "sku": "EA105",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 48
+  },
+  {
+    "name": "AKFIX Эпоксидный клей 30MIN",
+    "sku": "EA211",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Эпоксидный клей",
+    "sku": "EA012",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX ФИКСАТОР РЕЗЬБЫ средней прочности 50ML",
+    "sku": "ATL2431",
+    "barcode": null,
+    "category": "Фиксаторы резьбы",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 120
+  },
+  {
+    "name": "AKFIX ФИКСАТОР РЕЗЬБЫ АНАЭРОБНЫЙ средней прочности 250 мл",
+    "sku": "ATL2432",
+    "barcode": null,
+    "category": "Фиксаторы резьбы",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 36
+  },
+  {
+    "name": "AKFIX ФИКСАТОР РЕЗЬБЫ ВЫСОКАЯ ПРОЧНОСТЬ 50ML",
+    "sku": "ATL2701",
+    "barcode": null,
+    "category": "Фиксаторы резьбы",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 120
+  },
+  {
+    "name": "AKFIX ФИКСАТОР РЕЗЬБЫ ВЫСОКАЯ ПРОЧНОСТЬ 250ML",
+    "sku": "ATL2702",
+    "barcode": null,
+    "category": "Фиксаторы резьбы",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 36
+  },
+  {
+    "name": "AKFIX Аэрозольная краска глянцевая желтая RAL1003 400ML",
+    "sku": "SP1003G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая кремовая RAL1015 400ML",
+    "sku": "SP1015G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая оранжевая RAL2008 400ML",
+    "sku": "SP2008G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска глянцевая красная RAL3002 400ML",
+    "sku": "SP3002G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая красная RAL3020 400ML",
+    "sku": "SP3020G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска-спрей глянцевая темно-синяя RAL5002 400ML",
+    "sku": "SP5002G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая синяя RAL5017 400ML",
+    "sku": "SP5017G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая изумрудно-зеленая RAL6001 400ML",
+    "sku": "SP6001G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска мох зеленый RAL6005 400ML",
+    "sku": "SP6005G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "Akfix Краска спрей глянцевая зеленая RAL6016 400ML",
+    "sku": "SP6016G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска серебристо-серая RAL7001 400ML",
+    "sku": "SP7001G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска серый железный RAL7011 400ML",
+    "sku": "SP7011G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая антрацитово-серая RAL7016 400ML",
+    "sku": "SP7016G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая светло-серая RAL7035 400ML",
+    "sku": "SP7035G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска-спрей глянцевая коричневая RAL8017 400ML",
+    "sku": "SP8017G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Краска спрей глянцевая белая RAL9003 400ML",
+    "sku": "SP9003G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска матовая белая RAL9003 400ML",
+    "sku": "SP9003M",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска глянцевая черная RAL9005 400ML",
+    "sku": "SP9005G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска матовая черная RAL9005 400ML",
+    "sku": "SP9005M",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Аэрозольная краска для колес алюминиевый RAL9006 400ML",
+    "sku": "SP9006G",
+    "barcode": null,
+    "category": "Краски аэрозольные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 6
+  },
+  {
+    "name": "AKFIX Силикон прозрачный тюбик 50ML",
+    "sku": "SA111",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик в тюбике белый 50ML",
+    "sku": "SA112",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик прозрачный 310ML",
+    "sku": "SA061",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик белый 310ML",
+    "sku": "SA062",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик прозрачный 280ML",
+    "sku": "SA1100E",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силикон белый 280ML",
+    "sku": "SA1102E",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Санитарный силикон прозрачный 280ML",
+    "sku": "SA031",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Санитарный силикон белый 280ML",
+    "sku": "SA032",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик для аквариума 280ML",
+    "sku": "SA080D",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик 310ML",
+    "sku": "SA075",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Высокотемпературный силиконовый герметик 280ML",
+    "sku": "SA1501",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Силикон прозрачный 280ML",
+    "sku": "SA041",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силикон белый 280ML",
+    "sku": "SA042",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силикон черный 280ML",
+    "sku": "SA043",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силикон коричневый 280ML",
+    "sku": "SA044",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силиконовый герметик серый 280ML",
+    "sku": "SA046",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силикон серый 280ML",
+    "sku": "SA04601",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Силикон для зеркала 310ML",
+    "sku": "SA081",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Герметик белый 600ML",
+    "sku": "AA662",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Герметик черный 600ML",
+    "sku": "AA663",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Герметик серый 600ML",
+    "sku": "AA666",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Акриловый герметик белый 310ML",
+    "sku": "AA002",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Акриловый герметик 310ML",
+    "sku": "AB003",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Герметик 350GR",
+    "sku": "AA615",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 48
+  },
+  {
+    "name": "AKFIX Клей-герметик черный 300ML",
+    "sku": "AA155",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Акриловый герметик белый 310ML",
+    "sku": "GA214",
+    "barcode": null,
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Монтажная пена MEGA 750ML",
+    "sku": "FA011",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Профессиональная монтажная пена 750ML",
+    "sku": "FA001",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Высокорасширяющаяся пена MEGA 850ML",
+    "sku": "FA875",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Монтажная пена профессиональная",
+    "sku": "FA600",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Профессиональная монтажная пена MEGA 850ML",
+    "sku": "FA002",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Монтажная пена-клей 800ML",
+    "sku": "FA009",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Монтажная пена 750ML",
+    "sku": "FA019",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX ПРОФ.Монтажная пена 750ML",
+    "sku": "FA001W",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Монтажная пена 750ML",
+    "sku": "FA967C",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Полиуретановая монтажная пена 750ML",
+    "sku": "FA967P",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Проф. монтажная пена MEGA 850ML",
+    "sku": "FA014",
+    "barcode": null,
+    "category": "Пены монтажные",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 12
+  },
+  {
+    "name": "AKFIX Клей МДФ 200ML+50G",
+    "sku": "GA060B",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX HM208 Hot Melt 1KG 8MM",
+    "sku": "GA120",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 16
+  },
+  {
+    "name": "AKFIX Клей жидкие гвозди 310ML",
+    "sku": "GA200",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX Клей жидкие гвозди 250G",
+    "sku": "GA205",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 36
+  },
+  {
+    "name": "AKFIX Клей жидкие гвозди 310G",
+    "sku": "GA208",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX МДФ клей 500ML+100G",
+    "sku": "GA0655",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX МДФ клей 400ML+100G",
+    "sku": "GA065B",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 24
+  },
+  {
+    "name": "AKFIX МДФ клей 100ML+25G",
+    "sku": "GA055",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 48
+  },
+  {
+    "name": "AKFIX Клей для обоев 300G",
+    "sku": "WA530",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 18
+  },
+  {
+    "name": "AKFIX Силиконовый шланг 11мм 1кг прозрачный",
+    "sku": "GA104",
+    "barcode": null,
+    "category": "Клеи",
+    "unit": "шт",
+    "min_stock": 5,
+    "brand": "AKFIX",
+    "stock": 25
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147110-08-S2 магнитная E1/4 100мм 8мм 2шт",
+    "sku": "147110-08-S2",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147148-08-S10 магнитная E1/4 48мм 8мм 10шт",
+    "sku": "147148-08-S10",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147148-08 магнитная E1/4 48мм 8мм",
+    "sku": "147148-08",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147148-10 магнитная E1/4 48мм 10мм",
+    "sku": "147148-10",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147148-12 магнитная E1/4 48мм 12мм",
+    "sku": "147148-12",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147148-13 магнитная E1/4 48мм 13мм",
+    "sku": "147148-13",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бита с торцовой головкой ЭКСПЕРТ 147165-14 магнитная E1/4 65мм 14мм",
+    "sku": "147165-14",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 14722-01-050-02 кованые PH1 50мм 2шт",
+    "sku": "14722-01-050-02",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 14722-02-100-01 кованые PH2 100мм",
+    "sku": "14722-02-100-01",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 14723-04-050-02 кованые H4 50мм 2шт",
+    "sku": "14723-04-050-02",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 14723-04-050-10 кованые H4 50мм 10шт",
+    "sku": "14723-04-050-10",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 147250-01 кованые PH2 50мм",
+    "sku": "147250-01",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 147250-02 кованые PH2 50мм 2шт",
+    "sku": "147250-02",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двусторонние ЭКСПЕРТ 147250-10 кованые PH2 50мм 10шт",
+    "sku": "147250-10",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты двухсторонние TULEX 5032225-S2 для ГКЛ магнитный держатель PH2 65мм 2шт",
+    "sku": "5032225-S2",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Биты торсионные ЭКСПЕРТ 147150-02 кованые PH2 50мм 2шт",
+    "sku": "147150-02",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Биты торсионные TULEX DIAMOND 5131225-S2 кованые алмазное напыление PH2 50мм 2шт",
+    "sku": "5131225-S2",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Бокорезы ЭКСПЕРТ 51405-160 двухкомпонентные рукоятки 160мм",
+    "sku": "51405-160",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Брусок для шлифования ЭКСПЕРТ 1515-165 пластмассовый 165х85мм",
+    "sku": "1515-165",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Брусок для шлифования ЭКСПЕРТ 1515-210 пластмассовый 210х105мм",
+    "sku": "1515-210",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-110-04 SDS-Plus 4х110мм",
+    "sku": "610-110-04",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-110-05 SDS-Plus 5х110мм",
+    "sku": "610-110-05",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-110-06 SDS-Plus 6х110мм",
+    "sku": "610-110-06",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-05 SDS-Plus 5х160мм",
+    "sku": "610-160-05",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-06 SDS-Plus 6х160мм",
+    "sku": "610-160-06",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-07 SDS-Plus 7х160мм",
+    "sku": "610-160-07",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-08 SDS-Plus 8х160мм",
+    "sku": "610-160-08",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-09 SDS-Plus 9х160мм",
+    "sku": "610-160-09",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-10 SDS-Plus 10х160мм",
+    "sku": "610-160-10",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-12 SDS-Plus 12х160мм",
+    "sku": "610-160-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-14 SDS-Plus 14х160мм",
+    "sku": "610-160-14",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-160-16 SDS-Plus 16х160мм",
+    "sku": "610-160-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-06 SDS-Plus 6х210мм",
+    "sku": "610-210-06",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-08 SDS-Plus 8х210мм",
+    "sku": "610-210-08",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-09 SDS-Plus 9х210мм",
+    "sku": "610-210-09",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-10 SDS-Plus 10х210мм",
+    "sku": "610-210-10",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-12 SDS-Plus 12х210мм",
+    "sku": "610-210-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-14 SDS-Plus 14х210мм",
+    "sku": "610-210-14",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-210-16 SDS-Plus 16х210мм",
+    "sku": "610-210-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-06 SDS-Plus 6х260мм",
+    "sku": "610-260-06",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-065 SDS-Plus 6.5х260мм",
+    "sku": "610-260-065",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-08 SDS-Plus 8х260мм",
+    "sku": "610-260-08",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-10 SDS-Plus 10х260мм",
+    "sku": "610-260-10",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-12 SDS-Plus 12х260мм",
+    "sku": "610-260-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-14 SDS-Plus 14х260мм",
+    "sku": "610-260-14",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-16 SDS-Plus 16х260мм",
+    "sku": "610-260-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-18 SDS-Plus 18х260мм",
+    "sku": "610-260-18",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 610-260-20 SDS-Plus 20х260мм",
+    "sku": "610-260-20",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-08 два резца SDS-Plus 8х310мм",
+    "sku": "620-310-08",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-10 два резца SDS-Plus 10х310мм",
+    "sku": "620-310-10",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-12 два резца SDS-Plus 12х310мм",
+    "sku": "620-310-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-14 два резца SDS-Plus 14х310мм",
+    "sku": "620-310-14",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-16 два резца SDS-Plus 16х310мм",
+    "sku": "620-310-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-18 два резца SDS-Plus 18х310мм",
+    "sku": "620-310-18",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-310-20 два резца SDS-Plus 20х310мм",
+    "sku": "620-310-20",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-08 два резца SDS-Plus 8х450мм",
+    "sku": "620-450-08",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-10 два резца SDS-Plus 10х450мм",
+    "sku": "620-450-10",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-12 два резца SDS-Plus 12х450мм",
+    "sku": "620-450-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-16 два резца SDS-Plus 16х450мм",
+    "sku": "620-450-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-18 два резца SDS-Plus 18х450мм",
+    "sku": "620-450-18",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-20 два резца SDS-Plus 20х450мм",
+    "sku": "620-450-20",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-22 два резца SDS-Plus 22х450мм",
+    "sku": "620-450-22",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-25 два резца SDS-Plus 25х450мм",
+    "sku": "620-450-25",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-450-32 два резца SDS-Plus 32х450мм",
+    "sku": "620-450-32",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-600-18 два резца SDS-Plus 18х600мм",
+    "sku": "620-600-18",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-600-22 два резца SDS-Plus 22х600мм",
+    "sku": "620-600-22",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-600-32 два резца SDS-Plus 32х600мм",
+    "sku": "620-600-32",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-800-12 два резца SDS-Plus 12х800мм",
+    "sku": "620-800-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-800-14 два резца SDS-Plus 14х800мм",
+    "sku": "620-800-14",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-800-16 два резца SDS-Plus 16х800мм",
+    "sku": "620-800-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-800-22 два резца SDS-Plus 22х800мм",
+    "sku": "620-800-22",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-800-25 два резца SDS-Plus 25х800мм",
+    "sku": "620-800-25",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Бур по бетону ЭКСПЕРТ 620-800-30 два резца SDS-Plus 30х800мм",
+    "sku": "620-800-30",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Валик ЭКСПЕРТ 20124 структурный поролоновый бюгель 8мм 240мм",
+    "sku": "20124",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный TULEX DECOR 2014424 полиакрил бюгель 8мм 44х240мм",
+    "sku": "2014424",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 5
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ DecoPRO 2124 длина 240мм диаметр 44мм",
+    "sku": "2124",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ DECOR 2016 160мм диаметр 38мм",
+    "sku": "2016",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ DECOR 2018 180мм диаметр 38мм",
+    "sku": "2018",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ DECOR 2024 240мм диаметр 38мм",
+    "sku": "2024",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ PaintPRO 2310 100мм диаметр 15мм",
+    "sku": "2310",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ PaintPRO 2316 160мм диаметр 15мм",
+    "sku": "2316",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ PaintPRO 2318 180мм диаметр 38мм",
+    "sku": "2318",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ PaintPRO 2324 240мм диаметр 38мм",
+    "sku": "2324",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ TexPRO 2210 100мм диаметр 28мм",
+    "sku": "2210",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ TexPRO 2218 180мм диаметр 38мм",
+    "sku": "2218",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ TexPRO 2224 240мм диаметр 38мм",
+    "sku": "2224",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ TexPRO 2225 250мм диаметр 55мм",
+    "sku": "2225",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ Velur 2410-15 100мм диаметр 15мм",
+    "sku": "2410-15",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ Velur 2410 100мм диаметр 28мм",
+    "sku": "2410",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ Velur 2415 150мм диаметр 28мм",
+    "sku": "2415",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ Velur 2418 180мм диаметр 38мм",
+    "sku": "2418",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик малярный ЭКСПЕРТ Velur 2424 240мм диаметр 38мм",
+    "sku": "2424",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик фасадный TULEX GIANT 2123824 полиакрил бюгель 6мм 38х240мм",
+    "sku": "2123824",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Валик фасадный TULEX GIANT 2125525 полиакрил бюгель 8мм 55х250мм",
+    "sku": "2125525",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Валик фасадный TULEX GIANT 2126825 полиакрил бюгель 8мм 68х250мм",
+    "sku": "2126825",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Валик фасадный TULEX 2153825 микрофибра бюгель 6мм 38х250мм",
+    "sku": "2153825",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Валик TULEX 2064425 полиамид бюгель 8мм 44х250мм",
+    "sku": "2064425",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 4
+  },
+  {
+    "name": "Валик-мини ЭКСПЕРТ 2607 микрофибра ворс 5мм бюгель 6мм 15х70мм",
+    "sku": "2607",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик-мини ЭКСПЕРТ 2611 микрофибра ворс 5мм бюгель 6мм 15х110мм",
+    "sku": "2611",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик-мини ЭКСПЕРТ DECOR 2007 полиакрил ворс 7мм бюгель 6мм 15х70мм",
+    "sku": "2007",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Валик-мини ЭКСПЕРТ DECOR 2011 полиакрил ворс 7мм бюгель 6мм 15х110мм",
+    "sku": "2011",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Ведро строительное ЭКСПЕРТ 120-12 пластмассовое 12л",
+    "sku": "120-12",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Ведро строительное ЭКСПЕРТ 120-16 пластмассовое 16л",
+    "sku": "120-16",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Ведро строительное ЭКСПЕРТ 120-20 пластмассовое 20л",
+    "sku": "120-20",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Ведро строительное CAPSTONE 9371-12 пластмассовое 12л",
+    "sku": "9371-12",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "CAPSTONE",
+    "stock": 0
+  },
+  {
+    "name": "Ведро строительное CAPSTONE 9371-20 пластмассовое 20л",
+    "sku": "9371-20",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "CAPSTONE",
+    "stock": 0
+  },
+  {
+    "name": "Гладилка ЭКСПЕРТ 3512-01 стальная с пластмассовой ручкой 120х280мм",
+    "sku": "3512-01",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Гладилка TULEX 3011110 стальная двухкомпонентная рукоятка 280х130мм",
+    "sku": "3011110",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный ЭКСПЕРТ 175-110-40Т-22 по дереву 110х22мм 40Т",
+    "sku": "175-110-40T-22",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный ЭКСПЕРТ 175-110-50Т-22 по дереву 110х22мм 50Т",
+    "sku": "175-110-50T-22",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный ЭКСПЕРТ 175-115-24Т-1.8 по дереву 115х22мм 24Т",
+    "sku": "175-115-24T-1,8",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный ЭКСПЕРТ 175-125-36Т-22 по дереву 125х22мм 36Т",
+    "sku": "175-125-36T-22",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный ЭКСПЕРТ 175-180-48Т-22 по дереву 180х22мм 48Т",
+    "sku": "175-180-48T-22",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный ЭКСПЕРТ 176-255-100Т-30 МУЛЬТИ РЕЗ по алюминию ламинату пластику ДСП 255х30мм 100Т",
+    "sku": "176-255-100T-30",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный TULEX 8015110-24 по дереву 110х20мм 24Т",
+    "sku": "8015110-24",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный TULEX 8015115-24 по дереву 115х22мм 24Т",
+    "sku": "8015115-24",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный TULEX 8015125-36 по дереву 125х22мм 36Т",
+    "sku": "8015125-36",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный TULEX 8015125-40 по дереву 125х22мм 40Т",
+    "sku": "8015125-40",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный TULEX 8015180-48 по дереву 180х22мм 48Т",
+    "sku": "8015180-48",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Диск пильный TULEX 8015185-30 по дереву 185х20мм 30Т",
+    "sku": "8015185-30",
+    "barcode": null,
+    "category": "Диски пильные",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Дрель ударная TULEX TD-550 патрон 13мм реверс 550Вт",
+    "sku": "TD-550",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель ударная TULEX TD-810 патрон 13мм металл. корпус редуктора реверс 810Вт",
+    "sku": "TD-810",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель-шуруповерт TULEX TDC-12-1 Li-Ion 2х скор 17+1 10мм 12В",
+    "sku": "TDC-12-1",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель-шуруповерт TULEX TDC-12-2 Li-Ion 2х скор 17+1 10мм 12В доп.аккум кейс",
+    "sku": "TDC-12-2",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель-шуруповерт TULEX TDL-12-1 Li-Ion 2х скор 20+1 10мм 12В",
+    "sku": "TDL-12-1",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель-шуруповерт TULEX TDL-12-2 Li-Ion 2х скор 20+1 10мм 12В кейс",
+    "sku": "TDL-12-2",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель-шуруповерт TULEX TDL-16/40-2 Li-Ion 2х скор 20+1 10мм 16.8В кейс",
+    "sku": "TDL-16/40-2",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Дрель-шуруповерт TULEX TDL-21/55-2 Li-Ion 2х скор 20+1 10мм 21В кейс",
+    "sku": "TDL-21/55-2",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Заклепочник ЭКСПЕРТ 4601 под заклепки 2.4-3.2-4.0-4.8мм",
+    "sku": "4601",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кельма штукатурная ЭКСПЕРТ СЕРДЦЕ 36219 углеродистая сталь деревянная рукоятка 190мм",
+    "sku": "36219",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кельма штукатурная TULEX HEART 3012119 нержавеющее полотно двухкомп. рукоятка 190мм",
+    "sku": "3012119",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Кирка ЭКСПЕРТ 5101-40 фиберглассовая рукоятка 0.4кг",
+    "sku": "5101-40",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кирка-молоток каменщика ЭКСПЕРТ 5102-60 фиберглассовая рукоятка 0.6кг",
+    "sku": "5102-60",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15020 искусственная щетина 20мм",
+    "sku": "15020",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 10
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15025 искусственная щетина 25мм",
+    "sku": "15025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15038 искусственная щетина 38мм",
+    "sku": "15038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 11
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15050 искусственная щетина 50мм",
+    "sku": "15050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15063 искусственная щетина 63мм",
+    "sku": "15063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15075 искусственная щетина 75мм",
+    "sku": "15075",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 8
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ АКВА 15100 искусственная щетина 100мм",
+    "sku": "15100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12020 натуральная щетина 20мм",
+    "sku": "12020",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12025 натуральная щетина 25мм",
+    "sku": "12025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12038 натуральная щетина 38мм",
+    "sku": "12038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12050 натуральная щетина 50мм",
+    "sku": "12050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12063 натуральная щетина 63мм",
+    "sku": "12063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 9
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12075 натуральная щетина 75мм",
+    "sku": "12075",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 7
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ПРОФИ 12100 натуральная щетина 100мм",
+    "sku": "12100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 10
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ радиаторная УНИВЕРСАЛ 16038 натуральная щетина 38мм",
+    "sku": "16038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ радиаторная УНИВЕРСАЛ 16050 натуральная щетина 50мм",
+    "sku": "16050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ радиаторная УНИВЕРСАЛ 16063 натуральная щетина 63мм",
+    "sku": "16063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11020 натуральная щетина 20мм",
+    "sku": "11020",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11025 натуральная щетина 25мм",
+    "sku": "11025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 11
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11038 натуральная щетина 38мм",
+    "sku": "11038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11050 натуральная щетина 50мм",
+    "sku": "11050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 9
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11063 натуральная щетина 63мм",
+    "sku": "11063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11075 натуральная щетина 75мм",
+    "sku": "11075",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 11100 натуральная щетина 100мм",
+    "sku": "11100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 9
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 17025 натуральная щетина пластик ручка 25мм",
+    "sku": "17025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 17038 натуральная щетина пластик ручка 38мм",
+    "sku": "17038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 17050 натуральная щетина пластик ручка 50мм",
+    "sku": "17050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ УНИВЕРСАЛ 17100 натуральная щетина пластик ручка 100мм",
+    "sku": "17100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 14020 20мм",
+    "sku": "14020",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 14025 25мм",
+    "sku": "14025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 14038 38мм",
+    "sku": "14038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 14050 50мм",
+    "sku": "14050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 11
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 14063 63мм",
+    "sku": "14063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 9
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 14100 100мм",
+    "sku": "14100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 18038 пластик ручка 38мм",
+    "sku": "18038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 18050 пластик ручка 50мм",
+    "sku": "18050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 18063 пластик ручка 63мм",
+    "sku": "18063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 18075 пластик ручка 75мм",
+    "sku": "18075",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская ЭКСПЕРТ ЭКО 18100 пластик ручка 100мм",
+    "sku": "18100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 110025 смешанная щетина деревянная рукоятка 25мм",
+    "sku": "110025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 11
+  },
+  {
+    "name": "Кисть плоская TULEX 110038 смешанная щетина деревянная рукоятка 38мм",
+    "sku": "110038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 10
+  },
+  {
+    "name": "Кисть плоская TULEX 110050 смешанная щетина деревянная рукоятка 50мм",
+    "sku": "110050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 110063 смешанная щетина деревянная рукоятка 63мм",
+    "sku": "110063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 110075 смешанная щетина деревянная рукоятка 75мм",
+    "sku": "110075",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 110100 смешанная щетина деревянная рукоятка 100мм",
+    "sku": "110100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 121025 искусственная щетина пластик рукоятка 25мм",
+    "sku": "121025",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 121038 искусственная щетина пластик рукоятка 38мм",
+    "sku": "121038",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 121050 искусственная щетина пластик рукоятка 50мм",
+    "sku": "121050",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 10
+  },
+  {
+    "name": "Кисть плоская TULEX 121063 искусственная щетина пластик рукоятка 63мм",
+    "sku": "121063",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Кисть плоская TULEX 121075 искусственная щетина пластик рукоятка 75мм",
+    "sku": "121075",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 11
+  },
+  {
+    "name": "Кисть плоская TULEX 121100 искусственная щетина пластик рукоятка 100мм",
+    "sku": "121100",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 12
+  },
+  {
+    "name": "Киянка резиновая белая ЭКСПЕРТ 531-680 деревянная лакированная рукоятка 680гр",
+    "sku": "531-680",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Киянка резиновая белая ЭКСПЕРТ 531-900 деревянная лакированная рукоятка 900гр",
+    "sku": "531-900",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Киянка резиновая белая ЭКСПЕРТ 541-680 фиберглассовая рукоятка 680гр",
+    "sku": "541-680",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Киянка резиновая белая ЭКСПЕРТ 541-900 фиберглассовая рукоятка 900гр",
+    "sku": "541-900",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Киянка резиновая черная ЭКСПЕРТ 532-680 деревянная лакированная рукоятка 680гр",
+    "sku": "532-680",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Киянка резиновая черная ЭКСПЕРТ 532-900 деревянная лакированная рукоятка 900гр",
+    "sku": "532-900",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Киянка резиновая черная ЭКСПЕРТ 542-680 фиберглассовая рукоятка 680гр",
+    "sku": "542-680",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Киянка резиновая черная ЭКСПЕРТ 542-900 фиберглассовая рукоятка 900гр",
+    "sku": "542-900",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Клещи переставные TULEX 5005025 двухкомпонентные рукоятки 250мм",
+    "sku": "5005025",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Ковш штукатурный ЭКСПЕРТ 30116 круглый углеродистая сталь деревянная рукоятка 160мм",
+    "sku": "30116",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-20 по стеклу и плитке центр. сверло трехгранный хвост. 20мм",
+    "sku": "60113-20",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-32 по стеклу и плитке 32мм",
+    "sku": "60113-32",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-35 по стеклу и плитке 35мм",
+    "sku": "60113-35",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-38 по стеклу и плитке 38мм",
+    "sku": "60113-38",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-40 по стеклу и плитке 40мм",
+    "sku": "60113-40",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-45 по стеклу и плитке 45мм",
+    "sku": "60113-45",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-50 по стеклу и плитке 50мм",
+    "sku": "60113-50",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-65 по стеклу и плитке 65мм",
+    "sku": "60113-65",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка алмазная TULEX 60113-75 по стеклу и плитке 75мм",
+    "sku": "60113-75",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-022 шестигранный хвост. с центр. сверлом 22мм",
+    "sku": "601013-022",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-025 шестигранный хвост. с центр. сверлом 25мм",
+    "sku": "601013-025",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-032 шестигранный хвост. с центр. сверлом 32мм",
+    "sku": "601013-032",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-038 шестигранный хвост. с центр. сверлом 38мм",
+    "sku": "601013-038",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-051 шестигранный хвост. с центр. сверлом 51мм",
+    "sku": "601013-051",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-064 шестигранный хвост. с центр. сверлом 64мм",
+    "sku": "601013-064",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-067 шестигранный хвост. с центр. сверлом 67мм",
+    "sku": "601013-067",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-073 шестигранный хвост. с центр. сверлом 73мм",
+    "sku": "601013-073",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка биметаллическая TULEX 601013-083 шестигранный хвост. с центр. сверлом 83мм",
+    "sku": "601013-083",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-06 по стеклу и плитке цил. хвост. 6х50мм",
+    "sku": "1425-06",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-08 8х50мм",
+    "sku": "1425-08",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-10 10х50мм",
+    "sku": "1425-10",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-12 12х50мм",
+    "sku": "1425-12",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-14 14х50мм",
+    "sku": "1425-14",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-16 16х50мм",
+    "sku": "1425-16",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-20 трехгранный хвост. 20х50мм",
+    "sku": "1425-20",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-25 25х50мм",
+    "sku": "1425-25",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-30 30х50мм",
+    "sku": "1425-30",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-32 32х50мм",
+    "sku": "1425-32",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-35 35х50мм",
+    "sku": "1425-35",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-40 40х50мм",
+    "sku": "1425-40",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-45 45х50мм",
+    "sku": "1425-45",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-50 50х50мм",
+    "sku": "1425-50",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-60 60х50мм",
+    "sku": "1425-60",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-65 65х50мм",
+    "sku": "1425-65",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-68 68х50мм",
+    "sku": "1425-68",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-70 70х50мм",
+    "sku": "1425-70",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Коронка буровая алмазная ЭКСПЕРТ 1425-75 75х50мм",
+    "sku": "1425-75",
+    "barcode": null,
+    "category": "Буры и сверла",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Краскопульт электрический TULEX TSG-500 800мл 500Вт",
+    "sku": "TSG-500",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-115-24 оксид алюминия 115х22мм Р24",
+    "sku": "85231-115-24",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-115-40 115х22мм Р40",
+    "sku": "85231-115-40",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-115-60 115х22мм Р60",
+    "sku": "85231-115-60",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-115-80 115х22мм Р80",
+    "sku": "85231-115-80",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-125-24 125х22мм Р24",
+    "sku": "85231-125-24",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-125-40 125х22мм Р40",
+    "sku": "85231-125-40",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-125-60 125х22мм Р60",
+    "sku": "85231-125-60",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-125-80 125х22мм Р80",
+    "sku": "85231-125-80",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-180-24 180х22мм Р24",
+    "sku": "85231-180-24",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-180-40 180х22мм Р40",
+    "sku": "85231-180-40",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-180-60 180х22мм Р60",
+    "sku": "85231-180-60",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг лепестковый торцевой конический TULEX 85231-180-80 180х22мм Р80",
+    "sku": "85231-180-80",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный ЭКСПЕРТ 174-115-1.2 по металлу для УШМ 115х1.2х22мм",
+    "sku": "174-115-1,2",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 2
+  },
+  {
+    "name": "Круг отрезной абразивный ЭКСПЕРТ 174-125-1.2 по металлу 125х1.2х22мм",
+    "sku": "174-125-1,2",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной абразивный ЭКСПЕРТ 174-125-1.4 по металлу 125х1.4х22мм",
+    "sku": "174-125-1,4",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 2
+  },
+  {
+    "name": "Круг отрезной абразивный ЭКСПЕРТ 174-125-1.6 по металлу 125х1.6х22мм",
+    "sku": "174-125-1,6",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной абразивный ЭКСПЕРТ 174-180-1.4 по металлу 180х1.4х22мм",
+    "sku": "174-180-1,4",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной абразивный ЭКСПЕРТ 174-180-1.6 по металлу 180х1.6х22мм",
+    "sku": "174-180-1,6",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8000125 по металлу 125х1.0х22мм",
+    "sku": "8000125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8002125 по металлу 125х1.2х22мм",
+    "sku": "8002125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8004115 по металлу 115х1.4х22мм",
+    "sku": "8004115",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8004125 по металлу 125х1.4х22мм",
+    "sku": "8004125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8004180 по металлу 180х1.4х22мм",
+    "sku": "8004180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8006180 по металлу 180х1.6х22мм",
+    "sku": "8006180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной абразивный TULEX 8008125 по металлу 125х0.8х22мм",
+    "sku": "8008125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный ЭКСПЕРТ 171-115 универсальный сегментный 115х22мм",
+    "sku": "171-115",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный ЭКСПЕРТ 171-125 универсальный сегментный 125х22мм",
+    "sku": "171-125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный ЭКСПЕРТ 171-180 универсальный сегментный 180х22мм",
+    "sku": "171-180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный ЭКСПЕРТ 172-115 универсальный сегментированный 115х22мм",
+    "sku": "172-115",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный ЭКСПЕРТ 172-125 универсальный сегментированный 125х22мм",
+    "sku": "172-125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный ЭКСПЕРТ 172-180 универсальный сегментированный 180х22мм",
+    "sku": "172-180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Круг отрезной алмазный TULEX 8011115 универсальный сегментный 115х22мм",
+    "sku": "8011115",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной алмазный TULEX 8011125 универсальный сегментный 125х22мм",
+    "sku": "8011125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной алмазный TULEX 8011180 универсальный сегментный 180х22мм",
+    "sku": "8011180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной алмазный TULEX 8013125 влажная резка сплошной 125х22мм",
+    "sku": "8013125",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Круг отрезной алмазный TULEX 8013180 влажная резка сплошной 180х22мм",
+    "sku": "8013180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Круг шлифовальный абразивный ЭКСПЕРТ 191-125-6 по металлу 125х6х22мм",
+    "sku": "191-125-6",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Круг шлифовальный абразивный ЭКСПЕРТ 191-180-6 по металлу 180х6х22мм",
+    "sku": "191-180-6",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-1000 велкро 125мм Р1000 5шт",
+    "sku": "85201-125-1000",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-120 велкро 125мм Р120 5шт",
+    "sku": "85201-125-120",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-180 велкро 125мм Р180 5шт",
+    "sku": "85201-125-180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-240 велкро 125мм Р240 5шт",
+    "sku": "85201-125-240",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-320 велкро 125мм Р320 5шт",
+    "sku": "85201-125-320",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-400 велкро 125мм Р400 5шт",
+    "sku": "85201-125-400",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-60 велкро 125мм Р60 5шт",
+    "sku": "85201-125-60",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-600 велкро 125мм Р600 5шт",
+    "sku": "85201-125-600",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85201-125-80 велкро 125мм Р80 5шт",
+    "sku": "85201-125-80",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85202-125-120 8 отверстий велкро 125мм Р120 5шт",
+    "sku": "85202-125-120",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85202-125-180 8 отверстий велкро 125мм Р180 5шт",
+    "sku": "85202-125-180",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85202-125-240 8 отверстий велкро 125мм Р240 5шт",
+    "sku": "85202-125-240",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85202-125-320 8 отверстий велкро 125мм Р320 5шт",
+    "sku": "85202-125-320",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85202-125-400 8 отверстий велкро 125мм Р400 5шт",
+    "sku": "85202-125-400",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Круг шлифовальный TULEX 85202-125-60 8 отверстий велкро 125мм Р60 5шт",
+    "sku": "85202-125-60",
+    "barcode": null,
+    "category": "Диски и круги",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда ЭКСПЕРТ 51101-15 деревянная рукоятка 1.5кг",
+    "sku": "51101-15",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда ЭКСПЕРТ 51101-20 деревянная рукоятка 2.0кг",
+    "sku": "51101-20",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда ЭКСПЕРТ 51102-15 фиберглассовая рукоятка 1.5кг",
+    "sku": "51102-15",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда ЭКСПЕРТ 51102-20 фиберглассовая рукоятка 2.0кг",
+    "sku": "51102-20",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда кованная TULEX MJOLNIR 5052009 фибергласовая обрезиненная рукоятка 0.9кг",
+    "sku": "5052009",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда кованная TULEX MJOLNIR 5052013 1.3кг",
+    "sku": "5052013",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда кованная TULEX MJOLNIR 5052015 1.5кг",
+    "sku": "5052015",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Кувалда кованная TULEX MJOLNIR 5052020 2.0кг",
+    "sku": "5052020",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Кювета малярная ЭКСПЕРТ 111-33-35 пластмассовая 33х35см",
+    "sku": "111-33-35",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лезвие сегментное ЭКСПЕРТ 1018 18х100мм 7 сегментов 10шт",
+    "sku": "1018",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лезвие сегментное ЭКСПЕРТ 1025 25х100мм 8 сегментов 10шт",
+    "sku": "1025",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лезвия сегментные TULEX SK5 8210818 18х100мм 8 сегментов 10шт",
+    "sku": "8210818",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85211-1000 бумажная основа водостойкий 23х28см Р1000 5шт",
+    "sku": "85211-1000",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85211-180 бумажная основа Р180 5шт",
+    "sku": "85211-180",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85211-240 бумажная основа Р240 5шт",
+    "sku": "85211-240",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85211-60 бумажная основа Р60 5шт",
+    "sku": "85211-60",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85211-80 бумажная основа Р80 5шт",
+    "sku": "85211-80",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85212-180 тканевая основа Р180 5шт",
+    "sku": "85212-180",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85212-40 тканевая основа Р40 5шт",
+    "sku": "85212-40",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лист шлифовальный TULEX 85212-60 тканевая основа Р60 5шт",
+    "sku": "85212-60",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лобзик TULEX TJ-600 3-х позиционный маятниковый ход 600Вт",
+    "sku": "TJ-600",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Лом строительный TULEX 5060212 22мм углеродистая сталь шестигранный профиль 1200мм",
+    "sku": "5060212",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лом-гвоздодер ЭКСПЕРТ 51318-40 шестигранный профиль 400мм",
+    "sku": "51318-40",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лом-гвоздодер ЭКСПЕРТ 51318-60 шестигранный профиль 600мм",
+    "sku": "51318-60",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лопата ЭКСПЕРТ 0001-1 штыковая без черенка",
+    "sku": "2001-1",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лопата ЭКСПЕРТ 0003-1 совковая без черенка",
+    "sku": "2003-1",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лопата ЭКСПЕРТ 0006-1 совковая строительная без черенка",
+    "sku": "2006-1",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Лопата CAPSTONE 90111-0 штыковая без черенка",
+    "sku": "90111-0",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "CAPSTONE",
+    "stock": 0
+  },
+  {
+    "name": "Лопата CAPSTONE 90121-0 совковая без черенка",
+    "sku": "90121-0",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "CAPSTONE",
+    "stock": 0
+  },
+  {
+    "name": "Лопата TULEX 0011300 совковая без черенка",
+    "sku": "11300",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лопата TULEX 0011400 совковая усиленная без черенка",
+    "sku": "11400",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лопата TULEX 0011500 штыковая универсальная без черенка",
+    "sku": "11500",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лопата TULEX 0011503 штыковая универсальная деревянный черенок 1480мм",
+    "sku": "11503",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лопата TULEX 0011600 совковая строительная без черенка",
+    "sku": "11600",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Лопата TULEX 0011603 совковая строительная деревянный черенок 1480мм",
+    "sku": "11603",
+    "barcode": null,
+    "category": "Строительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Макловица ЭКСПЕРТ УНИВЕРСАЛ 1330-120 натуральная щетина 120мм",
+    "sku": "1330-120",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Макловица ЭКСПЕРТ УНИВЕРСАЛ 1340-140 натуральная щетина 140мм",
+    "sku": "1340-140",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Макловица ЭКСПЕРТ 1460-150 искусственная щетина 150х60мм",
+    "sku": "1460-150",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Макловица ЭКСПЕРТ 1475-170 искусственная щетина 170х75мм",
+    "sku": "1475-170",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Макловица TULEX UNIVERSAL 1010312 смешанная щетина 30х120мм",
+    "sku": "1010312",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Макловица TULEX UNIVERSAL 1010414 смешанная щетина 40х140мм",
+    "sku": "1010414",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Миксер ЭКСПЕРТ 52160 SDS оцинкованный для смесей хвостовик SDS+ 100мм 600мм",
+    "sku": "52160 SDS",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Миксер ЭКСПЕРТ 52640 SDS оцинкованный хвостовик SDS+ 60мм 400мм",
+    "sku": "52640 SDS",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Миксер ЭКСПЕРТ 52840 SDS оцинкованный хвостовик SDS+ 80мм 400мм",
+    "sku": "52840 SDS",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 2
+  },
+  {
+    "name": "Миксер универсальный ЭКСПЕРТ 51160 SDS оцинкованный хвостовик SDS+ 100мм 600мм",
+    "sku": "51160 SDS",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 4
+  },
+  {
+    "name": "Миксер универсальный ЭКСПЕРТ 51640 SDS оцинкованный хвостовик SDS+ 60мм 400мм",
+    "sku": "51640 SDS",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 2
+  },
+  {
+    "name": "Миксер универсальный ЭКСПЕРТ 51840 SDS оцинкованный хвостовик SDS+ 80мм 400мм",
+    "sku": "51840 SDS",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 59002-02 пластиковая рукоятка 0.2кг",
+    "sku": "59002-02",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 59002-03 пластиковая рукоятка 0.3кг",
+    "sku": "59002-03",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 59002-05 пластиковая рукоятка 0.5кг",
+    "sku": "59002-05",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 59002-08 пластиковая рукоятка 0.8кг",
+    "sku": "59002-08",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 59002-10 пластиковая рукоятка 1.0кг",
+    "sku": "59002-10",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 593-02 кованый деревянная лакированная рукоятка 0.2кг",
+    "sku": "593-02",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 593-03 кованый деревянная рукоятка 0.3кг",
+    "sku": "593-03",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 593-05 кованый деревянная рукоятка 0.5кг",
+    "sku": "593-05",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 593-08 кованый деревянная рукоятка 0.8кг",
+    "sku": "593-08",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный ЭКСПЕРТ 593-10 кованый деревянная рукоятка 1.0кг",
+    "sku": "593-10",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный TULEX 5050003 квадратный боек фибергласовая обрезиненная рукоятка 0.3кг",
+    "sku": "5050003",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный TULEX 5050005 0.5кг",
+    "sku": "5050005",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Молоток слесарный TULEX 5050008 0.8кг",
+    "sku": "5050008",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Молоток-гвоздодер ЭКСПЕРТ 595-45 кованый фиберглассовая рукоятка 0.45кг",
+    "sku": "595-45",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток-гвоздодер ЭКСПЕРТ 595-56 кованый фиберглассовая рукоятка 0.56кг",
+    "sku": "595-56",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Молоток-гвоздодер TULEX 5051045 боек с магнитом фибергласовая обрезиненная рукоятка 0.45кг",
+    "sku": "5051045",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Молоток-гвоздодер TULEX 5051056 боек с магнитом 0.56кг",
+    "sku": "5051056",
+    "barcode": null,
+    "category": "Молотки и киянки",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Набор ЭКСПЕРТ 149301-S21 отвертка с битодержателем с битами 21пред",
+    "sku": "149301-S21",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор ЭКСПЕРТ 149302-S20 отвертка реверсивно-рычажная с битами и торц. головками 20пред",
+    "sku": "149302-S20",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор ЭКСПЕРТ 149303-S42 отвертки с 2х комп. рукояткой Cr-V магнитный наконечник 42пред",
+    "sku": "149303-S42",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор ключей имбусовых ЭКСПЕРТ 14801-01-09 стандартные HEX 1.5-10мм 9шт",
+    "sku": "14801-01-09",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Набор ключей имбусовых ЭКСПЕРТ 14801-02-09 удлиненные HEX 1.5-10мм 9шт",
+    "sku": "14801-02-09",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Набор ключей имбусовых ЭКСПЕРТ 14802-01-09 стандартные TORX T10-T50 9шт",
+    "sku": "14802-01-09",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Набор ключей имбусовых ЭКСПЕРТ 14802-02-09 удлиненные TORX T10-T50 9шт",
+    "sku": "14802-02-09",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Набор ключей имбусовых ЭКСПЕРТ 14802-03-09 длинные TORX T10-T50 9шт",
+    "sku": "14802-03-09",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор разметочный ЭКСПЕРТ 264-15 50г х15м",
+    "sku": "264-15",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор сверел по металлу ЭКСПЕРТ КОБАЛЬТ 1410-S13 Co5% P6M5 d1.5-6.5мм 13шт",
+    "sku": "1410-S13",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор сверел по металлу ЭКСПЕРТ КОБАЛЬТ 1410-S6 Co5% P6M5 d2-8мм 6шт",
+    "sku": "1410-S6",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор сверел по металлу ЭКСПЕРТ КОБАЛЬТ 1410-S8 Co5% P6M5 d3-10мм 8шт",
+    "sku": "1410-S8",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Набор сверел по металлу TULEX 60121-S13 КОБАЛЬТ HSS-Co5% М35 d2-8мм 13шт",
+    "sku": "60121-S13",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Набор сверел по металлу TULEX 60121-S19 КОБАЛЬТ HSS-Co5% М35 d1-10мм 19шт",
+    "sku": "60121-S19",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Набор TULEX ELECTRO 5020121-S8 отвертки диэлектрические до 1000В тестер 8шт",
+    "sku": "5020121-S8",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Нож ЭКСПЕРТ ABS 8518 с автоблокировкой сегментированное лезвие 18мм",
+    "sku": "8518",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Нож ЭКСПЕРТ PP 8118 с винтовым фиксатором сегментированное лезвие 18мм",
+    "sku": "8118",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Нож ЭКСПЕРТ PP 8318 с автоблокировкой сегментированное лезвие 18мм",
+    "sku": "8318",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Нож TULEX HEAVY DUTY 8112018 с автоблокировкой двухкомп. корпус лезвие SK5 18мм",
+    "sku": "8112018",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Нож TULEX 8101025 с винтовым фиксатором магнитный держатель двухкомп. корпус 25мм",
+    "sku": "8101025",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Ножницы по металлу ЭКСПЕРТ 51601-300 двухкомп. рукоятки прямые 300мм",
+    "sku": "51601-300",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножницы по металлу ЭКСПЕРТ 51602-250 двухкомп. рукоятки левые 250мм",
+    "sku": "51602-250",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножницы по металлу ЭКСПЕРТ 51601-250 двухкомп. рукоятки прямые 250мм",
+    "sku": "51601-250",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножницы по твердому металлу TULEX HEAVY DUTY 5006125 хромомолибденовая сталь прямые 250мм",
+    "sku": "5006125",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Ножницы по твердому металлу TULEX HEAVY DUTY 5006130 прямые 300мм",
+    "sku": "5006130",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножницы по твердому металлу TULEX HEAVY DUTY 5006225 правые 250мм",
+    "sku": "5006225",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножницы по твердому металлу TULEX HEAVY DUTY 5006325 левые 250мм",
+    "sku": "5006325",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву ЭКСПЕРТ 57105-40 3D-заточка закаленный зуб 5TPI 400мм",
+    "sku": "57105-40",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву ЭКСПЕРТ 57105-45 5TPI 450мм",
+    "sku": "57105-45",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву ЭКСПЕРТ 57105-50 5TPI 500мм",
+    "sku": "57105-50",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву TULEX 5011040 3D-заточка закаленный зуб 5TPI 400мм",
+    "sku": "5011040",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву TULEX 5011045 5TPI 450мм",
+    "sku": "5011045",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву TULEX 5011050 5TPI 500мм",
+    "sku": "5011050",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву TULEX 5011140 7TPI 400мм",
+    "sku": "5011140",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву TULEX 5011145 7TPI 450мм",
+    "sku": "5011145",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по дереву TULEX 5011240 11TPI 400мм",
+    "sku": "5011240",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по металлу ЭКСПЕРТ 57201-30 пластиковая ручка 300мм",
+    "sku": "57201-30",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по металлу ЭКСПЕРТ 57202-30 2-комп. пластиковая ручка 300мм",
+    "sku": "57202-30",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Ножовка по металлу TULEX PRO 5012130 обрезиненная пластик. рукоятка рычажное натяжение 300мм",
+    "sku": "5012130",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Отвертка ЭКСПЕРТ 149102-1-100 двухкомп. рукоятка магнитный наконечник PH1 100мм",
+    "sku": "149102-1-100",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ЭКСПЕРТ 149102-1-150 двухкомп. рукоятка магнитный наконечник PH1 150мм",
+    "sku": "149102-1-150",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ударная TULEX 5021610 двухкомп. рукоятка магнитный наконечник SL6.3х100мм",
+    "sku": "5021610",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ударная TULEX 5021615 SL6.3х150мм",
+    "sku": "5021615",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ударная TULEX 5021820 SL8х200мм",
+    "sku": "5021820",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ударная TULEX 5022210 PH2х100мм",
+    "sku": "5022210",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ударная TULEX 5022215 PH2х150мм",
+    "sku": "5022215",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Отвертка ударная TULEX 5022320 PH3х200мм",
+    "sku": "5022320",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Перфоратор TULEX THC-650 SDS-plus реверс 2.4Дж 650Вт кейс",
+    "sku": "THC-650",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Перфоратор TULEX THC-850 SDS-plus реверс 3Дж 850Вт кейс",
+    "sku": "THC-850",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Перфоратор TULEX TVC-1000 вертикальный SDS-plus реверс 4Дж 1000Вт кейс",
+    "sku": "TVC-1000",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Пила циркулярная погружная TULEX TS-165-1.3 пропил 90-55мм 165х20мм 1300Вт",
+    "sku": "TS-165-1.3",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Пила циркулярная TULEX TS-165-1.4 пропил 90-54мм 165х20мм 1400Вт",
+    "sku": "TS-165-1.4",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Пила циркулярная TULEX TS-190-1.6 пропил 90-64мм 190х20мм 1600Вт",
+    "sku": "TS-190-1.6",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Пистолет клеевой ЭКСПЕРТ 4407-10 электрический 10Вт 7мм",
+    "sku": "4407-10",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет клеевой ЭКСПЕРТ 4411-50 электрический 50Вт 11мм",
+    "sku": "4411-50",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для герметиков ЭКСПЕРТ 4131 скелетный 310мл",
+    "sku": "4131",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для герметиков ЭКСПЕРТ 4231 полукорпусной усиленный 310мл",
+    "sku": "4231",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для герметиков ЭКСПЕРТ 4330 закрытый алюминиевый корпус 300мл",
+    "sku": "4330",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для герметиков TULEX 4001331 полукорпусной обрезиненная рукоятка усиленный зубчатый шток 310мл",
+    "sku": "4001331",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для герметиков TULEX 4000731 усиленный скелетный 310мл",
+    "sku": "4000731",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для герметиков TULEX 4001631 пластик полукорпусной гладкий шток 310мл",
+    "sku": "4001631",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для монтажной пены ЭКСПЕРТ 4302 пластиковый корпус с фиксатором",
+    "sku": "4302",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Пистолет для монтажной пены ЭКСПЕРТ 4304 комбинированный корпус с регулировкой",
+    "sku": "4304",
+    "barcode": null,
+    "category": "Пистолеты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Плоскогубцы ЭКСПЕРТ 51401-160 комбинированные двухкомп. рукоятки 160мм",
+    "sku": "51401-160",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Плоскогубцы ЭКСПЕРТ 51401-180 комбинированные двухкомп. рукоятки 180мм",
+    "sku": "51401-180",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Плоскогубцы ЭКСПЕРТ 51401-200 комбинированные двухкомп. рукоятки 200мм",
+    "sku": "51401-200",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Плоскогубцы TULEX 5001016 комбинированные двухкомп. рукоятки 160мм",
+    "sku": "5001016",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Плоскогубцы TULEX 5001018 комбинированные двухкомп. рукоятки 180мм",
+    "sku": "5001018",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Плоскогубцы TULEX 5001020 комбинированные двухкомп. рукоятки 200мм",
+    "sku": "5001020",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Полотна TULEX 5112230-S10 для ножовки по металлу bi-metal M2/D6A 24TPI 300мм 10шт",
+    "sku": "5112230-S10",
+    "barcode": null,
+    "category": "Расходники",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Рашпиль ЭКСПЕРТ 5741-20-2 плоский двухкомп. рукоятка №2 200мм",
+    "sku": "5741-20-2",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Рашпиль ЭКСПЕРТ 5742-20-2 полукруглый двухкомп. рукоятка №2 200мм",
+    "sku": "5742-20-2",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рашпиль ЭКСПЕРТ 5745-20-2 круглый двухкомп. рукоятка №2 200мм",
+    "sku": "5745-20-2",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 1
+  },
+  {
+    "name": "Режущий элемент ЭКСПЕРТ 47151 для плиткорезов 15х6х1.5мм",
+    "sku": "47151",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Режущий элемент ЭКСПЕРТ 48226 для плиткорезов 22х6х6мм",
+    "sku": "48226",
+    "barcode": null,
+    "category": "Инструменты",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Реноватор TULEX TRC-400 150000-21000об/мин 6 насадок 400Вт кейс",
+    "sku": "TRC-400",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 1
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7203 двойная фиксация ABS пластик 3м",
+    "sku": "7203",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7205 двойная фиксация ABS пластик 5м",
+    "sku": "7205",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7375 двойная фиксация обрезиненный корпус 7.5м х25мм",
+    "sku": "7375",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7403 автоматическая фиксация 3м",
+    "sku": "7403",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX 7001103 DualAutoLock обрезиненный корпус двойная автофиксация магнитный зацеп 3м х16мм",
+    "sku": "7001103",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX 7001105 DualAutoLock 5м х25мм",
+    "sku": "7001105",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX 7001110 DualAutoLock 10м х25мм",
+    "sku": "7001110",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7503 автоматическая фиксация обрезиненный корпус 3м х16мм",
+    "sku": "7503",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7505 автоматическая фиксация обрезиненный корпус 5м х19мм",
+    "sku": "7505",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7575 автоматическая фиксация обрезиненный корпус 7.5м х25мм",
+    "sku": "7575",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7603 обрезиненный корпус 3м х16мм",
+    "sku": "7603",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7605 обрезиненный корпус 5м х19мм",
+    "sku": "7605",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7675 обрезиненный корпус 7.5м х25мм",
+    "sku": "7675",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7702 ABS пластик 2м",
+    "sku": "7702",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка ЭКСПЕРТ 7775 ABS пластик 7.5м",
+    "sku": "7775",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX 2FIX 7000303 двойная фиксация ABS пластик 3м х16мм",
+    "sku": "7000303",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX 2FIX 7000305 двойная фиксация ABS пластик 5м х25мм",
+    "sku": "7000305",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX COMFORT 7001403 ударопрочный обрезиненный корпус магнит. зацеп 3м х16мм",
+    "sku": "7001403",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX COMFORT 7001405 5м х25мм",
+    "sku": "7001405",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX DOUBLEHOOK 7001203 нейлоновое покрытие обрезиненный корпус 2-ой магнит. зацеп 3м х16мм",
+    "sku": "7001203",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX DOUBLEHOOK 7001205 5м х25мм",
+    "sku": "7001205",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Рулетка TULEX DOUBLEHOOK 7001275 7.5м х25мм",
+    "sku": "7001275",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 2,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло перьевое по дереву \"ЭКСПЕРТ\" 144-152-30 шестигранный хвостовик 1/4\", длина 152мм,диаметр 30мм",
+    "sku": "144-152-30",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло перьевое по дереву \"ЭКСПЕРТ\" 144-152-32 шестигранный хвостовик 1/4\", длина 152мм,диаметр 32мм",
+    "sku": "144-152-32",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло перьевое по дереву \"ЭКСПЕРТ\" 144-152-38 шестигранный хвостовик 1/4\", длина 152мм,диаметр 38мм",
+    "sku": "144-152-38",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло перьевое по дереву \"ЭКСПЕРТ\" 144-152-40 шестигранный хвостовик 1/4\", длина 152мм,диаметр 40мм",
+    "sku": "144-152-40",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-060-03 спиральное с М-образной заточкой, длина 61мм,диаметр 3мм",
+    "sku": "143-060-03",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-075-04 спиральное с М-образной заточкой, длина 75мм, диаметр 4мм",
+    "sku": "143-075-04",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-085-05 спиральное с М-образной заточкой, длина 85мм, диаметр 5мм",
+    "sku": "143-085-05",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-092-06 спиральное с М-образной заточкой, длина 93мм, диаметр 6мм",
+    "sku": "143-092-06",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-100-07 спиральное с М-образной заточкой, длина 100мм, диаметр 7мм",
+    "sku": "143-100-07",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-115-08 спиральное с М-образной заточкой, длина 110мм, диаметр 8мм",
+    "sku": "143-115-08",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-115-09 спиральное с М-образной заточкой, длина 115мм, диаметр 9мм",
+    "sku": "143-115-09",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-120-10 спиральное с М-образной заточкой, длина 120мм, диаметр 10мм",
+    "sku": "143-120-10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-140-11 спиральное с М-образной заточкой, длина 126мм, диаметр 11мм",
+    "sku": "143-140-11",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-140-12 спиральное с М-образной заточкой, длина 130мм, диаметр 12мм",
+    "sku": "143-140-12",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по дереву \"ЭКСПЕРТ\" КОРОНА 143-150-13 спиральное с М-образной заточкой, длина 130мм, диаметр 13мм",
+    "sku": "143-150-13",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 142-060-4 с двумя режущими лезвиями, длина 60мм, диаметр 4мм",
+    "sku": "142-060-4",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 142-065-5 с двумя режущими лезвиями, длина 65мм, диаметр 5мм",
+    "sku": "142-065-5",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 142-065-6 с двумя режущими лезвиями, длина 65мм, диаметр 6мм",
+    "sku": "142-065-6",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 142-070-8 с двумя режущими лезвиями, длина 70мм, диаметр 8мм",
+    "sku": "142-070-8",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 1424-060-04 четыре режущих элемента, длина 60мм, диаметр 4мм",
+    "sku": "1424-060-04",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 1424-070-05 четыре режущих элемента, длина 70мм, диаметр 5мм",
+    "sku": "1424-070-05",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 1424-075-06 четыре режущих элемента, длина 75мм, диаметр 6мм",
+    "sku": "1424-075-06",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 1424-080-08 четыре режущих элемента, длина 80мм, диаметр 8мм",
+    "sku": "1424-080-08",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 1424-100-10 четыре режущих элемента, длина 100мм, диаметр 10мм",
+    "sku": "1424-100-10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по кафелю и стеклу \"ЭКСПЕРТ\" 1424-100-12 четыре режущих элемента, длина 100мм, диаметр 12мм",
+    "sku": "1424-100-12",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-1,5-S2 КОБАЛЬТ HSSE-Co(5%), 1,5мм (2шт/уп)",
+    "sku": "60121-1,5-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-10 КОБАЛЬТ HSSE-Co(5%), 10мм (1шт/уп)",
+    "sku": "60121-10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-11 КОБАЛЬТ HSSE-Co(5%), 11мм (1шт/уп)",
+    "sku": "60121-11",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-12 КОБАЛЬТ HSSE-Co(5%), 12мм (1шт/уп)",
+    "sku": "60121-12",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-2-S2 КОБАЛЬТ HSSE-Co(5%), 2мм (2шт/уп)",
+    "sku": "60121-2-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-2,5-S2 КОБАЛЬТ HSSE-Co(5%), 2,5мм (2шт/уп)",
+    "sku": "60121-2,5-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-3-S10 КОБАЛЬТ HSSE-Co(5%), 3мм (10шт/уп)",
+    "sku": "60121-3-S10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-3-S2 КОБАЛЬТ HSSE-Co(5%), 3мм (2шт/уп)",
+    "sku": "60121-3-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-3,2-S2 КОБАЛЬТ HSSE-Co(5%), 3,2мм (2шт/уп)",
+    "sku": "60121-3,2-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-3,4-S2 КОБАЛЬТ HSSE-Co(5%), 3,4мм (2шт/уп)",
+    "sku": "60121-3,4-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-3,5-S2 КОБАЛЬТ HSSE-Co(5%), 3,5мм (2шт/уп)",
+    "sku": "60121-3,5-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-4-S10 КОБАЛЬТ HSSE-Co(5%), 4мм (10шт/уп)",
+    "sku": "60121-4-S10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-4-S2 КОБАЛЬТ HSSE-Co(5%), 4мм (2шт/уп)",
+    "sku": "60121-4-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-4,5-S2 КОБАЛЬТ HSSE-Co(5%), 4,5мм (2шт/уп)",
+    "sku": "60121-4,5-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-5-S10 КОБАЛЬТ HSSE-Co(5%), 5мм (10шт/уп)",
+    "sku": "60121-5-S10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-5-S2 КОБАЛЬТ HSSE-Co(5%), 5мм (2шт/уп)",
+    "sku": "60121-5-S2",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-6 КОБАЛЬТ HSSE-Co(5%), 6мм (1шт/уп)",
+    "sku": "60121-6",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-6-S10 КОБАЛЬТ HSSE-Co(5%), 6мм (10шт/уп)",
+    "sku": "60121-6-S10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-7 КОБАЛЬТ HSSE-Co(5%), 7мм (1шт/уп)",
+    "sku": "60121-7",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-8 КОБАЛЬТ HSSE-Co(5%), 8мм (1шт/уп)",
+    "sku": "60121-8",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло по металлу TULEX 60121-9 КОБАЛЬТ HSSE-Co(5%), 9мм (1шт/уп)",
+    "sku": "60121-9",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло под конфирмат TULEX 60131-4, 4мм, для конфирмата 5х50",
+    "sku": "60131-4",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло ступенчатое TULEX 60120-04-12 по металлу, HSS-Co(5%), HEX хвостовик, 9 ступеней, 4-12мм",
+    "sku": "60120-04-12",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло ступенчатое TULEX 60120-04-20 по металлу, HSS-Co(5%), HEX хвостовик, 9 ступеней, 4-20мм",
+    "sku": "60120-04-20",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло ступенчатое TULEX 60120-06-30 по металлу, HSS-Co(5%), трехгранный хвостовик, 13 ступеней, 6-30мм",
+    "sku": "60120-06-30",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-10 по дереву, ДСП, ламинату, 8х10мм",
+    "sku": "1441-10",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-20 по дереву, ДСП, ламинату, 8х20мм",
+    "sku": "1441-20",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-22 по дереву, ДСП, ламинату, 8х22мм",
+    "sku": "1441-22",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-25 по дереву, ДСП, ламинату, 8х25мм",
+    "sku": "1441-25",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-30 по дереву, ДСП, ламинату, 8х30мм",
+    "sku": "1441-30",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-32 по дереву, ДСП, ламинату, 8х32мм",
+    "sku": "1441-32",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло Форстнера \"ЭКСПЕРТ\" 1441-35 по дереву, ДСП, ламинату, 8х35мм",
+    "sku": "1441-35",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011204 по кафелю, керамике, стеклу, два режущих лезвия, шестигранный хвостовик 1/4, 4мм",
+    "sku": "6011204",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011206 по кафелю, керамике, стеклу, два режущих лезвия, шестигранный хвостовик 1/4, 6мм",
+    "sku": "6011206",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011208 по кафелю, керамике, стеклу, два режущих лезвия, шестигранный хвостовик 1/4, 8мм",
+    "sku": "6011208",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011210 по кафелю, керамике, стеклу, два режущих лезвия, шестигранный хвостовик 1/4, 10мм",
+    "sku": "6011210",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011212 по кафелю, керамике, стеклу, два режущих лезвия, шестигранный хвостовик 1/4, 12мм",
+    "sku": "6011212",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011405 по кафелю, керамике, стеклу, с пылеудалением, четыре лезвия, шестигранный хвостовик 1/4, 5мм",
+    "sku": "6011405",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011406 по кафелю, керамике, стеклу, с пылеудалением, четыре лезвия, шестигранный хвостовик 1/4, 6мм",
+    "sku": "6011406",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011408 по кафелю, керамике, стеклу, с пылеудалением, четыре лезвия, шестигранный хвостовик 1/4, 8мм",
+    "sku": "6011408",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сверло TULEX 6011410 по кафелю, керамике, стеклу, с пылеудалением, четыре лезвия, шестигранный хвостовик 1/4, 10мм",
+    "sku": "6011410",
+    "barcode": null,
+    "category": "Сверла",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сетка стеклотканевая \"ЭКСПЕРТ\" 131-5-20 самоклеящаяся, ширина 5см, длина 20м, ячейка 3х3мм",
+    "sku": "0131-5-20",
+    "barcode": null,
+    "category": "Строительные материалы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сетка стеклотканевая \"ЭКСПЕРТ\" 131-5-45 самоклеящаяся, ширина 5см, длина 45м, ячейка 3х3мм",
+    "sku": "131-5-45",
+    "barcode": null,
+    "category": "Строительные материалы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сетка стеклотканевая \"ЭКСПЕРТ\" 131-5-90 самоклеящаяся, ширина 5см, длина 90м, ячейка 3х3мм",
+    "sku": "131-5-90",
+    "barcode": null,
+    "category": "Строительные материалы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сетка стеклотканевая \"ЭКСПЕРТ\" 131-10-45 самоклеящаяся, ширина 10см, длина 45м, ячейка 3х3мм",
+    "sku": "131-10-45",
+    "barcode": null,
+    "category": "Строительные материалы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Сетка стеклотканевая TULEX 3011212 ширина 100см, длина 20м, ячейка 2,8х2,8мм, плотность 45г/кв.м",
+    "sku": "3011212",
+    "barcode": null,
+    "category": "Строительные материалы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Сетка стеклотканевая TULEX 3011215 ширина 100см, длина 50м, ячейка 2,8х2,8мм, плотность 45г/кв.м",
+    "sku": "3011215",
+    "barcode": null,
+    "category": "Строительные материалы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Стержень-удлинитель \"ЭКСПЕРТ\" 2502 телескопический для малярного инструмента 1-2м",
+    "sku": "2502",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Стержень-удлинитель \"ЭКСПЕРТ\" 2503 телескопический 1,3-3,0м для малярного инструмента",
+    "sku": "2503",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Стержень-удлинитель TULEX \"EURO\" 2002002 телескопический для малярного инструмента, стальной 1-2м",
+    "sku": "2002002",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Стержень-удлинитель TULEX \"EURO\" 2002003 телескопический для малярного инструмента, стальной 1,3-3м",
+    "sku": "2002003",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Тарелка опорная \"ЭКСПЕРТ\" 1514-125 пластиковая для УШМ под круг на липучке, М14, диаметр 125мм",
+    "sku": "1514-125",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Терка \"ЭКСПЕРТ\" 1516-105 для шлифования с металлическим фиксатором, 230x105мм",
+    "sku": "1516-105",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Тонкогубцы \"ЭКСПЕРТ\" 51403-160 с двухкомпонентными рукоятками, 160мм",
+    "sku": "51403-160",
+    "barcode": null,
+    "category": "Ручной инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Тонкогубцы \"TULEX\" 5002016 с двухкомпонентными рукоятками, 160мм",
+    "sku": "5002016",
+    "barcode": null,
+    "category": "Ручной инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Тонкогубцы изогнутые \"TULEX\" 5003016 с двухкомпонентными рукоятками, 160мм",
+    "sku": "5003016",
+    "barcode": null,
+    "category": "Ручной инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Топор TULEX 5053006 фибергласовая обрезиненная рукоятка, 0.6кг",
+    "sku": "5053006",
+    "barcode": null,
+    "category": "Ручной инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Топор TULEX 5053010 фибергласовая обрезиненная рукоятка, 1.0кг",
+    "sku": "5053010",
+    "barcode": null,
+    "category": "Ручной инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Углошлифовальная машина TULEX TG-125-0.8, 125мм, 11000 об/мин., 800Вт",
+    "sku": "TG-125-0.8",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Углошлифовальная машина TULEX TG-125-0.9, 125мм, 11000 об/мин., регулировка оборотов, 900Вт",
+    "sku": "TG-125-0.9",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Углошлифовальная машина TULEX TG-125-1.0, 125мм, 11000 об/мин., регулировка оборотов, 1000Вт",
+    "sku": "TG-125-1.0",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Углошлифовальная машина TULEX TG-150-1.4, 150мм, 9500 об/мин., регулировка оборотов, 1400Вт",
+    "sku": "TG-150-1.4",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Углошлифовальная машина TULEX TG-180-1.6, 180мм, 9500 об/мин., 1600Вт",
+    "sku": "TG-180-1.6",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Углошлифовальная машина TULEX TG-230-2.4, 230мм, 6500 об/мин., плавный пуск, 2400Вт",
+    "sku": "TG-230-2.4",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Угольник \"ЭКСПЕРТ\" 762-030 столярный, алюминиевый, 300мм",
+    "sku": "762-030",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Угольник \"ЭКСПЕРТ\" 763-025 столярный, алюминиевый с уровнем, 250мм",
+    "sku": "763-025",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Угольник \"ЭКСПЕРТ\" 763-030 столярный, алюминиевый с уровнем, 300мм",
+    "sku": "763-030",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Угольник \"ЭКСПЕРТ\" 763-040 столярный, алюминиевый с уровнем, 400мм",
+    "sku": "763-040",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 751-040 рельс.двутавровый, алюминиевый, 3 ампулы, 40см",
+    "sku": "751-040",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 751-060 рельс.двутавровый, алюминиевый, 3 ампулы, 60см",
+    "sku": "751-060",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 751-080 рельс.двутавровый, алюминиевый, 3 ампулы, 80см",
+    "sku": "751-080",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 751-100 рельс.двутавровый, алюминиевый, 3 ампулы, 100см",
+    "sku": "751-100",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 752-040 коробчатый, алюминиевый, усиленный, 3 ампулы, 40см",
+    "sku": "752-040",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 752-060 коробчатый, алюминиевый, усиленный, 3 ампулы, 60см",
+    "sku": "752-060",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 752-080 коробчатый, алюминиевый, усиленный, 3 ампулы, 80см",
+    "sku": "752-080",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 752-100 коробчатый, алюминиевый, усиленный, 3 ампулы, 100см",
+    "sku": "752-100",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 753-060 рельс.двутавровый, алюминиевый, магнитная поверхность, 3 ампулы, 60см",
+    "sku": "753-060",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 753-080 рельс.двутавровый, алюминиевый, магнитная поверхность, 3 ампулы, 80см",
+    "sku": "753-080",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень \"ЭКСПЕРТ\" 753-100 рельс.двутавровый, алюминиевый, магнитная поверхность, 3 ампулы, 100см",
+    "sku": "753-100",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Уровень TULEX \"PERFECT\" 7012306 коробчатый, усиленный, алюминиевый, магнитная поверхность, 3 ампулы, 60см",
+    "sku": "7012306",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Уровень TULEX \"PERFECT\" 7012308 коробчатый, усиленный, алюминиевый, магнитная поверхность, 3 ампулы, 80см",
+    "sku": "7012308",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Уровень TULEX \"PERFECT\" 7012310 коробчатый, усиленный, алюминиевый, магнитная поверхность, 3 ампулы, 100см",
+    "sku": "7012310",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Фен строительный TULEX THG-2000, 350-600 гр., 2 режима, 2000Вт, кейс",
+    "sku": "THG-2000",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шина направляющая алюминиевая TULEX TT-140 для пилы циркулярной погружной, 140см",
+    "sku": "TT-140",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шкурка шлифовальная TULEX 85221-100, на бумажной основе, мини-рулон 100ммх5м, P100",
+    "sku": "85221-100",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шкурка шлифовальная TULEX 85221-150, на бумажной основе, мини-рулон 100ммх5м, P150",
+    "sku": "85221-150",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шкурка шлифовальная TULEX 85221-60, на бумажной основе, мини-рулон 100ммх5м, P60",
+    "sku": "85221-60",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель \"ЭКСПЕРТ\" 3104 нержавеющий, 40мм",
+    "sku": "3104",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель \"ЭКСПЕРТ\" 3106 нержавеющий, 60мм",
+    "sku": "3106",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель \"ЭКСПЕРТ\" 3108 нержавеющий, 80мм",
+    "sku": "3108",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый \"ЭКСПЕРТ\" 3215 нержавеющий, зуб 6х6мм, 150мм",
+    "sku": "3215",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый \"ЭКСПЕРТ\" 3220 нержавеющий, зуб 6х6мм, 200мм",
+    "sku": "3220",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый \"ЭКСПЕРТ\" 3225 нержавеющий, зуб 6х6мм, 250мм",
+    "sku": "3225",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый \"ЭКСПЕРТ\" 3230 нержавеющий, зуб 8х8мм, 300мм",
+    "sku": "3230",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый \"ЭКСПЕРТ\" 3235 нержавеющий, зуб 8х8мм, 350мм",
+    "sku": "3235",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый ЭКСПЕРТ 3230-1 нержавеющий, зуб 10х10мм, 300мм",
+    "sku": "3230-1",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель зубчатый ЭКСПЕРТ 3235-1 нержавеющий, зуб 10х10мм, 350мм",
+    "sku": "3235-1",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3110 нержавеющий, 100мм",
+    "sku": "3110",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3115 нержавеющий, 150мм",
+    "sku": "3115",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3115-1 нержавеющий, 150мм",
+    "sku": "3115-1",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3120 нержавеющий, 200мм",
+    "sku": "3120",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3125 нержавеющий, 250мм",
+    "sku": "3125",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3130 нержавеющий, 300мм",
+    "sku": "3130",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3135 нержавеющий, 350мм",
+    "sku": "3135",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3140 нержавеющий, 400мм",
+    "sku": "3140",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"ЭКСПЕРТ\" 3145 нержавеющий, 450мм",
+    "sku": "3145",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"TULEX\" 3001110 усиленный, нержавеющий, 2комп. ручка, 100мм",
+    "sku": "3001110",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"TULEX\" 3001115 усиленный, нержавеющий, 2комп. ручка, 150мм",
+    "sku": "3001115",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"TULEX\" 3001125 усиленный, нержавеющий, 2комп. ручка, 250мм",
+    "sku": "3001125",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"TULEX\" 3001135 усиленный, нержавеющий, 2комп. ручка, 350мм",
+    "sku": "3001135",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный \"TULEX\" 3001140 усиленный, нержавеющий, 2комп. ручка, 400мм",
+    "sku": "3001140",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX \"PROFESSIONAL\" 3002315 усиленный, нержавеющий, 2комп. ручка, 150мм",
+    "sku": "3002315",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX \"PROFESSIONAL\" 3002325 усиленный, нержавеющий, 2комп. ручка, 250мм",
+    "sku": "3002325",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX \"PROFESSIONAL\" 3002335 усиленный, нержавеющий, 2комп. ручка, 350мм",
+    "sku": "3002335",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX \"PROFESSIONAL\" 3002345 усиленный, нержавеющий, 2комп. ручка, 450мм",
+    "sku": "3002345",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001204 нержавеющий, 40мм",
+    "sku": "3001204",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001206 нержавеющий, 60мм",
+    "sku": "3001206",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001208 нержавеющий, 80мм",
+    "sku": "3001208",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001210 нержавеющий, 100мм",
+    "sku": "3001210",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001215 нержавеющий, 150мм",
+    "sku": "3001215",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001215-1 нержавеющий, 150мм",
+    "sku": "3001215-1",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001220 нержавеющий, 200мм",
+    "sku": "3001220",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001225 нержавеющий, 250мм",
+    "sku": "3001225",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001230 нержавеющий, 300мм",
+    "sku": "3001230",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001235 нержавеющий, 350мм",
+    "sku": "3001235",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001240 нержавеющий, 400мм",
+    "sku": "3001240",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001245 нержавеющий, 450мм",
+    "sku": "3001245",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шпатель фасадный TULEX 3001260 нержавеющий, 600мм",
+    "sku": "3001260",
+    "barcode": null,
+    "category": "Малярный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Штангенциркуль \"ЭКСПЕРТ\" 771-015 стальной, 150мм",
+    "sku": "771-015",
+    "barcode": null,
+    "category": "Измерительный инструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Штроборез TULEX TWC-125-1.4, 125мм, гл.реза 0-32мм, 1400Вт",
+    "sku": "TWC-125-1.4",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Шуруповерт сетевой TULEX TDS-300, патрон 10мм, реверс, 0-750 об/мин, 300Вт",
+    "sku": "TDS-300",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Щетка \"ЭКСПЕРТ\" 1616-01 проволочная латунная с пластмассовой ручкой",
+    "sku": "1616-01",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "ЭКСПЕРТ",
+    "stock": 0
+  },
+  {
+    "name": "Щетка дисковая TULEX 853131-100 для дрели, витая латунированная проволока 0,3мм, диаметр 100мм",
+    "sku": "853131-100",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Щетка дисковая TULEX 853131-65 для дрели, витая латунированная проволока 0,3мм, диаметр 65мм",
+    "sku": "853131-65",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Щетка дисковая TULEX 853131-75 для дрели, витая латунированная проволока 0,3мм, диаметр 75мм",
+    "sku": "853131-75",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Щетка коническая TULEX 853021-100 для УШМ, резьба М14, витая латунированная проволока 0,3мм, диаметр 100мм",
+    "sku": "853021-100",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Щетка коническая TULEX 853021-125 для УШМ, резьба М14, витая латунированная проволока 0,3мм, диаметр 125мм",
+    "sku": "853021-125",
+    "barcode": null,
+    "category": "Абразивы",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Электроплиткорез ручной циркулярный TULEX TC-110-1.4, пропил 90-34мм; 45-28мм, 13000об/мин, 1400Вт",
+    "sku": "TC-110-1.4",
+    "barcode": null,
+    "category": "Электроинструмент",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "TULEX",
+    "stock": 0
+  },
+  {
+    "name": "Снежинка Салфетки",
+    "sku": "ХЕР",
+    "barcode": "762497325539",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 10,
+    "brand": "Снежинка",
+    "stock": 60
+  },
+  {
+    "name": "HerbaLife ванильный вечерний коктейль",
+    "sku": "1232",
+    "barcode": "1636RS",
+    "category": "Герметики",
+    "unit": "шт",
+    "min_stock": 3,
+    "brand": "HerbaLife",
+    "stock": 99
+  }
+]

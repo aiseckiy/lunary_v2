@@ -598,30 +598,284 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
 
 
 @app.get("/api/kaspi/orders/local")
-def kaspi_orders_local(state: Optional[str] = None, db: Session = Depends(get_db)):
-    """Возвращает заказы из локальной БД (сохранённые sync скриптом)"""
+def kaspi_orders_local(
+    state: Optional[str] = None,
+    limit: int = 500,
+    offset: int = 0,
+    db: Session = Depends(get_db)
+):
     from database import KaspiOrder
+    from sqlalchemy import func
     import json
+
+    # Маппинг русских статусов (XML) → внутренние
+    STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
+
     q = db.query(KaspiOrder)
     if state:
-        q = q.filter(KaspiOrder.state == state)
-    orders = q.order_by(KaspiOrder.id.desc()).limit(200).all()
+        if state in STATE_MAP.values():
+            # найти русские эквиваленты
+            russian = [k for k, v in STATE_MAP.items() if v == state]
+            q = q.filter(KaspiOrder.state.in_(russian + [state]))
+        else:
+            q = q.filter(KaspiOrder.state == state)
+
+    total_count = q.count()
+    orders = q.order_by(KaspiOrder.id.desc()).offset(offset).limit(limit).all()
+
+    # Счётчики по вкладкам
+    raw_counts = db.query(KaspiOrder.state, func.count(KaspiOrder.id)).group_by(KaspiOrder.state).all()
+    state_counts: dict = {}
+    for s, c in raw_counts:
+        key = STATE_MAP.get(s, s)
+        state_counts[key] = state_counts.get(key, 0) + c
+
+    def fmt(o):
+        normalized = STATE_MAP.get(o.state, o.state)
+        if o.entries and o.entries != "[]":
+            entries = json.loads(o.entries)
+        elif o.product_name:
+            entries = [{"name": o.product_name, "sku": o.sku or "", "qty": o.quantity or 1, "basePrice": o.total}]
+        else:
+            entries = []
+        synced = None
+        if o.created_at:
+            try:
+                from datetime import timezone, timedelta
+                synced = o.created_at.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=5))).strftime("%d.%m %H:%M")
+            except Exception:
+                pass
+        return {
+            "id": o.order_id,
+            "state": normalized,
+            "total": o.total or 0,
+            "customer": o.customer or "",
+            "entries": entries,
+            "date": o.order_date or "",
+            "synced_at": synced,
+            "source": o.source or "kaspi_api",
+            "delivery_method": o.delivery_method or "",
+            "address": o.address or "",
+            "payment_method": o.payment_method or "",
+            "cancel_reason": o.cancel_reason or "",
+        }
+
     return {
-        "orders": [
-            {
-                "id": o.order_id,
-                "state": o.state,
-                "total": o.total,
-                "customer": o.customer,
-                "entries": json.loads(o.entries or "[]"),
-                "date": o.order_date,
-                "synced_at": (o.created_at.replace(tzinfo=__import__('datetime').timezone.utc).astimezone(__import__('datetime').timezone(__import__('datetime').timedelta(hours=5)))).strftime("%d.%m %H:%M")
-            }
-            for o in orders
-        ],
-        "total": len(orders),
-        "error": None
+        "orders": [fmt(o) for o in orders],
+        "total": total_count,
+        "state_counts": state_counts,
+        "error": None,
     }
+
+
+@app.get("/api/kaspi/orders/export")
+def kaspi_orders_export(state: Optional[str] = None, db: Session = Depends(get_db)):
+    """Экспорт заказов в CSV"""
+    from database import KaspiOrder
+    from fastapi.responses import StreamingResponse
+    import csv, io
+
+    STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
+    q = db.query(KaspiOrder)
+    if state:
+        if state in STATE_MAP.values():
+            russian = [k for k, v in STATE_MAP.items() if v == state]
+            q = q.filter(KaspiOrder.state.in_(russian + [state]))
+        else:
+            q = q.filter(KaspiOrder.state == state)
+
+    orders = q.order_by(KaspiOrder.id.desc()).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Номер заказа", "Дата", "Статус", "Товар", "Артикул", "Кол-во", "Сумма ₸",
+                     "Категория", "Способ доставки", "Адрес", "Способ оплаты", "Причина отмены",
+                     "Стоимость доставки (продавец)", "Компенсация доставки", "Источник"])
+    for o in orders:
+        writer.writerow([
+            o.order_id, o.order_date, STATE_MAP.get(o.state, o.state),
+            o.product_name or "", o.sku or "", o.quantity or "",
+            o.total or 0, o.category or "",
+            o.delivery_method or "", o.address or "", o.payment_method or "",
+            o.cancel_reason or "", o.delivery_cost_seller or 0,
+            o.delivery_compensation or 0, o.source or "",
+        ])
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue().encode("utf-8-sig")]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=kaspi_orders.csv"}
+    )
+
+
+@app.get("/api/analytics/overview")
+def analytics_overview(db: Session = Depends(get_db)):
+    """Общая статистика по заказам"""
+    from database import KaspiOrder
+    from sqlalchemy import func
+
+    total_orders = db.query(func.count(KaspiOrder.id)).scalar()
+    total_revenue = db.query(func.sum(KaspiOrder.total)).scalar() or 0
+    avg_order = int(total_revenue / total_orders) if total_orders else 0
+
+    STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
+    completed = db.query(func.count(KaspiOrder.id)).filter(KaspiOrder.state.in_(["Выдан", "ARCHIVE"])).scalar() or 0
+    cancelled = db.query(func.count(KaspiOrder.id)).filter(KaspiOrder.state.in_(["Отменен", "CANCELLED"])).scalar() or 0
+
+    return {
+        "total_orders": total_orders,
+        "total_revenue": total_revenue,
+        "avg_order": avg_order,
+        "completed": completed,
+        "cancelled": cancelled,
+        "conversion_rate": round(completed / total_orders * 100, 1) if total_orders else 0,
+    }
+
+
+@app.get("/api/analytics/abc")
+def analytics_abc(db: Session = Depends(get_db)):
+    """ABC-анализ товаров по выручке"""
+    from database import KaspiOrder
+    from sqlalchemy import func
+
+    rows = db.query(
+        KaspiOrder.product_name,
+        KaspiOrder.sku,
+        KaspiOrder.category,
+        func.sum(KaspiOrder.total).label("revenue"),
+        func.sum(KaspiOrder.quantity).label("qty"),
+        func.count(KaspiOrder.id).label("orders"),
+    ).filter(
+        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
+        KaspiOrder.product_name.isnot(None),
+    ).group_by(KaspiOrder.product_name, KaspiOrder.sku, KaspiOrder.category).all()
+
+    if not rows:
+        return {"products": [], "total_revenue": 0}
+
+    items = sorted(
+        [{"name": r.product_name, "sku": r.sku or "", "category": r.category or "",
+          "revenue": int(r.revenue or 0), "qty": int(r.qty or 0), "orders": int(r.orders or 0)}
+         for r in rows],
+        key=lambda x: x["revenue"], reverse=True
+    )
+
+    total_rev = sum(i["revenue"] for i in items)
+    cumulative = 0
+    for item in items:
+        cumulative += item["revenue"]
+        pct = cumulative / total_rev * 100
+        item["abc"] = "A" if pct <= 80 else ("B" if pct <= 95 else "C")
+        item["revenue_pct"] = round(item["revenue"] / total_rev * 100, 1)
+
+    return {"products": items, "total_revenue": total_rev}
+
+
+@app.get("/api/analytics/revenue")
+def analytics_revenue(period: str = "month", db: Session = Depends(get_db)):
+    """Выручка по периодам (month / week)"""
+    from database import KaspiOrder
+    from sqlalchemy import func
+
+    rows = db.query(
+        KaspiOrder.order_date,
+        func.sum(KaspiOrder.total).label("revenue"),
+        func.count(KaspiOrder.id).label("orders"),
+    ).filter(
+        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
+        KaspiOrder.order_date.isnot(None),
+    ).group_by(KaspiOrder.order_date).all()
+
+    from datetime import datetime
+    from collections import defaultdict
+
+    by_period: dict = defaultdict(lambda: {"revenue": 0, "orders": 0})
+    for r in rows:
+        try:
+            d = datetime.strptime(r.order_date, "%d.%m.%Y")
+            key = d.strftime("%Y-%m") if period == "month" else d.strftime("%Y-W%W")
+            by_period[key]["revenue"] += int(r.revenue or 0)
+            by_period[key]["orders"] += int(r.orders or 0)
+        except Exception:
+            continue
+
+    points = sorted([
+        {"period": k, "revenue": v["revenue"], "orders": v["orders"]}
+        for k, v in by_period.items()
+    ], key=lambda x: x["period"])
+
+    return {"points": points, "period": period}
+
+
+@app.get("/api/analytics/forecast")
+def analytics_forecast(db: Session = Depends(get_db)):
+    """Прогноз спроса по топ-20 товарам (линейная регрессия по неделям)"""
+    import numpy as np
+    from database import KaspiOrder
+    from sqlalchemy import func
+    from datetime import datetime
+    from collections import defaultdict
+
+    # Топ-20 товаров по выручке
+    top = db.query(
+        KaspiOrder.product_name,
+        func.sum(KaspiOrder.total).label("rev"),
+    ).filter(
+        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
+        KaspiOrder.product_name.isnot(None),
+    ).group_by(KaspiOrder.product_name).order_by(func.sum(KaspiOrder.total).desc()).limit(20).all()
+
+    top_names = [r.product_name for r in top]
+
+    rows = db.query(
+        KaspiOrder.product_name,
+        KaspiOrder.order_date,
+        KaspiOrder.quantity,
+    ).filter(
+        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
+        KaspiOrder.product_name.in_(top_names),
+    ).all()
+
+    # Сгруппировать по товару → по неделе
+    by_product: dict = defaultdict(lambda: defaultdict(int))
+    for r in rows:
+        if not r.order_date:
+            continue
+        try:
+            d = datetime.strptime(r.order_date, "%d.%m.%Y")
+            week = d.strftime("%Y-W%W")
+            by_product[r.product_name][week] += r.quantity or 1
+        except Exception:
+            continue
+
+    results = []
+    for name, week_data in by_product.items():
+        weeks = sorted(week_data.keys())
+        if len(weeks) < 3:
+            continue
+        y = np.array([week_data[w] for w in weeks], dtype=float)
+        x = np.arange(len(y))
+        # Линейная регрессия
+        coeffs = np.polyfit(x, y, 1)
+        trend = float(coeffs[0])  # положительный = рост
+        # Прогноз на след. 4 недели
+        next_x = len(y) + np.arange(4)
+        forecast = [max(0, round(float(np.polyval(coeffs, xi)))) for xi in next_x]
+        # Скользящее среднее за 4 недели
+        ma4 = float(np.mean(y[-4:])) if len(y) >= 4 else float(np.mean(y))
+        results.append({
+            "name": name,
+            "weeks": weeks[-8:],
+            "history": [int(week_data[w]) for w in weeks[-8:]],
+            "forecast_4w": forecast,
+            "trend": round(trend, 2),
+            "trend_dir": "up" if trend > 0.1 else ("down" if trend < -0.1 else "flat"),
+            "ma4": round(ma4, 1),
+        })
+
+    results.sort(key=lambda x: sum(x["history"]), reverse=True)
+    return {"products": results}
 
 
 @app.get("/api/kaspi/debug")
@@ -656,6 +910,12 @@ def sync_kaspi_products_endpoint():
 @app.get("/kaspi", response_class=HTMLResponse)
 def kaspi_page():
     with open("static/kaspi.html") as f:
+        return f.read()
+
+
+@app.get("/analytics", response_class=HTMLResponse)
+def analytics_page():
+    with open("static/analytics.html") as f:
         return f.read()
 
 

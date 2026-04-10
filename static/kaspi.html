@@ -6,78 +6,85 @@
 <title>Kaspi — Lunary</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:70px; }
+body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:80px; }
 
 header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#0f0f13; z-index:50; }
 .logo { font-size:18px; font-weight:800; color:#fff; }
 .logo span { color:#6366f1; }
 .header-links { display:flex; gap:8px; }
 .hlink { background:#18181b; border:1px solid #27272a; border-radius:8px; padding:6px 12px; font-size:13px; color:#a1a1aa; text-decoration:none; }
+.hlink:hover { border-color:#6366f1; color:#6366f1; }
 
-.container { max-width:900px; margin:0 auto; padding:20px; }
-.page-title { font-size:22px; font-weight:800; margin-bottom:6px; }
-.page-sub { font-size:13px; color:#71717a; margin-bottom:20px; }
+.container { max-width:900px; margin:0 auto; padding:16px 20px; }
 
-/* Status tabs */
-.status-tabs { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
-.status-tabs::-webkit-scrollbar { display:none; }
-.stab { background:#18181b; border:1px solid #27272a; border-radius:20px; padding:7px 14px; font-size:13px; color:#71717a; cursor:pointer; white-space:nowrap; transition:all .15s; }
-.stab.active { background:#6366f1; border-color:#6366f1; color:#fff; }
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.page-title { font-size:22px; font-weight:800; }
+.page-sub { font-size:13px; color:#71717a; margin-top:3px; }
+.btn-export { background:#18181b; border:1px solid #27272a; border-radius:10px; padding:9px 16px; font-size:13px; color:#a1a1aa; cursor:pointer; white-space:nowrap; transition:all .15s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+.btn-export:hover { border-color:#6366f1; color:#6366f1; }
 
-/* Config panel */
-.config-panel { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:20px; margin-bottom:20px; }
-.config-title { font-size:14px; font-weight:600; margin-bottom:12px; }
-.config-row { display:flex; gap:10px; margin-bottom:10px; }
-.config-input { flex:1; background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px 12px; color:#e4e4e7; font-size:14px; outline:none; }
-.config-input:focus { border-color:#6366f1; }
-.btn-save { background:#6366f1; color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; }
-.config-hint { font-size:12px; color:#52525b; line-height:1.5; }
-
-/* Orders */
-.orders-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.orders-count { font-size:13px; color:#71717a; }
-.btn-refresh { background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:8px 14px; color:#a1a1aa; font-size:13px; cursor:pointer; }
-.btn-refresh:hover { background:#3f3f46; }
-
-.order-card { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:18px; margin-bottom:12px; }
-.order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.order-id { font-size:15px; font-weight:700; }
-.order-date { font-size:12px; color:#71717a; margin-top:2px; }
-.order-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
-.badge-accepted { background:#6366f11a; color:#6366f1; }
-.badge-completed { background:#22c55e1a; color:#22c55e; }
-.badge-cancelled { background:#ef44441a; color:#ef4444; }
-.badge-delivery { background:#f9731620; color:#f97316; }
-.badge-pickup { background:#eab3081a; color:#eab308; }
-
-.order-customer { font-size:13px; color:#a1a1aa; margin-bottom:10px; }
-.order-items { border-top:1px solid #27272a; padding-top:10px; }
-.order-item { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #1f1f23; }
-.order-item:last-child { border-bottom:none; }
-.item-name { font-size:13px; flex:1; }
-.item-sku { font-size:11px; color:#52525b; font-family:monospace; }
-.item-qty { font-size:13px; font-weight:600; color:#6366f1; white-space:nowrap; margin-left:8px; }
-.item-price { font-size:13px; color:#a1a1aa; white-space:nowrap; margin-left:8px; }
-.order-total { display:flex; justify-content:flex-end; margin-top:10px; font-size:15px; font-weight:700; color:#22c55e; }
-
-.no-config { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:40px; text-align:center; }
-.no-config .icon { font-size:48px; margin-bottom:12px; }
-.no-config h3 { font-size:16px; font-weight:700; margin-bottom:8px; }
-.no-config p { font-size:13px; color:#71717a; line-height:1.6; }
-
-.loading { text-align:center; padding:40px; color:#52525b; }
-.spinner { display:inline-block; width:24px; height:24px; border:2px solid #27272a; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:8px; }
-@keyframes spin { to{transform:rotate(360deg)} }
-
-.error-box { background:#ef44441a; border:1px solid #ef444440; border-radius:12px; padding:16px; color:#ef4444; font-size:14px; }
-
-/* Stats row */
-.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
-.stat { background:#18181b; border:1px solid #27272a; border-radius:12px; padding:14px; }
-.stat-label { font-size:11px; color:#71717a; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
-.stat-value { font-size:24px; font-weight:800; }
+/* Stats */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
+.stat { background:#18181b; border:1px solid #27272a; border-radius:12px; padding:14px 16px; }
+.stat-label { font-size:11px; color:#71717a; text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px; }
+.stat-value { font-size:22px; font-weight:800; }
 .stat-value.purple { color:#6366f1; }
 .stat-value.green { color:#22c55e; }
+.stat-value.red { color:#ef4444; }
+
+/* Tabs */
+.status-tabs { display:flex; gap:6px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+.status-tabs::-webkit-scrollbar { display:none; }
+.stab { background:#18181b; border:1px solid #27272a; border-radius:20px; padding:7px 14px; font-size:13px; color:#71717a; cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:5px; }
+.stab.active { background:#6366f1; border-color:#6366f1; color:#fff; }
+.stab .cnt { background:#27272a; border-radius:10px; padding:1px 7px; font-size:11px; font-weight:700; }
+.stab.active .cnt { background:#ffffff30; }
+
+/* Orders header */
+.orders-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.orders-count { font-size:14px; font-weight:600; }
+.orders-sum { font-size:14px; color:#22c55e; font-weight:700; }
+.orders-info { display:flex; align-items:center; gap:12px; }
+.btn-refresh { background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:7px 14px; color:#a1a1aa; font-size:13px; cursor:pointer; transition:all .15s; }
+.btn-refresh:hover { background:#3f3f46; }
+
+/* Cards */
+.order-card { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:18px; margin-bottom:10px; transition:border-color .15s; }
+.order-card:hover { border-color:#3f3f46; }
+.order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
+.order-left { flex:1; }
+.order-id { font-size:14px; font-weight:700; color:#e4e4e7; }
+.order-customer { font-size:13px; color:#a1a1aa; margin-top:2px; }
+.order-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.order-total-top { font-size:16px; font-weight:800; color:#e4e4e7; }
+.order-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
+.badge-accepted { background:#6366f11a; color:#6366f1; border:1px solid #6366f130; }
+.badge-completed { background:#22c55e1a; color:#22c55e; border:1px solid #22c55e30; }
+.badge-cancelled { background:#ef44441a; color:#ef4444; border:1px solid #ef444430; }
+.badge-delivery { background:#f9731620; color:#f97316; border:1px solid #f9731630; }
+.badge-pickup { background:#eab3081a; color:#eab308; border:1px solid #eab30830; }
+
+.order-items { border-top:1px solid #27272a; margin-top:12px; padding-top:12px; }
+.order-item { display:flex; justify-content:space-between; align-items:center; padding:5px 0; gap:8px; }
+.item-name { font-size:13px; color:#e4e4e7; flex:1; }
+.item-sku { font-size:11px; color:#52525b; font-family:monospace; margin-top:1px; }
+.item-qty { font-size:12px; font-weight:700; color:#6366f1; white-space:nowrap; }
+.item-price { font-size:12px; color:#71717a; white-space:nowrap; }
+
+.order-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #1f1f23; }
+.order-meta { font-size:11px; color:#52525b; }
+.order-date-time { font-size:12px; color:#71717a; }
+
+/* Source badge */
+.src-xml { font-size:10px; color:#52525b; background:#27272a; border-radius:4px; padding:1px 6px; }
+.src-api { font-size:10px; color:#6366f150; }
+
+/* Loading/empty */
+.loading { text-align:center; padding:50px 20px; color:#52525b; }
+.spinner { display:inline-block; width:24px; height:24px; border:2px solid #27272a; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:10px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.empty { text-align:center; padding:50px 20px; color:#52525b; font-size:14px; }
+.error-box { background:#ef44441a; border:1px solid #ef444430; border-radius:12px; padding:16px; color:#ef4444; font-size:14px; }
 
 /* Bottom nav */
 .app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#18181b; border-top:1px solid #27272a; z-index:200; }
@@ -96,33 +103,24 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
     <a class="hlink" href="/">🏠 Склад</a>
     <a class="hlink" href="/scanner">📷 Сканер</a>
     <a class="hlink" href="/history">📋 История</a>
+    <a class="hlink" href="/analytics">📊 Аналитика</a>
   </div>
 </header>
 
 <div class="container">
-  <div class="page-title">🛒 Kaspi заказы</div>
-  <div class="page-sub">Просмотр заказов из Kaspi.kz в реальном времени</div>
-
-  <!-- Настройки (показываем если нет токена) -->
-  <div class="config-panel" id="config-panel" style="display:none">
-    <div class="config-title">⚙️ Настройки Kaspi API</div>
-    <div class="config-row">
-      <input class="config-input" id="cfg-token" type="password" placeholder="X-Auth-Token (KASPI_TOKEN)">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🛒 Kaspi заказы</div>
+      <div class="page-sub">Все заказы из Kaspi.kz</div>
     </div>
-    <div class="config-row">
-      <input class="config-input" id="cfg-shop" placeholder="Shop ID (KASPI_SHOP_ID)">
-      <button class="btn-save" onclick="saveConfig()">Сохранить</button>
-    </div>
-    <div class="config-hint">
-      Токен и Shop ID можно получить в личном кабинете Kaspi.kz → Магазин → API.<br>
-      Или добавьте KASPI_TOKEN и KASPI_SHOP_ID в переменные окружения Railway.
-    </div>
+    <a class="btn-export" id="export-btn" href="/api/kaspi/orders/export" download>
+      ⬇️ Экспорт CSV
+    </a>
   </div>
 
-  <div id="stats-row" class="stats-row" style="display:none"></div>
+  <div id="stats-row" class="stats-row"></div>
 
-  <!-- Статусы -->
-  <div class="status-tabs">
+  <div class="status-tabs" id="status-tabs">
     <div class="stab active" onclick="setStatus('')" data-s="">📋 Все</div>
     <div class="stab" onclick="setStatus('NEW')" data-s="NEW">🟡 Новые</div>
     <div class="stab" onclick="setStatus('DELIVERY')" data-s="DELIVERY">🚛 Доставка</div>
@@ -130,12 +128,13 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
     <div class="stab" onclick="setStatus('PICKUP')" data-s="PICKUP">🏪 Самовывоз</div>
     <div class="stab" onclick="setStatus('ARCHIVE')" data-s="ARCHIVE">✅ Архив</div>
     <div class="stab" onclick="setStatus('CANCELLED')" data-s="CANCELLED">❌ Отменены</div>
+    <div class="stab" onclick="setStatus('RETURN')" data-s="RETURN">↩️ Возврат</div>
   </div>
 
-  <div class="orders-header">
-    <div>
-      <div class="orders-count" id="orders-count">—</div>
-      <div style="font-size:11px;color:#52525b;margin-top:2px" id="sync-time"></div>
+  <div class="orders-meta">
+    <div class="orders-info">
+      <span class="orders-count" id="orders-count">—</span>
+      <span class="orders-sum" id="orders-sum"></span>
     </div>
     <button class="btn-refresh" onclick="loadOrders()">🔄 Обновить</button>
   </div>
@@ -145,141 +144,141 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
   </div>
 </div>
 
-<!-- Bottom nav -->
 <nav class="app-nav">
   <div class="nav-items">
     <a class="nav-item" href="/"><span class="nav-icon">🏠</span>Склад</a>
     <a class="nav-item" href="/scanner"><span class="nav-icon">📷</span>Сканер</a>
     <a class="nav-item" href="/history"><span class="nav-icon">📋</span>История</a>
+    <a class="nav-item" href="/analytics"><span class="nav-icon">📊</span>Аналитика</a>
     <a class="nav-item cur" href="/kaspi"><span class="nav-icon">🛒</span>Kaspi</a>
   </div>
 </nav>
 
 <script>
 let currentStatus = '';
+let allOrders = [];
 
 const STATE_LABELS = {
-  NEW: 'Новый',
-  ACCEPTED: 'Новый',
-  COMPLETED: 'Выполнен',
-  CANCELLED: 'Отменён',
-  KASPI_DELIVERY: 'Kaspi Доставка',
-  DELIVERY: 'Доставка',
-  PICKUP: 'Самовывоз',
-  ARCHIVE: 'Архив',
-  SIGN_REQUIRED: 'Подпись',
+  NEW:'Новый', ACCEPTED:'Новый', COMPLETED:'Выполнен', CANCELLED:'Отменён',
+  KASPI_DELIVERY:'Kaspi', DELIVERY:'Доставка', PICKUP:'Самовывоз',
+  ARCHIVE:'Архив', SIGN_REQUIRED:'Подпись', RETURN:'Возврат',
 };
-
 const STATE_BADGE = {
-  NEW: 'badge-accepted',
-  ACCEPTED: 'badge-accepted',
-  COMPLETED: 'badge-completed',
-  CANCELLED: 'badge-cancelled',
-  KASPI_DELIVERY: 'badge-delivery',
-  DELIVERY: 'badge-delivery',
-  PICKUP: 'badge-pickup',
-  ARCHIVE: 'badge-completed',
-  SIGN_REQUIRED: 'badge-pickup',
+  NEW:'badge-accepted', ACCEPTED:'badge-accepted', COMPLETED:'badge-completed',
+  CANCELLED:'badge-cancelled', KASPI_DELIVERY:'badge-delivery', DELIVERY:'badge-delivery',
+  PICKUP:'badge-pickup', ARCHIVE:'badge-completed', SIGN_REQUIRED:'badge-pickup', RETURN:'badge-cancelled',
 };
 
 function setStatus(s) {
   currentStatus = s;
-  document.querySelectorAll('.stab').forEach(el => {
-    el.classList.toggle('active', el.dataset.s === s);
-  });
+  document.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.dataset.s === s));
+  const url = s ? `/api/kaspi/orders/export?state=${s}` : '/api/kaspi/orders/export';
+  document.getElementById('export-btn').href = url;
   loadOrders();
 }
 
 async function loadOrders() {
   const container = document.getElementById('orders-container');
   container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка...</div>';
-
   try {
-    const res = await fetch(`/api/kaspi/orders/local?state=${currentStatus}`);
-    const data = await res.json();
+    const url = currentStatus ? `/api/kaspi/orders/local?state=${currentStatus}&limit=500` : '/api/kaspi/orders/local?limit=500';
+    const data = await fetch(url).then(r => r.json());
+    if (data.error) { container.innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`; return; }
 
-    if (data.error) {
-      if (data.error.includes('не заданы')) {
-        document.getElementById('config-panel').style.display = 'block';
-        container.innerHTML = `
-          <div class="no-config">
-            <div class="icon">🔑</div>
-            <h3>Нужны учётные данные Kaspi</h3>
-            <p>Добавьте KASPI_TOKEN и KASPI_SHOP_ID в переменные Railway,<br>или заполните форму выше.</p>
-          </div>`;
-        return;
-      }
-      container.innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`;
-      return;
-    }
+    // Обновить счётчики на вкладках
+    if (data.state_counts) updateTabCounts(data.state_counts);
 
-    document.getElementById('config-panel').style.display = 'none';
-    const orders = (data.orders || []).sort((a, b) => (Number(b.date) || 0) - (Number(a.date) || 0));
-    document.getElementById('orders-count').textContent = `${orders.length} из ${data.total} заказов`;
-    if (orders[0]?.synced_at) document.getElementById('sync-time').textContent = `Синхронизировано: ${orders[0].synced_at}`;
-    else document.getElementById('sync-time').textContent = 'Синхронизация каждые 5 минут';
-
-    if (!orders.length) {
-      container.innerHTML = '<div class="loading">📭 Заказов в этом статусе нет</div>';
-      return;
-    }
-
-    // Stats
-    const total = orders.reduce((s, o) => s + (o.total || 0), 0);
-    const items = orders.reduce((s, o) => s + (o.entries || []).reduce((a, e) => a + e.qty, 0), 0);
-    document.getElementById('stats-row').style.display = 'grid';
-    document.getElementById('stats-row').innerHTML = `
-      <div class="stat"><div class="stat-label">Заказов</div><div class="stat-value purple">${orders.length}</div></div>
-      <div class="stat"><div class="stat-label">Позиций</div><div class="stat-value">${items}</div></div>
-      <div class="stat"><div class="stat-label">Сумма</div><div class="stat-value green">${total.toLocaleString('ru')} ₸</div></div>
-    `;
-
-    container.innerHTML = orders.map(o => {
-      const badge = STATE_BADGE[o.state] || 'badge-accepted';
-      const label = STATE_LABELS[o.state] || o.state;
-      const dateStr = formatDate(o.date);
-      const entries = (o.entries || []).map(e => `
-        <div class="order-item">
-          <div>
-            <div class="item-name">${e.name || '—'}</div>
-            ${e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : ''}
-          </div>
-          <div class="item-qty">${e.qty} шт</div>
-          <div class="item-price">${(e.basePrice || e.price || 0).toLocaleString('ru')} ₸</div>
-        </div>
-      `).join('');
-      return `
-        <div class="order-card">
-          <div class="order-top">
-            <div>
-              <div class="order-id">Заказ #${o.id}</div>
-              <div class="order-date">${dateStr}</div>
-            </div>
-            <span class="order-badge ${badge}">${label}</span>
-          </div>
-          <div class="order-customer">👤 ${o.customer || 'Покупатель'}</div>
-          <div class="order-items">${entries}</div>
-          <div class="order-total">Итого: ${(o.total || 0).toLocaleString('ru')} ₸</div>
-        </div>`;
-    }).join('');
-
-  } catch (e) {
-    container.innerHTML = `<div class="error-box">⚠️ Ошибка загрузки: ${e.message}</div>`;
+    const orders = data.orders || [];
+    allOrders = orders;
+    renderStats(orders, data.total);
+    renderOrders(orders);
+  } catch(e) {
+    container.innerHTML = `<div class="error-box">⚠️ Ошибка: ${e.message}</div>`;
   }
 }
 
-function formatDate(ts) {
-  if (!ts || ts === '—') return '—';
-  try {
-    const num = Number(ts);
-    const d = new Date(num > 1e10 ? num : num * 1000);
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleString('ru', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  } catch { return '—'; }
+function updateTabCounts(counts) {
+  document.querySelectorAll('.stab').forEach(tab => {
+    const s = tab.dataset.s;
+    if (!s) return;
+    const n = counts[s] || 0;
+    let badge = tab.querySelector('.cnt');
+    if (n > 0) {
+      if (!badge) { badge = document.createElement('span'); badge.className = 'cnt'; tab.appendChild(badge); }
+      badge.textContent = n;
+    } else if (badge) {
+      badge.remove();
+    }
+  });
 }
 
-function saveConfig() {
-  alert('Добавьте KASPI_TOKEN и KASPI_SHOP_ID в переменные окружения Railway.\nПерезапустите сервис после добавления.');
+function renderStats(orders, total) {
+  const revenue = orders.reduce((s,o) => s + (o.total||0), 0);
+  const qty = orders.reduce((s,o) => s + (o.entries||[]).reduce((a,e) => a+(e.qty||0), 0), 0);
+  document.getElementById('orders-count').textContent = `${total.toLocaleString('ru')} заказов`;
+  document.getElementById('orders-sum').textContent = revenue ? `· ${revenue.toLocaleString('ru')} ₸` : '';
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat"><div class="stat-label">Показано</div><div class="stat-value purple">${orders.length.toLocaleString('ru')}</div></div>
+    <div class="stat"><div class="stat-label">Выручка</div><div class="stat-value green">${(revenue/1000).toFixed(0)}K ₸</div></div>
+    <div class="stat"><div class="stat-label">Позиций</div><div class="stat-value">${qty.toLocaleString('ru')}</div></div>
+    <div class="stat"><div class="stat-label">Ср. чек</div><div class="stat-value">${orders.length ? Math.round(revenue/orders.length).toLocaleString('ru') : 0} ₸</div></div>
+  `;
+}
+
+function renderOrders(orders) {
+  const container = document.getElementById('orders-container');
+  if (!orders.length) { container.innerHTML = '<div class="empty">📭 Заказов нет</div>'; return; }
+
+  container.innerHTML = orders.map(o => {
+    const badge = STATE_BADGE[o.state] || 'badge-accepted';
+    const label = STATE_LABELS[o.state] || o.state;
+    const dateStr = formatDate(o.date);
+    const entries = (o.entries||[]).map(e => `
+      <div class="order-item">
+        <div style="flex:1">
+          <div class="item-name">${e.name||'—'}</div>
+          ${e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : ''}
+        </div>
+        <div class="item-qty">${e.qty||1} шт</div>
+        <div class="item-price">${((e.basePrice||e.price||0)).toLocaleString('ru')} ₸</div>
+      </div>`).join('');
+
+    const delivery = o.delivery_method ? `<span class="order-meta">${o.delivery_method}</span>` : '';
+    const src = o.source === 'xml_import' ? '<span class="src-xml">архив</span>' : '';
+
+    return `
+      <div class="order-card">
+        <div class="order-top">
+          <div class="order-left">
+            <div class="order-id">#${o.id}</div>
+            <div class="order-customer">${o.customer || 'Покупатель'}</div>
+          </div>
+          <div class="order-right">
+            <div class="order-total-top">${(o.total||0).toLocaleString('ru')} ₸</div>
+            <span class="order-badge ${badge}">${label}</span>
+          </div>
+        </div>
+        ${entries ? `<div class="order-items">${entries}</div>` : ''}
+        <div class="order-footer">
+          <div style="display:flex;align-items:center;gap:8px">${delivery}${src}</div>
+          <div class="order-date-time">${dateStr}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function formatDate(val) {
+  if (!val) return '—';
+  // dd.mm.yyyy формат (XML)
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(val)) return val;
+  // Unix timestamp (API)
+  try {
+    const num = Number(val);
+    const d = new Date(num > 1e10 ? num : num * 1000);
+    if (isNaN(d.getTime())) return val;
+    return d.toLocaleString('ru', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  } catch { return val; }
 }
 
 loadOrders();

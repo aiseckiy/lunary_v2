@@ -36,6 +36,21 @@ class KaspiOrder(Base):
     order_date = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Расширенные поля из XML / Kaspi
+    product_name = Column(String, nullable=True)
+    sku = Column(String, nullable=True)
+    quantity = Column(Integer, nullable=True)
+    category = Column(String, nullable=True)
+    address = Column(String, nullable=True)
+    status_date = Column(String, nullable=True)
+    cancel_reason = Column(String, nullable=True)
+    payment_method = Column(String, nullable=True)
+    delivery_method = Column(String, nullable=True)
+    courier = Column(String, nullable=True)
+    delivery_cost_seller = Column(Integer, default=0)
+    delivery_compensation = Column(Integer, default=0)
+    source = Column(String, default="kaspi_api")  # kaspi_api | xml_import
+
 
 class Movement(Base):
     __tablename__ = "movements"
@@ -60,10 +75,26 @@ def get_db():
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-    # Миграция: добавить колонку price если нет
+    new_columns = [
+        ("products", "price", "INTEGER"),
+        ("kaspi_orders", "product_name", "TEXT"),
+        ("kaspi_orders", "sku", "TEXT"),
+        ("kaspi_orders", "quantity", "INTEGER"),
+        ("kaspi_orders", "category", "TEXT"),
+        ("kaspi_orders", "address", "TEXT"),
+        ("kaspi_orders", "status_date", "TEXT"),
+        ("kaspi_orders", "cancel_reason", "TEXT"),
+        ("kaspi_orders", "payment_method", "TEXT"),
+        ("kaspi_orders", "delivery_method", "TEXT"),
+        ("kaspi_orders", "courier", "TEXT"),
+        ("kaspi_orders", "delivery_cost_seller", "INTEGER DEFAULT 0"),
+        ("kaspi_orders", "delivery_compensation", "INTEGER DEFAULT 0"),
+        ("kaspi_orders", "source", "TEXT DEFAULT 'kaspi_api'"),
+    ]
     with engine.connect() as conn:
-        try:
-            conn.execute(text("ALTER TABLE products ADD COLUMN price INTEGER"))
-            conn.commit()
-        except Exception:
-            pass
+        for table, col, col_type in new_columns:
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+                conn.commit()
+            except Exception:
+                pass

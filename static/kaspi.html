@@ -5,103 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Kaspi — Lunary</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:transparent; color:#111827; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:80px; }
-
-header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:transparent; z-index:50; }
-.logo { font-size:18px; font-weight:800; color:#fff; }
-.logo span { color:#6366f1; }
-.header-links { display:flex; gap:8px; }
-.hlink { background:#ffffff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 12px; font-size:13px; color:#6b7280; text-decoration:none; }
-.hlink:hover { border-color:#6366f1; color:#6366f1; }
-
-.container { max-width:900px; margin:0 auto; padding:16px 20px; }
-
-.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; gap:12px; }
-.page-title { font-size:22px; font-weight:800; }
-.page-sub { font-size:13px; color:#9ca3af; margin-top:3px; }
-.btn-export { background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:9px 16px; font-size:13px; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all .15s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
-.btn-export:hover { border-color:#6366f1; color:#6366f1; }
+/* Page header row */
+.page-header-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; gap:12px; }
 
 /* Stats */
-.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
-.stat { background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 16px; }
-.stat-label { font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px; }
-.stat-value { font-size:22px; font-weight:800; }
-.stat-value.purple { color:#6366f1; }
-.stat-value.green { color:#22c55e; }
-.stat-value.red { color:#ef4444; }
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
+.stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
+.stat-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; margin-bottom:6px; }
+.stat-value { font-size:24px; font-weight:800; color:var(--text); }
+.stat-value.purple { color:var(--accent); }
+.stat-value.green { color:var(--green); }
+.stat-value.red { color:var(--red); }
 
-/* Tabs */
-.status-tabs { display:flex; gap:6px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+/* Status tabs */
+.status-tabs { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
 .status-tabs::-webkit-scrollbar { display:none; }
-.stab { background:#ffffff; border:1px solid #e5e7eb; border-radius:20px; padding:7px 14px; font-size:13px; color:#9ca3af; cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:5px; }
-.stab.active { background:#6366f1; border-color:#6366f1; color:#fff; }
-.stab .cnt { background:#f3f4f6; border-radius:10px; padding:1px 7px; font-size:11px; font-weight:700; }
-.stab.active .cnt { background:#ffffff30; }
+.stab { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:5px; }
+.stab:hover { border-color:#d1d5db; color:var(--text); }
+.stab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.stab .cnt { background:rgba(0,0,0,.07); border-radius:10px; padding:1px 7px; font-size:11px; font-weight:700; }
+.stab.active .cnt { background:rgba(255,255,255,.25); }
 
 /* Orders header */
 .orders-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.orders-count { font-size:14px; font-weight:600; }
-.orders-sum { font-size:14px; color:#22c55e; font-weight:700; }
+.orders-count { font-size:14px; font-weight:600; color:var(--text); }
+.orders-sum { font-size:14px; color:var(--green); font-weight:700; }
 .orders-info { display:flex; align-items:center; gap:12px; }
-.btn-refresh { background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:7px 14px; color:#6b7280; font-size:13px; cursor:pointer; transition:all .15s; }
-.btn-refresh:hover { background:#e5e7eb; }
 
-/* Cards */
-.order-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:18px; margin-bottom:10px; transition:border-color .15s; }
-.order-card:hover { border-color:#e5e7eb; }
+/* Order cards */
+.order-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:10px; transition:box-shadow .15s, border-color .15s; }
+.order-card:hover { border-color:#d1d5db; box-shadow:0 2px 10px rgba(0,0,0,.06); }
 .order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
-.order-left { flex:1; }
-.order-id { font-size:14px; font-weight:700; color:#111827; }
-.order-customer { font-size:13px; color:#6b7280; margin-top:2px; }
-.order-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
-.order-total-top { font-size:16px; font-weight:800; color:#111827; }
+.order-left { flex:1; min-width:0; }
+.order-id { font-size:14px; font-weight:700; color:var(--text); }
+.order-customer { font-size:13px; color:var(--text2); margin-top:2px; }
+.order-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+.order-total-top { font-size:16px; font-weight:800; color:var(--text); }
 .order-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
-.badge-accepted { background:#6366f11a; color:#6366f1; border:1px solid #6366f130; }
-.badge-completed { background:#22c55e1a; color:#22c55e; border:1px solid #22c55e30; }
-.badge-cancelled { background:#ef44441a; color:#ef4444; border:1px solid #ef444430; }
-.badge-delivery { background:#f9731620; color:#f97316; border:1px solid #f9731630; }
-.badge-pickup { background:#eab3081a; color:#eab308; border:1px solid #eab30830; }
+.badge-accepted { background:#ede9fe; color:var(--accent); }
+.badge-completed { background:#dcfce7; color:var(--green); }
+.badge-cancelled { background:#fee2e2; color:var(--red); }
+.badge-delivery { background:#ffedd5; color:var(--orange); }
+.badge-pickup { background:#fef9c3; color:var(--yellow); }
 
-.order-items { border-top:1px solid #e5e7eb; margin-top:12px; padding-top:12px; }
+.order-items { border-top:1px solid var(--border2); margin-top:12px; padding-top:12px; }
 .order-item { display:flex; justify-content:space-between; align-items:center; padding:5px 0; gap:8px; }
-.item-name { font-size:13px; color:#111827; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
-.item-sku { font-size:11px; color:#9ca3af; font-family:monospace; margin-top:1px; }
-.item-qty { font-size:12px; font-weight:700; color:#6366f1; white-space:nowrap; }
-.item-price { font-size:12px; color:#9ca3af; white-space:nowrap; }
+.item-name { font-size:13px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
+.item-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-top:1px; }
+.item-qty { font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap; }
+.item-price { font-size:12px; color:var(--text3); white-space:nowrap; }
 
-.order-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #f9fafb; }
-.order-meta { font-size:11px; color:#9ca3af; }
-.order-date-time { font-size:12px; color:#9ca3af; }
+.order-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid var(--border2); }
+.order-meta { font-size:11px; color:var(--text3); }
+.order-date-time { font-size:12px; color:var(--text3); }
 
-/* Date filter */
-.date-filter { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
-.date-filter::-webkit-scrollbar { display:none; }
-.dpill { background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:6px 14px; font-size:12px; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all .15s; font-weight:500; }
-.dpill:hover { background:#f3f4f6; }
-.dpill.active { background:#111827; border-color:#111827; color:#fff; }
-
-/* Source badge */
-.src-xml { font-size:10px; color:#9ca3af; background:#f3f4f6; border-radius:4px; padding:1px 6px; }
-.src-api { font-size:10px; color:#6366f150; }
-
-/* Loading/empty */
-.loading { text-align:center; padding:50px 20px; color:#9ca3af; }
-.spinner { display:inline-block; width:24px; height:24px; border:2px solid #f3f4f6; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:10px; }
-@keyframes spin { to{transform:rotate(360deg)} }
-.empty { text-align:center; padding:50px 20px; color:#9ca3af; font-size:14px; }
-.error-box { background:#ef44441a; border:1px solid #ef444430; border-radius:12px; padding:16px; color:#ef4444; font-size:14px; }
-
-/* Bottom nav */
-.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#ffffff; border-top:1px solid #e5e7eb; z-index:200; }
-.nav-items { display:flex; }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#9ca3af; font-size:10px; gap:2px; transition:color .15s; }
-.nav-item.cur { color:#6366f1; }
-.nav-icon { font-size:22px; line-height:1; }
-@media(max-width:768px) { .app-nav{display:block;} .header-links{display:none;} }
+.src-xml { font-size:10px; color:var(--text3); background:var(--bg); border-radius:4px; padding:1px 6px; }
+.error-box { background:#fee2e2; border:1px solid #fca5a5; border-radius:12px; padding:16px; color:var(--red); font-size:14px; }
 </style>
 <link rel="stylesheet" href="/static/layout.css">
+<script src="/static/datepicker.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -124,28 +86,18 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 
 <div class="main-content">
 <div class="page-container">
-  <div class="page-header">
+  <div class="page-header-row">
     <div>
-      <div class="page-title">🛒 Kaspi заказы</div>
-      <div class="page-sub">Все заказы из Kaspi.kz</div>
+      <div class="page-title">Kaspi заказы</div>
+      <div class="page-sub">Синхронизация с Kaspi.kz</div>
     </div>
-    <a class="btn-export" id="export-btn" href="/api/kaspi/orders/export" download>
-      ⬇️ Экспорт CSV
-    </a>
+    <a class="btn btn-secondary" id="export-btn" href="/api/kaspi/orders/export" download>⬇ Экспорт CSV</a>
   </div>
 
   <div id="stats-row" class="stats-row"></div>
 
-  <div class="date-filter" id="date-filter">
-    <div class="dpill active" onclick="setPeriod('all')" data-p="all">Всё время</div>
-    <div class="dpill" onclick="setPeriod('today')" data-p="today">Сегодня</div>
-    <div class="dpill" onclick="setPeriod('week')" data-p="week">Неделя</div>
-    <div class="dpill" onclick="setPeriod('month')" data-p="month">Месяц</div>
-    <div class="dpill" onclick="setPeriod('3month')" data-p="3month">3 месяца</div>
-    <div class="dpill" onclick="setPeriod('year')" data-p="year">Год</div>
-    <div class="dpill" onclick="setPeriod('2024')" data-p="2024">2024</div>
-    <div class="dpill" onclick="setPeriod('2025')" data-p="2025">2025</div>
-    <div class="dpill" onclick="setPeriod('2026')" data-p="2026">2026</div>
+  <div style="margin-bottom:16px;">
+    <button class="ppill" id="dp-trigger" style="display:inline-flex;align-items:center;gap:6px;">📅 Последние 30 дней</button>
   </div>
 
   <div class="status-tabs" id="status-tabs">
@@ -164,7 +116,7 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
       <span class="orders-count" id="orders-count">—</span>
       <span class="orders-sum" id="orders-sum"></span>
     </div>
-    <button class="btn-refresh" onclick="loadOrders()">🔄 Обновить</button>
+    <button class="btn btn-secondary" onclick="loadOrders()">↻ Обновить</button>
   </div>
 
   <div id="orders-container">
@@ -184,43 +136,29 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 
 <script>
 let currentStatus = '';
-let currentPeriod = 'all';
+let dateFrom = null;
+let dateTo = null;
 let allOrders = [];
+let dp;
 
-function getPeriodDates(period) {
+document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   const fmt = d => d.toISOString().slice(0,10);
-  const today = fmt(now);
-  if (period === 'all') return {};
-  if (period === 'today') return { date_from: today, date_to: today };
-  if (period === 'week') {
-    const d = new Date(now); d.setDate(d.getDate() - 7);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (period === 'month') {
-    const d = new Date(now); d.setMonth(d.getMonth() - 1);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (period === '3month') {
-    const d = new Date(now); d.setMonth(d.getMonth() - 3);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (period === 'year') {
-    const d = new Date(now); d.setFullYear(d.getFullYear() - 1);
-    return { date_from: fmt(d), date_to: today };
-  }
-  // Конкретный год (2024, 2025...)
-  if (/^\d{4}$/.test(period)) {
-    return { date_from: `${period}-01-01`, date_to: `${period}-12-31` };
-  }
-  return {};
-}
+  const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
+  dateFrom = fmt(d30);
+  dateTo = fmt(now);
 
-function setPeriod(p) {
-  currentPeriod = p;
-  document.querySelectorAll('.dpill').forEach(el => el.classList.toggle('active', el.dataset.p === p));
+  dp = new DateRangePicker({
+    trigger: '#dp-trigger',
+    onApply: (from, to) => {
+      dateFrom = from;
+      dateTo = to;
+      loadOrders();
+    }
+  });
+  dp.setRange(dateFrom, dateTo);
   loadOrders();
-}
+});
 
 const STATE_LABELS = {
   NEW:'Новый', ACCEPTED:'Новый', COMPLETED:'Выполнен', CANCELLED:'Отменён',
@@ -247,9 +185,8 @@ async function loadOrders() {
   try {
     const params = new URLSearchParams({ limit: 2000 });
     if (currentStatus) params.set('state', currentStatus);
-    const dates = getPeriodDates(currentPeriod);
-    if (dates.date_from) params.set('date_from', dates.date_from);
-    if (dates.date_to) params.set('date_to', dates.date_to);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
     const url = `/api/kaspi/orders/local?${params}`;
     const data = await fetch(url).then(r => r.json());
     if (data.error) { container.innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`; return; }

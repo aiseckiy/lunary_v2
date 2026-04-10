@@ -5,93 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>История — Lunary OS</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f4f4f5; color:#111827; min-height:100vh; }
-
-header { padding:16px 24px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#f4f4f5; z-index:50; }
-.logo { font-size:20px; font-weight:800; color:#fff; }
-.logo span { color:#6366f1; }
-.header-actions { display:flex; gap:10px; }
-.btn-header { background:#6366f1; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; }
-.btn-header.outline { background:transparent; border:1px solid #e5e7eb; color:#6b7280; }
-
-.container { max-width:1200px; margin:0 auto; padding:24px; }
-
 /* Toolbar */
-.toolbar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
-.search-input { flex:1; min-width:200px; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:10px 14px; color:#111827; font-size:14px; outline:none; }
-.search-input:focus { border-color:#6366f1; }
-.filter-pill { background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:7px 14px; font-size:13px; color:#9ca3af; cursor:pointer; white-space:nowrap; user-select:none; transition:all .15s; }
-.filter-pill:hover { border-color:#9ca3af; color:#111827; }
-.filter-pill.active { background:#6366f1; border-color:#6366f1; color:#fff; }
-.count-badge { font-size:12px; color:#9ca3af; align-self:center; }
+.toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+.search-input { flex:1; min-width:200px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-size:14px; outline:none; font-family:inherit; transition:border-color .15s; }
+.search-input:focus { border-color:var(--accent); }
+.search-input::placeholder { color:var(--text3); }
+.filter-pill { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; white-space:nowrap; user-select:none; transition:all .15s; flex-shrink:0; }
+.filter-pill:hover { border-color:#d1d5db; color:var(--text); }
+.filter-pill.active { background:var(--text); border-color:var(--text); color:#fff; }
+.count-badge { font-size:12px; color:var(--text3); align-self:center; }
 
-/* Таблица */
-.table-wrap { overflow-x:auto; border-radius:12px; border:1px solid #e5e7eb; }
+/* Table */
+.table-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); background:var(--surface); }
 table { width:100%; border-collapse:collapse; font-size:14px; }
-thead tr { background:#fff; }
-th { padding:12px 16px; text-align:left; font-size:12px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; font-weight:600; border-bottom:1px solid #e5e7eb; white-space:nowrap; }
-tbody tr { border-bottom:1px solid #f0f0f2; transition:background .1s; }
+thead tr { background:var(--surface); }
+th { padding:12px 16px; text-align:left; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; border-bottom:1px solid var(--border); white-space:nowrap; }
+tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
 tbody tr:last-child { border-bottom:none; }
-tbody tr:hover { background:#fff; }
+tbody tr:hover { background:#fafafa; }
 td { padding:12px 16px; vertical-align:middle; }
 
 .type-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.type-income  { background:#22c55e1a; color:#22c55e; }
-.type-sale    { background:#ef44441a; color:#ef4444; }
-.type-writeoff{ background:#f9731620; color:#f97316; }
-.type-return  { background:#6366f11a; color:#6366f1; }
-.type-adjustment { background:#a855f71a; color:#a855f7; }
+.type-income   { background:#dcfce7; color:var(--green); }
+.type-sale     { background:#fee2e2; color:var(--red); }
+.type-writeoff { background:#ffedd5; color:var(--orange); }
+.type-return   { background:#ede9fe; color:var(--accent); }
+.type-adjustment { background:#f3f4f6; color:var(--text2); }
 
-.qty-pos { color:#22c55e; font-weight:700; }
-.qty-neg { color:#ef4444; font-weight:700; }
+.qty-pos { color:var(--green); font-weight:700; }
+.qty-neg { color:var(--red); font-weight:700; }
 
-.source-badge { font-size:11px; padding:2px 7px; border-radius:10px; background:#f3f4f6; color:#9ca3af; }
-.source-ai { background:#6366f11a; color:#6366f1; }
+.source-badge { font-size:11px; padding:2px 7px; border-radius:8px; background:var(--bg); color:var(--text3); }
+.source-ai { background:#ede9fe; color:var(--accent); }
 
-.product-link { color:#111827; text-decoration:none; }
-.product-link:hover { color:#6366f1; }
-.sku-text { font-size:11px; color:#9ca3af; font-family:monospace; display:block; margin-top:2px; }
+.product-link { color:var(--text); text-decoration:none; font-weight:500; }
+.product-link:hover { color:var(--accent); }
+.sku-text { font-size:11px; color:var(--text3); font-family:monospace; display:block; margin-top:2px; }
 
-.btn-del { background:none; border:none; color:#9ca3af; cursor:pointer; font-size:16px; padding:4px 8px; border-radius:6px; }
-.btn-del:hover { background:#ef44441a; color:#ef4444; }
+.btn-del { background:none; border:none; color:var(--text3); cursor:pointer; font-size:15px; padding:4px 8px; border-radius:6px; transition:all .15s; }
+.btn-del:hover { background:#fee2e2; color:var(--red); }
 
-.empty-state { text-align:center; padding:80px; color:#9ca3af; }
+.empty-state { text-align:center; padding:80px; color:var(--text3); }
 .empty-state .icon { font-size:48px; margin-bottom:12px; }
 
 /* Pagination */
 .pagination { display:flex; gap:8px; justify-content:center; margin-top:20px; align-items:center; }
-.page-btn { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px 14px; color:#111827; cursor:pointer; font-size:13px; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 14px; color:var(--text); cursor:pointer; font-size:13px; font-family:inherit; transition:all .15s; }
 .page-btn:hover { border-color:#9ca3af; }
-.page-btn.active { background:#6366f1; border-color:#6366f1; }
+.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 .page-btn:disabled { opacity:.4; cursor:default; }
-.page-info { color:#9ca3af; font-size:13px; align-self:center; }
-
-/* Toast */
-.toast-container { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:999; }
-.toast { background:#f3f4f6; color:#fff; padding:11px 18px; border-radius:10px; font-size:14px; font-weight:500; opacity:0; transition:opacity .3s; white-space:nowrap; }
-.toast.show { opacity:1; }
-.toast.success { background:#22c55e; }
-.toast.error { background:#ef4444; }
+.page-info { color:var(--text3); font-size:13px; }
 
 /* Date divider */
-.date-divider td { padding:8px 16px; font-size:12px; color:#9ca3af; font-weight:600; text-transform:uppercase; letter-spacing:.05em; background:#f4f4f5; }
+.date-divider td { padding:6px 16px; font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.05em; background:var(--bg); }
 
-/* Summary row */
+/* Summary */
 .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
-.sum-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 16px; }
-.sum-label { font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
-.sum-value { font-size:22px; font-weight:800; }
-
-/* Bottom nav */
-.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e5e7eb; z-index:200; }
-.nav-items { display:flex; }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#9ca3af; font-size:10px; gap:2px; }
-.nav-item.cur { color:#6366f1; }
-.nav-icon { font-size:22px; line-height:1; }
-@media(max-width:768px) { .app-nav{display:block;} body{padding-bottom:70px;} .header-actions{display:none;} }
+.sum-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; }
+.sum-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; font-weight:600; margin-bottom:6px; }
+.sum-value { font-size:22px; font-weight:800; color:var(--text); }
 </style>
 <link rel="stylesheet" href="/static/layout.css">
+<script src="/static/datepicker.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -108,20 +83,15 @@ td { padding:12px 16px; vertical-align:middle; }
 </aside>
 <div class="mobile-header"><div class="mobile-logo">Lunary <span>OS</span></div></div>
 <div class="main-content"><div class="page-container">
-  <h2 style="font-size:22px;font-weight:800;margin-bottom:16px">📋 История операций</h2>
+  <div class="page-title">История операций</div>
+  <div class="page-sub">Все движения товаров на складе</div>
 
   <!-- Сводка -->
   <div class="summary" id="summary"></div>
 
   <!-- Дата -->
   <div class="toolbar" style="margin-bottom:10px">
-    <span class="filter-pill active" data-period="today" onclick="setPeriod(this,'today')">Сегодня</span>
-    <span class="filter-pill" data-period="yesterday" onclick="setPeriod(this,'yesterday')">Вчера</span>
-    <span class="filter-pill" data-period="week" onclick="setPeriod(this,'week')">7 дней</span>
-    <span class="filter-pill" data-period="month" onclick="setPeriod(this,'month')">Месяц</span>
-    <span class="filter-pill" data-period="all" onclick="setPeriod(this,'all')">Всё время</span>
-    <input type="date" id="date-from" class="filter-pill" onchange="setCustomDate()" style="cursor:pointer;color:#111827" title="С даты">
-    <input type="date" id="date-to" class="filter-pill" onchange="setCustomDate()" style="cursor:pointer;color:#111827" title="По дату">
+    <button class="filter-pill" id="hist-dp-trigger" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;">📅 Сегодня</button>
   </div>
 
   <!-- Тип операции -->
@@ -166,20 +136,25 @@ let allItems = [];
 let filtered = [];
 let activeType = '';
 let activeSource = '';
-let activePeriod = 'today';
-let dateFrom = null;
-let dateTo = null;
+let dateFrom = new Date().toISOString().slice(0, 10); // сегодня по умолчанию
+let dateTo = new Date().toISOString().slice(0, 10);
 let page = 0;
 const PAGE_SIZE = 50;
+let histDp;
 
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-function offsetDate(days) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+document.addEventListener('DOMContentLoaded', () => {
+  histDp = new DateRangePicker({
+    trigger: '#hist-dp-trigger',
+    onApply: (from, to) => {
+      dateFrom = from;
+      dateTo = to;
+      page = 0;
+      applyFilters();
+    }
+  });
+  histDp.setRange(dateFrom, dateTo);
+  load();
+});
 
 async function load() {
   const params = new URLSearchParams({limit: 5000});
@@ -189,48 +164,12 @@ async function load() {
   applyFilters();
 }
 
-function setPeriod(el, period) {
-  activePeriod = period;
-  dateFrom = null;
-  dateTo = null;
-  document.getElementById('date-from').value = '';
-  document.getElementById('date-to').value = '';
-  document.querySelectorAll('[data-period]').forEach(e => e.classList.toggle('active', e.dataset.period === period));
-  page = 0;
-  applyFilters();
-}
-
-function setCustomDate() {
-  dateFrom = document.getElementById('date-from').value || null;
-  dateTo = document.getElementById('date-to').value || null;
-  if (dateFrom || dateTo) {
-    activePeriod = 'custom';
-    document.querySelectorAll('[data-period]').forEach(e => e.classList.remove('active'));
-  }
-  page = 0;
-  applyFilters();
-}
-
 function itemInPeriod(i) {
-  // Парсим дату из формата DD.MM.YYYY
   const [d, m, y] = i.date.split('.');
   const itemDate = `${y}-${m}-${d}`;
-
-  if (activePeriod === 'custom') {
-    if (dateFrom && itemDate < dateFrom) return false;
-    if (dateTo && itemDate > dateTo) return false;
-    return true;
-  }
-  const today = todayStr();
-  const yesterday = offsetDate(-1);
-  const weekAgo = offsetDate(-7);
-  const monthAgo = offsetDate(-30);
-
-  if (activePeriod === 'today') return itemDate === today;
-  if (activePeriod === 'yesterday') return itemDate === yesterday;
-  if (activePeriod === 'week') return itemDate >= weekAgo;
-  if (activePeriod === 'month') return itemDate >= monthAgo;
-  return true; // all
+  if (dateFrom && itemDate < dateFrom) return false;
+  if (dateTo && itemDate > dateTo) return false;
+  return true;
 }
 
 function renderSummary() {
@@ -384,7 +323,6 @@ function toast(msg, type) {
   setTimeout(() => t.className='toast', 3000);
 }
 
-load();
 </script>
 
 </div></div></div>

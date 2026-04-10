@@ -251,6 +251,33 @@ def _auto_import_if_empty():
         db.close()
 
 
+def _seed_kaspi_from_xml():
+    """
+    Первый старт на Railway: если kaspi_orders пустая — загрузить
+    исторические заказы из XML. После этого синк с API дополняет новыми.
+    """
+    import os
+    from database import KaspiOrder, SessionLocal
+    db = SessionLocal()
+    try:
+        count = db.query(KaspiOrder).count()
+        if count > 0:
+            print(f"ℹ️ kaspi_orders уже содержит {count} заказов — XML пропущен")
+            return
+        xml_path = os.path.join(os.path.dirname(__file__), 'lunary_all_orders (1).xml')
+        if not os.path.exists(xml_path):
+            print("⚠️ XML файл не найден — исторические заказы не загружены")
+            return
+        import import_xml
+        orders = import_xml.parse_orders(xml_path)
+        inserted, updated = import_xml.upsert_orders(orders)
+        print(f"✅ Исторические заказы загружены: {inserted} добавлено, {updated} обновлено")
+    except Exception as e:
+        print(f"⚠️ Ошибка загрузки исторических заказов: {e}")
+    finally:
+        db.close()
+
+
 
 
 # ─── Auth ────────────────────────────────────────────────────

@@ -6,42 +6,25 @@
 <title>Аналитика — Lunary</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:transparent; color:#111827; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:80px; }
-
-header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:transparent; z-index:50; }
-.logo { font-size:18px; font-weight:800; color:#fff; }
-.logo span { color:#6366f1; }
-.header-links { display:flex; gap:8px; }
-.hlink { background:#ffffff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 12px; font-size:13px; color:#6b7280; text-decoration:none; }
-.hlink:hover { border-color:#6366f1; color:#6366f1; }
-
-.container { max-width:1100px; margin:0 auto; padding:20px; }
-.page-title { font-size:22px; font-weight:800; margin-bottom:4px; }
-.page-sub { font-size:13px; color:#9ca3af; margin-bottom:24px; }
-
 /* KPI cards */
-.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:28px; }
-.kpi { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:18px; }
-.kpi-label { font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
-.kpi-value { font-size:26px; font-weight:800; line-height:1; }
-.kpi-value.purple { color:#6366f1; }
-.kpi-value.green { color:#22c55e; }
-.kpi-value.red { color:#ef4444; }
-.kpi-value.yellow { color:#eab308; }
-.kpi-sub { font-size:12px; color:#9ca3af; margin-top:5px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
+.kpi { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
+.kpi-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; margin-bottom:8px; }
+.kpi-value { font-size:26px; font-weight:800; line-height:1; color:var(--text); }
+.kpi-value.purple { color:var(--accent); }
+.kpi-value.green { color:var(--green); }
+.kpi-value.red { color:var(--red); }
+.kpi-value.yellow { color:var(--yellow); }
+.kpi-sub { font-size:12px; color:var(--text3); margin-top:5px; }
 
 /* Section */
-.section { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:20px; margin-bottom:20px; }
+.section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:16px; }
 .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
-.section-title { font-size:16px; font-weight:700; }
-.section-sub { font-size:12px; color:#9ca3af; margin-top:2px; }
+.section-title { font-size:15px; font-weight:700; color:var(--text); }
+.section-sub { font-size:12px; color:var(--text3); margin-top:2px; }
 .toggle-btns { display:flex; gap:4px; }
-.tbtn { background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:5px 12px; font-size:12px; color:#9ca3af; cursor:pointer; }
-.tbtn.active { background:#6366f1; border-color:#6366f1; color:#fff; }
-.dpill { background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:6px 14px; font-size:12px; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all .15s; font-weight:500; }
-.dpill:hover { background:#f3f4f6; }
-.dpill.active { background:#111827; border-color:#111827; color:#fff; }
+.tbtn { background:#f3f4f6; border:1px solid var(--border); border-radius:8px; padding:5px 12px; font-size:12px; color:var(--text2); cursor:pointer; font-family:inherit; transition:all .15s; }
+.tbtn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
 /* Chart */
 .chart-wrap { position:relative; height:240px; }
@@ -95,20 +78,9 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 .corr-mid { background:#f9731620; color:#f97316; }
 .corr-low { background:#f3f4f6; color:#9ca3af; }
 
-/* Loading */
-.loading { text-align:center; padding:40px; color:#9ca3af; }
-.spinner { display:inline-block; width:24px; height:24px; border:2px solid #f3f4f6; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg)} }
-
-/* Bottom nav */
-.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#ffffff; border-top:1px solid #e5e7eb; z-index:200; }
-.nav-items { display:flex; }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#9ca3af; font-size:10px; gap:2px; transition:color .15s; }
-.nav-item.cur { color:#6366f1; }
-.nav-icon { font-size:22px; line-height:1; }
-@media(max-width:768px) { .app-nav{display:block;} .header-links{display:none;} }
 </style>
 <link rel="stylesheet" href="/static/layout.css">
+<script src="/static/datepicker.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -128,16 +100,8 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
   <div class="page-title">📊 Аналитика</div>
   <div class="page-sub">Продажи, ABC-анализ, прогноз спроса</div>
 
-  <div class="date-filter" id="date-filter" style="display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;">
-    <div class="dpill active" onclick="setAnalyticsPeriod('all')" data-p="all">Всё время</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('today')" data-p="today">Сегодня</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('week')" data-p="week">Неделя</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('month')" data-p="month">Месяц</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('3month')" data-p="3month">3 месяца</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('year')" data-p="year">Год</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('2024')" data-p="2024">2024</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('2025')" data-p="2025">2025</div>
-    <div class="dpill" onclick="setAnalyticsPeriod('2026')" data-p="2026">2026</div>
+  <div style="margin-bottom:20px;">
+    <button class="ppill" id="an-dp-trigger" style="display:inline-flex;align-items:center;gap:6px;">📅 Всё время</button>
   </div>
 
   <!-- KPI -->
@@ -215,49 +179,29 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 <script>
 let revenueChart = null;
 let categoryChart = null;
-let analyticsPeriod = 'all';
 let revenuePeriod = 'month';
+let anDateFrom = null;
+let anDateTo = null;
+let anDp;
 
-function getPeriodDates(period) {
-  const now = new Date();
-  const fmt = d => d.toISOString().slice(0,10);
-  const today = fmt(now);
-  if (period === 'all') return {};
-  if (period === 'today') return { date_from: today, date_to: today };
-  if (period === 'week') {
-    const d = new Date(now); d.setDate(d.getDate() - 7);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (period === 'month') {
-    const d = new Date(now); d.setMonth(d.getMonth() - 1);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (period === '3month') {
-    const d = new Date(now); d.setMonth(d.getMonth() - 3);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (period === 'year') {
-    const d = new Date(now); d.setFullYear(d.getFullYear() - 1);
-    return { date_from: fmt(d), date_to: today };
-  }
-  if (/^\d{4}$/.test(period)) {
-    return { date_from: `${period}-01-01`, date_to: `${period}-12-31` };
-  }
-  return {};
-}
+document.addEventListener('DOMContentLoaded', () => {
+  anDp = new DateRangePicker({
+    trigger: '#an-dp-trigger',
+    onApply: (from, to) => {
+      anDateFrom = from;
+      anDateTo = to;
+      init();
+    }
+  });
+  init();
+});
 
 function dateParams(extra) {
-  const dates = getPeriodDates(analyticsPeriod);
-  const p = new URLSearchParams({...dates, ...extra});
+  const p = new URLSearchParams({...extra});
+  if (anDateFrom) p.set('date_from', anDateFrom);
+  if (anDateTo) p.set('date_to', anDateTo);
   return p.toString() ? '?' + p : '';
 }
-
-function setAnalyticsPeriod(p) {
-  analyticsPeriod = p;
-  document.querySelectorAll('.dpill').forEach(el => el.classList.toggle('active', el.dataset.p === p));
-  init();
-}
-let currentPeriod = 'month';
 let abcData = null;
 
 Chart.defaults.color = '#71717a';
@@ -505,7 +449,6 @@ async function loadForecast() {
   }
 }
 
-init();
 </script>
 
 </body>

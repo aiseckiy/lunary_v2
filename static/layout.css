@@ -268,6 +268,235 @@ body {
 
 .empty { text-align: center; padding: 60px; color: var(--text3); font-size: 15px; }
 
+/* ---- CUSTOM DATE RANGE PICKER (datepicker.js) ---- */
+.drp2-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  z-index: 998;
+}
+.drp2-backdrop.drp2-open { display: block; }
+
+.drp2-panel {
+  display: none;
+  position: absolute;
+  z-index: 999;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.12);
+  width: 560px;
+  max-width: calc(100vw - 24px);
+  overflow: hidden;
+}
+.drp2-panel.drp2-open { display: flex; }
+
+/* Presets sidebar */
+.drp2-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  border-right: 1px solid var(--border);
+  min-width: 160px;
+  background: var(--bg);
+}
+.drp2-preset {
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.drp2-preset:hover { background: var(--surface); color: var(--text); }
+
+/* Calendar area */
+.drp2-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.drp2-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.drp2-cal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.drp2-nav-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 30px; height: 30px;
+  font-size: 18px;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+  line-height: 1;
+  font-family: inherit;
+}
+.drp2-nav-btn:hover { background: var(--bg); border-color: #d1d5db; color: var(--text); }
+
+/* Calendar grid */
+.drp2-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.drp2-weekdays span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.drp2-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.drp2-day {
+  text-align: center;
+  padding: 7px 4px;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text);
+  transition: background .1s;
+  user-select: none;
+}
+.drp2-day:hover { background: var(--bg); }
+.drp2-day.drp2-empty { cursor: default; }
+.drp2-day.drp2-day-today { font-weight: 700; color: var(--accent); }
+.drp2-day.drp2-day-range { background: #ede9fe; color: var(--accent); border-radius: 0; }
+.drp2-day.drp2-day-start,
+.drp2-day.drp2-day-end {
+  background: var(--accent) !important;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 8px !important;
+}
+.drp2-day.drp2-day-start.drp2-day-range { border-radius: 8px 0 0 8px !important; }
+.drp2-day.drp2-day-end.drp2-day-range   { border-radius: 0 8px 8px 0 !important; }
+
+/* Footer */
+.drp2-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.drp2-range-label {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 500;
+}
+.drp2-apply {
+  background: var(--text);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+.drp2-apply:hover { background: #374151; }
+
+@media (max-width: 600px) {
+  .drp2-panel { flex-direction: column; }
+  .drp2-presets { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); }
+  .drp2-preset { padding: 6px 10px; }
+}
+
+/* ---- OLD DATE RANGE PICKER (legacy inputs) ---- */
+.date-range-picker { margin-bottom: 16px; }
+.drp-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 9px 14px;
+  flex-wrap: wrap;
+}
+.drp-field { display: flex; align-items: center; gap: 6px; }
+.drp-label { font-size: 12px; color: var(--text3); font-weight: 500; white-space: nowrap; }
+.drp-input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  background: transparent;
+  cursor: pointer;
+  min-width: 110px;
+}
+.drp-input::-webkit-calendar-picker-indicator { opacity: .4; cursor: pointer; }
+.drp-sep { font-size: 14px; color: var(--border); }
+.drp-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  font-family: inherit;
+}
+.drp-btn:hover { background: #4f46e5; }
+
+/* ---- PERIOD PILLS (date filter row) ---- */
+.period-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.period-pills::-webkit-scrollbar { display: none; }
+.ppill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.ppill:hover { background: #f3f4f6; border-color: #d1d5db; }
+.ppill.active { background: var(--text); border-color: var(--text); color: #fff; }
+
 /* Auth modal */
 #auth-overlay { background: rgba(0,0,0,.5); backdrop-filter: blur(8px); }
 #auth-overlay .modal-box { max-width: 360px; }

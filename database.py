@@ -3,20 +3,18 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
 
 import os
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./lunary.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL не задан. Добавь переменную в Railway.")
 # Railway отдаёт postgres://, SQLAlchemy требует postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-else:
-    # Попробовать psycopg2, если нет — pg8000 (чистый Python, без бинарников)
-    try:
-        import psycopg2  # noqa
-        engine = create_engine(DATABASE_URL)
-    except ImportError:
-        engine = create_engine(DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1))
+try:
+    import psycopg2  # noqa
+    engine = create_engine(DATABASE_URL)
+except ImportError:
+    engine = create_engine(DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

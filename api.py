@@ -126,7 +126,6 @@ class AISuggestRequest(BaseModel):
 def startup():
     init_db()
     _auto_import_if_empty()
-    _auto_import_kaspi_xml()
     _start_kaspi_sync_loop()
 
 
@@ -252,28 +251,6 @@ def _auto_import_if_empty():
         db.close()
 
 
-def _auto_import_kaspi_xml():
-    """Если таблица kaspi_orders пустая — импортируем из XML файла"""
-    import os
-    from database import KaspiOrder, SessionLocal
-    db = SessionLocal()
-    try:
-        count = db.query(KaspiOrder).count()
-        if count > 0:
-            print(f"ℹ️ Kaspi XML пропущен: уже {count} заказов в БД")
-            return
-        xml_path = os.path.join(os.path.dirname(__file__), 'lunary_all_orders (1).xml')
-        if not os.path.exists(xml_path):
-            print("⚠️ Kaspi XML файл не найден, пропускаем автоимпорт")
-            return
-        import import_xml
-        orders = import_xml.parse_orders(xml_path)
-        inserted, updated = import_xml.upsert_orders(orders)
-        print(f"✅ Kaspi XML автоимпорт: {inserted} вставлено, {updated} обновлено")
-    except Exception as e:
-        print(f"⚠️ Kaspi XML автоимпорт ошибка: {e}")
-    finally:
-        db.close()
 
 
 # ─── Auth ────────────────────────────────────────────────────

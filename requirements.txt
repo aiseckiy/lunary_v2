@@ -3,6 +3,7 @@ uvicorn==0.29.0
 sqlalchemy==2.0.36
 python-telegram-bot==21.6
 python-dotenv==1.0.1
-openai>=1.30.0
-requests>=2.31.0
-numpy>=1.26.0
+openai>=1.30.0,<2.0.0
+requests>=2.31.0,<3.0.0
+numpy>=1.26.0,<3.0.0
+slowapi>=0.1.9

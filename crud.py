@@ -132,23 +132,21 @@ def set_initial_stock(product_id: int, quantity: int, db: Session):
 
 # ─── Товары с низким остатком ────────────────────────────────
 def get_low_stock_products(db: Session):
-    products = get_all_products(db)
-    result = []
-    for p in products:
-        stock = get_stock(p.id, db)
-        if stock <= p.min_stock:
-            result.append((p, stock))
-    return result
+    stocks = get_all_stocks(db)
+    return [(s["product"], s["stock"]) for s in stocks if s["stock"] <= s["product"].min_stock]
 
 
-# ─── Все остатки ─────────────────────────────────────────────
+# ─── Все остатки (один запрос вместо N+1) ────────────────────
 def get_all_stocks(db: Session):
-    products = get_all_products(db)
-    result = []
-    for p in products:
-        stock = get_stock(p.id, db)
-        result.append({"product": p, "stock": stock})
-    return result
+    """Один JOIN-запрос: товары + суммарный остаток"""
+    from sqlalchemy import outerjoin
+    rows = (
+        db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
+        .outerjoin(Movement, Movement.product_id == Product.id)
+        .group_by(Product.id)
+        .all()
+    )
+    return [{"product": p, "stock": int(stock)} for p, stock in rows]
 
 
 # ─── Обновить товар ──────────────────────────────────────────

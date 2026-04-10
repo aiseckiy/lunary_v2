@@ -9,6 +9,23 @@ import os
 from database import get_db, init_db
 import crud
 import kaspi as kaspi_module
+from datetime import datetime
+
+
+def _parse_order_date(date_str) -> datetime | None:
+    """Парсит дату заказа из dd.mm.yyyy или Unix ms timestamp"""
+    if not date_str:
+        return None
+    s = str(date_str).strip()
+    try:
+        if '.' in s:
+            return datetime.strptime(s, "%d.%m.%Y")
+        ts = int(float(s))
+        if ts > 1_000_000_000_000:
+            ts //= 1000
+        return datetime.fromtimestamp(ts)
+    except Exception:
+        return None
 
 app = FastAPI(title="Lunary OS", version="1.0")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -86,20 +103,51 @@ def _start_kaspi_sync_loop():
                 added = 0
                 new_orders = []
                 for o in all_orders:
+                    # Нормализуем дату из Unix ms → dd.mm.yyyy
+                    raw_date = o.get("date", "")
+                    try:
+                        d = _parse_order_date(raw_date)
+                        order_date = d.strftime("%d.%m.%Y") if d else str(raw_date)
+                    except Exception:
+                        order_date = str(raw_date)
+
                     existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
                     if existing:
+                        # Обновляем статус и основные поля
                         existing.state = o.get("state", existing.state)
+                        existing.total = int(o.get("total", existing.total or 0))
+                        existing.customer = o.get("customer", existing.customer)
+                        existing.delivery_method = o.get("deliveryMode", existing.delivery_method)
+                        existing.payment_method = o.get("paymentMode", existing.payment_method)
+                        if o.get("deliveryAddress"):
+                            addr = o["deliveryAddress"]
+                            existing.address = addr.get("formattedAddress", existing.address) if isinstance(addr, dict) else str(addr)
                     else:
                         # Загружаем состав заказа
                         entries = kaspi_module.get_order_entries(str(o["id"]))
                         o["entries"] = entries
+                        # Берём имя товара и SKU из первого entry
+                        product_name, sku, quantity = None, None, None
+                        if entries:
+                            product_name = entries[0].get("name")
+                            sku = entries[0].get("sku") or entries[0].get("merchantProduct", {}).get("code", "") if isinstance(entries[0], dict) else None
+                            quantity = sum(e.get("qty", e.get("quantity", 1)) for e in entries if isinstance(e, dict))
+                        addr_obj = o.get("deliveryAddress")
+                        address = addr_obj.get("formattedAddress", "") if isinstance(addr_obj, dict) else str(addr_obj or "")
                         db.add(KaspiOrder(
                             order_id=str(o["id"]),
                             state=o.get("state", ""),
                             total=int(o.get("total", 0)),
                             customer=o.get("customer", ""),
                             entries=json.dumps(entries, ensure_ascii=False),
-                            order_date=str(o.get("date", ""))
+                            order_date=order_date,
+                            product_name=product_name,
+                            sku=sku,
+                            quantity=quantity,
+                            delivery_method=o.get("deliveryMode", ""),
+                            payment_method=o.get("paymentMode", ""),
+                            address=address,
+                            source="kaspi_api",
                         ))
                         added += 1
                         new_orders.append(o)
@@ -625,7 +673,9 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
 @app.get("/api/kaspi/orders/local")
 def kaspi_orders_local(
     state: Optional[str] = None,
-    limit: int = 500,
+    date_from: Optional[str] = None,  # YYYY-MM-DD
+    date_to: Optional[str] = None,    # YYYY-MM-DD
+    limit: int = 2000,
     offset: int = 0,
     db: Session = Depends(get_db)
 ):
@@ -639,14 +689,32 @@ def kaspi_orders_local(
     q = db.query(KaspiOrder)
     if state:
         if state in STATE_MAP.values():
-            # найти русские эквиваленты
             russian = [k for k, v in STATE_MAP.items() if v == state]
             q = q.filter(KaspiOrder.state.in_(russian + [state]))
         else:
             q = q.filter(KaspiOrder.state == state)
 
-    total_count = q.count()
-    orders = q.order_by(KaspiOrder.id.desc()).offset(offset).limit(limit).all()
+    # Fetch all matching orders (date filter happens in Python due to mixed date formats)
+    all_orders = q.order_by(KaspiOrder.id.desc()).all()
+
+    # Date filtering in Python
+    df_dt = datetime.strptime(date_from, "%Y-%m-%d") if date_from else None
+    dt_dt = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59) if date_to else None
+    if df_dt or dt_dt:
+        filtered = []
+        for o in all_orders:
+            d = _parse_order_date(o.order_date)
+            if d is None:
+                continue
+            if df_dt and d < df_dt:
+                continue
+            if dt_dt and d > dt_dt:
+                continue
+            filtered.append(o)
+        all_orders = filtered
+
+    total_count = len(all_orders)
+    orders = all_orders[offset: offset + limit]
 
     # Счётчики по вкладкам
     raw_counts = db.query(KaspiOrder.state, func.count(KaspiOrder.id)).group_by(KaspiOrder.state).all()
@@ -734,19 +802,46 @@ def kaspi_orders_export(state: Optional[str] = None, db: Session = Depends(get_d
     )
 
 
+def _filter_orders_by_date(rows, date_from: str | None, date_to: str | None):
+    """Фильтр строк KaspiOrder по дате (Python-side, т.к. смешанные форматы)"""
+    df = datetime.strptime(date_from, "%Y-%m-%d") if date_from else None
+    dt = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59) if date_to else None
+    if not df and not dt:
+        return rows
+    result = []
+    for r in rows:
+        d = _parse_order_date(getattr(r, "order_date", None))
+        if d is None:
+            continue
+        if df and d < df:
+            continue
+        if dt and d > dt:
+            continue
+        result.append(r)
+    return result
+
+
 @app.get("/api/analytics/overview")
-def analytics_overview(db: Session = Depends(get_db)):
+def analytics_overview(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     """Общая статистика по заказам"""
     from database import KaspiOrder
     from sqlalchemy import func
 
-    total_orders = db.query(func.count(KaspiOrder.id)).scalar()
-    total_revenue = db.query(func.sum(KaspiOrder.total)).scalar() or 0
+    all_rows = db.query(KaspiOrder).all()
+    rows = _filter_orders_by_date(all_rows, date_from, date_to)
+
+    total_orders = len(rows)
+    total_revenue = sum(r.total or 0 for r in rows)
     avg_order = int(total_revenue / total_orders) if total_orders else 0
 
-    STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
-    completed = db.query(func.count(KaspiOrder.id)).filter(KaspiOrder.state.in_(["Выдан", "ARCHIVE"])).scalar() or 0
-    cancelled = db.query(func.count(KaspiOrder.id)).filter(KaspiOrder.state.in_(["Отменен", "CANCELLED"])).scalar() or 0
+    COMPLETED_STATES = {"Выдан", "ARCHIVE"}
+    CANCELLED_STATES = {"Отменен", "CANCELLED"}
+    completed = sum(1 for r in rows if r.state in COMPLETED_STATES)
+    cancelled = sum(1 for r in rows if r.state in CANCELLED_STATES)
 
     return {
         "total_orders": total_orders,
@@ -759,30 +854,35 @@ def analytics_overview(db: Session = Depends(get_db)):
 
 
 @app.get("/api/analytics/abc")
-def analytics_abc(db: Session = Depends(get_db)):
+def analytics_abc(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     """ABC-анализ товаров по выручке"""
     from database import KaspiOrder
-    from sqlalchemy import func
+    from collections import defaultdict
 
-    rows = db.query(
-        KaspiOrder.product_name,
-        KaspiOrder.sku,
-        KaspiOrder.category,
-        func.sum(KaspiOrder.total).label("revenue"),
-        func.sum(KaspiOrder.quantity).label("qty"),
-        func.count(KaspiOrder.id).label("orders"),
-    ).filter(
-        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
-        KaspiOrder.product_name.isnot(None),
-    ).group_by(KaspiOrder.product_name, KaspiOrder.sku, KaspiOrder.category).all()
+    COMPLETED = {"Выдан", "ARCHIVE"}
+    all_rows = db.query(KaspiOrder).filter(KaspiOrder.product_name.isnot(None)).all()
+    rows = _filter_orders_by_date(
+        [r for r in all_rows if r.state in COMPLETED], date_from, date_to
+    )
 
     if not rows:
         return {"products": [], "total_revenue": 0}
 
+    agg: dict = defaultdict(lambda: {"sku": "", "category": "", "revenue": 0, "qty": 0, "orders": 0})
+    for r in rows:
+        k = r.product_name
+        agg[k]["sku"] = r.sku or ""
+        agg[k]["category"] = r.category or ""
+        agg[k]["revenue"] += r.total or 0
+        agg[k]["qty"] += r.quantity or 1
+        agg[k]["orders"] += 1
+
     items = sorted(
-        [{"name": r.product_name, "sku": r.sku or "", "category": r.category or "",
-          "revenue": int(r.revenue or 0), "qty": int(r.qty or 0), "orders": int(r.orders or 0)}
-         for r in rows],
+        [{"name": k, **v} for k, v in agg.items()],
         key=lambda x: x["revenue"], reverse=True
     )
 
@@ -798,32 +898,35 @@ def analytics_abc(db: Session = Depends(get_db)):
 
 
 @app.get("/api/analytics/revenue")
-def analytics_revenue(period: str = "month", db: Session = Depends(get_db)):
-    """Выручка по периодам (month / week)"""
+def analytics_revenue(
+    period: str = "month",
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Выручка по периодам (month / week / day)"""
     from database import KaspiOrder
-    from sqlalchemy import func
-
-    rows = db.query(
-        KaspiOrder.order_date,
-        func.sum(KaspiOrder.total).label("revenue"),
-        func.count(KaspiOrder.id).label("orders"),
-    ).filter(
-        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
-        KaspiOrder.order_date.isnot(None),
-    ).group_by(KaspiOrder.order_date).all()
-
-    from datetime import datetime
     from collections import defaultdict
+
+    COMPLETED = {"Выдан", "ARCHIVE"}
+    all_rows = db.query(KaspiOrder).filter(KaspiOrder.order_date.isnot(None)).all()
+    rows = _filter_orders_by_date(
+        [r for r in all_rows if r.state in COMPLETED], date_from, date_to
+    )
 
     by_period: dict = defaultdict(lambda: {"revenue": 0, "orders": 0})
     for r in rows:
-        try:
-            d = datetime.strptime(r.order_date, "%d.%m.%Y")
-            key = d.strftime("%Y-%m") if period == "month" else d.strftime("%Y-W%W")
-            by_period[key]["revenue"] += int(r.revenue or 0)
-            by_period[key]["orders"] += int(r.orders or 0)
-        except Exception:
+        d = _parse_order_date(r.order_date)
+        if not d:
             continue
+        if period == "day":
+            key = d.strftime("%Y-%m-%d")
+        elif period == "week":
+            key = d.strftime("%Y-W%W")
+        else:
+            key = d.strftime("%Y-%m")
+        by_period[key]["revenue"] += r.total or 0
+        by_period[key]["orders"] += 1
 
     points = sorted([
         {"period": k, "revenue": v["revenue"], "orders": v["orders"]}
@@ -834,48 +937,37 @@ def analytics_revenue(period: str = "month", db: Session = Depends(get_db)):
 
 
 @app.get("/api/analytics/forecast")
-def analytics_forecast(db: Session = Depends(get_db)):
+def analytics_forecast(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     """Прогноз спроса по топ-20 товарам (линейная регрессия по неделям)"""
     import numpy as np
     from database import KaspiOrder
-    from sqlalchemy import func
-    from datetime import datetime
     from collections import defaultdict
 
-    # Топ-20 товаров по выручке
-    top = db.query(
-        KaspiOrder.product_name,
-        func.sum(KaspiOrder.total).label("rev"),
-    ).filter(
-        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
-        KaspiOrder.product_name.isnot(None),
-    ).group_by(KaspiOrder.product_name).order_by(func.sum(KaspiOrder.total).desc()).limit(20).all()
-
-    top_names = [r.product_name for r in top]
-
-    rows = db.query(
-        KaspiOrder.product_name,
-        KaspiOrder.order_date,
-        KaspiOrder.quantity,
-    ).filter(
-        KaspiOrder.state.in_(["Выдан", "ARCHIVE"]),
-        KaspiOrder.product_name.in_(top_names),
-    ).all()
+    COMPLETED = {"Выдан", "ARCHIVE"}
+    all_rows = db.query(KaspiOrder).filter(KaspiOrder.product_name.isnot(None)).all()
+    rows = _filter_orders_by_date(
+        [r for r in all_rows if r.state in COMPLETED], date_from, date_to
+    )
 
     # Сгруппировать по товару → по неделе
     by_product: dict = defaultdict(lambda: defaultdict(int))
     for r in rows:
-        if not r.order_date:
+        d = _parse_order_date(r.order_date)
+        if not d:
             continue
-        try:
-            d = datetime.strptime(r.order_date, "%d.%m.%Y")
-            week = d.strftime("%Y-W%W")
-            by_product[r.product_name][week] += r.quantity or 1
-        except Exception:
-            continue
+        week = d.strftime("%Y-W%W")
+        by_product[r.product_name][week] += r.quantity or 1
+
+    # Топ-20 по суммарному количеству
+    top_names = sorted(by_product.keys(), key=lambda n: sum(by_product[n].values()), reverse=True)[:20]
 
     results = []
-    for name, week_data in by_product.items():
+    for name in top_names:
+        week_data = by_product[name]
         weeks = sorted(week_data.keys())
         if len(weeks) < 3:
             continue

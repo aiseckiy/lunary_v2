@@ -75,6 +75,13 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 .order-meta { font-size:11px; color:#9ca3af; }
 .order-date-time { font-size:12px; color:#9ca3af; }
 
+/* Date filter */
+.date-filter { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+.date-filter::-webkit-scrollbar { display:none; }
+.dpill { background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:6px 14px; font-size:12px; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all .15s; font-weight:500; }
+.dpill:hover { background:#f3f4f6; }
+.dpill.active { background:#111827; border-color:#111827; color:#fff; }
+
 /* Source badge */
 .src-xml { font-size:10px; color:#9ca3af; background:#f3f4f6; border-radius:4px; padding:1px 6px; }
 .src-api { font-size:10px; color:#6366f150; }
@@ -129,6 +136,18 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 
   <div id="stats-row" class="stats-row"></div>
 
+  <div class="date-filter" id="date-filter">
+    <div class="dpill active" onclick="setPeriod('all')" data-p="all">Всё время</div>
+    <div class="dpill" onclick="setPeriod('today')" data-p="today">Сегодня</div>
+    <div class="dpill" onclick="setPeriod('week')" data-p="week">Неделя</div>
+    <div class="dpill" onclick="setPeriod('month')" data-p="month">Месяц</div>
+    <div class="dpill" onclick="setPeriod('3month')" data-p="3month">3 месяца</div>
+    <div class="dpill" onclick="setPeriod('year')" data-p="year">Год</div>
+    <div class="dpill" onclick="setPeriod('2024')" data-p="2024">2024</div>
+    <div class="dpill" onclick="setPeriod('2025')" data-p="2025">2025</div>
+    <div class="dpill" onclick="setPeriod('2026')" data-p="2026">2026</div>
+  </div>
+
   <div class="status-tabs" id="status-tabs">
     <div class="stab active" onclick="setStatus('')" data-s="">📋 Все</div>
     <div class="stab" onclick="setStatus('NEW')" data-s="NEW">🟡 Новые</div>
@@ -165,7 +184,43 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
 
 <script>
 let currentStatus = '';
+let currentPeriod = 'all';
 let allOrders = [];
+
+function getPeriodDates(period) {
+  const now = new Date();
+  const fmt = d => d.toISOString().slice(0,10);
+  const today = fmt(now);
+  if (period === 'all') return {};
+  if (period === 'today') return { date_from: today, date_to: today };
+  if (period === 'week') {
+    const d = new Date(now); d.setDate(d.getDate() - 7);
+    return { date_from: fmt(d), date_to: today };
+  }
+  if (period === 'month') {
+    const d = new Date(now); d.setMonth(d.getMonth() - 1);
+    return { date_from: fmt(d), date_to: today };
+  }
+  if (period === '3month') {
+    const d = new Date(now); d.setMonth(d.getMonth() - 3);
+    return { date_from: fmt(d), date_to: today };
+  }
+  if (period === 'year') {
+    const d = new Date(now); d.setFullYear(d.getFullYear() - 1);
+    return { date_from: fmt(d), date_to: today };
+  }
+  // Конкретный год (2024, 2025...)
+  if (/^\d{4}$/.test(period)) {
+    return { date_from: `${period}-01-01`, date_to: `${period}-12-31` };
+  }
+  return {};
+}
+
+function setPeriod(p) {
+  currentPeriod = p;
+  document.querySelectorAll('.dpill').forEach(el => el.classList.toggle('active', el.dataset.p === p));
+  loadOrders();
+}
 
 const STATE_LABELS = {
   NEW:'Новый', ACCEPTED:'Новый', COMPLETED:'Выполнен', CANCELLED:'Отменён',
@@ -190,7 +245,12 @@ async function loadOrders() {
   const container = document.getElementById('orders-container');
   container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка...</div>';
   try {
-    const url = currentStatus ? `/api/kaspi/orders/local?state=${currentStatus}&limit=500` : '/api/kaspi/orders/local?limit=500';
+    const params = new URLSearchParams({ limit: 2000 });
+    if (currentStatus) params.set('state', currentStatus);
+    const dates = getPeriodDates(currentPeriod);
+    if (dates.date_from) params.set('date_from', dates.date_from);
+    if (dates.date_to) params.set('date_to', dates.date_to);
+    const url = `/api/kaspi/orders/local?${params}`;
     const data = await fetch(url).then(r => r.json());
     if (data.error) { container.innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`; return; }
 

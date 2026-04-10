@@ -161,6 +161,7 @@ td { padding:12px 16px; vertical-align:middle; }
 
 <div class="toast-container"><div class="toast" id="toast"></div></div>
 
+<script src="/static/auth.js"></script>
 <script>
 let allItems = [];
 let filtered = [];
@@ -183,7 +184,7 @@ function offsetDate(days) {
 
 async function load() {
   const params = new URLSearchParams({limit: 5000});
-  const res = await fetch('/api/history?' + params);
+  const res = await apiFetch('/api/history?' + params);
   const data = await res.json();
   allItems = data.items;
   applyFilters();
@@ -366,7 +367,7 @@ function formatDate(d) {
 
 async function deleteRow(id) {
   if (!confirm('Удалить эту запись? Остаток товара пересчитается.')) return;
-  const res = await fetch(`/api/history/${id}`, {method:'DELETE'});
+  const res = await apiFetch(`/api/history/${id}`, {method:'DELETE'});
   if (res.ok) {
     allItems = allItems.filter(i => i.id !== id);
     renderSummary();
@@ -395,5 +396,21 @@ load();
   <a class="bnav-item" href="/analytics">📊 Аналитика</a>
   <a class="bnav-item" href="/kaspi">🛒 Kaspi</a>
 </div></nav>
+
+<div class="overlay" id="auth-overlay">
+  <div class="modal-box">
+    <div class="modal-body" style="padding:24px">
+      <div class="auth-logo">Lunary <span>OS</span></div>
+      <div class="auth-desc">Система управления складом</div>
+      <div id="auth-msg"></div>
+      <div style="margin-bottom:12px">
+        <label class="form-label">Ключ доступа</label>
+        <input class="form-input" id="auth-key-input" type="password" placeholder="Введите ключ..." onkeydown="authKeyEnter(event)" autofocus>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveAdminKey()">Войти</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
@@ -10,6 +10,15 @@ from database import get_db, init_db
 import crud
 import kaspi as kaspi_module
 from datetime import datetime
+
+
+def _check_admin(x_admin_key: Optional[str] = Header(default=None)):
+    """Простая защита API через заголовок X-Admin-Key"""
+    key = os.getenv("ADMIN_KEY", "")
+    if not key:
+        return  # Если ключ не задан — пропускаем (dev режим)
+    if x_admin_key != key:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 def _parse_order_date(date_str) -> datetime | None:
@@ -92,8 +101,8 @@ def _start_kaspi_sync_loop():
 
     def sync():
         while True:
+            db = SL()
             try:
-                db = SL()
                 all_orders = []
                 for state in STATES:
                     result = kaspi_module.get_kaspi_orders(state=state, size=100)
@@ -152,7 +161,6 @@ def _start_kaspi_sync_loop():
                         added += 1
                         new_orders.append(o)
                 db.commit()
-                db.close()
 
                 notify_states = {"NEW", "PICKUP", "KASPI_DELIVERY", "DELIVERY"}
                 for o in new_orders:
@@ -163,6 +171,8 @@ def _start_kaspi_sync_loop():
                     print(f"✅ Kaspi sync: +{added} новых заказов")
             except Exception as e:
                 print(f"⚠️ Kaspi sync error: {e}")
+            finally:
+                db.close()
             time.sleep(300)  # каждые 5 минут
 
     t = threading.Thread(target=sync, daemon=True)
@@ -228,6 +238,13 @@ def _auto_import_kaspi_xml():
         db.close()
 
 
+# ─── Auth ────────────────────────────────────────────────────
+@app.get("/api/auth/check")
+def auth_check():
+    """Проверить нужна ли авторизация"""
+    return {"required": bool(os.getenv("ADMIN_KEY", ""))}
+
+
 # ─── Товары ──────────────────────────────────────────────────
 @app.get("/api/products")
 def list_products(db: Session = Depends(get_db)):
@@ -251,7 +268,7 @@ def list_products(db: Session = Depends(get_db)):
 
 
 @app.post("/api/products")
-def create_product(data: ProductCreate, db: Session = Depends(get_db)):
+def create_product(data: ProductCreate, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     from database import Product as _P
     sku = data.sku.upper()
     if db.query(_P).filter(_P.sku == sku).first():
@@ -297,7 +314,7 @@ def get_by_barcode(barcode: str, db: Session = Depends(get_db)):
 
 
 @app.delete("/api/products/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(product_id: int, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     from database import Product as _P, Movement as _M
     p = db.query(_P).filter(_P.id == product_id).first()
     if not p:
@@ -309,7 +326,7 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
 
 
 @app.put("/api/products/{product_id}")
-def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
+def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
@@ -330,7 +347,7 @@ def get_stock(product_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/products/{product_id}/movement")
-def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_db)):
+def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
@@ -423,7 +440,7 @@ def get_all_history(
 
 
 @app.delete("/api/history/{movement_id}")
-def delete_movement(movement_id: int, db: Session = Depends(get_db)):
+def delete_movement(movement_id: int, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     from database import Movement
     m = db.query(Movement).filter(Movement.id == movement_id).first()
     if not m:
@@ -464,7 +481,8 @@ def history_page():
 
 # ─── AI автозаполнение ───────────────────────────────────────
 @app.post("/api/ai/suggest")
-def ai_suggest(data: AISuggestRequest):
+def ai_suggest(data: AISuggestRequest, _auth: None = Depends(_check_admin)):
+
     """AI подсказывает категорию, бренд, единицу и артикул по названию товара"""
     import os, json
     from openai import OpenAI
@@ -519,18 +537,6 @@ def get_kaspi_states():
     return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
 
 
-@app.get("/api/kaspi/test")
-def kaspi_test(state: str = "NEW", token: Optional[str] = None):
-    """Тест прямого запроса к Kaspi API с Railway"""
-    import requests as req
-    t = token or os.getenv("KASPI_TOKEN")
-    headers = {"X-Auth-Token": t, "Content-Type": "application/vnd.api+json", "Accept": "*/*"}
-    params = {"page[number]": 0, "page[size]": 5, "filter[orders][state]": state}
-    try:
-        r = req.get("https://kaspi.kz/shop/api/v2/orders", headers=headers, params=params, timeout=20, verify=False)
-        return {"status": r.status_code, "body": r.text[:1000]}
-    except Exception as e:
-        return {"error": str(e)}
 
 
 class KaspiOrdersPayload(BaseModel):
@@ -635,7 +641,7 @@ def _format_order_notification(o: dict) -> str:
 
 
 @app.post("/api/kaspi/orders/sync")
-def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)):
+def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
     orders = payload.orders
     from database import KaspiOrder
@@ -995,26 +1001,11 @@ def analytics_forecast(
     return {"products": results}
 
 
-@app.get("/api/kaspi/debug")
-def kaspi_debug():
-    """Отладка Kaspi API — показывает сырой ответ"""
-    import requests, os
-    token = os.getenv("KASPI_TOKEN", "")
-    shop_id = os.getenv("KASPI_SHOP_ID", "")
-    if not token or not shop_id:
-        return {"error": "токены не заданы", "token_set": bool(token), "shop_id_set": bool(shop_id)}
-    url = f"https://kaspi.kz/shop/api/v2/orders/merchant/{shop_id}/"
-    try:
-        r = requests.get(url, headers={"X-Auth-Token": token, "Content-Type": "application/json"},
-                        params={"page[number]": 0, "page[size]": 5, "filter[orders][state]": "ACCEPTED"},
-                        timeout=15, verify=False)
-        return {"status_code": r.status_code, "url": url, "shop_id": shop_id, "response": r.text[:500]}
-    except Exception as e:
-        return {"error": str(e), "url": url}
 
 
 @app.post("/api/kaspi/sync-products")
-def sync_kaspi_products_endpoint():
+def sync_kaspi_products_endpoint(_auth: None = Depends(_check_admin)):
+
     """Синхронизировать товары из Kaspi в склад"""
     token = os.getenv("KASPI_TOKEN")
     shop_id = os.getenv("KASPI_SHOP_ID")
@@ -1037,7 +1028,7 @@ def analytics_page():
 
 
 @app.post("/api/import-products")
-def import_products(db: Session = Depends(get_db)):
+def import_products(db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
     """Одноразовый импорт товаров из export_products.json"""
     import json, os
     path = os.path.join(os.path.dirname(__file__), 'export_products.json')

@@ -212,6 +212,7 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
   <a class="bnav-item" href="/kaspi">🛒 Kaspi</a>
 </div></nav>
 
+<script src="/static/auth.js"></script>
 <script>
 let revenueChart = null;
 let categoryChart = null;
@@ -270,7 +271,7 @@ async function init() {
 
 async function loadKpi() {
   try {
-    const d = await fetch('/api/analytics/overview' + dateParams()).then(r => r.json());
+    const d = await apiFetch('/api/analytics/overview' + dateParams()).then(r => r.json());
     document.getElementById('kpi-grid').innerHTML = `
       <div class="kpi">
         <div class="kpi-label">Всего заказов</div>
@@ -301,7 +302,7 @@ async function loadKpi() {
 async function loadRevenue(period) {
   revenuePeriod = period;
   try {
-    const d = await fetch('/api/analytics/revenue' + dateParams({period})).then(r => r.json());
+    const d = await apiFetch('/api/analytics/revenue' + dateParams({period})).then(r => r.json());
     const points = d.points || [];
     if (!points.length) return;
 
@@ -371,7 +372,7 @@ function switchPeriod(period, el) {
 
 async function loadAbc() {
   try {
-    const d = await fetch('/api/analytics/abc' + dateParams()).then(r => r.json());
+    const d = await apiFetch('/api/analytics/abc' + dateParams()).then(r => r.json());
     abcData = d;
     const products = d.products || [];
     if (!products.length) {
@@ -459,7 +460,7 @@ function renderCategoryChart(d) {
 
 async function loadForecast() {
   try {
-    const d = await fetch('/api/analytics/forecast' + dateParams()).then(r => r.json());
+    const d = await apiFetch('/api/analytics/forecast' + dateParams()).then(r => r.json());
     const products = d.products || [];
     if (!products.length) {
       document.getElementById('forecast-grid').innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:20px">Нет данных для прогноза (нужно минимум 3 недели продаж)</div>';
@@ -507,5 +508,21 @@ async function loadForecast() {
 
 init();
 </script>
+
+<div class="overlay" id="auth-overlay">
+  <div class="modal-box">
+    <div class="modal-body" style="padding:24px">
+      <div class="auth-logo">Lunary <span>OS</span></div>
+      <div class="auth-desc">Система управления складом</div>
+      <div id="auth-msg"></div>
+      <div style="margin-bottom:12px">
+        <label class="form-label">Ключ доступа</label>
+        <input class="form-input" id="auth-key-input" type="password" placeholder="Введите ключ..." onkeydown="authKeyEnter(event)" autofocus>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveAdminKey()">Войти</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

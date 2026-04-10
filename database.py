@@ -11,7 +11,12 @@ if DATABASE_URL.startswith("postgres://"):
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    engine = create_engine(DATABASE_URL)
+    # Попробовать psycopg2, если нет — pg8000 (чистый Python, без бинарников)
+    try:
+        import psycopg2  # noqa
+        engine = create_engine(DATABASE_URL)
+    except ImportError:
+        engine = create_engine(DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

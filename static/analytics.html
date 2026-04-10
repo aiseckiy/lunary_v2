@@ -7,37 +7,37 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:80px; }
+body { background:transparent; color:#111827; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; padding-bottom:80px; }
 
-header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#0f0f13; z-index:50; }
+header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:transparent; z-index:50; }
 .logo { font-size:18px; font-weight:800; color:#fff; }
 .logo span { color:#6366f1; }
 .header-links { display:flex; gap:8px; }
-.hlink { background:#18181b; border:1px solid #27272a; border-radius:8px; padding:6px 12px; font-size:13px; color:#a1a1aa; text-decoration:none; }
+.hlink { background:#ffffff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 12px; font-size:13px; color:#6b7280; text-decoration:none; }
 .hlink:hover { border-color:#6366f1; color:#6366f1; }
 
 .container { max-width:1100px; margin:0 auto; padding:20px; }
 .page-title { font-size:22px; font-weight:800; margin-bottom:4px; }
-.page-sub { font-size:13px; color:#71717a; margin-bottom:24px; }
+.page-sub { font-size:13px; color:#9ca3af; margin-bottom:24px; }
 
 /* KPI cards */
 .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:28px; }
-.kpi { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:18px; }
-.kpi-label { font-size:11px; color:#71717a; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+.kpi { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:18px; }
+.kpi-label { font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
 .kpi-value { font-size:26px; font-weight:800; line-height:1; }
 .kpi-value.purple { color:#6366f1; }
 .kpi-value.green { color:#22c55e; }
 .kpi-value.red { color:#ef4444; }
 .kpi-value.yellow { color:#eab308; }
-.kpi-sub { font-size:12px; color:#52525b; margin-top:5px; }
+.kpi-sub { font-size:12px; color:#9ca3af; margin-top:5px; }
 
 /* Section */
-.section { background:#18181b; border:1px solid #27272a; border-radius:16px; padding:20px; margin-bottom:20px; }
+.section { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:20px; margin-bottom:20px; }
 .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
 .section-title { font-size:16px; font-weight:700; }
-.section-sub { font-size:12px; color:#71717a; margin-top:2px; }
+.section-sub { font-size:12px; color:#9ca3af; margin-top:2px; }
 .toggle-btns { display:flex; gap:4px; }
-.tbtn { background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:5px 12px; font-size:12px; color:#71717a; cursor:pointer; }
+.tbtn { background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:5px 12px; font-size:12px; color:#9ca3af; cursor:pointer; }
 .tbtn.active { background:#6366f1; border-color:#6366f1; color:#fff; }
 
 /* Chart */
@@ -52,55 +52,55 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
 .dot-c { background:#52525b; }
 
 .abc-table { width:100%; border-collapse:collapse; }
-.abc-table th { font-size:11px; color:#71717a; text-transform:uppercase; letter-spacing:.04em; padding:0 8px 10px; text-align:left; border-bottom:1px solid #27272a; }
-.abc-table td { padding:10px 8px; border-bottom:1px solid #1f1f23; font-size:13px; vertical-align:middle; }
+.abc-table th { font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:.04em; padding:0 8px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
+.abc-table td { padding:10px 8px; border-bottom:1px solid #f9fafb; font-size:13px; vertical-align:middle; }
 .abc-table tr:last-child td { border-bottom:none; }
-.abc-table tr:hover td { background:#1f1f23; }
+.abc-table tr:hover td { background:#f9fafb; }
 .abc-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:700; }
 .abc-A { background:#6366f11a; color:#6366f1; border:1px solid #6366f130; }
 .abc-B { background:#f9731620; color:#f97316; border:1px solid #f9731630; }
-.abc-C { background:#52525b30; color:#71717a; border:1px solid #52525b40; }
+.abc-C { background:#52525b30; color:#9ca3af; border:1px solid #52525b40; }
 
-.bar-bg { background:#27272a; border-radius:4px; height:6px; overflow:hidden; }
+.bar-bg { background:#f3f4f6; border-radius:4px; height:6px; overflow:hidden; }
 .bar-fill { height:100%; border-radius:4px; background:#6366f1; transition:width .3s; }
 .bar-fill.orange { background:#f97316; }
 .bar-fill.gray { background:#52525b; }
 
 /* Forecast */
 .forecast-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
-.forecast-card { background:#0f0f13; border:1px solid #27272a; border-radius:12px; padding:16px; }
+.forecast-card { background:transparent; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
 .fc-name { font-size:13px; font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fc-meta { font-size:11px; color:#71717a; margin-bottom:12px; }
+.fc-meta { font-size:11px; color:#9ca3af; margin-bottom:12px; }
 .fc-trend { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; }
 .trend-up { background:#22c55e1a; color:#22c55e; }
 .trend-down { background:#ef44441a; color:#ef4444; }
-.trend-flat { background:#27272a; color:#71717a; }
+.trend-flat { background:#f3f4f6; color:#9ca3af; }
 .fc-weeks { display:flex; gap:4px; align-items:flex-end; height:50px; margin-bottom:8px; }
 .fc-bar { flex:1; border-radius:3px 3px 0 0; min-height:3px; }
 .fc-bar.hist { background:#6366f1; }
 .fc-bar.pred { background:#6366f150; border:1px dashed #6366f1; }
 .fc-row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
-.fc-label { font-size:11px; color:#71717a; }
-.fc-val { font-size:13px; font-weight:700; color:#e4e4e7; }
+.fc-label { font-size:11px; color:#9ca3af; }
+.fc-val { font-size:13px; font-weight:700; color:#111827; }
 
 /* Correlation */
 .corr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
-.corr-card { background:#0f0f13; border:1px solid #27272a; border-radius:10px; padding:14px; }
-.corr-name { font-size:12px; color:#a1a1aa; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.corr-card { background:transparent; border:1px solid #e5e7eb; border-radius:10px; padding:14px; }
+.corr-name { font-size:12px; color:#6b7280; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .corr-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; }
 .corr-high { background:#22c55e1a; color:#22c55e; }
 .corr-mid { background:#f9731620; color:#f97316; }
-.corr-low { background:#27272a; color:#71717a; }
+.corr-low { background:#f3f4f6; color:#9ca3af; }
 
 /* Loading */
-.loading { text-align:center; padding:40px; color:#52525b; }
-.spinner { display:inline-block; width:24px; height:24px; border:2px solid #27272a; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; }
+.loading { text-align:center; padding:40px; color:#9ca3af; }
+.spinner { display:inline-block; width:24px; height:24px; border:2px solid #f3f4f6; border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; }
 @keyframes spin { to{transform:rotate(360deg)} }
 
 /* Bottom nav */
-.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#18181b; border-top:1px solid #27272a; z-index:200; }
+.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#ffffff; border-top:1px solid #e5e7eb; z-index:200; }
 .nav-items { display:flex; }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#71717a; font-size:10px; gap:2px; transition:color .15s; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#9ca3af; font-size:10px; gap:2px; transition:color .15s; }
 .nav-item.cur { color:#6366f1; }
 .nav-icon { font-size:22px; line-height:1; }
 @media(max-width:768px) { .app-nav{display:block;} .header-links{display:none;} }
@@ -152,7 +152,7 @@ header { padding:14px 20px; border-bottom:1px solid #27272a; display:flex; align
         <div class="section-title">🏷️ ABC-анализ товаров</div>
         <div class="section-sub">A — 80% выручки &nbsp;·&nbsp; B — 15% &nbsp;·&nbsp; C — 5%</div>
       </div>
-      <div id="abc-summary" style="font-size:12px;color:#71717a;text-align:right"></div>
+      <div id="abc-summary" style="font-size:12px;color:#9ca3af;text-align:right"></div>
     </div>
     <div class="abc-legend">
       <div class="abc-pill"><div class="abc-dot dot-a"></div><span>Группа A — ключевые товары</span></div>
@@ -204,7 +204,7 @@ let currentPeriod = 'month';
 let abcData = null;
 
 Chart.defaults.color = '#71717a';
-Chart.defaults.borderColor = '#27272a';
+Chart.defaults.borderColor = '#f3f4f6';
 Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
 
 async function init() {
@@ -222,7 +222,7 @@ async function loadKpi() {
       </div>
       <div class="kpi">
         <div class="kpi-label">Выручка</div>
-        <div class="kpi-value green">${(d.total_revenue/1000000).toFixed(1)}M ₸</div>
+        <div class="kpi-value green">${d.total_revenue.toLocaleString('ru')} ₸</div>
         <div class="kpi-sub">${d.total_revenue.toLocaleString('ru')} ₸</div>
       </div>
       <div class="kpi">
@@ -286,10 +286,10 @@ async function loadRevenue(period) {
         interaction: { mode: 'index', intersect: false },
         plugins: { legend: { labels: { boxWidth: 12, font: { size: 12 } } } },
         scales: {
-          x: { grid: { color: '#27272a' }, ticks: { font: { size: 11 } } },
+          x: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } },
           y: {
-            grid: { color: '#27272a' },
-            ticks: { font: { size: 11 }, callback: v => (v/1000).toFixed(0) + 'K' }
+            grid: { color: '#f3f4f6' },
+            ticks: { font: { size: 11 }, callback: v => v.toLocaleString('ru') }
           },
           y2: {
             position: 'right',
@@ -318,7 +318,7 @@ async function loadAbc() {
     abcData = d;
     const products = d.products || [];
     if (!products.length) {
-      document.getElementById('abc-container').innerHTML = '<div style="color:#52525b;font-size:13px;padding:20px">Нет данных</div>';
+      document.getElementById('abc-container').innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:20px">Нет данных</div>';
       return;
     }
 
@@ -345,15 +345,15 @@ async function loadAbc() {
             return `<tr>
               <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                 <div style="font-weight:500">${p.name}</div>
-                ${p.sku ? `<div style="font-size:11px;color:#52525b;font-family:monospace">${p.sku}</div>` : ''}
+                ${p.sku ? `<div style="font-size:11px;color:#9ca3af;font-family:monospace">${p.sku}</div>` : ''}
               </td>
-              <td style="color:#71717a;font-size:12px">${p.category||'—'}</td>
+              <td style="color:#9ca3af;font-size:12px">${p.category||'—'}</td>
               <td style="text-align:right;font-weight:700">${p.revenue.toLocaleString('ru')} ₸</td>
-              <td style="text-align:right;color:#71717a">${p.qty} шт</td>
+              <td style="text-align:right;color:#9ca3af">${p.qty} шт</td>
               <td style="min-width:100px">
                 <div style="display:flex;align-items:center;gap:8px">
                   <div class="bar-bg" style="flex:1"><div class="bar-fill${colorClass}" style="width:${(p.revenue/maxRev*100).toFixed(1)}%"></div></div>
-                  <span style="font-size:11px;color:#71717a;white-space:nowrap">${p.revenue_pct}%</span>
+                  <span style="font-size:11px;color:#9ca3af;white-space:nowrap">${p.revenue_pct}%</span>
                 </div>
               </td>
               <td><span class="abc-badge abc-${p.abc}">${p.abc}</span></td>
@@ -387,7 +387,7 @@ function renderCategoryChart(d) {
     type: 'doughnut',
     data: {
       labels,
-      datasets: [{ data: values, backgroundColor: colors, borderColor: '#18181b', borderWidth: 2 }]
+      datasets: [{ data: values, backgroundColor: colors, borderColor: '#ffffff', borderWidth: 2 }]
     },
     options: {
       responsive: true,
@@ -405,7 +405,7 @@ async function loadForecast() {
     const d = await fetch('/api/analytics/forecast').then(r => r.json());
     const products = d.products || [];
     if (!products.length) {
-      document.getElementById('forecast-grid').innerHTML = '<div style="color:#52525b;font-size:13px;padding:20px">Нет данных для прогноза (нужно минимум 3 недели продаж)</div>';
+      document.getElementById('forecast-grid').innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:20px">Нет данных для прогноза (нужно минимум 3 недели продаж)</div>';
       return;
     }
 
@@ -429,7 +429,7 @@ async function loadForecast() {
             <span class="fc-trend ${trendClass}">${trendIcon} ${trendLabel} (${p.trend > 0 ? '+' : ''}${p.trend}/нед)</span>
           </div>
           <div class="fc-weeks">${histBars}${predBars}</div>
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:#52525b;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:8px">
             <span>← история (${p.weeks.length} нед)</span>
             <span>прогноз (4 нед) →</span>
           </div>

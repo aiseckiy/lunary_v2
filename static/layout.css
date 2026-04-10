@@ -204,7 +204,7 @@ body {
 /* Pill filters */
 .pill { background: #f3f4f6; border: 1px solid transparent; border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--text2); cursor: pointer; white-space: nowrap; user-select: none; transition: all .15s; font-weight: 500; }
 .pill:hover { background: #e5e7eb; }
-.pill.active { background: var(--text); border-color: var(--text); color: #fff; }
+.pill.active { background: var(--text); border-color: var(--text); color: #fff; font-weight: 600; }
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; }
@@ -495,7 +495,7 @@ body {
   flex-shrink: 0;
 }
 .ppill:hover { background: #f3f4f6; border-color: #d1d5db; }
-.ppill.active { background: var(--text); border-color: var(--text); color: #fff; }
+.ppill.active { background: var(--text); border-color: var(--text); color: #fff; font-weight: 600; }
 
 /* Auth modal */
 #auth-overlay { background: rgba(0,0,0,.5); backdrop-filter: blur(8px); }

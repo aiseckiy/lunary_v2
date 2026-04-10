@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Вход — Lunary OS</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f4f4f6;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.06);
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 6px;
+  letter-spacing: -.5px;
+}
+.logo span { color: #6366f1; }
+
+.subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.input-wrap { position: relative; margin-bottom: 16px; }
+.input {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 11px 42px 11px 14px;
+  font-size: 15px;
+  color: #111827;
+  outline: none;
+  transition: border-color .15s, background .15s;
+  font-family: inherit;
+}
+.input:focus { border-color: #6366f1; background: #fff; }
+
+.eye-btn {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; color: #9ca3af;
+  font-size: 18px; padding: 4px;
+  line-height: 1;
+}
+
+.btn {
+  width: 100%;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  font-family: inherit;
+  margin-top: 4px;
+}
+.btn:hover { background: #374151; }
+.btn:active { background: #1f2937; }
+
+.error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+  margin-bottom: 16px;
+  display: none;
+}
+.error.show { display: block; }
+
+.footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 12px;
+  color: #d1d5db;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Lunary <span>OS</span></div>
+  <div class="subtitle">Система управления складом</div>
+
+  <div class="error" id="err">Неверный пароль</div>
+
+  <label class="label">Пароль</label>
+  <div class="input-wrap">
+    <input class="input" id="pwd" type="password" placeholder="Введите пароль..." onkeydown="onEnter(event)" autofocus>
+    <button class="eye-btn" type="button" onclick="toggleEye()" id="eye-btn">👁</button>
+  </div>
+
+  <button class="btn" id="btn" onclick="doLogin()">Войти</button>
+
+  <div class="footer">Lunary OS v2</div>
+</div>
+
+<script>
+async function doLogin() {
+  const pwd = document.getElementById('pwd').value;
+  if (!pwd) return;
+  const btn = document.getElementById('btn');
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    if (res.ok) {
+      const next = new URLSearchParams(location.search).get('next') || '/';
+      location.href = next;
+    } else {
+      document.getElementById('err').classList.add('show');
+      document.getElementById('pwd').value = '';
+      document.getElementById('pwd').focus();
+      btn.textContent = 'Войти';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Войти';
+    btn.disabled = false;
+  }
+}
+
+function onEnter(e) { if (e.key === 'Enter') doLogin(); }
+
+function toggleEye() {
+  const inp = document.getElementById('pwd');
+  const btn = document.getElementById('eye-btn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+</script>
+</body>
+</html>

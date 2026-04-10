@@ -18,19 +18,19 @@
 .search-input { flex:1; min-width:200px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:10px 14px; color:#111827; font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
 .search-input:focus { border-color:#6366f1; background:#fff; }
 .search-input::placeholder { color:#9ca3af; }
-.filter-pill { background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:6px 14px; font-size:13px; color:#6b7280; cursor:pointer; white-space:nowrap; user-select:none; transition:all .15s; flex-shrink:0; font-weight:500; }
+.filter-pill { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:7px 14px; font-size:14px; color:#6b7280; cursor:pointer; white-space:nowrap; user-select:none; transition:all .15s; flex-shrink:0; font-weight:500; }
 .filter-pill:hover { background:#f3f4f6; border-color:#d1d5db; color:#111827; }
-.filter-pill.active { background:#111827; border-color:#111827; color:#fff; font-weight:600; }
-.filter-pill.active-brand { background:#111827; border-color:#111827; color:#fff; font-weight:600; }
-.btn-add { background:#111827; color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+.filter-pill.active { background:#111827; border-color:#111827; color:#fff; font-weight:500; }
+.filter-pill.active-brand { background:#111827; border-color:#111827; color:#fff; font-weight:500; }
+.btn-add { background:#111827; color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
 .btn-add:hover { background:#374151; }
-.sort-btn { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:9px 14px; font-size:13px; color:#6b7280; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
+.sort-btn { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:9px 14px; font-size:14px; color:#6b7280; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
 .sort-btn:hover { border-color:#d1d5db; color:#111827; }
 .sort-btn:focus { outline:none; border-color:#6366f1; }
-.filter-rows { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:10px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:6px; }
+.filter-rows { margin-bottom:12px; display:flex; flex-direction:column; gap:6px; }
 .filter-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; align-items:center; }
 .filter-row::-webkit-scrollbar { display:none; }
-.filter-row-label { font-size:11px; color:#9ca3af; font-weight:600; text-transform:uppercase; letter-spacing:.04em; align-self:center; flex-shrink:0; min-width:72px; }
+.filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:72px; }
 .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
 .product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
@@ -334,7 +334,6 @@
   </div>
 </nav>
 
-<script src="/static/auth.js"></script>
 <script>
 let allProducts = [];
 let activeCat = null;
@@ -369,7 +368,7 @@ function getBrand(p) {
 }
 
 async function load() {
-  const res = await apiFetch('/api/products');
+  const res = await fetch('/api/products');
   allProducts = await res.json();
   renderStats();
   buildFilters();
@@ -549,7 +548,7 @@ function closeMoveModal(e) {
 
 async function doMove(type) {
   const qty = parseInt(document.getElementById('mm-qty').value)||1;
-  const res = await apiFetch(`/api/products/${selectedId}/movement`, {
+  const res = await fetch(`/api/products/${selectedId}/movement`, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({quantity:qty, type, source:'web'})
   });
@@ -560,7 +559,7 @@ async function doMove(type) {
 }
 
 async function quickMove(id, type) {
-  const res = await apiFetch(`/api/products/${id}/movement`, {
+  const res = await fetch(`/api/products/${id}/movement`, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({quantity:1, type, source:'web'})
   });
@@ -632,7 +631,7 @@ async function submitAdd() {
   if (!name || !sku) { toast('Заполни название и артикул', 'error'); return; }
 
   // Создать товар
-  const r1 = await apiFetch('/api/products', {
+  const r1 = await fetch('/api/products', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price})
   });
@@ -641,7 +640,7 @@ async function submitAdd() {
 
   // Установить остаток
   if (stock > 0) {
-    await apiFetch(`/api/products/${p.id}/movement`, {
+    await fetch(`/api/products/${p.id}/movement`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({quantity:stock, type:'income', source:'web', note:'initial'})
     });
@@ -678,7 +677,7 @@ function closeEditModal(e) {
 async function deleteProduct() {
   const p = allProducts.find(x => x.id === editId);
   if (!confirm(`Удалить "${p?.name}"?\n\nВся история движений тоже будет удалена.`)) return;
-  const res = await apiFetch(`/api/products/${editId}`, {method: 'DELETE'});
+  const res = await fetch(`/api/products/${editId}`, {method: 'DELETE'});
   if (res.ok) {
     closeEditModal();
     toast(`🗑 ${p?.name} удалён`, 'success');
@@ -700,7 +699,7 @@ async function submitEdit() {
 
   const brand = document.getElementById('em-brand').value.trim() || null;
   const price = parseInt(document.getElementById('em-price').value) || null;
-  const res = await apiFetch(`/api/products/${editId}`, {
+  const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price})
@@ -721,7 +720,7 @@ async function aiSuggest() {
   btn.textContent = '⏳ ...';
   btn.classList.add('loading');
   try {
-    const res = await apiFetch('/api/ai/suggest', {
+    const res = await fetch('/api/ai/suggest', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({name})
@@ -787,21 +786,6 @@ load().then(() => {
 });
 setInterval(load, 30000);
 </script>
-
-<div class="overlay" id="auth-overlay">
-  <div class="modal-box">
-    <div class="modal-body" style="padding:24px">
-      <div class="auth-logo">Lunary <span>OS</span></div>
-      <div class="auth-desc">Система управления складом</div>
-      <div id="auth-msg"></div>
-      <div style="margin-bottom:12px">
-        <label class="form-label">Ключ доступа</label>
-        <input class="form-input" id="auth-key-input" type="password" placeholder="Введите ключ..." onkeydown="authKeyEnter(event)" autofocus>
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="saveAdminKey()">Войти</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

@@ -7,3 +7,4 @@ openai>=1.30.0,<2.0.0
 requests>=2.31.0,<3.0.0
 numpy>=1.26.0,<3.0.0
 slowapi>=0.1.9
+python-multipart>=0.0.9

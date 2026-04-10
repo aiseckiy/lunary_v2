@@ -182,7 +182,6 @@ header { padding:14px 20px; border-bottom:1px solid #e5e7eb; display:flex; align
   </div>
 </nav>
 
-<script src="/static/auth.js"></script>
 <script>
 let currentStatus = '';
 let currentPeriod = 'all';
@@ -252,7 +251,7 @@ async function loadOrders() {
     if (dates.date_from) params.set('date_from', dates.date_from);
     if (dates.date_to) params.set('date_to', dates.date_to);
     const url = `/api/kaspi/orders/local?${params}`;
-    const data = await apiFetch(url).then(r => r.json());
+    const data = await fetch(url).then(r => r.json());
     if (data.error) { container.innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`; return; }
 
     // Обновить счётчики на вкладках
@@ -353,21 +352,6 @@ function formatDate(val) {
 
 loadOrders();
 </script>
-
-<div class="overlay" id="auth-overlay">
-  <div class="modal-box">
-    <div class="modal-body" style="padding:24px">
-      <div class="auth-logo">Lunary <span>OS</span></div>
-      <div class="auth-desc">Система управления складом</div>
-      <div id="auth-msg"></div>
-      <div style="margin-bottom:12px">
-        <label class="form-label">Ключ доступа</label>
-        <input class="form-input" id="auth-key-input" type="password" placeholder="Введите ключ..." onkeydown="authKeyEnter(event)" autofocus>
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="saveAdminKey()">Войти</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

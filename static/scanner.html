@@ -167,7 +167,6 @@ body { background:#f4f4f5; color:#111827; font-family:-apple-system,BlinkMacSyst
   <a class="bnav-item" href="/kaspi">🛒 Kaspi</a>
 </div></nav>
 
-<script src="/static/auth.js"></script>
 <script>
 let scanner = null;
 let currentProduct = null;
@@ -258,7 +257,7 @@ function onManualInput() {
 }
 
 async function searchProducts(q) {
-  const res = await apiFetch(`/api/products/search?q=${encodeURIComponent(q)}`);
+  const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
   const products = await res.json();
   const container = document.getElementById('search-results');
 
@@ -281,10 +280,10 @@ async function searchProducts(q) {
 }
 
 async function selectProduct(id) {
-  const res = await apiFetch(`/api/products/${id}/stock`);
+  const res = await fetch(`/api/products/${id}/stock`);
   const p = await res.json();
   // get full product data
-  const allRes = await apiFetch(`/api/products/search?q=${p.name.substring(0,10)}`);
+  const allRes = await fetch(`/api/products/search?q=${p.name.substring(0,10)}`);
   const all = await allRes.json();
   const full = all.find(x => x.id === id) || p;
   showCard({ ...full, ...p });
@@ -294,7 +293,7 @@ async function selectProduct(id) {
 
 async function loadProductByBarcode(barcode) {
   try {
-    const res = await apiFetch(`/api/products/barcode/${encodeURIComponent(barcode)}`);
+    const res = await fetch(`/api/products/barcode/${encodeURIComponent(barcode)}`);
     if (!res.ok) {
       showNotFound(barcode);
       return;
@@ -369,7 +368,7 @@ async function doMove(type) {
   const qty = parseInt(document.getElementById('qty').value) || 1;
   const labels = { sale: 'Продажа', income: 'Приход', writeoff: 'Списание', return: 'Возврат' };
 
-  const res = await apiFetch(`/api/products/${currentProduct.id}/movement`, {
+  const res = await fetch(`/api/products/${currentProduct.id}/movement`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ quantity: qty, type, source: 'scanner' })
@@ -419,21 +418,6 @@ if (!window.isSecureContext) {
   document.getElementById('https-warn').classList.add('show');
 }
 </script>
-
-<div class="overlay" id="auth-overlay">
-  <div class="modal-box">
-    <div class="modal-body" style="padding:24px">
-      <div class="auth-logo">Lunary <span>OS</span></div>
-      <div class="auth-desc">Система управления складом</div>
-      <div id="auth-msg"></div>
-      <div style="margin-bottom:12px">
-        <label class="form-label">Ключ доступа</label>
-        <input class="form-input" id="auth-key-input" type="password" placeholder="Введите ключ..." onkeydown="authKeyEnter(event)" autofocus>
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="saveAdminKey()">Войти</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

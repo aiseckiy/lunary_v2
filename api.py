@@ -12,13 +12,6 @@ import kaspi as kaspi_module
 from datetime import datetime
 
 
-def _check_admin(x_admin_key: Optional[str] = Header(default=None)):
-    """Простая защита API через заголовок X-Admin-Key"""
-    key = os.getenv("ADMIN_KEY", "")
-    if not key:
-        return  # Если ключ не задан — пропускаем (dev режим)
-    if x_admin_key != key:
-        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 def _parse_order_date(date_str) -> datetime | None:
@@ -36,11 +29,18 @@ def _parse_order_date(date_str) -> datetime | None:
     except Exception:
         return None
 
+import secrets
+from fastapi import Request, Cookie
+from fastapi.responses import JSONResponse, RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+# Сессионный токен — генерируется при старте, хранится в памяти
+_SESSION_TOKEN = secrets.token_urlsafe(32)
+
 try:
     from slowapi import Limiter, _rate_limit_exceeded_handler
     from slowapi.util import get_remote_address
     from slowapi.errors import RateLimitExceeded
-    from fastapi import Request
     limiter = Limiter(key_func=get_remote_address, default_limits=["120/minute"])
     _slowapi_ok = True
 except ImportError:
@@ -51,6 +51,30 @@ app = FastAPI(title="Lunary OS", version="1.0")
 if _slowapi_ok:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+# ─── Auth middleware ──────────────────────────────────────────
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        password = os.getenv("ADMIN_PASSWORD", "")
+        if not password:
+            return await call_next(request)  # Пароль не задан — открыто
+
+        path = request.url.path
+        # Публичные пути
+        if path in ("/login", "/api/auth/login") or path.startswith("/static/"):
+            return await call_next(request)
+
+        session = request.cookies.get("lunary_session", "")
+        if session != _SESSION_TOKEN:
+            if path.startswith("/api/"):
+                return JSONResponse({"error": "Unauthorized"}, status_code=401)
+            next_url = path
+            return RedirectResponse(f"/login?next={next_url}", status_code=302)
+
+        return await call_next(request)
+
+app.add_middleware(AuthMiddleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -253,10 +277,35 @@ def _auto_import_kaspi_xml():
 
 
 # ─── Auth ────────────────────────────────────────────────────
-@app.get("/api/auth/check")
-def auth_check():
-    """Проверить нужна ли авторизация"""
-    return {"required": bool(os.getenv("ADMIN_KEY", ""))}
+class LoginRequest(BaseModel):
+    password: str
+
+@app.get("/login", response_class=HTMLResponse)
+def login_page():
+    with open("static/login.html", encoding="utf-8") as f:
+        return f.read()
+
+@app.post("/api/auth/login")
+def auth_login(data: LoginRequest):
+    password = os.getenv("ADMIN_PASSWORD", "")
+    if not password:
+        # Пароль не задан — всегда успех
+        resp = JSONResponse({"ok": True})
+    elif data.password == password:
+        resp = JSONResponse({"ok": True})
+    else:
+        raise HTTPException(status_code=401, detail="Неверный пароль")
+    resp.set_cookie(
+        "lunary_session", _SESSION_TOKEN,
+        httponly=True, samesite="lax", max_age=60 * 60 * 24 * 30  # 30 дней
+    )
+    return resp
+
+@app.post("/api/auth/logout")
+def auth_logout():
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie("lunary_session")
+    return resp
 
 
 # ─── Товары ──────────────────────────────────────────────────
@@ -282,7 +331,7 @@ def list_products(db: Session = Depends(get_db)):
 
 
 @app.post("/api/products")
-def create_product(data: ProductCreate, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def create_product(data: ProductCreate, db: Session = Depends(get_db)):
     from database import Product as _P
     sku = data.sku.upper()
     if db.query(_P).filter(_P.sku == sku).first():
@@ -328,7 +377,7 @@ def get_by_barcode(barcode: str, db: Session = Depends(get_db)):
 
 
 @app.delete("/api/products/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def delete_product(product_id: int, db: Session = Depends(get_db)):
     from database import Product as _P, Movement as _M
     p = db.query(_P).filter(_P.id == product_id).first()
     if not p:
@@ -340,7 +389,7 @@ def delete_product(product_id: int, db: Session = Depends(get_db), _auth: None =
 
 
 @app.put("/api/products/{product_id}")
-def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
@@ -361,7 +410,7 @@ def get_stock(product_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/products/{product_id}/movement")
-def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_db)):
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
@@ -454,7 +503,7 @@ def get_all_history(
 
 
 @app.delete("/api/history/{movement_id}")
-def delete_movement(movement_id: int, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def delete_movement(movement_id: int, db: Session = Depends(get_db)):
     from database import Movement
     m = db.query(Movement).filter(Movement.id == movement_id).first()
     if not m:
@@ -495,7 +544,7 @@ def history_page():
 
 # ─── AI автозаполнение ───────────────────────────────────────
 @app.post("/api/ai/suggest")
-def ai_suggest(data: AISuggestRequest, _auth: None = Depends(_check_admin)):
+def ai_suggest(data: AISuggestRequest):
 
     """AI подсказывает категорию, бренд, единицу и артикул по названию товара"""
     import os, json
@@ -655,7 +704,7 @@ def _format_order_notification(o: dict) -> str:
 
 
 @app.post("/api/kaspi/orders/sync")
-def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)):
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
     orders = payload.orders
     from database import KaspiOrder
@@ -1018,7 +1067,7 @@ def analytics_forecast(
 
 
 @app.post("/api/kaspi/sync-products")
-def sync_kaspi_products_endpoint(_auth: None = Depends(_check_admin)):
+def sync_kaspi_products_endpoint():
 
     """Синхронизировать товары из Kaspi в склад"""
     token = os.getenv("KASPI_TOKEN")
@@ -1042,7 +1091,7 @@ def analytics_page():
 
 
 @app.post("/api/import-products")
-def import_products(db: Session = Depends(get_db), _auth: None = Depends(_check_admin)):
+def import_products(db: Session = Depends(get_db)):
     """Одноразовый импорт товаров из export_products.json"""
     import json, os
     path = os.path.join(os.path.dirname(__file__), 'export_products.json')

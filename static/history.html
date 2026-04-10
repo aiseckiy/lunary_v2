@@ -91,19 +91,23 @@ td { padding:12px 16px; vertical-align:middle; }
 .nav-icon { font-size:22px; line-height:1; }
 @media(max-width:768px) { .app-nav{display:block;} body{padding-bottom:70px;} .header-actions{display:none;} }
 </style>
+<link rel="stylesheet" href="/static/layout.css">
 </head>
 <body>
-
-<header>
-  <a href="/" style="text-decoration:none"><div class="logo">Lunary <span>OS</span></div></a>
-  <div class="header-actions">
-    <a href="/" class="btn-header outline">🏠 Склад</a>
-    <a href="/scanner" class="btn-header outline">📷 Сканер</a>
-    <a href="/kaspi" class="btn-header outline">🛒 Kaspi</a>
-  </div>
-</header>
-
-<div class="container">
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="sidebar-logo">Lunary <span>OS</span></div>
+  <div class="sidebar-section">Меню</div>
+  <a class="nav-link" href="/">🏠 Склад</a>
+  <a class="nav-link" href="/scanner">📷 Сканер</a>
+  <a class="nav-link active" href="/history">📋 История</a>
+  <a class="nav-link" href="/analytics">📊 Аналитика</a>
+  <a class="nav-link" href="/kaspi">🛒 Kaspi</a>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">Lunary OS v2</div>
+</aside>
+<div class="mobile-header"><div class="mobile-logo">Lunary <span>OS</span></div></div>
+<div class="main-content"><div class="page-container">
   <h2 style="font-size:22px;font-weight:800;margin-bottom:16px">📋 История операций</h2>
 
   <!-- Сводка -->
@@ -383,15 +387,13 @@ function toast(msg, type) {
 load();
 </script>
 
-<!-- Bottom nav -->
-<nav class="app-nav">
-  <div class="nav-items">
-    <a class="nav-item" href="/"><span class="nav-icon">🏠</span>Склад</a>
-    <a class="nav-item" href="/scanner"><span class="nav-icon">📷</span>Сканер</a>
-    <a class="nav-item cur" href="/history"><span class="nav-icon">📋</span>История</a>
-    <a class="nav-item" href="/analytics"><span class="nav-icon">📊</span>Аналитика</a>
-    <a class="nav-item" href="/kaspi"><span class="nav-icon">🛒</span>Kaspi</a>
-  </div>
-</nav>
+</div></div></div>
+<nav class="bottom-nav"><div class="bottom-nav-inner">
+  <a class="bnav-item" href="/">🏠 Склад</a>
+  <a class="bnav-item" href="/scanner">📷 Сканер</a>
+  <a class="bnav-item active" href="/history">📋 История</a>
+  <a class="bnav-item" href="/analytics">📊 Аналитика</a>
+  <a class="bnav-item" href="/kaspi">🛒 Kaspi</a>
+</div></nav>
 </body>
 </html>

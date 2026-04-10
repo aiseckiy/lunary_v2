@@ -7,21 +7,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
+body { background:#f4f4f5; color:#111827; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
 
-.header { padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid #27272a; }
+.header { padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid #e5e7eb; }
 .header h1 { font-size:17px; font-weight:700; }
-.header p { font-size:12px; color:#71717a; }
+.header p { font-size:12px; color:#9ca3af; }
 
-.tabs { display:flex; border-bottom:1px solid #27272a; }
-.tab { flex:1; padding:12px; text-align:center; font-size:14px; font-weight:500; color:#71717a; cursor:pointer; border-bottom:2px solid transparent; transition:.2s; }
+.tabs { display:flex; border-bottom:1px solid #e5e7eb; }
+.tab { flex:1; padding:12px; text-align:center; font-size:14px; font-weight:500; color:#9ca3af; cursor:pointer; border-bottom:2px solid transparent; transition:.2s; }
 .tab.active { color:#6366f1; border-bottom-color:#6366f1; }
 
 /* СКАНЕР */
 .scanner-section { padding:16px; display:none; }
 .scanner-section.active { display:block; }
 #reader { width:100%; max-width:400px; margin:0 auto 12px; border-radius:12px; overflow:hidden; }
-.scan-hint { text-align:center; color:#52525b; font-size:13px; margin-bottom:16px; }
+.scan-hint { text-align:center; color:#9ca3af; font-size:13px; margin-bottom:16px; }
 .btn-start { width:100%; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:14px; font-size:15px; font-weight:600; cursor:pointer; }
 .btn-start:active { opacity:.85; }
 
@@ -29,31 +29,31 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 .manual-section { padding:16px; display:none; }
 .manual-section.active { display:block; }
 .input-group { margin-bottom:14px; }
-.input-label { font-size:13px; color:#71717a; margin-bottom:6px; }
-.input-field { width:100%; background:#18181b; border:1px solid #27272a; border-radius:10px; padding:12px 14px; color:#e4e4e7; font-size:15px; outline:none; }
+.input-label { font-size:13px; color:#9ca3af; margin-bottom:6px; }
+.input-field { width:100%; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 14px; color:#111827; font-size:15px; outline:none; }
 .input-field:focus { border-color:#6366f1; }
 .search-results { margin-top:8px; }
-.result-item { background:#18181b; border:1px solid #27272a; border-radius:10px; padding:14px; margin-bottom:8px; cursor:pointer; }
+.result-item { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px; margin-bottom:8px; cursor:pointer; }
 .result-item:active { border-color:#6366f1; }
 .result-name { font-size:14px; font-weight:500; }
-.result-meta { font-size:12px; color:#71717a; margin-top:4px; }
+.result-meta { font-size:12px; color:#9ca3af; margin-top:4px; }
 .result-stock { font-size:20px; font-weight:700; }
 .result-stock.low { color:#ef4444; }
 .result-stock.ok { color:#22c55e; }
 
 /* КАРТОЧКА ТОВАРА */
-.product-card { background:#18181b; border:1px solid #27272a; border-radius:14px; padding:18px; margin-bottom:14px; display:none; }
+.product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:18px; margin-bottom:14px; display:none; }
 .product-card.show { display:block; }
 .product-card.low { border-color:#ef4444; }
 .p-name { font-size:16px; font-weight:600; margin-bottom:4px; }
-.p-sku { font-size:12px; color:#52525b; font-family:monospace; margin-bottom:14px; }
+.p-sku { font-size:12px; color:#9ca3af; font-family:monospace; margin-bottom:14px; }
 .p-stock-big { font-size:44px; font-weight:800; line-height:1; margin-bottom:4px; }
-.p-unit { font-size:13px; color:#71717a; margin-bottom:18px; }
+.p-unit { font-size:13px; color:#9ca3af; margin-bottom:18px; }
 
 .qty-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; width:100%; }
-.qty-label { font-size:13px; color:#71717a; white-space:nowrap; flex-shrink:0; }
-.qty-btn { width:44px; height:44px; min-width:44px; background:#27272a; border:none; border-radius:8px; color:#fff; font-size:22px; cursor:pointer; flex-shrink:0; }
-.qty-input { flex:1; min-width:0; background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px 6px; color:#fff; font-size:18px; text-align:center; outline:none; }
+.qty-label { font-size:13px; color:#9ca3af; white-space:nowrap; flex-shrink:0; }
+.qty-btn { width:44px; height:44px; min-width:44px; background:#f3f4f6; border:none; border-radius:8px; color:#fff; font-size:22px; cursor:pointer; flex-shrink:0; }
+.qty-input { flex:1; min-width:0; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:10px 6px; color:#fff; font-size:18px; text-align:center; outline:none; }
 
 .actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
 .act-btn { padding:14px 8px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
@@ -61,7 +61,7 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 .act-income { background:#22c55e1a; color:#22c55e; }
 .act-writeoff { background:#f9731620; color:#f97316; }
 .act-return { background:#6366f11a; color:#6366f1; }
-.btn-reset { width:100%; background:#27272a; color:#a1a1aa; border:none; border-radius:10px; padding:12px; font-size:14px; cursor:pointer; }
+.btn-reset { width:100%; background:#f3f4f6; color:#6b7280; border:none; border-radius:10px; padding:12px; font-size:14px; cursor:pointer; }
 
 /* Уведомление */
 .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; transition:opacity .3s; z-index:999; pointer-events:none; white-space:nowrap; }
@@ -73,9 +73,9 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 .https-warn.show { display:block; }
 
 /* Bottom nav */
-.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#18181b; border-top:1px solid #27272a; z-index:200; }
+.app-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e5e7eb; z-index:200; }
 .nav-items { display:flex; }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#71717a; font-size:10px; gap:2px; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 12px; text-decoration:none; color:#9ca3af; font-size:10px; gap:2px; }
 .nav-item.cur { color:#6366f1; }
 .nav-icon { font-size:22px; line-height:1; }
 @media(max-width:768px) { .app-nav{display:block;} body{padding-bottom:70px;} .header nav{display:none;} }
@@ -85,15 +85,15 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
 
 <div class="header">
   <div style="display:flex;align-items:center;gap:12px">
-    <a href="/" style="color:#71717a;font-size:20px;text-decoration:none;line-height:1">←</a>
+    <a href="/" style="color:#9ca3af;font-size:20px;text-decoration:none;line-height:1">←</a>
     <div>
       <h1>📷 Сканер</h1>
       <p id="status-text">Готов к работе</p>
     </div>
   </div>
   <nav style="display:flex;gap:8px">
-    <a href="/" style="background:#18181b;border:1px solid #27272a;border-radius:8px;padding:6px 12px;font-size:13px;color:#a1a1aa;text-decoration:none">🏠 Склад</a>
-    <a href="/history" style="background:#18181b;border:1px solid #27272a;border-radius:8px;padding:6px 12px;font-size:13px;color:#a1a1aa;text-decoration:none">📋 История</a>
+    <a href="/" style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:13px;color:#6b7280;text-decoration:none">🏠 Склад</a>
+    <a href="/history" style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:13px;color:#6b7280;text-decoration:none">📋 История</a>
   </nav>
 </div>
 
@@ -146,7 +146,7 @@ body { background:#0f0f13; color:#e4e4e7; font-family:-apple-system,BlinkMacSyst
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
       <button class="btn-reset" onclick="scanAgain()">📷 Сканировать ещё</button>
-      <a href="/" style="background:#27272a;color:#a1a1aa;border:none;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;text-decoration:none;text-align:center;display:block">🏠 На склад</a>
+      <a href="/" style="background:#f3f4f6;color:#6b7280;border:none;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;text-decoration:none;text-align:center;display:block">🏠 На склад</a>
     </div>
   </div>
 </div>
@@ -259,7 +259,7 @@ async function searchProducts(q) {
   const container = document.getElementById('search-results');
 
   if (!products.length) {
-    container.innerHTML = '<div style="color:#52525b;font-size:13px;padding:8px 0">Ничего не найдено</div>';
+    container.innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:8px 0">Ничего не найдено</div>';
     return;
   }
 
@@ -326,9 +326,9 @@ function showNotFound(code) {
     <div style="background:#ef44441a;border:1px solid #ef4444;border-radius:14px;padding:20px;margin-bottom:14px;text-align:center">
       <div style="font-size:28px;margin-bottom:8px">❌</div>
       <div style="font-weight:600;margin-bottom:4px">Штрихкод не найден</div>
-      <div style="font-size:13px;color:#71717a;font-family:monospace;margin-bottom:16px">${code}</div>
+      <div style="font-size:13px;color:#9ca3af;font-family:monospace;margin-bottom:16px">${code}</div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button onclick="retryCamera()" style="background:#27272a;color:#e4e4e7;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer">🔄 Сканировать снова</button>
+        <button onclick="retryCamera()" style="background:#f3f4f6;color:#111827;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer">🔄 Сканировать снова</button>
         <a href="/?open_add=1&barcode=${encodeURIComponent(code)}" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block">➕ Добавить товар</a>
       </div>
     </div>

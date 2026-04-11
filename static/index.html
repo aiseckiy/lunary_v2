@@ -49,7 +49,8 @@
 .card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight:600; }
 .badge-ok  { background:#dcfce7; color:var(--green); }
 .badge-low { background:#fee2e2; color:var(--red); }
-.card-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:12px; }
+.card-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-kaspi-sku { font-size:10px; color:#6366f1; font-family:monospace; margin-bottom:10px; opacity:.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card-bottom { display:flex; align-items:flex-end; justify-content:space-between; }
 .card-stock { font-size:28px; font-weight:800; }
 .card-stock.low { color:var(--red); }
@@ -95,7 +96,7 @@
 .tab-btns { display:flex; border-bottom:1px solid var(--border); margin-bottom:16px; }
 .tab-btn { padding:10px 16px; background:none; border:none; color:var(--text3); font-size:14px; cursor:pointer; border-bottom:2px solid transparent; font-weight:500; }
 .tab-btn.active { color:var(--text); border-bottom-color:var(--text); }
-.toast-container { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+.toast-container { position:fixed; bottom:env(safe-area-inset-bottom, 24px); bottom:calc(env(safe-area-inset-bottom, 0px) + 80px); left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .toast { background:var(--text); color:#fff; padding:11px 18px; border-radius:10px; font-size:14px; font-weight:500; opacity:0; transition:opacity .3s; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,.15); }
 .toast.show { opacity:1; }
 .toast.success { background:var(--green); }
@@ -652,7 +653,8 @@ function productCard(p) {
         <div class="card-name">${p.name}</div>
         <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️':'✓'}</span>
       </div>
-      <div class="card-sku">${p.sku}${p.kaspi_sku ? ` <span style="color:#6366f1;opacity:.7;font-size:10px">K</span>` : ''}</div>
+      <div class="card-sku">${p.sku}</div>
+      ${p.kaspi_sku ? `<div class="card-kaspi-sku">${p.kaspi_sku}</div>` : ''}
       <div class="card-bottom">
         <div>
           <div class="card-stock ${p.low?'low':'ok'}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>

@@ -27,10 +27,16 @@
 .sort-btn { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:9px 14px; font-size:13px; color:#6b7280; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
 .sort-btn:hover { border-color:#d1d5db; color:#111827; }
 .sort-btn:focus { outline:none; border-color:#6366f1; }
-.filter-rows { margin-bottom:12px; display:flex; flex-direction:column; gap:6px; width:100%; min-width:0; }
-.filter-row { display:flex; gap:8px; overflow-x:auto; overflow-y:visible; padding-bottom:4px; scrollbar-width:none; align-items:center; width:100%; min-width:0; -webkit-overflow-scrolling:touch; }
-.filter-row::-webkit-scrollbar { display:none; }
-.filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:64px; }
+.filter-rows { margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.filter-drop-btn { background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:7px 14px; font-size:13px; color:#6b7280; cursor:pointer; white-space:nowrap; font-weight:500; display:inline-flex; align-items:center; gap:5px; transition:all .15s; position:relative; }
+.filter-drop-btn:hover { border-color:#d1d5db; color:#111827; }
+.filter-drop-btn.active { background:#111827; border-color:#111827; color:#fff; }
+.fdrop-menu { display:none; position:absolute; top:calc(100% + 6px); left:0; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.1); z-index:200; min-width:180px; max-height:280px; overflow-y:auto; padding:6px; }
+.fdrop-menu.open { display:block; }
+.fdrop-item { padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; color:#374151; display:flex; justify-content:space-between; align-items:center; }
+.fdrop-item:hover { background:#f3f4f6; }
+.fdrop-item.active { background:#111827; color:#fff; font-weight:600; }
+.fdrop-cnt { font-size:11px; opacity:.6; }
 .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
 .product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
@@ -59,7 +65,7 @@
 .modal { background:#fff; border:1px solid #e5e7eb; border-radius:18px; width:420px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.12); }
 .modal-header { padding:20px 20px 0; display:flex; justify-content:space-between; align-items:center; }
 .modal-title { font-size:17px; font-weight:700; color:#111827; }
-.modal-close { background:#f3f4f6; border:none; border-radius:50%; width:30px; height:30px; color:#6b7280; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.modal-close { background:#f3f4f6; border:none; border-radius:50%; width:32px; height:32px; min-width:32px; min-height:32px; color:#6b7280; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
 .modal-close:hover { background:#e5e7eb; }
 .modal-body { padding:20px; }
 .form-group { margin-bottom:14px; }
@@ -75,7 +81,7 @@
 .move-modal .big-num.low { color:#ef4444; }
 .move-modal .big-num.ok { color:#16a34a; }
 .qty-control { display:flex; align-items:center; gap:12px; margin:16px 0; }
-.qty-control button { width:44px; height:44px; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; color:#111827; font-size:22px; cursor:pointer; }
+.qty-control button { width:44px; height:44px; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; color:#111827 !important; font-size:22px; cursor:pointer; }
 .qty-control input { flex:1; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px; color:#111827; font-size:18px; text-align:center; outline:none; font-family:inherit; }
 .move-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
 .move-btn { padding:13px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
@@ -114,9 +120,7 @@
   .search-input { width: 100% !important; font-size: 16px !important; }
   #sort-select { flex: 1 !important; font-size: 13px !important; }
   .btn-add { flex: 1 !important; font-size: 13px !important; padding: 9px 10px !important; }
-  .filter-rows { gap: 4px !important; }
-  .filter-row { padding-right: 0 !important; }
-  .filter-row-label { min-width: 58px !important; font-size: 12px !important; }
+  .filter-rows { gap: 6px !important; }
   /* Modal */
   .overlay { align-items: flex-end !important; padding: 0 !important; }
   .modal { width: 100% !important; border-radius: 20px 20px 0 0 !important; position: relative !important; max-height: 92vh !important; }
@@ -170,13 +174,21 @@
 
   <!-- Фильтры -->
   <div class="filter-rows">
-    <div class="filter-row" id="cat-row">
-      <span class="filter-row-label">Категория</span>
-      <span class="filter-pill active" id="cat-all" onclick="setCat(null)">Все</span>
+    <div style="position:relative">
+      <button class="filter-drop-btn" id="cat-btn" onclick="toggleDrop('cat')">
+        <span id="cat-label">Категория</span> <span style="font-size:10px">▼</span>
+      </button>
+      <div class="fdrop-menu" id="cat-menu">
+        <div class="fdrop-item active" id="cat-all-item" onclick="setCat(null)">Все категории</div>
+      </div>
     </div>
-    <div class="filter-row" id="brand-row">
-      <span class="filter-row-label">Бренд</span>
-      <span class="filter-pill active" id="brand-all" onclick="setBrand(null)">Все</span>
+    <div style="position:relative">
+      <button class="filter-drop-btn" id="brand-btn" onclick="toggleDrop('brand')">
+        <span id="brand-label">Бренд</span> <span style="font-size:10px">▼</span>
+      </button>
+      <div class="fdrop-menu" id="brand-menu">
+        <div class="fdrop-item active" id="brand-all-item" onclick="setBrand(null)">Все бренды</div>
+      </div>
     </div>
   </div>
 
@@ -431,73 +443,86 @@ function renderStats() {
 }
 
 function applyRestoredFilters() {
-  // Восстанавливаем визуал пилюль после buildFilters()
-  document.getElementById('cat-all').classList.toggle('active', !activeCat);
-  document.querySelectorAll('.cat-pill').forEach(el => {
-    el.classList.toggle('active', el.dataset.cat === activeCat);
-  });
-  document.getElementById('brand-all').classList.toggle('active', !activeBrand);
-  document.querySelectorAll('.brand-pill').forEach(el => {
-    el.classList.toggle('active-brand', el.dataset.brand === activeBrand);
-    if (el.dataset.brand === activeBrand) el.classList.remove('active');
-  });
+  updateCatBtn();
+  updateBrandBtn();
   document.getElementById('f-low').classList.toggle('active', showLow);
 }
 
+function toggleDrop(which) {
+  const menu = document.getElementById(which + '-menu');
+  const isOpen = menu.classList.contains('open');
+  // Закрыть все
+  document.querySelectorAll('.fdrop-menu').forEach(m => m.classList.remove('open'));
+  if (!isOpen) menu.classList.add('open');
+}
+
+// Закрывать дропдаун при клике вне
+document.addEventListener('click', e => {
+  if (!e.target.closest('.filter-drop-btn') && !e.target.closest('.fdrop-menu')) {
+    document.querySelectorAll('.fdrop-menu').forEach(m => m.classList.remove('open'));
+  }
+});
+
 function buildFilters() {
-  // Категории: считаем
+  // Категории
   const catCount = {};
-  allProducts.forEach(p => {
-    const c = p.category || 'Общее';
-    catCount[c] = (catCount[c] || 0) + 1;
-  });
-  const catRow = document.getElementById('cat-row');
-  // Удаляем старые (кроме "Все" и label)
-  [...catRow.querySelectorAll('.cat-pill')].forEach(el => el.remove());
+  allProducts.forEach(p => { const c = p.category || 'Общее'; catCount[c] = (catCount[c]||0)+1; });
+  const catMenu = document.getElementById('cat-menu');
+  [...catMenu.querySelectorAll('.cat-item')].forEach(el => el.remove());
   Object.entries(catCount).sort((a,b) => b[1]-a[1]).forEach(([cat, cnt]) => {
-    const el = document.createElement('span');
-    el.className = 'filter-pill cat-pill';
-    el.textContent = `${cat} (${cnt})`;
-    el.onclick = () => setCat(cat);
+    const el = document.createElement('div');
+    el.className = 'fdrop-item cat-item';
     el.dataset.cat = cat;
-    catRow.appendChild(el);
+    el.innerHTML = `${cat} <span class="fdrop-cnt">${cnt}</span>`;
+    el.onclick = () => setCat(cat);
+    catMenu.appendChild(el);
   });
 
-  // Бренды: считаем
+  // Бренды
   const brandCount = {};
-  allProducts.forEach(p => {
-    const b = getBrand(p);
-    brandCount[b] = (brandCount[b] || 0) + 1;
-  });
-  const brandRow = document.getElementById('brand-row');
-  [...brandRow.querySelectorAll('.brand-pill')].forEach(el => el.remove());
+  allProducts.forEach(p => { const b = getBrand(p); brandCount[b] = (brandCount[b]||0)+1; });
+  const brandMenu = document.getElementById('brand-menu');
+  [...brandMenu.querySelectorAll('.brand-item')].forEach(el => el.remove());
   Object.entries(brandCount).sort((a,b) => b[1]-a[1]).forEach(([brand, cnt]) => {
-    const el = document.createElement('span');
-    el.className = 'filter-pill brand-pill';
-    el.textContent = `${brand} (${cnt})`;
-    el.onclick = () => setBrand(brand);
+    const el = document.createElement('div');
+    el.className = 'fdrop-item brand-item';
     el.dataset.brand = brand;
-    brandRow.appendChild(el);
+    el.innerHTML = `${brand} <span class="fdrop-cnt">${cnt}</span>`;
+    el.onclick = () => setBrand(brand);
+    brandMenu.appendChild(el);
   });
+}
+
+function updateCatBtn() {
+  const btn = document.getElementById('cat-btn');
+  const label = document.getElementById('cat-label');
+  btn.classList.toggle('active', !!activeCat);
+  label.textContent = activeCat || 'Категория';
+  document.getElementById('cat-all-item').classList.toggle('active', !activeCat);
+  document.querySelectorAll('.cat-item').forEach(el => el.classList.toggle('active', el.dataset.cat === activeCat));
+}
+
+function updateBrandBtn() {
+  const btn = document.getElementById('brand-btn');
+  const label = document.getElementById('brand-label');
+  btn.classList.toggle('active', !!activeBrand);
+  label.textContent = activeBrand || 'Бренд';
+  document.getElementById('brand-all-item').classList.toggle('active', !activeBrand);
+  document.querySelectorAll('.brand-item').forEach(el => el.classList.toggle('active', el.dataset.brand === activeBrand));
 }
 
 function setCat(cat) {
   activeCat = cat;
-  document.getElementById('cat-all').classList.toggle('active', !cat);
-  document.querySelectorAll('.cat-pill').forEach(el => {
-    el.classList.toggle('active', el.dataset.cat === cat);
-  });
+  document.querySelectorAll('.fdrop-menu').forEach(m => m.classList.remove('open'));
+  updateCatBtn();
   saveFilters();
   render();
 }
 
 function setBrand(brand) {
   activeBrand = brand;
-  document.getElementById('brand-all').classList.toggle('active', !brand);
-  document.querySelectorAll('.brand-pill').forEach(el => {
-    el.classList.toggle('active-brand', el.dataset.brand === brand);
-    el.classList.remove('active');
-  });
+  document.querySelectorAll('.fdrop-menu').forEach(m => m.classList.remove('open'));
+  updateBrandBtn();
   saveFilters();
   render();
 }
@@ -557,7 +582,7 @@ function productCard(p) {
           <div class="card-stock ${p.low?'low':'ok'}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>
           ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${p.cost_price && p.price > p.cost_price ? ` <span style="color:#10b981;font-size:11px;font-weight:500">+${Math.round((p.price-p.cost_price)/p.price*100)}%</span>` : ''}</div>` : ''}
         </div>
-        <button class="card-btn" onclick="event.stopPropagation();openEditModal(${p.id})" title="Редактировать" style="opacity:0.4">✏️</button>
+        <button class="card-btn" onclick="event.stopPropagation();openEditModal(${p.id})" title="Редактировать">✏️</button>
       </div>
       <div class="card-tags">
         ${p.category ? `<span class="card-tag">${p.category}</span>` : ''}
@@ -815,6 +840,7 @@ function startEditBarcodeScanner() {
     {fps: 10, qrbox: {width: 250, height: 120}},
     (code) => {
       document.getElementById('em-barcode').value = code;
+      beep();
       editBarcodeScanner.stop().then(() => {
         editBarcodeScanner = null;
         wrap.style.display = 'none';
@@ -823,6 +849,20 @@ function startEditBarcodeScanner() {
     },
     () => {}
   ).catch(() => { wrap.style.display = 'none'; wrap.innerHTML = ''; });
+}
+
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 1800;
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
 }
 
 // ── Toast ───────────────────────────────────────────────

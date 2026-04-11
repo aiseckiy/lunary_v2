@@ -179,7 +179,7 @@ body {
   .main-content { margin-left: 0 !important; }
   .mobile-header { display: flex !important; }
   .bottom-nav { display: none !important; }
-  .page-container { padding: 16px 16px 32px !important; }
+  .page-container { padding: 12px 12px 32px !important; }
   /* Bottom sheet modals */
   .modal-box {
     width: 100% !important;

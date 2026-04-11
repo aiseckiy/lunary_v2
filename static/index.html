@@ -31,7 +31,7 @@
 .filter-row { display:flex; gap:8px; overflow-x:auto; overflow-y:visible; padding-bottom:4px; scrollbar-width:none; align-items:center; width:100%; min-width:0; -webkit-overflow-scrolling:touch; }
 .filter-row::-webkit-scrollbar { display:none; }
 .filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:64px; }
-.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr)); gap:14px; width:100%; min-width:0; box-sizing:border-box; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
 .product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }
@@ -98,23 +98,26 @@
 .btn-ai:hover { background:#ddd6fe; }
 .btn-ai.loading { opacity:.6; pointer-events:none; }
 @media (max-width: 768px) {
-  .products-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .card-stock { font-size: 22px !important; }
-  .card-name { font-size: 13px !important; }
+  /* Grid */
+  .products-grid { display: grid !important; grid-template-columns: calc(50% - 5px) calc(50% - 5px) !important; gap: 10px !important; width: 100% !important; }
+  .card-stock { font-size: 20px !important; }
+  .card-name { font-size: 12px !important; }
   .card-bottom { flex-wrap: wrap; gap: 4px; }
-  .stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .stat { padding: 14px !important; }
-  .stat-value { font-size: 24px !important; }
-  /* Toolbar на мобиле: 2 строки */
-  .toolbar { display: grid !important; grid-template-columns: 1fr auto !important; gap: 8px !important; }
-  .search-input { grid-column: 1 / -1 !important; font-size: 16px !important; }
-  #sort-select { font-size: 13px !important; }
-  #f-low { order: 3; }
-  .btn-add { order: 2; padding: 9px 12px !important; font-size: 13px !important; }
-  .toolbar > a { order: 4; }
+  .card-tags { gap: 4px !important; }
+  .card-tag { font-size: 10px !important; padding: 2px 6px !important; }
+  /* Stats */
+  .stats { grid-template-columns: calc(50% - 5px) calc(50% - 5px) !important; gap: 10px !important; }
+  .stat { padding: 12px !important; }
+  .stat-value { font-size: 22px !important; }
+  /* Toolbar */
+  .toolbar { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+  .search-input { width: 100% !important; font-size: 16px !important; }
+  #sort-select { flex: 1 !important; font-size: 13px !important; }
+  .btn-add { flex: 1 !important; font-size: 13px !important; padding: 9px 10px !important; }
   .filter-rows { gap: 4px !important; }
-  .filter-row-label { min-width: 60px !important; font-size: 12px !important; }
-  /* Modal bottom sheet */
+  .filter-row { padding-right: 0 !important; }
+  .filter-row-label { min-width: 58px !important; font-size: 12px !important; }
+  /* Modal */
   .overlay { align-items: flex-end !important; padding: 0 !important; }
   .modal { width: 100% !important; border-radius: 20px 20px 0 0 !important; position: relative !important; max-height: 92vh !important; }
   .form-input { font-size: 16px !important; }

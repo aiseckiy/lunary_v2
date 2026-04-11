@@ -224,9 +224,9 @@
     btn.innerHTML = `<div class="burger-icon"><span></span><span></span><span></span></div>`;
     btn.addEventListener('click', openDrawer);
 
-    // Добавляем в группу кнопок (второй flex-item), а не в сам хедер
-    const group = header.querySelector('div[style*="flex"]') || header.querySelector('div:last-child');
-    if (group) {
+    // Добавляем в группу кнопок справа
+    const group = header.querySelector('.mobile-header-actions') || header.querySelector('div[style*="gap:8px"]') || header.querySelector('div:last-child');
+    if (group && group !== header.querySelector('.mobile-logo')?.parentElement) {
       group.appendChild(btn);
     } else {
       header.appendChild(btn);

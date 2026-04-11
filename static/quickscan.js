@@ -44,6 +44,7 @@ window.openQuickScan = function() {
   document.getElementById('qs-assign-box').style.display = 'none';
   document.getElementById('qs-results').innerHTML = '';
   qsSwitchTab('cam');
+  if (window.isSecureContext) setTimeout(() => qsStartCamera(), 100);
 };
 
 window.closeQuickScan = function() {

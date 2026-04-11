@@ -14,7 +14,7 @@
 .stat-value.red { color:#ef4444; }
 .stat-value.green { color:#16a34a; }
 .stat-value.purple { color:#6366f1; }
-.toolbar { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+.toolbar { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; align-items:center; width:100%; min-width:0; }
 .search-input { flex:1; min-width:200px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:10px 14px; color:#111827; font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
 .search-input:focus { border-color:#6366f1; background:#fff; }
 .search-input::placeholder { color:#9ca3af; }
@@ -27,11 +27,11 @@
 .sort-btn { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:9px 14px; font-size:13px; color:#6b7280; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
 .sort-btn:hover { border-color:#d1d5db; color:#111827; }
 .sort-btn:focus { outline:none; border-color:#6366f1; }
-.filter-rows { margin-bottom:12px; display:flex; flex-direction:column; gap:6px; }
-.filter-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; align-items:center; }
+.filter-rows { margin-bottom:12px; display:flex; flex-direction:column; gap:6px; width:100%; min-width:0; }
+.filter-row { display:flex; gap:8px; overflow-x:auto; overflow-y:visible; padding-bottom:4px; scrollbar-width:none; align-items:center; width:100%; min-width:0; -webkit-overflow-scrolling:touch; }
 .filter-row::-webkit-scrollbar { display:none; }
-.filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:72px; }
-.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+.filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:64px; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; width:100%; min-width:0; }
 .product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }

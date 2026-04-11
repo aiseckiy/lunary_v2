@@ -238,7 +238,7 @@ def _auto_import_if_empty():
         count = db.query(_P).count()
         if count > 0:
             return
-        path = os.path.join(os.path.dirname(__file__), 'export_products.json')
+        path = os.path.join(os.path.dirname(__file__), '_archive', 'export_products.json')
         if not os.path.exists(path):
             return
         with open(path, encoding='utf-8') as f:
@@ -281,6 +281,8 @@ def _seed_kaspi_from_xml():
         if not os.path.exists(xml_path):
             print("⚠️ XML файл не найден — исторические заказы не загружены")
             return
+        import sys as _sys
+        _sys.path.insert(0, os.path.join(os.path.dirname(__file__), '_archive'))
         import import_xml
         orders = import_xml.parse_orders(xml_path)
         inserted, updated = import_xml.upsert_orders(orders)
@@ -1352,7 +1354,7 @@ def scanner_redirect():
 def import_products(db: Session = Depends(get_db)):
     """Одноразовый импорт товаров из export_products.json"""
     import json, os
-    path = os.path.join(os.path.dirname(__file__), 'export_products.json')
+    path = os.path.join(os.path.dirname(__file__), '_archive', 'export_products.json')
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="export_products.json не найден")
     with open(path, encoding='utf-8') as f:

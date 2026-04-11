@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUNARY — Строительные материалы</title>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --accent: #6366f1;
+  --accent-dark: #4f46e5;
+  --bg: #f8f8fb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text2: #6b7280;
+  --text3: #9ca3af;
+  --green: #16a34a;
+  --red: #ef4444;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.store-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.header-tagline {
+  font-size: 13px;
+  color: var(--text3);
+  flex: 1;
+}
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  width: 280px;
+}
+.header-search input {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+}
+.header-search input::placeholder { color: var(--text3); }
+.header-search svg { flex-shrink: 0; color: var(--text3); }
+
+/* ── MAIN LAYOUT ── */
+.store-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* ── SIDEBAR FILTERS ── */
+.store-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 84px;
+}
+.filter-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+.filter-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text2);
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+}
+.category-item:hover { background: #f3f4f6; color: var(--text); }
+.category-item.active { background: #ede9fe; color: var(--accent); font-weight: 600; }
+.category-count {
+  font-size: 12px;
+  color: var(--text3);
+  background: #f3f4f6;
+  border-radius: 20px;
+  padding: 1px 7px;
+}
+.category-item.active .category-count { background: #ddd6fe; color: var(--accent); }
+
+.filter-divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+.brand-list { display: flex; flex-direction: column; gap: 4px; }
+.brand-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: background 0.15s;
+}
+.brand-check:hover { background: #f3f4f6; }
+.brand-check input { accent-color: var(--accent); }
+
+/* ── PRODUCTS AREA ── */
+.store-content { flex: 1; min-width: 0; }
+
+.store-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.results-count {
+  font-size: 14px;
+  color: var(--text2);
+}
+.results-count strong { color: var(--text); }
+
+.sort-select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  cursor: default;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.product-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #f3f4f6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+
+.product-brand {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.product-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-sku {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: monospace;
+}
+.product-bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.product-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.product-price .currency {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+}
+.product-stock {
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.stock-in {
+  background: #dcfce7;
+  color: #166534;
+}
+.stock-out {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.product-category-tag {
+  font-size: 11px;
+  color: var(--text3);
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 2px 8px;
+  align-self: flex-start;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text2);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .store-sidebar { display: none; }
+  .header-tagline { display: none; }
+  .header-search { width: auto; flex: 1; }
+  .store-layout { padding: 16px; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .product-card { padding: 14px; }
+  .product-image { font-size: 36px; }
+  .product-price { font-size: 15px; }
+
+  /* Mobile filter pills */
+  .mobile-filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 16px 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-filters::-webkit-scrollbar { display: none; }
+  .mobile-pill {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .mobile-pill.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-filters { display: none; }
+}
+
+/* ── SKELETON ── */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 10px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<header class="store-header">
+  <div class="header-inner">
+    <a class="header-logo" href="/">LUNARY</a>
+    <span class="header-tagline">Строительные материалы и инструменты</span>
+    <div class="header-search">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Поиск товаров...">
+    </div>
+  </div>
+</header>
+
+<!-- Mobile category pills -->
+<div class="mobile-filters" id="mobile-cats"></div>
+
+<div class="store-layout">
+  <!-- Sidebar -->
+  <aside class="store-sidebar">
+    <div class="filter-card">
+      <div class="filter-title">Категории</div>
+      <div id="cat-list"></div>
+      <div class="filter-divider"></div>
+      <div class="filter-title">Бренды</div>
+      <div class="brand-list" id="brand-list"></div>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="store-content">
+    <div class="store-toolbar">
+      <div class="results-count" id="results-count">Загрузка...</div>
+      <select class="sort-select" id="sort-select" onchange="render()">
+        <option value="name">По названию</option>
+        <option value="price_asc">Сначала дешевле</option>
+        <option value="price_desc">Сначала дороже</option>
+        <option value="stock">По наличию</option>
+      </select>
+    </div>
+    <div class="product-grid" id="grid"></div>
+  </main>
+</div>
+
+<script>
+let allProducts = [];
+let activeCategory = 'all';
+let activeBrands = new Set();
+let searchQuery = '';
+
+async function load() {
+  const res = await fetch('/api/store/products');
+  allProducts = await res.json();
+  buildFilters();
+  render();
+}
+
+function buildFilters() {
+  // Categories
+  const cats = {};
+  allProducts.forEach(p => {
+    const c = p.category || 'Другое';
+    cats[c] = (cats[c] || 0) + 1;
+  });
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+
+  const catList = document.getElementById('cat-list');
+  const mobileCats = document.getElementById('mobile-cats');
+
+  // "All" item
+  catList.innerHTML = `<div class="category-item active" data-cat="all" onclick="setCategory('all')">
+    Все товары <span class="category-count">${allProducts.length}</span>
+  </div>`;
+  mobileCats.innerHTML = `<div class="mobile-pill active" data-cat="all" onclick="setCategory('all')">Все</div>`;
+
+  sorted.forEach(([name, count]) => {
+    catList.innerHTML += `<div class="category-item" data-cat="${name}" onclick="setCategory('${name}')">
+      ${name} <span class="category-count">${count}</span>
+    </div>`;
+    mobileCats.innerHTML += `<div class="mobile-pill" data-cat="${name}" onclick="setCategory('${name}')">${name}</div>`;
+  });
+
+  // Brands
+  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))].sort();
+  const brandList = document.getElementById('brand-list');
+  brandList.innerHTML = brands.map(b => `
+    <label class="brand-check">
+      <input type="checkbox" value="${b}" onchange="toggleBrand('${b}', this.checked)">
+      ${b}
+    </label>
+  `).join('');
+}
+
+function setCategory(cat) {
+  activeCategory = cat;
+  document.querySelectorAll('[data-cat]').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  render();
+}
+
+function toggleBrand(brand, checked) {
+  if (checked) activeBrands.add(brand);
+  else activeBrands.delete(brand);
+  render();
+}
+
+function filtered() {
+  let list = allProducts;
+  if (activeCategory !== 'all') list = list.filter(p => (p.category || 'Другое') === activeCategory);
+  if (activeBrands.size) list = list.filter(p => activeBrands.has(p.brand));
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (p.brand || '').toLowerCase().includes(q) ||
+      (p.sku || '').toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
+function sorted(list) {
+  const s = document.getElementById('sort-select').value;
+  if (s === 'price_asc') return [...list].sort((a,b) => (a.price||0) - (b.price||0));
+  if (s === 'price_desc') return [...list].sort((a,b) => (b.price||0) - (a.price||0));
+  if (s === 'stock') return [...list].sort((a,b) => b.stock - a.stock);
+  return [...list].sort((a,b) => a.name.localeCompare(b.name, 'ru'));
+}
+
+function categoryEmoji(cat) {
+  const map = {
+    'Инструменты': '🔧', 'Лопаты': '🪣', 'Пена': '🧴', 'Герметик': '🧴',
+    'Краски': '🎨', 'Шпатели': '🔨', 'Топоры': '🪓', 'Пилы': '🪚',
+    'Клей': '🧲', 'Дюбели': '🔩', 'Сверла': '🔩', 'Уровни': '📏',
+    'Рулетки': '📏', 'Электроинструмент': '⚡', 'Расходники': '📦',
+  };
+  for (const [k, v] of Object.entries(map)) {
+    if (cat && cat.toLowerCase().includes(k.toLowerCase())) return v;
+  }
+  return '📦';
+}
+
+function render() {
+  const list = sorted(filtered());
+  const grid = document.getElementById('grid');
+  const count = document.getElementById('results-count');
+
+  count.innerHTML = `Найдено: <strong>${list.length}</strong> товаров`;
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">🔍</div>
+      <h3>Ничего не найдено</h3>
+      <p>Попробуйте изменить фильтры или поисковый запрос</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const inStock = p.stock > 0;
+    const priceHtml = p.price
+      ? `<div class="product-price">${p.price.toLocaleString('ru')}<span class="currency"> ₸</span></div>`
+      : `<div class="product-price" style="color:var(--text3);font-size:14px">Цена по запросу</div>`;
+    return `
+    <div class="product-card">
+      <div class="product-image">${categoryEmoji(p.category)}</div>
+      ${p.brand ? `<div class="product-brand">${p.brand}</div>` : ''}
+      <div class="product-name">${p.name}</div>
+      <div class="product-sku">${p.sku}</div>
+      <div class="product-bottom">
+        ${priceHtml}
+        <span class="product-stock ${inStock ? 'stock-in' : 'stock-out'}">${inStock ? 'В наличии' : 'Нет'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Search debounce
+let searchTimer;
+document.getElementById('search-input').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { searchQuery = e.target.value.trim(); render(); }, 250);
+});
+
+load();
+</script>
+</body>
+</html>

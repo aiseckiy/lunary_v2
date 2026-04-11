@@ -145,7 +145,7 @@ async function doLogin() {
       body: JSON.stringify({ password: pwd })
     });
     if (res.ok) {
-      const next = new URLSearchParams(location.search).get('next') || '/';
+      const next = new URLSearchParams(location.search).get('next') || '/admin';
       location.href = next;
     } else {
       document.getElementById('err').classList.add('show');

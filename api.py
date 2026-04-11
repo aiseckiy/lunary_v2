@@ -54,6 +54,9 @@ if _slowapi_ok:
 
 
 # ─── Auth middleware ──────────────────────────────────────────
+_PUBLIC_PATHS = {"/", "/login", "/api/auth/login", "/api/auth/logout"}
+_PUBLIC_PREFIXES = ("/static/", "/api/store/")
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         password = os.getenv("ADMIN_PASSWORD", "")
@@ -61,8 +64,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)  # Пароль не задан — открыто
 
         path = request.url.path
-        # Публичные пути
-        if path in ("/login", "/api/auth/login") or path.startswith("/static/"):
+        # Публичные пути — магазин и статика
+        if path in _PUBLIC_PATHS or any(path.startswith(p) for p in _PUBLIC_PREFIXES):
             return await call_next(request)
 
         session = request.cookies.get("lunary_session", "")
@@ -533,20 +536,54 @@ def low_stock(db: Session = Depends(get_db)):
     ]
 
 
-# ─── Дашборд ─────────────────────────────────────────────────
+# ─── Публичный магазин ───────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
+def store_page():
+    with open("static/store.html") as f:
+        return f.read()
+
+
+# ─── Публичный API магазина ───────────────────────────────────
+@app.get("/api/store/products")
+def store_products(db: Session = Depends(get_db)):
+    """Публичный список товаров для магазина (только с ценой и в наличии)"""
+    from database import Product as _P, Movement as _M
+    from sqlalchemy import func
+    stocks = (
+        db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
+        .outerjoin(_M, _M.product_id == _P.id)
+        .group_by(_P.id)
+        .all()
+    )
+    return [
+        {
+            "id": s[0].id,
+            "name": s[0].name,
+            "sku": s[0].sku,
+            "category": s[0].category or "Другое",
+            "brand": s[0].brand or "",
+            "price": s[0].price,
+            "unit": s[0].unit or "шт",
+            "stock": int(s[1]),
+        }
+        for s in stocks
+    ]
+
+
+# ─── Панель управления (только для авторизованных) ───────────
+@app.get("/admin", response_class=HTMLResponse)
 def dashboard():
     with open("static/index.html") as f:
         return f.read()
 
 
-@app.get("/scanner", response_class=HTMLResponse)
+@app.get("/admin/scanner", response_class=HTMLResponse)
 def scanner():
     with open("static/scanner.html") as f:
         return f.read()
 
 
-@app.get("/history", response_class=HTMLResponse)
+@app.get("/admin/history", response_class=HTMLResponse)
 def history_page():
     with open("static/history.html") as f:
         return f.read()
@@ -1200,16 +1237,34 @@ def sync_kaspi_products_endpoint():
     return {"message": result}
 
 
-@app.get("/kaspi", response_class=HTMLResponse)
+@app.get("/admin/kaspi", response_class=HTMLResponse)
 def kaspi_page():
     with open("static/kaspi.html") as f:
         return f.read()
 
 
-@app.get("/analytics", response_class=HTMLResponse)
+@app.get("/admin/analytics", response_class=HTMLResponse)
 def analytics_page():
     with open("static/analytics.html") as f:
         return f.read()
+
+
+# Редиректы со старых путей
+@app.get("/kaspi", response_class=HTMLResponse)
+def kaspi_redirect():
+    return RedirectResponse("/admin/kaspi", status_code=301)
+
+@app.get("/analytics", response_class=HTMLResponse)
+def analytics_redirect():
+    return RedirectResponse("/admin/analytics", status_code=301)
+
+@app.get("/history", response_class=HTMLResponse)
+def history_redirect():
+    return RedirectResponse("/admin/history", status_code=301)
+
+@app.get("/scanner", response_class=HTMLResponse)
+def scanner_redirect():
+    return RedirectResponse("/admin/scanner", status_code=301)
 
 
 @app.post("/api/import-products")

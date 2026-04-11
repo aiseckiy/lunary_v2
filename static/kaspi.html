@@ -51,8 +51,23 @@
 .order-items { border-top:1px solid var(--border2); margin-top:12px; padding-top:12px; }
 .order-item { display:flex; justify-content:space-between; align-items:center; padding:5px 0; gap:8px; }
 .item-name { font-size:13px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
-.item-link { color:var(--accent); text-decoration:none; }
+.item-link { color:var(--accent); text-decoration:none; cursor:pointer; }
 .item-link:hover { text-decoration:underline; }
+
+/* Product modal */
+.pmodal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
+.pmodal-overlay.open { display:flex; }
+.pmodal { background:#fff; border-radius:18px; width:100%; max-width:400px; padding:24px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
+.pmodal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+.pmodal-name { font-size:16px; font-weight:700; color:var(--text); line-height:1.3; flex:1; padding-right:12px; }
+.pmodal-close { font-size:20px; color:var(--text3); cursor:pointer; line-height:1; }
+.pmodal-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border2); font-size:14px; }
+.pmodal-row:last-child { border-bottom:none; }
+.pmodal-label { color:var(--text2); }
+.pmodal-val { font-weight:600; color:var(--text); }
+.pmodal-stock { font-size:28px; font-weight:800; }
+.pmodal-stock.ok { color:var(--green); }
+.pmodal-stock.low { color:var(--red); }
 .item-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-top:1px; }
 .item-qty { font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap; }
 .item-price { font-size:12px; color:var(--text3); white-space:nowrap; }
@@ -133,6 +148,17 @@
     <div class="loading"><div class="spinner"></div><br>Загрузка...</div>
   </div>
 </div></div></div>
+
+<!-- Product card modal -->
+<div class="pmodal-overlay" id="pmodal-overlay" onclick="if(event.target===this)closePModal()">
+  <div class="pmodal">
+    <div class="pmodal-header">
+      <div class="pmodal-name" id="pmodal-name">—</div>
+      <div class="pmodal-close" onclick="closePModal()">✕</div>
+    </div>
+    <div id="pmodal-body"></div>
+  </div>
+</div>
 
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
@@ -252,7 +278,7 @@ function renderOrders(orders) {
     const dateStr = formatDate(o.date);
     const entries = (o.entries||[]).map(e => {
       const nameHtml = e.product_id
-        ? `<a class="item-name item-link" href="/?open=${e.product_id}" target="_blank">${e.name||'—'} ↗</a>`
+        ? `<span class="item-name item-link" onclick="openPModal(${e.product_id})">${e.name||'—'} ↗</span>`
         : `<div class="item-name">${e.name||'—'}</div>`;
       const skuHtml = e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : '';
       return `<div class="order-item">
@@ -300,6 +326,35 @@ function formatDate(val) {
 }
 
 loadOrders();
+
+async function openPModal(id) {
+  document.getElementById('pmodal-name').textContent = 'Загрузка...';
+  document.getElementById('pmodal-body').innerHTML = '';
+  document.getElementById('pmodal-overlay').classList.add('open');
+  try {
+    const data = await fetch(`/api/products/${id}`).then(r => r.json());
+    const p = data.product || data;
+    document.getElementById('pmodal-name').textContent = p.name || '—';
+    const stockClass = p.low ? 'low' : 'ok';
+    document.getElementById('pmodal-body').innerHTML = `
+      <div class="pmodal-row" style="margin-bottom:8px">
+        <span class="pmodal-label">Остаток</span>
+        <span class="pmodal-stock ${stockClass}">${p.stock ?? '—'} ${p.unit || 'шт'}</span>
+      </div>
+      ${p.sku ? `<div class="pmodal-row"><span class="pmodal-label">Артикул</span><span class="pmodal-val" style="font-family:monospace">${p.sku}</span></div>` : ''}
+      ${p.kaspi_sku ? `<div class="pmodal-row"><span class="pmodal-label">Kaspi SKU</span><span class="pmodal-val" style="font-family:monospace;font-size:12px">${p.kaspi_sku}</span></div>` : ''}
+      ${p.category ? `<div class="pmodal-row"><span class="pmodal-label">Категория</span><span class="pmodal-val">${p.category}</span></div>` : ''}
+      ${p.price ? `<div class="pmodal-row"><span class="pmodal-label">Цена</span><span class="pmodal-val">${Number(p.price).toLocaleString('ru')} ₸</span></div>` : ''}
+      ${p.min_stock != null ? `<div class="pmodal-row"><span class="pmodal-label">Мин. остаток</span><span class="pmodal-val">${p.min_stock}</span></div>` : ''}
+    `;
+  } catch(e) {
+    document.getElementById('pmodal-body').innerHTML = `<div style="color:var(--red)">Ошибка загрузки</div>`;
+  }
+}
+
+function closePModal() {
+  document.getElementById('pmodal-overlay').classList.remove('open');
+}
 </script>
 
 <script src="/static/mobile.js"></script>

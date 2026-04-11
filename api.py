@@ -428,6 +428,20 @@ def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(g
     return {"id": p.id, "name": p.name, "sku": p.sku}
 
 
+@app.get("/api/products/{product_id}")
+def get_product(product_id: int, db: Session = Depends(get_db)):
+    p = crud.get_product_by_id(product_id, db)
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    stock = crud.get_stock(product_id, db)
+    return {"product": {
+        "id": p.id, "name": p.name, "sku": p.sku or "", "kaspi_sku": p.kaspi_sku or "",
+        "category": p.category or "", "unit": p.unit or "шт",
+        "price": p.price, "min_stock": p.min_stock,
+        "stock": stock, "low": stock <= (p.min_stock or 0),
+    }}
+
+
 @app.get("/api/products/{product_id}/stock")
 def get_stock(product_id: int, db: Session = Depends(get_db)):
     p = crud.get_product_by_id(product_id, db)

@@ -841,6 +841,10 @@ load().then(() => {
     openAddModal(params.get('barcode') || '');
     history.replaceState({}, '', '/');
   }
+  if (params.get('open')) {
+    const pid = parseInt(params.get('open'));
+    if (pid) { openMoveModal(pid); history.replaceState({}, '', '/'); }
+  }
 });
 setInterval(load, 30000);
 </script>

@@ -933,6 +933,7 @@ def kaspi_orders_local(
         state_counts[key] = state_counts.get(key, 0) + c
 
     def fmt(o):
+        from database import Product
         normalized = STATE_MAP.get(o.state, o.state)
         if o.entries and o.entries != "[]":
             entries = json.loads(o.entries)
@@ -940,6 +941,22 @@ def kaspi_orders_local(
             entries = [{"name": o.product_name, "sku": o.sku or "", "qty": o.quantity or 1, "basePrice": o.total}]
         else:
             entries = []
+        # Добавить product_id к каждой позиции для ссылки на карточку
+        for entry in entries:
+            if entry.get("product_id"):
+                continue
+            mssku = entry.get("merchantSku", "")
+            name = entry.get("name", "")
+            product = None
+            if mssku:
+                product = db.query(Product).filter(
+                    (Product.kaspi_sku == mssku) |
+                    Product.kaspi_sku.like(f"{mssku}_%")
+                ).first()
+            if not product and name:
+                product = db.query(Product).filter(Product.name.ilike(f"%{name[:30]}%")).first()
+            if product:
+                entry["product_id"] = product.id
         synced = None
         if o.created_at:
             try:

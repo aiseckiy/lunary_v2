@@ -51,6 +51,8 @@
 .order-items { border-top:1px solid var(--border2); margin-top:12px; padding-top:12px; }
 .order-item { display:flex; justify-content:space-between; align-items:center; padding:5px 0; gap:8px; }
 .item-name { font-size:13px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
+.item-link { color:var(--accent); text-decoration:none; }
+.item-link:hover { text-decoration:underline; }
 .item-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-top:1px; }
 .item-qty { font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap; }
 .item-price { font-size:12px; color:var(--text3); white-space:nowrap; }
@@ -248,15 +250,17 @@ function renderOrders(orders) {
     const badge = STATE_BADGE[o.state] || 'badge-accepted';
     const label = STATE_LABELS[o.state] || o.state;
     const dateStr = formatDate(o.date);
-    const entries = (o.entries||[]).map(e => `
-      <div class="order-item">
-        <div style="flex:1">
-          <div class="item-name">${e.name||'—'}</div>
-          ${e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : ''}
-        </div>
+    const entries = (o.entries||[]).map(e => {
+      const nameHtml = e.product_id
+        ? `<a class="item-name item-link" href="/?open=${e.product_id}" target="_blank">${e.name||'—'} ↗</a>`
+        : `<div class="item-name">${e.name||'—'}</div>`;
+      const skuHtml = e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : '';
+      return `<div class="order-item">
+        <div style="flex:1">${nameHtml}${skuHtml}</div>
         <div class="item-qty">${e.qty||1} шт</div>
         <div class="item-price">${((e.basePrice||e.price||0)).toLocaleString('ru')} ₸</div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     const delivery = o.delivery_method ? `<span class="order-meta">${o.delivery_method}</span>` : '';
     const src = o.source === 'xml_import' ? '<span class="src-xml">архив</span>' : '';

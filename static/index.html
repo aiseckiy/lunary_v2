@@ -590,7 +590,11 @@ async function doMove(type) {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({quantity:qty, type, source:'web', note})
   });
-  if (!res.ok) { toast('Ошибка сохранения', 'error'); return; }
+  if (!res.ok) {
+    let msg = 'Ошибка ' + res.status;
+    try { const e = await res.json(); msg = e.detail || msg; } catch {}
+    toast(msg, 'error'); return;
+  }
   const data = await res.json();
   document.getElementById('mm-note').value = '';
   closeMoveModal();
@@ -603,7 +607,11 @@ async function quickMove(id, type) {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({quantity:1, type, source:'web'})
   });
-  if (!res.ok) { toast('Ошибка: ' + res.status, 'error'); return; }
+  if (!res.ok) {
+    let msg = 'Ошибка ' + res.status;
+    try { const e = await res.json(); msg = e.detail || msg; } catch {}
+    toast(msg, 'error'); return;
+  }
   const data = await res.json();
   toast(`${type==='sale'?'🛒 -1':'📦 +1'} ${data.product} → ${data.new_stock}`, 'success');
   load();

@@ -174,10 +174,14 @@ def _start_kaspi_sync_loop():
                     if existing:
                         old_state = existing.state
                         new_state = o.get("state", existing.state)
-                        # Списываем остатки при переходе в архив
-                        if new_state in ARCHIVE_STATES and old_state not in ARCHIVE_STATES and not existing.stock_deducted:
+                        # Списываем остатки при переходе в доставку/архив
+                        if new_state in DEDUCT_STATES and old_state not in DEDUCT_STATES and not existing.stock_deducted:
                             _deduct_stock_for_order(existing, db)
                             existing.stock_deducted = 1
+                        # Возвращаем остатки при отмене (если уже списали)
+                        elif new_state in CANCEL_STATES and old_state not in CANCEL_STATES and existing.stock_deducted:
+                            _return_stock_for_order(existing, db)
+                            existing.stock_deducted = 0
                         # Обновляем статус и основные поля
                         existing.state = new_state
                         existing.total = int(o.get("total", existing.total or 0))
@@ -833,9 +837,43 @@ def _format_order_notification(o: dict) -> str:
 
 
 ARCHIVE_STATES = {"ARCHIVE", "Выдан"}
+# Состояния когда товар физически ушёл — списываем остаток
+DEDUCT_STATES = {"KASPI_DELIVERY", "DELIVERY", "PICKUP", "ARCHIVE", "Выдан"}
+# Состояния отмены — возвращаем остаток если уже списали
+CANCEL_STATES = {"CANCELLED", "Отменен", "RETURN", "Возврат"}
+
+def _return_stock_for_order(order_row, db: Session):
+    """Возвращает остатки при отмене заказа (если уже были списаны)."""
+    from database import Product
+    import json
+    entries = []
+    if order_row.entries:
+        try:
+            entries = json.loads(order_row.entries)
+        except Exception:
+            pass
+    if not entries and order_row.sku and order_row.quantity:
+        entries = [{"merchantSku": order_row.sku, "qty": order_row.quantity}]
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        merchant_sku = entry.get("merchantSku", "")
+        qty = int(entry.get("qty", 1))
+        if qty <= 0:
+            continue
+        product = None
+        if merchant_sku:
+            product = db.query(Product).filter(
+                (Product.kaspi_sku == merchant_sku) |
+                Product.kaspi_sku.like(f"{merchant_sku}_%")
+            ).first()
+        if product:
+            crud.add_movement(product.id, qty, "return", db,
+                              source="kaspi", note=f"Возврат: отмена заказа {order_row.order_id}")
+
 
 def _deduct_stock_for_order(order_row, db: Session):
-    """Списывает остатки по заказу. Вызывается один раз при переходе в ARCHIVE."""
+    """Списывает остатки по заказу. Вызывается один раз при переходе в DEDUCT_STATES."""
     from database import Product
     import json
 
@@ -904,11 +942,15 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
             old_state = existing.state
             existing.state = new_state
             updated += 1
-            # Списываем если только что перешёл в архив
-            if new_state in ARCHIVE_STATES and old_state not in ARCHIVE_STATES and not existing.stock_deducted:
+            # Списываем при переходе в доставку/архив
+            if new_state in DEDUCT_STATES and old_state not in DEDUCT_STATES and not existing.stock_deducted:
                 _deduct_stock_for_order(existing, db)
                 existing.stock_deducted = 1
                 deducted_total += 1
+            # Возвращаем при отмене
+            elif new_state in CANCEL_STATES and old_state not in CANCEL_STATES and existing.stock_deducted:
+                _return_stock_for_order(existing, db)
+                existing.stock_deducted = 0
         else:
             ko = KaspiOrder(
                 order_id=str(o["id"]),
@@ -920,11 +962,11 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
                 stock_deducted=0,
             )
             db.add(ko)
-            db.flush()  # чтобы ko.id был доступен
+            db.flush()
             added += 1
             new_orders.append(o)
-            # Если новый заказ сразу в архиве — тоже списываем
-            if new_state in ARCHIVE_STATES:
+            # Если новый заказ сразу в доставке или архиве — списываем
+            if new_state in DEDUCT_STATES:
                 _deduct_stock_for_order(ko, db)
                 ko.stock_deducted = 1
                 deducted_total += 1

@@ -338,6 +338,14 @@ def auth_logout():
     return resp
 
 
+# ─── Admin ───────────────────────────────────────────────────
+@app.post("/api/admin/run-migrations")
+def run_migrations():
+    """Принудительно применить все pending миграции БД"""
+    init_db()
+    return {"ok": True, "message": "Миграции применены"}
+
+
 # ─── Товары ──────────────────────────────────────────────────
 @app.get("/api/products")
 def list_products(db: Session = Depends(get_db)):

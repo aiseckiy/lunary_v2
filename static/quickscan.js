@@ -17,6 +17,7 @@ const html = `
     <div id="qs-section-cam">
       <div id="qs-reader" style="width:100%;border-radius:12px;overflow:hidden;margin-bottom:12px"></div>
       <button id="qs-btn-start" onclick="qsStartCamera()" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer">▶ Запустить камеру</button>
+      <button id="qs-btn-torch" onclick="qsToggleTorch()" style="display:none;width:100%;margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;color:var(--text)">🔦 Фонарик</button>
     </div>
     <!-- Ввод вручную -->
     <div id="qs-section-manual" style="display:none">
@@ -37,6 +38,7 @@ let qsScanner = null;
 let qsSearchTimer = null;
 let qsPendingBarcode = null;
 let qsAssignTimer = null;
+let qsTorchOn = false;
 
 window.openQuickScan = function() {
   document.getElementById('qs-overlay').classList.add('open');
@@ -52,6 +54,9 @@ window.closeQuickScan = function() {
   if (qsScanner) { qsScanner.stop().catch(() => {}); qsScanner = null; }
   document.getElementById('qs-reader').innerHTML = '';
   document.getElementById('qs-btn-start') && (document.getElementById('qs-btn-start').style.display = 'block');
+  const tb = document.getElementById('qs-btn-torch');
+  if (tb) { tb.style.display = 'none'; tb.textContent = '🔦 Фонарик'; tb.style.background = 'var(--surface)'; tb.style.borderColor = 'var(--border)'; }
+  qsTorchOn = false;
 };
 
 window.qsSwitchTab = function(tab) {
@@ -76,17 +81,36 @@ window.qsStartCamera = function() {
 };
 
 function qsInitCamera() {
+  qsTorchOn = false;
   qsScanner = new Html5Qrcode('qs-reader');
   qsScanner.start(
     { facingMode: 'environment' },
     { fps: 10, qrbox: { width: 280, height: 120 } },
     qsOnBarcode,
     () => {}
-  ).catch(() => {
+  ).then(() => {
+    // Показать кнопку фонарика если устройство поддерживает
+    const track = qsScanner?.getRunningTrackCapabilities?.();
+    if (track && track.torch) {
+      document.getElementById('qs-btn-torch').style.display = 'block';
+    }
+  }).catch(() => {
     qsSwitchTab('manual');
     document.getElementById('qs-btn-start').style.display = 'block';
   });
 }
+
+window.qsToggleTorch = async function() {
+  if (!qsScanner) return;
+  try {
+    qsTorchOn = !qsTorchOn;
+    await qsScanner.applyVideoConstraints({ advanced: [{ torch: qsTorchOn }] });
+    const btn = document.getElementById('qs-btn-torch');
+    btn.textContent = qsTorchOn ? '🔦 Фонарик ВКЛ' : '🔦 Фонарик';
+    btn.style.background = qsTorchOn ? '#fef9c3' : 'var(--surface)';
+    btn.style.borderColor = qsTorchOn ? '#fde047' : 'var(--border)';
+  } catch { /* устройство не поддерживает */ }
+};
 
 function qsBeep() {
   try {

@@ -103,7 +103,6 @@ def add_movement(product_id: int, quantity: int, move_type: str, db: Session, so
     )
     db.add(movement)
     db.commit()
-    db.refresh(movement)
     return movement
 
 

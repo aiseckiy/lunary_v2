@@ -224,8 +224,13 @@
     btn.innerHTML = `<div class="burger-icon"><span></span><span></span><span></span></div>`;
     btn.addEventListener('click', openDrawer);
 
-    // Insert before first child (logo stays left, burger goes right)
-    header.appendChild(btn);
+    // Добавляем в группу кнопок (второй flex-item), а не в сам хедер
+    const group = header.querySelector('div[style*="flex"]') || header.querySelector('div:last-child');
+    if (group) {
+      group.appendChild(btn);
+    } else {
+      header.appendChild(btn);
+    }
   }
 
   function removeBottomNav() {

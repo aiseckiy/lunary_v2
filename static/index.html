@@ -97,6 +97,20 @@
 .btn-ai { background:#ede9fe; color:#6366f1; border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
 .btn-ai:hover { background:#ddd6fe; }
 .btn-ai.loading { opacity:.6; pointer-events:none; }
+@media (max-width: 768px) {
+  .products-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .card-stock { font-size: 22px !important; }
+  .card-name { font-size: 13px !important; }
+  .toolbar { gap: 8px; }
+  .filter-rows { gap: 4px; }
+  .stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .stat { padding: 14px !important; }
+  .stat-value { font-size: 24px !important; }
+  .modal { width: 100% !important; border-radius: 20px 20px 0 0 !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; top: auto !important; max-height: 92vh !important; }
+  .overlay { align-items: flex-end !important; padding: 0 !important; }
+  .search-input { font-size: 16px !important; } /* prevent iOS zoom */
+  .form-input { font-size: 16px !important; }
+}
 </style>
 </head>
 <body>
@@ -808,6 +822,6 @@ load().then(() => {
 });
 setInterval(load, 30000);
 </script>
-
+<script src="/static/mobile.js"></script>
 </body>
 </html>

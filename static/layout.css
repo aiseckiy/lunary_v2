@@ -176,13 +176,19 @@ body {
   .sidebar { display: none; }
   .main-content { margin-left: 0; }
   .mobile-header { display: flex; }
-  .bottom-nav { display: block; }
-  .page-container { padding: 16px 16px 76px; }
-}
-
-@media (max-width: 360px) {
-  .bnav-item { font-size: 9px; padding: 6px 2px; }
-  .bnav-icon { font-size: 18px; }
+  .bottom-nav { display: none !important; }
+  .page-container { padding: 16px 16px 32px; }
+  /* Bottom sheet modals */
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    top: auto !important;
+    max-height: 92vh !important;
+  }
+  .overlay { align-items: flex-end !important; padding: 0 !important; }
 }
 
 /* ---- COMMON COMPONENTS ---- */

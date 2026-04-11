@@ -136,6 +136,7 @@
     </select>
     <span class="filter-pill" id="f-low" onclick="toggleLow()" style="display:inline-flex;align-items:center;gap:5px"><span>⚠️</span> Заканчивается</span>
     <button class="btn-add" onclick="openAddModal()"><span style="font-size:16px;line-height:1">+</span> Добавить товар</button>
+    <a class="sort-btn" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
   </div>
 
   <!-- Фильтры -->
@@ -306,13 +307,17 @@
           <input class="form-input" id="em-min" type="number" min="0">
         </div>
         <div class="form-group">
-          <label class="form-label">Бренд <span style="color:#52525b">(авто если пусто)</span></label>
+          <label class="form-label">Бренд</label>
           <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX...">
         </div>
         <div class="form-group">
           <label class="form-label">Цена (₸)</label>
           <input class="form-input" id="em-price" type="number" placeholder="1500" min="0">
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SKU Kaspi <span style="font-size:11px;color:#9ca3af;font-weight:400">(авто из файла активных карточек)</span></label>
+        <input class="form-input" id="em-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
       </div>
       <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
       <button class="btn-cancel-move" style="margin-top:8px" onclick="closeEditModal()">Отмена</button>
@@ -508,7 +513,7 @@ function productCard(p) {
         <div class="card-name">${p.name}</div>
         <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️':'✓'}</span>
       </div>
-      <div class="card-sku">${p.sku}</div>
+      <div class="card-sku">${p.sku}${p.kaspi_sku ? ` <span style="color:#6366f1;opacity:.7">K</span>` : ''}</div>
       <div class="card-bottom">
         <div>
           <div class="card-stock ${p.low?'low':'ok'}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>
@@ -666,6 +671,7 @@ function openEditModal(id) {
   document.getElementById('em-min').value = p.min_stock ?? 5;
   document.getElementById('em-brand').value = p.brand || '';
   document.getElementById('em-price').value = p.price || '';
+  document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
   document.getElementById('edit-modal').classList.add('open');
 }
 
@@ -699,10 +705,11 @@ async function submitEdit() {
 
   const brand = document.getElementById('em-brand').value.trim() || null;
   const price = parseInt(document.getElementById('em-price').value) || null;
+  const kaspi_sku = document.getElementById('em-kaspi-sku').value.trim() || null;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price})
+    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, kaspi_sku})
   });
 
   if (!res.ok) { toast('Ошибка сохранения', 'error'); return; }

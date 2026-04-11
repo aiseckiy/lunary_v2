@@ -10,3 +10,4 @@ slowapi>=0.1.9
 python-multipart>=0.0.9
 psycopg2-binary>=2.9.9
 pg8000>=1.30.0
+openpyxl>=3.1.0

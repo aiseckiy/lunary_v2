@@ -31,6 +31,7 @@ class Product(Base):
     min_stock = Column(Integer, default=5)
     brand = Column(String, nullable=True)
     price = Column(Integer, nullable=True)  # цена в тенге
+    kaspi_sku = Column(String, nullable=True)  # SKU карточки в Kaspi
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -87,6 +88,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     new_columns = [
         ("products", "price", "INTEGER"),
+        ("products", "kaspi_sku", "TEXT"),
         ("kaspi_orders", "product_name", "TEXT"),
         ("kaspi_orders", "sku", "TEXT"),
         ("kaspi_orders", "quantity", "INTEGER"),

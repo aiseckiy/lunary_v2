@@ -99,6 +99,7 @@ class ProductUpdate(BaseModel):
     min_stock: Optional[int] = None
     brand: Optional[str] = None
     price: Optional[int] = None
+    kaspi_sku: Optional[str] = None
 
 
 class MovementCreate(BaseModel):
@@ -328,7 +329,8 @@ def list_products(db: Session = Depends(get_db)):
             "stock": s["stock"],
             "low": s["stock"] <= s["product"].min_stock,
             "brand": s["product"].brand or "",
-            "price": s["product"].price
+            "price": s["product"].price,
+            "kaspi_sku": s["product"].kaspi_sku or ""
         }
         for s in stocks
     ]
@@ -872,6 +874,115 @@ def kaspi_orders_export(state: Optional[str] = None, db: Session = Depends(get_d
         iter([output.getvalue().encode("utf-8-sig")]),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=kaspi_orders.csv"}
+    )
+
+
+@app.get("/api/products/export/xlsx")
+def products_export_xlsx(db: Session = Depends(get_db)):
+    """Экспорт остатков в Excel (формат загрузки Kaspi)"""
+    from fastapi.responses import StreamingResponse
+    from sqlalchemy import func
+    import openpyxl, io
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from database import Product, Movement
+
+    rows = (
+        db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
+        .outerjoin(Movement, Movement.product_id == Product.id)
+        .group_by(Product.id)
+        .order_by(Product.name)
+        .all()
+    )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Остатки"
+
+    # Стили
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill("solid", fgColor="111827")
+    center = Alignment(horizontal="center", vertical="center")
+    thin = Border(
+        left=Side(style="thin", color="E5E7EB"),
+        right=Side(style="thin", color="E5E7EB"),
+        top=Side(style="thin", color="E5E7EB"),
+        bottom=Side(style="thin", color="E5E7EB"),
+    )
+
+    headers = ["SKU (Kaspi)", "Артикул (внутр.)", "Название товара", "Бренд",
+               "Категория", "Цена (₸)", "Остаток", "Мин. остаток", "Ед. изм."]
+    col_widths = [28, 18, 50, 15, 20, 12, 12, 14, 10]
+
+    for ci, (h, w) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(1, ci, h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+        cell.border = thin
+        ws.column_dimensions[cell.column_letter].width = w
+
+    ws.row_dimensions[1].height = 22
+
+    low_fill = PatternFill("solid", fgColor="FEE2E2")
+    ok_fill  = PatternFill("solid", fgColor="DCFCE7")
+
+    for ri, (p, stock) in enumerate(rows, 2):
+        stock = int(stock)
+        values = [
+            p.kaspi_sku or "",
+            p.sku or "",
+            p.name or "",
+            p.brand or "",
+            p.category or "",
+            p.price or "",
+            stock,
+            p.min_stock or 0,
+            p.unit or "шт",
+        ]
+        for ci, val in enumerate(values, 1):
+            cell = ws.cell(ri, ci, val)
+            cell.alignment = Alignment(vertical="center")
+            cell.border = thin
+
+        # Подсветить строку если остаток низкий
+        if stock <= (p.min_stock or 5):
+            for ci in range(1, len(headers)+1):
+                ws.cell(ri, ci).fill = low_fill
+        ws.row_dimensions[ri].height = 18
+
+    # Заморозить шапку
+    ws.freeze_panes = "A2"
+
+    # Второй лист — только для загрузки в Kaspi (формат active.xlsx)
+    ws2 = wb.create_sheet("Для Kaspi")
+    kaspi_headers = ["SKU", "model", "brand", "price", "PP1", "PP2", "PP3", "PP4", "PP5", "preorder"]
+    for ci, h in enumerate(kaspi_headers, 1):
+        cell = ws2.cell(1, ci, h)
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="F3F4F6")
+
+    ws2.column_dimensions["A"].width = 28
+    ws2.column_dimensions["B"].width = 50
+    ws2.column_dimensions["C"].width = 15
+
+    for ri, (p, stock) in enumerate(rows, 2):
+        if not p.kaspi_sku:
+            continue
+        ws2.cell(ri, 1, p.kaspi_sku)
+        ws2.cell(ri, 2, p.name)
+        ws2.cell(ri, 3, p.brand or "")
+        ws2.cell(ri, 4, p.price or "")
+        ws2.cell(ri, 5, max(0, int(stock)))  # PP1 = основной склад
+        for c in range(6, 11):
+            ws2.cell(ri, c, "no")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=stock_export.xlsx"}
     )
 
 

@@ -348,9 +348,11 @@
           <label class="form-label">Мин. остаток</label>
           <input class="form-input" id="em-min" type="number" min="0">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="position:relative">
           <label class="form-label">Бренд</label>
-          <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX...">
+          <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX..." autocomplete="off"
+            oninput="filterBrandList(this.value)" onfocus="showBrandList()" onblur="setTimeout(hideBrandList,150)">
+          <div id="brand-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.1);z-index:400;max-height:200px;overflow-y:auto;margin-top:2px"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Цена (₸)</label>
@@ -849,6 +851,39 @@ function startEditBarcodeScanner() {
     },
     () => {}
   ).catch(() => { wrap.style.display = 'none'; wrap.innerHTML = ''; });
+}
+
+// ── Brand suggest ────────────────────────────────────────
+function getBrandList() {
+  const set = new Set();
+  allProducts.forEach(p => { if (p.brand) set.add(p.brand); });
+  return [...set].sort();
+}
+
+function showBrandList() {
+  filterBrandList(document.getElementById('em-brand').value);
+}
+
+function filterBrandList(q) {
+  const box = document.getElementById('brand-suggest');
+  const brands = getBrandList();
+  const filtered = q ? brands.filter(b => b.toLowerCase().includes(q.toLowerCase())) : brands;
+  if (!filtered.length && !q) { box.style.display = 'none'; return; }
+  const rows = filtered.map(b => `<div class="fdrop-item" onmousedown="pickBrand('${b.replace(/'/g,"&#39;")}')">${b}</div>`).join('');
+  const addRow = q && !brands.some(b => b.toLowerCase() === q.toLowerCase())
+    ? `<div class="fdrop-item" style="color:#6366f1;font-weight:600" onmousedown="pickBrand('${q.replace(/'/g,"&#39;")}')">+ Добавить «${q}»</div>`
+    : '';
+  box.innerHTML = rows + addRow;
+  box.style.display = (rows || addRow) ? 'block' : 'none';
+}
+
+function pickBrand(val) {
+  document.getElementById('em-brand').value = val;
+  hideBrandList();
+}
+
+function hideBrandList() {
+  document.getElementById('brand-suggest').style.display = 'none';
 }
 
 function beep() {

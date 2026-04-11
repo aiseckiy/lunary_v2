@@ -431,22 +431,29 @@ def get_stock(product_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/products/{product_id}/movement")
 def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_db)):
-    p = crud.get_product_by_id(product_id, db)
-    if not p:
-        raise HTTPException(status_code=404, detail="Товар не найден")
+    try:
+        p = crud.get_product_by_id(product_id, db)
+        if not p:
+            raise HTTPException(status_code=404, detail="Товар не найден")
 
-    if data.type not in ("income", "sale", "writeoff", "return", "adjustment"):
-        raise HTTPException(status_code=400, detail="Неверный тип движения")
+        if data.type not in ("income", "sale", "writeoff", "return", "adjustment"):
+            raise HTTPException(status_code=400, detail="Неверный тип движения")
 
-    m = crud.add_movement(product_id, data.quantity, data.type, db, data.source, data.note)
-    new_stock = crud.get_stock(product_id, db)
-    return {
-        "movement_id": m.id,
-        "product": p.name,
-        "type": data.type,
-        "quantity": data.quantity,
-        "new_stock": new_stock
-    }
+        m = crud.add_movement(product_id, data.quantity, data.type, db, data.source, data.note)
+        new_stock = crud.get_stock(product_id, db)
+        return {
+            "movement_id": m.id,
+            "product": p.name,
+            "type": data.type,
+            "quantity": data.quantity,
+            "new_stock": new_stock
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print("MOVEMENT ERROR:", traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/products/{product_id}/history")

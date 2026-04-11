@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kaspi — Lunary</title>
 <style>
 /* Page header row */
@@ -12,7 +12,8 @@
 .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
 .stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
 .stat-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; margin-bottom:6px; }
-.stat-value { font-size:24px; font-weight:800; color:var(--text); }
+.stat-value { font-size:24px; font-weight:800; color:var(--text); word-break:break-all; overflow-wrap:break-word; line-height:1.1; }
+@media (max-width:600px) { .stat-value { font-size:18px; } }
 .stat-value.purple { color:var(--accent); }
 .stat-value.green { color:var(--green); }
 .stat-value.red { color:var(--red); }
@@ -279,7 +280,7 @@ function renderOrders(orders) {
     const dateStr = formatDate(o.date);
     const entries = (o.entries||[]).map(e => {
       const nameHtml = e.product_id
-        ? `<span class="item-name item-link" onclick="openPModal(${e.product_id})">${e.name||'—'} ↗</span>`
+        ? `<span class="item-name item-link" data-pid="${e.product_id}">${e.name||'—'} ↗</span>`
         : `<div class="item-name">${e.name||'—'}</div>`;
       const skuHtml = e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : '';
       return `<div class="order-item">
@@ -328,12 +329,20 @@ function formatDate(val) {
 
 loadOrders();
 
+// Делегированный обработчик для item-link (безопасно, без inline onclick)
+document.addEventListener('click', function(e) {
+  const el = e.target.closest('[data-pid]');
+  if (el) openPModal(parseInt(el.dataset.pid));
+});
+
 async function openPModal(id) {
   document.getElementById('pmodal-name').textContent = 'Загрузка...';
   document.getElementById('pmodal-body').innerHTML = '';
   document.getElementById('pmodal-overlay').classList.add('open');
   try {
-    const data = await fetch(`/api/products/${id}`).then(r => r.json());
+    const res = await fetch(`/api/products/${id}`);
+    if (!res.ok) throw new Error('Статус ' + res.status);
+    const data = await res.json();
     const p = data.product || data;
     document.getElementById('pmodal-name').textContent = p.name || '—';
     const stockClass = p.low ? 'low' : 'ok';
@@ -347,6 +356,9 @@ async function openPModal(id) {
       ${p.category ? `<div class="pmodal-row"><span class="pmodal-label">Категория</span><span class="pmodal-val">${p.category}</span></div>` : ''}
       ${p.price ? `<div class="pmodal-row"><span class="pmodal-label">Цена</span><span class="pmodal-val">${Number(p.price).toLocaleString('ru')} ₸</span></div>` : ''}
       ${p.min_stock != null ? `<div class="pmodal-row"><span class="pmodal-label">Мин. остаток</span><span class="pmodal-val">${p.min_stock}</span></div>` : ''}
+      <div style="margin-top:16px">
+        <a href="/admin?open=${p.id}" style="display:block;width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;text-align:center;text-decoration:none">✏️ Редактировать карточку</a>
+      </div>
     `;
   } catch(e) {
     document.getElementById('pmodal-body').innerHTML = `<div style="color:var(--red)">Ошибка загрузки</div>`;

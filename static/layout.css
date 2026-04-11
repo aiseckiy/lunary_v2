@@ -471,8 +471,8 @@ body {
 
 @media (max-width: 600px) {
   .drp2-panel { flex-direction: column; }
-  .drp2-presets { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); }
-  .drp2-preset { padding: 6px 10px; }
+  .drp2-presets { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); padding: 8px 6px; gap: 4px; }
+  .drp2-preset { padding: 5px 8px; font-size: 12px; }
 }
 
 /* ---- OLD DATE RANGE PICKER (legacy inputs) ---- */

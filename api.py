@@ -457,6 +457,28 @@ def patch_product(product_id: int, data: ProductPatch, db: Session = Depends(get
     return {"ok": True}
 
 
+class SetStockBody(BaseModel):
+    actual: int
+    note: Optional[str] = None
+
+@app.post("/api/products/{product_id}/set-stock")
+def set_stock_value(product_id: int, data: SetStockBody, db: Session = Depends(get_db)):
+    p = crud.get_product_by_id(product_id, db)
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    if data.actual < 0:
+        raise HTTPException(status_code=400, detail="Остаток не может быть отрицательным")
+    current = crud.get_stock(product_id, db)
+    delta = data.actual - current
+    if delta == 0:
+        return {"product": p.name, "new_stock": current, "delta": 0}
+    move_type = "income" if delta > 0 else "writeoff"
+    note = data.note or f"Коррекция остатка: было {current}, стало {data.actual}"
+    crud.add_movement(product_id, abs(delta), move_type, db, "web", note)
+    new_stock = crud.get_stock(product_id, db)
+    return {"product": p.name, "new_stock": new_stock, "delta": delta}
+
+
 @app.get("/api/products/{product_id}/stock")
 def get_stock(product_id: int, db: Session = Depends(get_db)):
     p = crud.get_product_by_id(product_id, db)
@@ -1404,6 +1426,53 @@ def history_redirect():
 @app.get("/scanner", response_class=HTMLResponse)
 def scanner_redirect():
     return RedirectResponse("/admin/scanner", status_code=301)
+
+
+@app.get("/api/purchases/list")
+def purchases_list(db: Session = Depends(get_db)):
+    """Список товаров с остатком ниже минимума, сгруппированных по поставщику."""
+    products = crud.get_all_products(db)
+    result = []
+    for p in products:
+        stock = crud.get_stock(p.id, db)
+        min_s = p.min_stock or 0
+        if stock <= min_s:
+            result.append({
+                "id": p.id,
+                "name": p.name,
+                "sku": p.sku or "",
+                "supplier": p.supplier or "Не указан",
+                "brand": p.brand or "",
+                "stock": stock,
+                "min_stock": min_s,
+                "unit": p.unit or "шт",
+                "need": max(1, min_s - stock + max(min_s, 5)),
+            })
+    # Сортируем: сначала по поставщику, потом по бренду
+    result.sort(key=lambda x: (x["supplier"], x["brand"], x["name"]))
+    return {"items": result, "total": len(result)}
+
+
+@app.post("/api/purchases/send-tg")
+def purchases_send_tg(db: Session = Depends(get_db)):
+    """Отправить список закупок в Telegram."""
+    data = purchases_list(db)
+    items = data["items"]
+    if not items:
+        return {"ok": True, "message": "Нет товаров для закупки"}
+    # Группируем по поставщику
+    from collections import defaultdict
+    by_supplier = defaultdict(list)
+    for item in items:
+        by_supplier[item["supplier"]].append(item)
+    lines = ["📦 <b>Список закупок</b>", f"Итого позиций: {len(items)}", ""]
+    for supplier, sup_items in by_supplier.items():
+        lines.append(f"🏭 <b>{supplier}</b>")
+        for it in sup_items:
+            lines.append(f"  • {it['name']} ({it['sku']}) — осталось {it['stock']} {it['unit']}, заказать ~{it['need']}")
+        lines.append("")
+    _send_tg_notification("\n".join(lines))
+    return {"ok": True, "message": f"Отправлено {len(items)} позиций"}
 
 
 @app.post("/api/import-products")

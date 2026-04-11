@@ -139,21 +139,32 @@ window.qsOnInput = function() {
 };
 
 async function qsDoSearch(q, isAssign) {
-  const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
-  const products = await res.json();
   const container = document.getElementById('qs-results');
-  if (!products.length) { container.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">Ничего не найдено</div>'; return; }
-  container.innerHTML = products.slice(0, 8).map(p => `
-    <div class="qs-result" onclick="${isAssign ? `qsAssignBarcode(${p.id})` : `qsOpenProduct(${p.id})`}">
-      <div style="flex:1">
-        <div class="qs-rname">${p.name}</div>
-        <div class="qs-rmeta">${p.sku}${p.barcode ? ' • ' + p.barcode : ''}${isAssign ? '' : ''}</div>
-      </div>
-      ${isAssign
-        ? `<button style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Присвоить</button>`
-        : `<div class="qs-rstock ${p.stock <= (p.min_stock||5) ? 'low' : 'ok'}">${p.stock}</div>`
-      }
-    </div>`).join('');
+  try {
+    const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) { container.innerHTML = '<div style="color:var(--red);font-size:13px;padding:8px 0">Ошибка поиска</div>'; return; }
+    const products = await res.json();
+    if (!products.length) { container.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">Ничего не найдено</div>'; return; }
+    container.innerHTML = products.slice(0, 8).map(p => `
+      <div class="qs-result" data-id="${p.id}" data-assign="${isAssign ? 1 : 0}">
+        <div style="flex:1">
+          <div class="qs-rname">${p.name}</div>
+          <div class="qs-rmeta">${p.sku}${p.barcode ? ' • ' + p.barcode : ''}</div>
+        </div>
+        ${isAssign
+          ? `<button style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Присвоить</button>`
+          : `<div class="qs-rstock ${p.stock <= (p.min_stock||5) ? 'low' : 'ok'}">${p.stock}</div>`
+        }
+      </div>`).join('');
+    container.querySelectorAll('.qs-result').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = parseInt(el.dataset.id);
+        if (el.dataset.assign === '1') qsAssignBarcode(id); else qsOpenProduct(id);
+      });
+    });
+  } catch(e) {
+    container.innerHTML = '<div style="color:var(--red);font-size:13px;padding:8px 0">Ошибка сети</div>';
+  }
 }
 
 window.qsAssignBarcode = async function(productId) {

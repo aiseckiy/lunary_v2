@@ -170,6 +170,8 @@
       <option value="name-asc">А-Я Название</option>
     </select>
     <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
+    <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight:600">📦 Приёмка</button>
+    <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight:600">🛒 Закупки</button>
     <a class="sort-btn" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
   </div>
 
@@ -211,26 +213,88 @@
         <div class="modal-title" id="mm-name">—</div>
         <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="mm-sku">—</div>
       </div>
-      <button class="modal-close" onclick="closeMoveModal()">×</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="closeMoveModal();openEditModal(selectedId)" title="Редактировать карточку" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px;line-height:1;color:var(--text2)">✏️</button>
+        <button class="modal-close" onclick="closeMoveModal()">×</button>
+      </div>
     </div>
     <div class="modal-body">
       <div class="stock-display">
         <div class="big-num ok" id="mm-stock">0</div>
         <div style="font-size:13px;color:#71717a" id="mm-unit">шт</div>
       </div>
-      <div class="qty-control">
-        <button onclick="chQty(-1)">−</button>
-        <input type="number" id="mm-qty" value="1" min="1">
-        <button onclick="chQty(1)">+</button>
+      <!-- Вкладки: Изменить / Установить -->
+      <div class="tab-btns" style="margin-bottom:12px">
+        <button class="tab-btn active" id="mm-tab-adj" onclick="mmSwitchTab('adj')">Изменить</button>
+        <button class="tab-btn" id="mm-tab-set" onclick="mmSwitchTab('set')">Установить остаток</button>
       </div>
-      <div class="move-actions">
-        <button class="move-btn sale" onclick="doMove('sale')">🛒 Продажа</button>
-        <button class="move-btn income" onclick="doMove('income')">📦 Приход</button>
-        <button class="move-btn writeoff" onclick="doMove('writeoff')">🗑 Списание</button>
-        <button class="move-btn ret" onclick="doMove('return')">↩️ Возврат</button>
+      <!-- Вкладка: Изменить -->
+      <div id="mm-adj-section">
+        <div class="qty-control">
+          <button onclick="chQty(-1)">−</button>
+          <input type="number" id="mm-qty" value="1" min="1">
+          <button onclick="chQty(1)">+</button>
+        </div>
+        <div class="move-actions">
+          <button class="move-btn sale" onclick="doMove('sale')">🛒 Продажа</button>
+          <button class="move-btn income" onclick="doMove('income')">📦 Приход</button>
+          <button class="move-btn writeoff" onclick="doMove('writeoff')">🗑 Списание</button>
+          <button class="move-btn ret" onclick="doMove('return')">↩️ Возврат</button>
+        </div>
+        <input type="text" id="mm-note" placeholder="Комментарий (необязательно)" style="width:100%;margin-top:10px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;background:var(--bg)">
       </div>
-      <input type="text" id="mm-note" placeholder="Комментарий (необязательно)" style="width:100%;margin-top:10px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;color:#111827;outline:none;background:#f9fafb">
-      <button class="btn-cancel-move" onclick="closeMoveModal()">Закрыть</button>
+      <!-- Вкладка: Установить остаток -->
+      <div id="mm-set-section" style="display:none">
+        <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:12px">Введи фактическое количество на складе</div>
+        <div class="qty-control">
+          <button onclick="chActual(-1)">−</button>
+          <input type="number" id="mm-actual" value="0" min="0" style="font-size:22px;font-weight:700">
+          <button onclick="chActual(1)">+</button>
+        </div>
+        <input type="text" id="mm-set-note" placeholder="Причина коррекции (необязательно)" style="width:100%;margin-bottom:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;background:var(--bg)">
+        <button class="btn-submit" onclick="doSetStock()" style="background:var(--green)">💾 Сохранить остаток</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-cancel-move" onclick="closeMoveModal()" style="flex:1">Закрыть</button>
+        <button onclick="closeMoveModal();openEditModal(selectedId)" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;color:var(--text)">✏️ Изменить карточку</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модал: Приёмка товара -->
+<div class="overlay" id="receipt-modal" onclick="closeReceiptModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📦 Приёмка товара</div>
+      <button class="modal-close" onclick="closeReceiptModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:10px">Поиск по названию, артикулу или штрихкоду:</div>
+      <input class="form-input" id="receipt-search" type="text" placeholder="Найти товар..." oninput="receiptSearch()" autocomplete="off">
+      <div id="receipt-suggest" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px;max-height:180px;overflow-y:auto;padding:4px"></div>
+      <div id="receipt-list" style="margin-top:14px"></div>
+      <div id="receipt-empty" style="color:var(--text3);font-size:13px;text-align:center;padding:12px 0;display:none">Добавь товары выше</div>
+      <div id="receipt-footer" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+        <input type="text" id="receipt-note" placeholder="Поставщик / номер поставки (необязательно)" style="width:100%;margin-bottom:10px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;background:var(--bg)">
+        <button class="btn-submit" onclick="submitReceipt()" style="background:var(--green)">✅ Подтвердить приёмку</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модал: Закупки -->
+<div class="overlay" id="purchases-modal" onclick="closePurchasesModal(event)">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title">🛒 Список закупок</div>
+      <button class="modal-close" onclick="closePurchasesModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="purchases-body"><div class="empty">Загрузка...</div></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-submit" onclick="sendPurchasesToTg()" id="purchases-tg-btn" style="flex:1;background:#229ED9">📨 Отправить в Telegram</button>
+      </div>
     </div>
   </div>
 </div>
@@ -426,8 +490,7 @@ function restoreFilters() {
 
 function getBrand(p) {
   if (!p.brand) return 'Не указан';
-  const b = p.brand.trim();
-  return b.charAt(0).toUpperCase() + b.slice(1).toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  return p.brand.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 async function load() {
@@ -614,6 +677,8 @@ function openMoveModal(id) {
   document.getElementById('mm-unit').textContent = p.unit;
   document.getElementById('mm-qty').value = 1;
   document.getElementById('mm-note').value = '';
+  document.getElementById('mm-set-note').value = '';
+  mmSwitchTab('adj');
   document.getElementById('move-modal').classList.add('open');
 }
 
@@ -659,6 +724,231 @@ async function quickMove(id, type) {
 function chQty(d) {
   const inp = document.getElementById('mm-qty');
   inp.value = Math.max(1,(parseInt(inp.value)||1)+d);
+}
+
+function chActual(d) {
+  const inp = document.getElementById('mm-actual');
+  inp.value = Math.max(0,(parseInt(inp.value)||0)+d);
+}
+
+function mmSwitchTab(tab) {
+  document.getElementById('mm-tab-adj').classList.toggle('active', tab === 'adj');
+  document.getElementById('mm-tab-set').classList.toggle('active', tab === 'set');
+  document.getElementById('mm-adj-section').style.display = tab === 'adj' ? '' : 'none';
+  document.getElementById('mm-set-section').style.display = tab === 'set' ? '' : 'none';
+  if (tab === 'set') {
+    const cur = parseInt(document.getElementById('mm-stock').textContent) || 0;
+    document.getElementById('mm-actual').value = cur;
+  }
+}
+
+async function doSetStock() {
+  const actual = parseInt(document.getElementById('mm-actual').value);
+  if (isNaN(actual) || actual < 0) { toast('Укажи корректное количество', 'error'); return; }
+  const note = document.getElementById('mm-set-note').value.trim() || null;
+  const res = await fetch(`/api/products/${selectedId}/set-stock`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({actual, note})
+  });
+  if (!res.ok) {
+    let msg = 'Ошибка';
+    try { const e = await res.json(); msg = e.detail || msg; } catch {}
+    toast(msg, 'error'); return;
+  }
+  const data = await res.json();
+  closeMoveModal();
+  const diff = data.delta > 0 ? `+${data.delta}` : data.delta === 0 ? '±0' : `${data.delta}`;
+  toast(`✅ ${data.product}: остаток ${data.new_stock} (${diff})`, 'success');
+  load();
+}
+
+// ── Приёмка ─────────────────────────────────────────────
+let receiptItems = []; // [{id, name, sku, qty}]
+let receiptTimer = null;
+
+function openReceiptModal() {
+  receiptItems = [];
+  document.getElementById('receipt-search').value = '';
+  document.getElementById('receipt-suggest').style.display = 'none';
+  renderReceiptList();
+  document.getElementById('receipt-modal').classList.add('open');
+  setTimeout(() => document.getElementById('receipt-search').focus(), 100);
+}
+
+function closeReceiptModal(e) {
+  if (!e || e.target === document.getElementById('receipt-modal'))
+    document.getElementById('receipt-modal').classList.remove('open');
+}
+
+function receiptSearch() {
+  clearTimeout(receiptTimer);
+  const q = document.getElementById('receipt-search').value.trim();
+  if (q.length < 2) { document.getElementById('receipt-suggest').style.display = 'none'; return; }
+  receiptTimer = setTimeout(() => doReceiptSearch(q), 250);
+}
+
+async function doReceiptSearch(q) {
+  const sug = document.getElementById('receipt-suggest');
+  try {
+    const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) return;
+    const products = await res.json();
+    if (!products.length) { sug.innerHTML = '<div style="padding:8px 12px;font-size:13px;color:var(--text3)">Не найдено</div>'; sug.style.display = 'block'; return; }
+    sug.innerHTML = products.slice(0, 8).map(p =>
+      `<div class="fdrop-item" data-id="${p.id}" data-name="${encodeURIComponent(p.name)}" data-sku="${p.sku||''}" data-stock="${p.stock||0}">
+        <span style="flex:1">${p.name} <span style="font-size:11px;color:var(--text3);font-family:monospace">${p.sku}</span></span>
+        <span style="font-size:12px;color:var(--text3)">${p.stock} шт</span>
+      </div>`
+    ).join('');
+    sug.style.display = 'block';
+    sug.querySelectorAll('.fdrop-item').forEach(el => {
+      el.addEventListener('click', () => {
+        addToReceipt(parseInt(el.dataset.id), decodeURIComponent(el.dataset.name), el.dataset.sku, parseInt(el.dataset.stock)||0);
+        document.getElementById('receipt-search').value = '';
+        sug.style.display = 'none';
+      });
+    });
+  } catch {}
+}
+
+function addToReceipt(id, name, sku, currentStock) {
+  const existing = receiptItems.find(x => x.id === id);
+  if (existing) { existing.qty++; }
+  else { receiptItems.push({id, name, sku, currentStock, qty: 1}); }
+  renderReceiptList();
+}
+
+function removeFromReceipt(id) {
+  receiptItems = receiptItems.filter(x => x.id !== id);
+  renderReceiptList();
+}
+
+function renderReceiptList() {
+  const list = document.getElementById('receipt-list');
+  const empty = document.getElementById('receipt-empty');
+  const footer = document.getElementById('receipt-footer');
+  if (!receiptItems.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    footer.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  footer.style.display = 'block';
+  list.innerHTML = receiptItems.map(item => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:monospace">${item.sku} · было ${item.currentStock} шт</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <button onclick="receiptChQty(${item.id},-1)" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;color:var(--text)">−</button>
+        <input type="number" value="${item.qty}" min="1" onchange="receiptSetQty(${item.id},this.value)" style="width:52px;text-align:center;padding:4px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight:700;color:var(--text);background:var(--bg)">
+        <button onclick="receiptChQty(${item.id},1)" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;color:var(--text)">+</button>
+        <button onclick="removeFromReceipt(${item.id})" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:14px;color:var(--red)">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function receiptChQty(id, d) {
+  const item = receiptItems.find(x => x.id === id);
+  if (item) { item.qty = Math.max(1, item.qty + d); renderReceiptList(); }
+}
+
+function receiptSetQty(id, val) {
+  const item = receiptItems.find(x => x.id === id);
+  if (item) { item.qty = Math.max(1, parseInt(val)||1); renderReceiptList(); }
+}
+
+async function submitReceipt() {
+  if (!receiptItems.length) return;
+  const note = document.getElementById('receipt-note').value.trim() || 'Приёмка товара';
+  const btn = document.querySelector('#receipt-footer .btn-submit');
+  btn.textContent = '⏳ Сохранение...';
+  btn.disabled = true;
+  let errors = 0;
+  for (const item of receiptItems) {
+    try {
+      const res = await fetch(`/api/products/${item.id}/movement`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({quantity: item.qty, type:'income', source:'web', note})
+      });
+      if (!res.ok) errors++;
+    } catch { errors++; }
+  }
+  closeReceiptModal();
+  if (errors) toast(`⚠️ Принято с ошибками (${errors} не удалось)`, 'error');
+  else toast(`✅ Принято ${receiptItems.length} позиций`, 'success');
+  load();
+}
+
+// ── Закупки ──────────────────────────────────────────────
+async function openPurchasesModal() {
+  document.getElementById('purchases-modal').classList.add('open');
+  document.getElementById('purchases-body').innerHTML = '<div class="empty">Загрузка...</div>';
+  try {
+    const res = await fetch('/api/purchases/list');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderPurchases(data.items);
+  } catch {
+    document.getElementById('purchases-body').innerHTML = '<div class="empty" style="color:var(--red)">Ошибка загрузки</div>';
+  }
+}
+
+function closePurchasesModal(e) {
+  if (!e || e.target === document.getElementById('purchases-modal'))
+    document.getElementById('purchases-modal').classList.remove('open');
+}
+
+function renderPurchases(items) {
+  const body = document.getElementById('purchases-body');
+  if (!items.length) {
+    body.innerHTML = '<div class="empty" style="color:var(--green)">✅ Всё в норме, закупать ничего не нужно</div>';
+    document.getElementById('purchases-tg-btn').style.display = 'none';
+    return;
+  }
+  document.getElementById('purchases-tg-btn').style.display = '';
+  // Группируем по поставщику
+  const groups = {};
+  items.forEach(it => {
+    const key = it.supplier || 'Не указан';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(it);
+  });
+  body.innerHTML = `
+    <div style="font-size:13px;color:var(--text3);margin-bottom:12px">Товаров ниже минимума: <b style="color:var(--red)">${items.length}</b></div>
+    ${Object.entries(groups).map(([supplier, list]) => `
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">🏭 ${supplier}</div>
+        ${list.map(it => `
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}</div>
+              <div style="font-size:11px;color:var(--text3);font-family:monospace">${it.sku}${it.brand ? ' · ' + it.brand : ''}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:13px;font-weight:700;color:var(--red)">${it.stock} ${it.unit}</div>
+              <div style="font-size:11px;color:var(--text3)">мин: ${it.min_stock}</div>
+            </div>
+          </div>`).join('')}
+      </div>`).join('')}`;
+}
+
+async function sendPurchasesToTg() {
+  const btn = document.getElementById('purchases-tg-btn');
+  btn.textContent = '⏳ Отправка...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/purchases/send-tg', {method:'POST'});
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    toast('📨 Список отправлен в Telegram', 'success');
+  } catch {
+    toast('Ошибка отправки в Telegram', 'error');
+  }
+  btn.textContent = '📨 Отправить в Telegram';
+  btn.disabled = false;
 }
 
 // ── Add modal ───────────────────────────────────────────

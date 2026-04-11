@@ -442,6 +442,21 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     }}
 
 
+class ProductPatch(BaseModel):
+    barcode: Optional[str] = None
+
+@app.patch("/api/products/{product_id}")
+def patch_product(product_id: int, data: ProductPatch, db: Session = Depends(get_db)):
+    from database import Product
+    p = db.query(Product).filter(Product.id == product_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    if data.barcode is not None:
+        p.barcode = data.barcode
+    db.commit()
+    return {"ok": True}
+
+
 @app.get("/api/products/{product_id}/stock")
 def get_stock(product_id: int, db: Session = Depends(get_db)):
     p = crud.get_product_by_id(product_id, db)

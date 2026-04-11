@@ -147,6 +147,7 @@
 <div class="mobile-header">
   <div class="mobile-logo">Lunary <span>OS</span></div>
   <div style="display:flex;gap:8px;align-items:center">
+    <button class="mobile-scan-btn" onclick="openQuickScan()">📷</button>
     <button class="btn-add" onclick="openAddModal()" style="padding:7px 14px;font-size:13px">+ Добавить</button>
   </div>
 </div>
@@ -932,5 +933,6 @@ load().then(() => {
 setInterval(load, 30000);
 </script>
 <script src="/static/mobile.js"></script>
+<script src="/static/quickscan.js"></script>
 </body>
 </html>

@@ -879,13 +879,28 @@ def _return_stock_for_order(order_row, db: Session):
             continue
         product = None
         if merchant_sku:
-            product = db.query(Product).filter(
-                (Product.kaspi_sku == merchant_sku) |
-                Product.kaspi_sku.like(f"{merchant_sku}_%")
-            ).first()
+            product = _find_product_by_sku(merchant_sku, db)
         if product:
             crud.add_movement(product.id, qty, "return", db,
                               source="kaspi", note=f"Возврат: отмена заказа {order_row.order_id}")
+
+
+def _find_product_by_sku(merchant_sku: str, db: Session):
+    """Ищет товар по kaspi_sku с поддержкой нескольких SKU через запятую."""
+    from database import Product
+    if not merchant_sku:
+        return None
+    # Точное совпадение или один из нескольких SKU в поле через запятую
+    all_products = db.query(Product).filter(Product.kaspi_sku != None).all()
+    for p in all_products:
+        skus = [s.strip() for s in (p.kaspi_sku or "").split(",") if s.strip()]
+        if merchant_sku in skus:
+            return p
+        # fallback: старый формат "101438761_943240382" матчится по prefix "101438761"
+        for s in skus:
+            if s == merchant_sku or merchant_sku.startswith(s + "_") or s.startswith(merchant_sku + "_"):
+                return p
+    return None
 
 
 def _deduct_stock_for_order(order_row, db: Session):
@@ -897,7 +912,7 @@ def _deduct_stock_for_order(order_row, db: Session):
 
     # Способ 1: у заказа есть kaspi_sku + quantity (XML-импорт или расширенные поля)
     if order_row.sku and order_row.quantity:
-        product = db.query(Product).filter(Product.kaspi_sku == order_row.sku).first()
+        product = _find_product_by_sku(order_row.sku, db)
         if product:
             crud.add_movement(product.id, order_row.quantity, "sale", db,
                               source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
@@ -920,10 +935,7 @@ def _deduct_stock_for_order(order_row, db: Session):
             # Способ 2a: по merchantSku (код товара продавца из Kaspi API)
             # kaspi_sku в БД может быть "101438761_943240382" или просто "101438761"
             if merchant_sku:
-                product = db.query(Product).filter(
-                    (Product.kaspi_sku == merchant_sku) |
-                    Product.kaspi_sku.like(f"{merchant_sku}_%")
-                ).first()
+                product = _find_product_by_sku(merchant_sku, db)
             # Способ 2b: по названию (ilike первые 30 символов)
             if not product and name:
                 product = db.query(Product).filter(

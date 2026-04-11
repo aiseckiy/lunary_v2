@@ -437,11 +437,10 @@
         <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD" list="suppliers-list" autocomplete="off">
         <datalist id="suppliers-list"></datalist>
       </div>
-      <div class="edit-modal field-row">
-        <div class="form-group" style="flex:1 1 100%">
-          <label class="form-label">Kaspi SKU <span style="font-size:11px;color:#9ca3af;font-weight:400">(для заказов)</span></label>
-          <input class="form-input" id="em-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
-        </div>
+      <div class="form-group">
+        <label class="form-label">Kaspi SKU <span style="font-size:11px;color:#9ca3af;font-weight:400">(для заказов)</span></label>
+        <div id="em-kaspi-sku-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+        <button type="button" onclick="addKaspiSkuField()" style="background:none;border:1px dashed var(--border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--accent);cursor:pointer;width:100%">+ Добавить SKU</button>
       </div>
       <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
       <button class="btn-cancel-move" style="margin-top:8px" onclick="closeEditModal()">Отмена</button>
@@ -1052,12 +1051,38 @@ function openEditModal(id, fromMove = false) {
   document.getElementById('em-price').value = p.price || '';
   document.getElementById('em-cost-price').value = p.cost_price || '';
   document.getElementById('em-supplier').value = p.supplier || '';
-  document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
+  // Kaspi SKU список
+  const skus = (p.kaspi_sku || '').split(',').map(s => s.trim()).filter(Boolean);
+  renderKaspiSkuList(skus.length ? skus : ['']);
   document.getElementById('edit-modal').classList.add('open');
   fetch('/api/products/suppliers').then(r => r.json()).then(list => {
     const dl = document.getElementById('suppliers-list');
     dl.innerHTML = list.map(s => `<option value="${s}">`).join('');
   }).catch(() => {});
+}
+
+function renderKaspiSkuList(skus) {
+  const container = document.getElementById('em-kaspi-sku-list');
+  container.innerHTML = skus.map((sku, i) => `
+    <div style="display:flex;gap:6px;align-items:center">
+      <input class="form-input em-kaspi-sku-input" value="${sku}" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0">
+      <button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color:#9ca3af;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>
+    </div>`).join('');
+}
+
+function addKaspiSkuField() {
+  const container = document.getElementById('em-kaspi-sku-list');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:6px;align-items:center';
+  div.innerHTML = `<input class="form-input em-kaspi-sku-input" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0"><button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color:#9ca3af;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>`;
+  container.appendChild(div);
+  div.querySelector('input').focus();
+}
+
+function removeKaspiSkuField(btn) {
+  const container = document.getElementById('em-kaspi-sku-list');
+  if (container.children.length > 1) btn.parentElement.remove();
+  else btn.previousElementSibling.value = '';
 }
 
 function closeEditModal(e) {
@@ -1092,7 +1117,7 @@ async function submitEdit() {
   const price = parseInt(document.getElementById('em-price').value) || null;
   const cost_price = parseInt(document.getElementById('em-cost-price').value) || null;
   const supplier = document.getElementById('em-supplier').value.trim() || null;
-  const kaspi_sku = document.getElementById('em-kaspi-sku').value.trim() || null;
+  const kaspi_sku = Array.from(document.querySelectorAll('.em-kaspi-sku-input')).map(i => i.value.trim()).filter(Boolean).join(',') || null;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},

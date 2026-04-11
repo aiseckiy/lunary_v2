@@ -93,7 +93,12 @@ def get_db():
 
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
+    print("[init_db] Запуск миграций...", flush=True)
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("[init_db] create_all выполнен", flush=True)
+    except Exception as e:
+        print(f"[init_db] ОШИБКА create_all: {e}", flush=True)
     new_columns = [
         ("products", "price", "INTEGER"),
         ("products", "kaspi_sku", "TEXT"),
@@ -120,5 +125,11 @@ def init_db():
             try:
                 conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
                 conn.commit()
-            except Exception:
-                pass
+                print(f"[init_db] Добавлена колонка {table}.{col}", flush=True)
+            except Exception as e:
+                err = str(e)
+                if "already exists" in err or "уже существует" in err or "duplicate column" in err.lower():
+                    pass  # нормально
+                else:
+                    print(f"[init_db] Пропуск {table}.{col}: {err[:120]}", flush=True)
+    print("[init_db] Готово", flush=True)

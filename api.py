@@ -34,8 +34,15 @@ from fastapi import Request, Cookie
 from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# Сессионный токен — генерируется при старте, хранится в памяти
-_SESSION_TOKEN = secrets.token_urlsafe(32)
+# Сессионный токен — стабильный между перезапусками (на основе пароля)
+def _make_session_token():
+    pwd = os.getenv("ADMIN_PASSWORD", "")
+    if not pwd:
+        return ""
+    import hashlib
+    return hashlib.sha256(f"lunary-session-{pwd}".encode()).hexdigest()
+
+_SESSION_TOKEN = _make_session_token()
 
 try:
     from slowapi import Limiter, _rate_limit_exceeded_handler

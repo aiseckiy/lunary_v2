@@ -206,7 +206,9 @@ window.qsAssignBarcode = async function(productId) {
     if (typeof openMoveModal === 'function') openMoveModal(productId);
     else window.location.href = `/?open=${productId}`;
   } else {
-    qsToast('Ошибка сохранения', true);
+    let msg = 'Ошибка сохранения';
+    try { const e = await res.json(); msg = e.detail || msg; } catch {}
+    qsToast(msg, true);
   }
 };
 

@@ -418,12 +418,17 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
 
 @app.put("/api/products/{product_id}")
 def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
+    from database import Product as _P
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
     if "sku" in updates:
         updates["sku"] = updates["sku"].upper()
+    if "barcode" in updates and updates["barcode"]:
+        conflict = db.query(_P).filter(_P.barcode == updates["barcode"], _P.id != product_id).first()
+        if conflict:
+            raise HTTPException(status_code=409, detail=f"Штрихкод уже привязан к товару «{conflict.name}» (арт. {conflict.sku})")
     p = crud.update_product(product_id, db, **updates)
     return {"id": p.id, "name": p.name, "sku": p.sku}
 
@@ -452,6 +457,10 @@ def patch_product(product_id: int, data: ProductPatch, db: Session = Depends(get
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
     if data.barcode is not None:
+        if data.barcode:
+            conflict = db.query(Product).filter(Product.barcode == data.barcode, Product.id != product_id).first()
+            if conflict:
+                raise HTTPException(status_code=409, detail=f"Штрихкод уже привязан к товару «{conflict.name}» (арт. {conflict.sku})")
         p.barcode = data.barcode
     db.commit()
     return {"ok": True}

@@ -1090,7 +1090,11 @@ async function submitEdit() {
     body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, kaspi_sku})
   });
 
-  if (!res.ok) { toast('Ошибка сохранения', 'error'); return; }
+  if (!res.ok) {
+    let msg = 'Ошибка сохранения';
+    try { const e = await res.json(); msg = e.detail || msg; } catch {}
+    toast(msg, 'error'); return;
+  }
   const data = await res.json();
   closeEditModal();
   toast(`✅ ${data.name} сохранён`, 'success');

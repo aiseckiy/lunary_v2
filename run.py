@@ -4,9 +4,18 @@
 import threading
 import signal
 import sys
+import logging
 import uvicorn
 from dotenv import load_dotenv
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s:%(name)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+sys.stdout.reconfigure(encoding="utf-8")
+
 from api import app
 from bot import run_bot
 from database import init_db

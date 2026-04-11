@@ -13,13 +13,15 @@ logger = logging.getLogger(__name__)
 KASPI_TOKEN = os.getenv("KASPI_TOKEN")
 KASPI_SHOP_ID = os.getenv("KASPI_SHOP_ID")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://cmbdlnpvsbxplispwlvr.supabase.co")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 PROXY_URL = f"{SUPABASE_URL}/functions/v1/kaspi-proxy"
 
 
 def _proxy(action: str, params: dict = None) -> dict:
     """Запрос к Kaspi через Supabase Edge Function"""
     try:
-        r = requests.post(PROXY_URL, json={"action": action, "params": params or {}}, timeout=30)
+        headers = {"Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}"}
+        r = requests.post(PROXY_URL, json={"action": action, "params": params or {}}, headers=headers, timeout=30)
         data = r.json()
         if data.get("success"):
             return data.get("data")

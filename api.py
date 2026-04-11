@@ -147,7 +147,7 @@ def _start_kaspi_sync_loop():
     import threading, time, json
     from database import KaspiOrder, SessionLocal as SL
 
-    STATES = ["NEW", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
+    STATES = ["NEW", "APPROVED", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
 
     def sync():
         while True:
@@ -804,8 +804,12 @@ def _deduct_stock_for_order(order_row, db: Session):
                 continue
             product = None
             # Способ 2a: по merchantSku (код товара продавца из Kaspi API)
+            # kaspi_sku в БД может быть "101438761_943240382" или просто "101438761"
             if merchant_sku:
-                product = db.query(Product).filter(Product.kaspi_sku == merchant_sku).first()
+                product = db.query(Product).filter(
+                    (Product.kaspi_sku == merchant_sku) |
+                    Product.kaspi_sku.like(f"{merchant_sku}_%")
+                ).first()
             # Способ 2b: по названию (ilike первые 30 символов)
             if not product and name:
                 product = db.query(Product).filter(

@@ -101,15 +101,19 @@
   .products-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
   .card-stock { font-size: 22px !important; }
   .card-name { font-size: 13px !important; }
-  .toolbar { gap: 8px; }
-  .filter-rows { gap: 4px; }
+  .toolbar { gap: 6px !important; flex-wrap: wrap !important; }
+  .filter-rows { gap: 4px !important; }
   .stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
   .stat { padding: 14px !important; }
   .stat-value { font-size: 24px !important; }
-  .modal { width: 100% !important; border-radius: 20px 20px 0 0 !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; top: auto !important; max-height: 92vh !important; }
+  /* Move modal bottom sheet */
   .overlay { align-items: flex-end !important; padding: 0 !important; }
-  .search-input { font-size: 16px !important; } /* prevent iOS zoom */
+  .modal { width: 100% !important; border-radius: 20px 20px 0 0 !important; position: relative !important; max-height: 92vh !important; }
+  .search-input { font-size: 16px !important; }
   .form-input { font-size: 16px !important; }
+  /* Sort btn and add btn full row */
+  .btn-add { flex: 1 !important; justify-content: center !important; }
+  .sort-btn { font-size: 12px !important; padding: 8px 10px !important; }
 }
 </style>
 </head>
@@ -134,7 +138,9 @@
 <!-- MOBILE HEADER -->
 <div class="mobile-header">
   <div class="mobile-logo">Lunary <span>OS</span></div>
-  <button class="btn-add" onclick="openAddModal()" style="padding:7px 14px;font-size:13px">+ Добавить</button>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn-add" onclick="openAddModal()" style="padding:7px 14px;font-size:13px">+ Добавить</button>
+  </div>
 </div>
 
 <div class="main-content">

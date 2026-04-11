@@ -173,11 +173,12 @@ body {
 
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
-  .sidebar { display: none; }
-  .main-content { margin-left: 0; }
-  .mobile-header { display: flex; }
+  .sidebar { display: none !important; }
+  .main-content { margin-left: 0 !important; width: 100% !important; }
+  .app-shell { display: block !important; }
+  .mobile-header { display: flex !important; }
   .bottom-nav { display: none !important; }
-  .page-container { padding: 16px 16px 32px; }
+  .page-container { padding: 16px 16px 32px !important; }
   /* Bottom sheet modals */
   .modal-box {
     width: 100% !important;

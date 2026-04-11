@@ -178,6 +178,8 @@ window.qsAssignBarcode = async function(productId) {
     closeQuickScan();
     qsToast(`✅ Штрихкод присвоен`);
     if (typeof load === 'function') load();
+    if (typeof openMoveModal === 'function') openMoveModal(productId);
+    else window.location.href = `/?open=${productId}`;
   } else {
     qsToast('Ошибка сохранения', true);
   }

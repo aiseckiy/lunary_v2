@@ -47,6 +47,7 @@ def get_order_entries(order_id: str) -> list:
         attr = item.get("attributes", {})
         entries.append({
             "name": attr.get("name") or attr.get("category", {}).get("title", "—"),
+            "merchantSku": attr.get("merchantSku", ""),
             "qty": attr.get("quantity", 1),
             "basePrice": int(attr.get("basePrice", 0)),
             "price": int(attr.get("totalPrice", 0)),

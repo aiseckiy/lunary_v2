@@ -189,7 +189,7 @@ def _start_kaspi_sync_loop():
                         product_name, sku, quantity = None, None, None
                         if entries:
                             product_name = entries[0].get("name")
-                            sku = entries[0].get("sku") or entries[0].get("merchantProduct", {}).get("code", "") if isinstance(entries[0], dict) else None
+                            sku = entries[0].get("merchantSku") or entries[0].get("sku", "") if isinstance(entries[0], dict) else None
                             quantity = sum(e.get("qty", e.get("quantity", 1)) for e in entries if isinstance(e, dict))
                         addr_obj = o.get("deliveryAddress")
                         address = addr_obj.get("formattedAddress", "") if isinstance(addr_obj, dict) else str(addr_obj or "")
@@ -764,6 +764,57 @@ def _format_order_notification(o: dict) -> str:
     return "\n".join(lines)
 
 
+ARCHIVE_STATES = {"ARCHIVE", "Выдан"}
+
+def _deduct_stock_for_order(order_row, db: Session):
+    """Списывает остатки по заказу. Вызывается один раз при переходе в ARCHIVE."""
+    from database import Product
+    import json
+
+    deducted = []
+
+    # Способ 1: у заказа есть kaspi_sku + quantity (XML-импорт или расширенные поля)
+    if order_row.sku and order_row.quantity:
+        product = db.query(Product).filter(Product.kaspi_sku == order_row.sku).first()
+        if product:
+            crud.add_movement(product.id, order_row.quantity, "sale", db,
+                              source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
+            deducted.append((product.name, order_row.quantity))
+            return deducted
+
+    # Способ 2: entries JSON — матчим по kaspi_sku через name
+    if order_row.entries:
+        try:
+            entries = json.loads(order_row.entries)
+        except Exception:
+            entries = []
+        for entry in entries:
+            name = entry.get("name", "")
+            merchant_sku = entry.get("merchantSku", "")
+            qty = int(entry.get("qty", 1))
+            if qty <= 0:
+                continue
+            product = None
+            # Способ 2a: по merchantSku (код товара продавца из Kaspi API)
+            if merchant_sku:
+                product = db.query(Product).filter(Product.kaspi_sku == merchant_sku).first()
+            # Способ 2b: по названию (ilike первые 30 символов)
+            if not product and name:
+                product = db.query(Product).filter(
+                    Product.kaspi_sku.isnot(None),
+                    Product.name.ilike(f"%{name[:30]}%")
+                ).first()
+            if not product and name:
+                # fallback: точное совпадение по name
+                product = db.query(Product).filter(Product.name == name).first()
+            if product:
+                crud.add_movement(product.id, qty, "sale", db,
+                                  source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
+                deducted.append((product.name, qty))
+
+    return deducted
+
+
 @app.post("/api/kaspi/orders/sync")
 def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)):
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
@@ -772,23 +823,39 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
     import json
     added = 0
     updated = 0
+    deducted_total = 0
     new_orders = []
     for o in orders:
         existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+        new_state = o.get("state", "")
         if existing:
-            existing.state = o.get("state", existing.state)
+            old_state = existing.state
+            existing.state = new_state
             updated += 1
+            # Списываем если только что перешёл в архив
+            if new_state in ARCHIVE_STATES and old_state not in ARCHIVE_STATES and not existing.stock_deducted:
+                _deduct_stock_for_order(existing, db)
+                existing.stock_deducted = 1
+                deducted_total += 1
         else:
-            db.add(KaspiOrder(
+            ko = KaspiOrder(
                 order_id=str(o["id"]),
-                state=o.get("state", ""),
+                state=new_state,
                 total=int(o.get("total", 0)),
                 customer=o.get("customer", ""),
                 entries=json.dumps(o.get("entries", []), ensure_ascii=False),
-                order_date=str(o.get("date", ""))
-            ))
+                order_date=str(o.get("date", "")),
+                stock_deducted=0,
+            )
+            db.add(ko)
+            db.flush()  # чтобы ko.id был доступен
             added += 1
             new_orders.append(o)
+            # Если новый заказ сразу в архиве — тоже списываем
+            if new_state in ARCHIVE_STATES:
+                _deduct_stock_for_order(ko, db)
+                ko.stock_deducted = 1
+                deducted_total += 1
     db.commit()
 
     # Уведомления о новых заказах (только ACCEPTED/PICKUP/KASPI_DELIVERY)
@@ -797,7 +864,7 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
         if o.get("state") in notify_states:
             _send_tg_notification(_format_order_notification(o))
 
-    return {"added": added, "updated": updated}
+    return {"added": added, "updated": updated, "stock_deducted": deducted_total}
 
 
 @app.get("/api/kaspi/orders/local")

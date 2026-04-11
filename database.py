@@ -67,6 +67,7 @@ class KaspiOrder(Base):
     delivery_cost_seller = Column(Integer, default=0)
     delivery_compensation = Column(Integer, default=0)
     source = Column(String, default="kaspi_api")  # kaspi_api | xml_import
+    stock_deducted = Column(Integer, default=0)  # 1 если остатки уже списаны
 
 
 class Movement(Base):
@@ -110,6 +111,7 @@ def init_db():
         ("kaspi_orders", "delivery_cost_seller", "INTEGER DEFAULT 0"),
         ("kaspi_orders", "delivery_compensation", "INTEGER DEFAULT 0"),
         ("kaspi_orders", "source", "TEXT DEFAULT 'kaspi_api'"),
+        ("kaspi_orders", "stock_deducted", "INTEGER DEFAULT 0"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

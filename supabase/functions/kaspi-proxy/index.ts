@@ -50,7 +50,8 @@ Deno.serve(async (req) => {
           const pd = await pr.json();
           const attr = pd?.data?.attributes || {};
           entry.attributes = entry.attributes || {};
-          entry.attributes.name = attr.name || attr.code || '—';
+          entry.attributes.name = attr.name || '—';
+          entry.attributes.merchantSku = attr.code || '';
         } catch { /* ignore */ }
       }));
       return new Response(JSON.stringify({ success: true, data }), {

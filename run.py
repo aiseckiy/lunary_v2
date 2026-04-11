@@ -14,7 +14,6 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s:%(name)s: %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-sys.stdout.reconfigure(encoding="utf-8")
 
 from api import app
 from bot import run_bot

@@ -100,6 +100,8 @@ class ProductUpdate(BaseModel):
     brand: Optional[str] = None
     price: Optional[int] = None
     kaspi_sku: Optional[str] = None
+    cost_price: Optional[int] = None
+    supplier: Optional[str] = None
 
 
 class MovementCreate(BaseModel):
@@ -330,7 +332,9 @@ def list_products(db: Session = Depends(get_db)):
             "low": s["stock"] <= s["product"].min_stock,
             "brand": s["product"].brand or "",
             "price": s["product"].price,
-            "kaspi_sku": s["product"].kaspi_sku or ""
+            "kaspi_sku": s["product"].kaspi_sku or "",
+            "cost_price": s["product"].cost_price,
+            "supplier": s["product"].supplier or ""
         }
         for s in stocks
     ]
@@ -910,8 +914,8 @@ def products_export_xlsx(db: Session = Depends(get_db)):
     )
 
     headers = ["SKU (Kaspi)", "Артикул (внутр.)", "Название товара", "Бренд",
-               "Категория", "Цена (₸)", "Остаток", "Мин. остаток", "Ед. изм."]
-    col_widths = [28, 18, 50, 15, 20, 12, 12, 14, 10]
+               "Категория", "Цена (₸)", "Закуп (₸)", "Маржа %", "Остаток", "Мин. остаток", "Ед. изм.", "Поставщик"]
+    col_widths = [28, 18, 50, 15, 20, 12, 12, 10, 12, 14, 10, 30]
 
     for ci, (h, w) in enumerate(zip(headers, col_widths), 1):
         cell = ws.cell(1, ci, h)
@@ -935,9 +939,12 @@ def products_export_xlsx(db: Session = Depends(get_db)):
             p.brand or "",
             p.category or "",
             p.price or "",
+            p.cost_price or "",
+            round((p.price - p.cost_price) / p.price * 100) if p.price and p.cost_price and p.price > 0 else "",
             stock,
             p.min_stock or 0,
             p.unit or "шт",
+            p.supplier or "",
         ]
         for ci, val in enumerate(values, 1):
             cell = ws.cell(ri, ci, val)

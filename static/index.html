@@ -314,6 +314,14 @@
           <label class="form-label">Цена (₸)</label>
           <input class="form-input" id="em-price" type="number" placeholder="1500" min="0">
         </div>
+        <div class="form-group">
+          <label class="form-label">Закупочная цена (₸)</label>
+          <input class="form-input" id="em-cost-price" type="number" placeholder="900" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Поставщик</label>
+        <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD">
       </div>
       <div class="form-group">
         <label class="form-label">SKU Kaspi <span style="font-size:11px;color:#9ca3af;font-weight:400">(авто из файла активных карточек)</span></label>
@@ -517,7 +525,7 @@ function productCard(p) {
       <div class="card-bottom">
         <div>
           <div class="card-stock ${p.low?'low':'ok'}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>
-          ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸</div>` : ''}
+          ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${p.cost_price && p.price > p.cost_price ? ` <span style="color:#10b981;font-size:11px;font-weight:500">+${Math.round((p.price-p.cost_price)/p.price*100)}%</span>` : ''}</div>` : ''}
         </div>
         <div class="card-actions" onclick="event.stopPropagation()">
           <button class="card-btn red" onclick="quickMove(${p.id},'sale')" title="Продажа">🛒</button>
@@ -671,6 +679,8 @@ function openEditModal(id) {
   document.getElementById('em-min').value = p.min_stock ?? 5;
   document.getElementById('em-brand').value = p.brand || '';
   document.getElementById('em-price').value = p.price || '';
+  document.getElementById('em-cost-price').value = p.cost_price || '';
+  document.getElementById('em-supplier').value = p.supplier || '';
   document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -705,11 +715,13 @@ async function submitEdit() {
 
   const brand = document.getElementById('em-brand').value.trim() || null;
   const price = parseInt(document.getElementById('em-price').value) || null;
+  const cost_price = parseInt(document.getElementById('em-cost-price').value) || null;
+  const supplier = document.getElementById('em-supplier').value.trim() || null;
   const kaspi_sku = document.getElementById('em-kaspi-sku').value.trim() || null;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, kaspi_sku})
+    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, kaspi_sku})
   });
 
   if (!res.ok) { toast('Ошибка сохранения', 'error'); return; }

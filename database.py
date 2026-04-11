@@ -32,6 +32,8 @@ class Product(Base):
     brand = Column(String, nullable=True)
     price = Column(Integer, nullable=True)  # цена в тенге
     kaspi_sku = Column(String, nullable=True)  # SKU карточки в Kaspi
+    cost_price = Column(Integer, nullable=True)  # закупочная цена
+    supplier = Column(String, nullable=True)  # поставщик
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -89,6 +91,8 @@ def init_db():
     new_columns = [
         ("products", "price", "INTEGER"),
         ("products", "kaspi_sku", "TEXT"),
+        ("products", "cost_price", "INTEGER"),
+        ("products", "supplier", "TEXT"),
         ("kaspi_orders", "product_name", "TEXT"),
         ("kaspi_orders", "sku", "TEXT"),
         ("kaspi_orders", "quantity", "INTEGER"),

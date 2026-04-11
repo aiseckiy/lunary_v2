@@ -214,7 +214,7 @@
         <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="mm-sku">—</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="closeMoveModal();openEditModal(selectedId)" title="Редактировать карточку" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px;line-height:1;color:var(--text2)">✏️</button>
+        <button onclick="closeMoveModal();openEditModal(selectedId,true)" title="Редактировать карточку" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px;line-height:1;color:var(--text2)">✏️</button>
         <button class="modal-close" onclick="closeMoveModal()">×</button>
       </div>
     </div>
@@ -371,9 +371,12 @@
 <div class="overlay edit-modal" id="edit-modal" onclick="closeEditModal(event)">
   <div class="modal">
     <div class="modal-header">
-      <div>
-        <div class="modal-title">✏️ Редактировать товар</div>
-        <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="em-sku-label">—</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="em-back-btn" onclick="closeEditModal();openMoveModal(editId)" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:var(--text2)">←</button>
+        <div>
+          <div class="modal-title">✏️ Редактировать товар</div>
+          <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="em-sku-label">—</div>
+        </div>
       </div>
       <button class="modal-close" onclick="closeEditModal()">×</button>
     </div>
@@ -1029,9 +1032,10 @@ async function submitAdd() {
 // ── Edit modal ──────────────────────────────────────────
 let editId = null;
 
-function openEditModal(id) {
+function openEditModal(id, fromMove = false) {
   const p = allProducts.find(x => x.id === id);
   editId = id;
+  document.getElementById('em-back-btn').style.display = fromMove ? '' : 'none';
   document.getElementById('em-sku-label').textContent = p.sku;
   document.getElementById('em-name').value = p.name;
   document.getElementById('em-sku').value = p.sku;

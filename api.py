@@ -172,8 +172,14 @@ def _start_kaspi_sync_loop():
 
                     existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
                     if existing:
+                        old_state = existing.state
+                        new_state = o.get("state", existing.state)
+                        # Списываем остатки при переходе в архив
+                        if new_state in ARCHIVE_STATES and old_state not in ARCHIVE_STATES and not existing.stock_deducted:
+                            _deduct_stock_for_order(existing, db)
+                            existing.stock_deducted = 1
                         # Обновляем статус и основные поля
-                        existing.state = o.get("state", existing.state)
+                        existing.state = new_state
                         existing.total = int(o.get("total", existing.total or 0))
                         existing.customer = o.get("customer", existing.customer)
                         existing.delivery_method = o.get("deliveryMode", existing.delivery_method)

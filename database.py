@@ -122,14 +122,16 @@ def init_db():
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:
+            # IF NOT EXISTS — PostgreSQL 9.6+, не бросает исключение если колонка уже есть
+            col_def = col_type.split()[0]  # берём только тип без DEFAULT для IF NOT EXISTS
             try:
-                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_type}"))
                 conn.commit()
-                print(f"[init_db] Добавлена колонка {table}.{col}", flush=True)
+                print(f"[init_db] OK {table}.{col}", flush=True)
             except Exception as e:
-                err = str(e)
-                if "already exists" in err or "уже существует" in err or "duplicate column" in err.lower():
-                    pass  # нормально
-                else:
-                    print(f"[init_db] Пропуск {table}.{col}: {err[:120]}", flush=True)
+                print(f"[init_db] ОШИБКА {table}.{col}: {str(e)[:200]}", flush=True)
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
     print("[init_db] Готово", flush=True)

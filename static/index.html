@@ -31,7 +31,7 @@
 .filter-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; align-items:center; }
 .filter-row::-webkit-scrollbar { display:none; }
 .filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:72px; }
-.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
 .product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }
@@ -185,6 +185,7 @@
         <button class="move-btn writeoff" onclick="doMove('writeoff')">🗑 Списание</button>
         <button class="move-btn ret" onclick="doMove('return')">↩️ Возврат</button>
       </div>
+      <input type="text" id="mm-note" placeholder="Комментарий (необязательно)" style="width:100%;margin-top:10px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;color:#111827;outline:none;background:#f9fafb">
       <button class="btn-cancel-move" onclick="closeMoveModal()">Закрыть</button>
     </div>
   </div>
@@ -340,7 +341,7 @@
 <!-- Bottom nav (mobile) -->
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
-    <a class="bnav-item active" href="/"><span class="bnav-icon">🏠</span>Склад</a>
+    <a class="bnav-item active" href="/admin"><span class="bnav-icon">🏠</span>Склад</a>
     <a class="bnav-item" href="/admin/scanner"><span class="bnav-icon">📷</span>Сканер</a>
     <a class="bnav-item" href="/admin/history"><span class="bnav-icon">📋</span>История</a>
     <a class="bnav-item" href="/admin/analytics"><span class="bnav-icon">📊</span>Аналитика</a>
@@ -517,22 +518,18 @@ function render() {
 
 function productCard(p) {
   return `
-    <div class="product-card ${p.low?'low':''}" onclick="openMoveModal(${p.id})">
+    <div class="product-card ${p.low?'low':''}" onclick="openMoveModal(${p.id})" style="cursor:pointer">
       <div class="card-top">
         <div class="card-name">${p.name}</div>
         <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️':'✓'}</span>
       </div>
-      <div class="card-sku">${p.sku}${p.kaspi_sku ? ` <span style="color:#6366f1;opacity:.7">K</span>` : ''}</div>
+      <div class="card-sku">${p.sku}${p.kaspi_sku ? ` <span style="color:#6366f1;opacity:.7;font-size:10px">K</span>` : ''}</div>
       <div class="card-bottom">
         <div>
           <div class="card-stock ${p.low?'low':'ok'}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>
           ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${p.cost_price && p.price > p.cost_price ? ` <span style="color:#10b981;font-size:11px;font-weight:500">+${Math.round((p.price-p.cost_price)/p.price*100)}%</span>` : ''}</div>` : ''}
         </div>
-        <div class="card-actions" onclick="event.stopPropagation()">
-          <button class="card-btn red" onclick="quickMove(${p.id},'sale')" title="Продажа">🛒</button>
-          <button class="card-btn green" onclick="quickMove(${p.id},'income')" title="Приход">📦</button>
-          <button class="card-btn" onclick="openEditModal(${p.id})" title="Редактировать">✏️</button>
-        </div>
+        <button class="card-btn" onclick="event.stopPropagation();openEditModal(${p.id})" title="Редактировать" style="opacity:0.4">✏️</button>
       </div>
       <div class="card-tags">
         ${p.category ? `<span class="card-tag">${p.category}</span>` : ''}
@@ -552,6 +549,7 @@ function openMoveModal(id) {
   document.getElementById('mm-stock').className = 'big-num ' + (p.low?'low':'ok');
   document.getElementById('mm-unit').textContent = p.unit;
   document.getElementById('mm-qty').value = 1;
+  document.getElementById('mm-note').value = '';
   document.getElementById('move-modal').classList.add('open');
 }
 
@@ -562,11 +560,14 @@ function closeMoveModal(e) {
 
 async function doMove(type) {
   const qty = parseInt(document.getElementById('mm-qty').value)||1;
+  const note = document.getElementById('mm-note').value.trim() || null;
   const res = await fetch(`/api/products/${selectedId}/movement`, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({quantity:qty, type, source:'web'})
+    body: JSON.stringify({quantity:qty, type, source:'web', note})
   });
+  if (!res.ok) { toast('Ошибка сохранения', 'error'); return; }
   const data = await res.json();
+  document.getElementById('mm-note').value = '';
   closeMoveModal();
   toast(`✅ ${data.product}: остаток ${data.new_stock}`, 'success');
   load();
@@ -577,6 +578,7 @@ async function quickMove(id, type) {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({quantity:1, type, source:'web'})
   });
+  if (!res.ok) { toast('Ошибка: ' + res.status, 'error'); return; }
   const data = await res.json();
   toast(`${type==='sale'?'🛒 -1':'📦 +1'} ${data.product} → ${data.new_stock}`, 'success');
   load();

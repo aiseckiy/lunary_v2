@@ -35,7 +35,8 @@ class Product(Base):
     min_stock = Column(Integer, default=5)
     brand = Column(String, nullable=True)
     price = Column(Integer, nullable=True)  # цена в тенге
-    kaspi_sku = Column(String, nullable=True)  # SKU карточки в Kaspi
+    kaspi_sku = Column(String, nullable=True)   # ID для матчинга заказов (101602457_xxx)
+    kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
     cost_price = Column(Integer, nullable=True)  # закупочная цена
     supplier = Column(String, nullable=True)  # поставщик
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -98,6 +99,7 @@ def init_db():
         ("products", "kaspi_sku", "TEXT"),
         ("products", "cost_price", "INTEGER"),
         ("products", "supplier", "TEXT"),
+        ("products", "kaspi_article", "TEXT"),
         ("kaspi_orders", "product_name", "TEXT"),
         ("kaspi_orders", "sku", "TEXT"),
         ("kaspi_orders", "quantity", "INTEGER"),

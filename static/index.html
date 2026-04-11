@@ -387,8 +387,8 @@
       </div>
       <div class="edit-modal field-row">
         <div class="form-group">
-          <label class="form-label">Артикул</label>
-          <input class="form-input" id="em-sku" style="text-transform:uppercase">
+          <label class="form-label">Свой артикул</label>
+          <input class="form-input" id="em-sku" style="text-transform:uppercase" placeholder="SA043">
         </div>
         <div class="form-group">
           <label class="form-label">Штрихкод</label>
@@ -435,9 +435,15 @@
         <label class="form-label">Поставщик</label>
         <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD">
       </div>
-      <div class="form-group">
-        <label class="form-label">SKU Kaspi <span style="font-size:11px;color:#9ca3af;font-weight:400">(авто из файла активных карточек)</span></label>
-        <input class="form-input" id="em-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
+      <div class="edit-modal field-row">
+        <div class="form-group">
+          <label class="form-label">Арт. Kaspi <span style="font-size:11px;color:#9ca3af;font-weight:400">(KSP_xxx)</span></label>
+          <input class="form-input" id="em-kaspi-article" placeholder="KSP_10160245" style="font-family:monospace;font-size:12px">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kaspi SKU <span style="font-size:11px;color:#9ca3af;font-weight:400">(для заказов)</span></label>
+          <input class="form-input" id="em-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
+        </div>
       </div>
       <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
       <button class="btn-cancel-move" style="margin-top:8px" onclick="closeEditModal()">Отмена</button>
@@ -1047,6 +1053,7 @@ function openEditModal(id, fromMove = false) {
   document.getElementById('em-price').value = p.price || '';
   document.getElementById('em-cost-price').value = p.cost_price || '';
   document.getElementById('em-supplier').value = p.supplier || '';
+  document.getElementById('em-kaspi-article').value = p.kaspi_article || '';
   document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -1084,10 +1091,11 @@ async function submitEdit() {
   const cost_price = parseInt(document.getElementById('em-cost-price').value) || null;
   const supplier = document.getElementById('em-supplier').value.trim() || null;
   const kaspi_sku = document.getElementById('em-kaspi-sku').value.trim() || null;
+  const kaspi_article = document.getElementById('em-kaspi-article').value.trim() || null;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, kaspi_sku})
+    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, kaspi_sku, kaspi_article})
   });
 
   if (!res.ok) {

@@ -110,6 +110,7 @@ class ProductUpdate(BaseModel):
     brand: Optional[str] = None
     price: Optional[int] = None
     kaspi_sku: Optional[str] = None
+    kaspi_article: Optional[str] = None
     cost_price: Optional[int] = None
     supplier: Optional[str] = None
 
@@ -444,7 +445,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Товар не найден")
     stock = crud.get_stock(product_id, db)
     return {"product": {
-        "id": p.id, "name": p.name, "sku": p.sku or "", "kaspi_sku": p.kaspi_sku or "",
+        "id": p.id, "name": p.name, "sku": p.sku or "", "kaspi_sku": p.kaspi_sku or "", "kaspi_article": p.kaspi_article or "",
         "category": p.category or "", "unit": p.unit or "шт",
         "price": p.price, "min_stock": p.min_stock,
         "stock": stock, "low": stock <= (p.min_stock or 0),

@@ -30,6 +30,7 @@
 .filter-drop-btn { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; color:var(--text2); cursor:pointer; white-space:nowrap; font-weight:500; display:inline-flex; align-items:center; gap:5px; transition:all .15s; position:relative; }
 .filter-drop-btn:hover { border-color:#d1d5db; color:var(--text); }
 .filter-drop-btn.active { background:var(--text); border-color:var(--text); color:#fff; }
+#f-low.active { background:#fee2e2; border-color:var(--red); color:var(--red); }
 .fdrop-menu { display:none; position:absolute; top:calc(100% + 6px); left:0; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.12); z-index:400; min-width:230px; max-height:400px; overflow-y:auto; padding:6px; scrollbar-width:thin; }
 .fdrop-menu.open { display:block; }
 .fdrop-item { padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; color:var(--text); display:flex; align-items:center; gap:6px; }
@@ -113,11 +114,14 @@
   .stats { grid-template-columns:calc(50% - 5px) calc(50% - 5px) !important; gap:10px !important; }
   .stat { padding:12px !important; }
   .stat-value { font-size:22px !important; }
+  /* Toolbar: поиск на всю ширину, остальное в ряд */
   .toolbar { flex-wrap:wrap !important; gap:8px !important; }
-  .search-input { width:100% !important; font-size:16px !important; }
-  #sort-select { flex:1 !important; font-size:13px !important; }
-  .btn-add { flex:1 !important; font-size:13px !important; padding:9px 10px !important; }
-  .filter-rows { gap:6px !important; }
+  .search-input { width:100% !important; flex:none !important; font-size:16px !important; }
+  #sort-select { flex:1 !important; font-size:13px !important; min-width:0 !important; }
+  .btn-add { font-size:13px !important; padding:9px 12px !important; }
+  /* Скрыть Excel на мобиле — есть в меню */
+  .toolbar > a.sort-btn[download] { display:none !important; }
+  .filter-rows { gap:6px !important; flex-wrap:wrap !important; }
   .overlay { align-items:flex-end !important; padding:0 !important; }
   .modal { width:100% !important; border-radius:20px 20px 0 0 !important; max-height:92vh !important; }
   .form-input { font-size:16px !important; }
@@ -156,6 +160,7 @@
 <div class="page-container">
   <div class="stats" id="stats"></div>
 
+  <!-- Строка 1: поиск + сортировка + кнопки -->
   <div class="toolbar">
     <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу, штрихкоду..." oninput="saveFilters();render()">
     <select class="sort-btn" id="sort-select" onchange="saveFilters();render()">
@@ -164,13 +169,13 @@
       <option value="stock-desc">↓ Остаток (больше)</option>
       <option value="name-asc">А-Я Название</option>
     </select>
-    <span class="filter-pill" id="f-low" onclick="toggleLow()" style="display:inline-flex;align-items:center;gap:5px"><span>⚠️</span> Заканчивается</span>
-    <button class="btn-add" onclick="openAddModal()"><span style="font-size:16px;line-height:1">+</span> Добавить товар</button>
+    <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
     <a class="sort-btn" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
   </div>
 
-  <!-- Фильтры -->
+  <!-- Строка 2: фильтры -->
   <div class="filter-rows">
+    <button class="filter-drop-btn" id="f-low" onclick="toggleLow()">⚠️ Заканчивается</button>
     <div style="position:relative">
       <button class="filter-drop-btn" id="cat-btn" onclick="toggleDrop('cat')">
         <span id="cat-label">Категория</span> <span style="font-size:10px">▼</span>

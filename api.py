@@ -385,6 +385,13 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
     return {"id": p.id, "name": p.name, "sku": p.sku}
 
 
+@app.get("/api/products/suppliers")
+def get_suppliers(db: Session = Depends(get_db)):
+    from database import Product as _P
+    rows = db.query(_P.supplier).filter(_P.supplier != None, _P.supplier != "").distinct().all()
+    return sorted([r[0] for r in rows if r[0]])
+
+
 @app.get("/api/products/search")
 def search_products(q: str, db: Session = Depends(get_db)):
     products = crud.find_product(q, db)

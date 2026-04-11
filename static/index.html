@@ -434,7 +434,8 @@
       </div>
       <div class="form-group">
         <label class="form-label">Поставщик</label>
-        <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD">
+        <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD" list="suppliers-list" autocomplete="off">
+        <datalist id="suppliers-list"></datalist>
       </div>
       <div class="edit-modal field-row">
         <div class="form-group" style="flex:1 1 100%">
@@ -1053,6 +1054,10 @@ function openEditModal(id, fromMove = false) {
   document.getElementById('em-supplier').value = p.supplier || '';
   document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
   document.getElementById('edit-modal').classList.add('open');
+  fetch('/api/products/suppliers').then(r => r.json()).then(list => {
+    const dl = document.getElementById('suppliers-list');
+    dl.innerHTML = list.map(s => `<option value="${s}">`).join('');
+  }).catch(() => {});
 }
 
 function closeEditModal(e) {

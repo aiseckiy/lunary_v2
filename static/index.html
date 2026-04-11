@@ -101,19 +101,24 @@
   .products-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
   .card-stock { font-size: 22px !important; }
   .card-name { font-size: 13px !important; }
-  .toolbar { gap: 6px !important; flex-wrap: wrap !important; }
-  .filter-rows { gap: 4px !important; }
+  .card-bottom { flex-wrap: wrap; gap: 4px; }
   .stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
   .stat { padding: 14px !important; }
   .stat-value { font-size: 24px !important; }
-  /* Move modal bottom sheet */
+  /* Toolbar на мобиле: 2 строки */
+  .toolbar { display: grid !important; grid-template-columns: 1fr auto !important; gap: 8px !important; }
+  .search-input { grid-column: 1 / -1 !important; font-size: 16px !important; }
+  #sort-select { font-size: 13px !important; }
+  #f-low { order: 3; }
+  .btn-add { order: 2; padding: 9px 12px !important; font-size: 13px !important; }
+  .toolbar > a { order: 4; }
+  .filter-rows { gap: 4px !important; }
+  .filter-row-label { min-width: 60px !important; font-size: 12px !important; }
+  /* Modal bottom sheet */
   .overlay { align-items: flex-end !important; padding: 0 !important; }
   .modal { width: 100% !important; border-radius: 20px 20px 0 0 !important; position: relative !important; max-height: 92vh !important; }
-  .search-input { font-size: 16px !important; }
   .form-input { font-size: 16px !important; }
-  /* Sort btn and add btn full row */
-  .btn-add { flex: 1 !important; justify-content: center !important; }
-  .sort-btn { font-size: 12px !important; padding: 8px 10px !important; }
+  .form-row { grid-template-columns: 1fr !important; }
 }
 </style>
 </head>

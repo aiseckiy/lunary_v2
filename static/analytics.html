@@ -77,7 +77,15 @@
 .corr-high { background:#22c55e1a; color:#22c55e; }
 .corr-mid { background:#f9731620; color:#f97316; }
 .corr-low { background:#f3f4f6; color:#9ca3af; }
-
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-card { padding: 12px !important; }
+  .stat-value { font-size: 20px !important; }
+  .corr-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .ppill { font-size: 12px !important; padding: 5px 10px !important; }
+  table { font-size: 12px !important; }
+  td, th { padding: 8px 8px !important; }
+}
 </style>
 <link rel="stylesheet" href="/static/layout.css">
 <script src="/static/datepicker.js"></script>

@@ -64,6 +64,14 @@ td { padding:12px 16px; vertical-align:middle; }
 .sum-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; }
 .sum-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; font-weight:600; margin-bottom:6px; }
 .sum-value { font-size:22px; font-weight:800; color:var(--text); }
+@media (max-width: 768px) {
+  .history-table { font-size: 13px !important; }
+  .history-table td, .history-table th { padding: 10px 10px !important; }
+  .summary { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .sum-card { padding: 12px !important; }
+  .sum-value { font-size: 18px !important; }
+  .ppill { font-size: 12px !important; padding: 5px 10px !important; }
+}
 </style>
 <link rel="stylesheet" href="/static/layout.css">
 <script src="/static/datepicker.js"></script>

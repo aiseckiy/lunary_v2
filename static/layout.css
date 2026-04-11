@@ -31,13 +31,8 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- APP SHELL ---- */
-.app-shell {
-  display: block;
-  min-height: 100vh;
-  max-width: 100%;
-  overflow-x: hidden;
-}
+/* ---- APP SHELL (только sidebar) ---- */
+.app-shell { display: contents; }
 
 /* ---- SIDEBAR (desktop) ---- */
 .sidebar {
@@ -106,19 +101,17 @@ body {
 .main-content {
   margin-left: var(--sidebar-w);
   min-width: 0;
-  max-width: 100%;
   overflow-x: hidden;
 }
+
+/* ---- MOBILE HEADER ---- */
 
 .page-container {
   max-width: 1100px;
   margin: 0 auto;
   padding: 28px 28px;
-  min-width: 0;
-  overflow-x: hidden;
 }
 
-/* ---- MOBILE HEADER (hidden on desktop) ---- */
 .mobile-header {
   display: none;
   padding: 12px 16px;
@@ -183,10 +176,10 @@ body {
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .sidebar { display: none !important; }
-  .main-content { margin-left: 0 !important; width: 100vw !important; max-width: 100vw !important; }
-  .mobile-header { display: flex !important; width: 100vw !important; max-width: 100vw !important; }
+  .main-content { margin-left: 0 !important; }
+  .mobile-header { display: flex !important; }
   .bottom-nav { display: none !important; }
-  .page-container { padding: 16px 16px 32px !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
+  .page-container { padding: 16px 16px 32px !important; }
   /* Bottom sheet modals */
   .modal-box {
     width: 100% !important;

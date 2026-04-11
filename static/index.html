@@ -31,7 +31,7 @@
 .filter-row { display:flex; gap:8px; overflow-x:auto; overflow-y:visible; padding-bottom:4px; scrollbar-width:none; align-items:center; width:100%; min-width:0; -webkit-overflow-scrolling:touch; }
 .filter-row::-webkit-scrollbar { display:none; }
 .filter-row-label { font-size:13px; color:#9ca3af; font-weight:500; align-self:center; flex-shrink:0; min-width:64px; }
-.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; width:100%; min-width:0; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr)); gap:14px; width:100%; min-width:0; box-sizing:border-box; }
 .product-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }

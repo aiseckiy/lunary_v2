@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, text
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import NullPool
 from datetime import datetime
 
 import os
@@ -12,18 +13,11 @@ if DATABASE_URL.startswith("postgres://"):
 
 try:
     import psycopg2  # noqa
-    engine = create_engine(
-        DATABASE_URL,
-        pool_pre_ping=True,
-        pool_recycle=300,
-        pool_size=5,
-        max_overflow=10,
-    )
+    engine = create_engine(DATABASE_URL, poolclass=NullPool)
 except ImportError:
     engine = create_engine(
         DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1),
-        pool_pre_ping=True,
-        pool_recycle=300,
+        poolclass=NullPool,
     )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

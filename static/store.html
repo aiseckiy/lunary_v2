@@ -326,6 +326,35 @@ body {
   .mobile-filters { display: none; }
 }
 
+/* ── PAGINATION ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.page-btn:hover:not(:disabled) { background: #f3f4f6; color: var(--text); }
+.page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.page-btn:disabled { opacity: 0.35; cursor: default; }
+.page-ellipsis { color: var(--text3); padding: 0 4px; font-size: 14px; }
+
 /* ── SKELETON ── */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -368,7 +397,7 @@ body {
   <main class="store-content">
     <div class="store-toolbar">
       <div class="results-count" id="results-count">Загрузка...</div>
-      <select class="sort-select" id="sort-select" onchange="render()">
+      <select class="sort-select" id="sort-select" onchange="currentPage=1;render()">
         <option value="name">По названию</option>
         <option value="price_asc">Сначала дешевле</option>
         <option value="price_desc">Сначала дороже</option>
@@ -376,6 +405,7 @@ body {
       </select>
     </div>
     <div class="product-grid" id="grid"></div>
+    <div class="pagination" id="pagination"></div>
   </main>
 </div>
 
@@ -384,6 +414,8 @@ let allProducts = [];
 let activeCategory = 'all';
 let activeBrands = new Set();
 let searchQuery = '';
+let currentPage = 1;
+const PAGE_SIZE = 80;
 
 async function load() {
   const res = await fetch('/api/store/products');
@@ -430,6 +462,7 @@ function buildFilters() {
 
 function setCategory(cat) {
   activeCategory = cat;
+  currentPage = 1;
   document.querySelectorAll('[data-cat]').forEach(el => {
     el.classList.toggle('active', el.dataset.cat === cat);
   });
@@ -439,6 +472,7 @@ function setCategory(cat) {
 function toggleBrand(brand, checked) {
   if (checked) activeBrands.add(brand);
   else activeBrands.delete(brand);
+  currentPage = 1;
   render();
 }
 
@@ -478,12 +512,39 @@ function categoryEmoji(cat) {
   return '📦';
 }
 
+function goToPage(p) {
+  currentPage = p;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderPagination(total) {
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && i > 2 && i < pages - 1 && Math.abs(i - currentPage) > 1) {
+      if (i === 3 || i === pages - 2) html += `<span class="page-ellipsis">…</span>`;
+      continue;
+    }
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  el.innerHTML = html;
+}
+
 function render() {
   const list = sorted(filtered());
   const grid = document.getElementById('grid');
   const count = document.getElementById('results-count');
+  const totalPages = Math.ceil(list.length / PAGE_SIZE);
+  if (currentPage > totalPages) currentPage = 1;
+  const page = list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  count.innerHTML = `Найдено: <strong>${list.length}</strong> товаров`;
+  count.innerHTML = `Найдено: <strong>${list.length}</strong> товаров` +
+    (totalPages > 1 ? ` — стр. <strong>${currentPage}</strong> из <strong>${totalPages}</strong>` : '');
 
   if (!list.length) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
@@ -491,10 +552,13 @@ function render() {
       <h3>Ничего не найдено</h3>
       <p>Попробуйте изменить фильтры или поисковый запрос</p>
     </div>`;
+    document.getElementById('pagination').innerHTML = '';
     return;
   }
 
-  grid.innerHTML = list.map(p => {
+  renderPagination(list.length);
+
+  grid.innerHTML = page.map(p => {
     const inStock = p.stock > 0;
     const priceHtml = p.price
       ? `<div class="product-price">${p.price.toLocaleString('ru')}<span class="currency"> ₸</span></div>`
@@ -517,7 +581,7 @@ function render() {
 let searchTimer;
 document.getElementById('search-input').addEventListener('input', e => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { searchQuery = e.target.value.trim(); render(); }, 250);
+  searchTimer = setTimeout(() => { searchQuery = e.target.value.trim(); currentPage = 1; render(); }, 250);
 });
 
 load();

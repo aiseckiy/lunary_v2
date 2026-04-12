@@ -702,6 +702,16 @@ def backfill_kaspi_entries(request: Request, db: Session = Depends(get_db)):
     return {"ok": True, "filled": filled, "failed": failed, "total": len(orders)}
 
 
+@app.get("/api/admin/kaspi/debug-entries/{order_id}")
+def debug_kaspi_entries(order_id: str, request: Request):
+    """Временный: посмотреть сырой ответ Kaspi для entries"""
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    raw = kaspi_module._proxy("get_order_entries", {"orderId": order_id})
+    return {"raw": raw}
+
+
 @app.post("/api/admin/dedupe-kaspi-orders")
 def dedupe_kaspi_orders(request: Request, db: Session = Depends(get_db)):
     """Удаляет base64 дубли заказов Kaspi, оставляя числовые ID"""

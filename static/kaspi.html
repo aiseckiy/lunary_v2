@@ -299,6 +299,21 @@ function renderStats(orders, total) {
   `;
 }
 
+function buildEntriesHtml(entries) {
+  if (!entries || !entries.length) return '';
+  return entries.map(e => {
+    const nameHtml = e.product_id
+      ? `<span class="item-name item-link" data-pid="${e.product_id}">${e.name||'—'} ↗</span>`
+      : `<div class="item-name">${e.name||'—'}</div>`;
+    const skuHtml = e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : '';
+    return `<div class="order-item">
+      <div style="flex:1">${nameHtml}${skuHtml}</div>
+      <div class="item-qty">${e.qty||1} шт</div>
+      <div class="item-price">${(e.basePrice||e.price||0).toLocaleString('ru')} ₸</div>
+    </div>`;
+  }).join('');
+}
+
 function renderOrders(orders) {
   const container = document.getElementById('orders-container');
   if (!orders.length) { container.innerHTML = '<div class="empty">📭 Заказов нет</div>'; return; }
@@ -307,22 +322,21 @@ function renderOrders(orders) {
     const badge = STATE_BADGE[o.state] || 'badge-accepted';
     const label = STATE_LABELS[o.state] || o.state;
     const dateStr = formatDate(o.date);
-    const entries = (o.entries||[]).map(e => {
-      const nameHtml = e.product_id
-        ? `<span class="item-name item-link" data-pid="${e.product_id}">${e.name||'—'} ↗</span>`
-        : `<div class="item-name">${e.name||'—'}</div>`;
-      const skuHtml = e.sku && e.sku !== 'undefined' ? `<div class="item-sku">${e.sku}</div>` : '';
-      return `<div class="order-item">
-        <div style="flex:1">${nameHtml}${skuHtml}</div>
-        <div class="item-qty">${e.qty||1} шт</div>
-        <div class="item-price">${((e.basePrice||e.price||0)).toLocaleString('ru')} ₸</div>
-      </div>`;
-    }).join('');
+    const entriesHtml = buildEntriesHtml(o.entries);
+    const hasEntries = entriesHtml.length > 0;
 
     const delivery = o.delivery_method ? `<span class="order-meta">${o.delivery_method}</span>` : '';
     const src = o.source === 'xml_import'
       ? '<span class="src-xml">📂 XML архив</span>'
       : (o.synced_at ? `<span class="src-sync">🔄 синхр. ${o.synced_at}</span>` : '<span class="src-sync">🔄 Kaspi API</span>');
+
+    const itemsBlock = hasEntries
+      ? `<div class="order-items" id="items-${o.id}">${entriesHtml}</div>`
+      : `<div class="order-items" id="items-${o.id}">
+           <div class="entries-load-btn" onclick="loadEntries('${o.id}')" style="font-size:13px;color:var(--accent);cursor:pointer;padding:6px 0">
+             📦 Показать состав заказа
+           </div>
+         </div>`;
 
     return `
       <div class="order-card">
@@ -336,7 +350,7 @@ function renderOrders(orders) {
             <span class="order-badge ${badge}">${label}</span>
           </div>
         </div>
-        ${entries ? `<div class="order-items">${entries}</div>` : ''}
+        ${itemsBlock}
         <div class="order-footer">
           <div style="display:flex;align-items:center;gap:8px">${delivery}${src}</div>
           <div class="order-date-time">${dateStr}</div>
@@ -423,6 +437,19 @@ async function loadSyncLog() {
     </table>`;
   } catch(e) {
     el.textContent = 'Не удалось загрузить лог';
+  }
+}
+
+async function loadEntries(orderId) {
+  const el = document.getElementById(`items-${orderId}`);
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:6px 0">⏳ Загрузка состава...</div>';
+  try {
+    const data = await fetch(`/api/kaspi/orders/${orderId}/entries`).then(r => r.json());
+    const html = buildEntriesHtml(data.entries || []);
+    el.innerHTML = html || '<div style="font-size:13px;color:var(--text3);padding:6px 0">Состав не найден</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--red);padding:6px 0">Ошибка загрузки</div>';
   }
 }
 

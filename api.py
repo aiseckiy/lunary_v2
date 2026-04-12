@@ -1334,39 +1334,53 @@ def _format_order_notification(o: dict) -> str:
 
     phone_raw = o.get("phone", "").strip()
     # Приводим к формату 7XXXXXXXXXX для WhatsApp
+    # Пропускаем фиктивные номера типа +0(000)-000-00-00 (Kaspi маскирует телефоны)
     phone_wa = ""
     if phone_raw:
         digits = "".join(c for c in phone_raw if c.isdigit())
         if digits.startswith("8") and len(digits) == 11:
             digits = "7" + digits[1:]
-        if len(digits) >= 10:
-            phone_wa = digits if digits.startswith("7") else "7" + digits[-10:]
+        # Валидный казахстанский номер: 11 цифр начиная с 7
+        if len(digits) == 11 and digits.startswith("7") and not digits.startswith("70000"):
+            phone_wa = digits
 
     lines = [
         f"<b>{label}</b>",
-        f"🛒 Заказ <b>{code}</b>",
+        f"🛒 Заказ <b>#{code}</b>",
         f"👤 {customer}",
     ]
     if phone_wa:
-        lines.append(f"📞 <a href='https://wa.me/{phone_wa}'>WhatsApp {phone_raw}</a>")
+        lines.append(f"📞 <a href='https://wa.me/{phone_wa}'>{phone_raw}</a>")
     if delivery_mode:
-        lines.append(f"📦 Доставка: {delivery_mode}")
+        lines.append(f"📦 {delivery_mode}")
     if addr_str:
         lines.append(f"📍 {addr_str}")
     if planned_str:
-        lines.append(f"📅 Планируемая дата: {planned_str}")
+        lines.append(f"📅 Дата доставки: {planned_str}")
     if payment:
-        lines.append(f"💳 Оплата: {payment}")
+        lines.append(f"💳 {payment}")
     lines.append("")
 
+    # Если entries есть — показываем состав
     if entries:
         for e in entries:
             qty = e.get('qty', 1)
             price = int(e.get('basePrice', e.get('price', 0)))
             name = e.get('name', '—')
-            lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
+            if name and name != '—':
+                lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
     else:
-        lines.append("  (состав заказа загружается отдельно)")
+        # Пробуем загрузить entries прямо сейчас для TG
+        try:
+            fetched = kaspi_module.get_order_entries(str(code))
+            for e in fetched:
+                qty = e.get('qty', 1)
+                price = int(e.get('basePrice', e.get('price', 0)))
+                name = e.get('name', '—')
+                if name and name != '—':
+                    lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
+        except Exception:
+            pass
 
     lines.append("")
     lines.append(f"<b>Итого: {total:,} ₸</b>".replace(",", " "))
@@ -1637,6 +1651,29 @@ def kaspi_orders_local(
         "state_counts": state_counts,
         "error": None,
     }
+
+
+@app.get("/api/kaspi/orders/{order_id}/entries")
+def get_kaspi_order_entries(order_id: str, db: Session = Depends(get_db)):
+    """Получить и сохранить состав конкретного заказа"""
+    import json
+    from database import KaspiOrder
+    order = db.query(KaspiOrder).filter(KaspiOrder.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404)
+    # Если уже есть — вернуть
+    if order.entries and order.entries not in ("[]", ""):
+        return {"entries": json.loads(order.entries)}
+    # Загрузить из Kaspi API
+    entries = kaspi_module.get_order_entries(order_id)
+    if entries:
+        order.entries = json.dumps(entries, ensure_ascii=False)
+        if not order.product_name:
+            order.product_name = entries[0].get("name")
+            order.sku = entries[0].get("merchantSku", "")
+            order.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
+        db.commit()
+    return {"entries": entries}
 
 
 @app.get("/api/kaspi/orders/export")

@@ -2470,23 +2470,12 @@ def changelog_page(request: Request):
 
 @app.get("/api/admin/changelog")
 def get_changelog(request: Request):
-    """Возвращает git log как список коммитов"""
+    """Возвращает список коммитов из changelog.json"""
     user = _get_user_from_session(request)
     if not user:
         raise HTTPException(status_code=403)
-    import subprocess
     try:
-        result = subprocess.run(
-            ["git", "log", "--pretty=format:%H|%ad|%s", "--date=format:%d.%m.%Y", "--max-count=100"],
-            capture_output=True, text=True, timeout=10
-        )
-        commits = []
-        for line in result.stdout.strip().split("\n"):
-            if not line:
-                continue
-            parts = line.split("|", 2)
-            if len(parts) == 3:
-                commits.append({"hash": parts[0][:7], "date": parts[1], "message": parts[2]})
-        return commits
-    except Exception as e:
+        with open("static/changelog.json", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
         return []

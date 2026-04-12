@@ -177,6 +177,8 @@ class DateRangePicker {
   }
 
   _apply() {
+    // Если выбран только from — считаем как один день
+    if (this.from && !this.to) this.to = this.from;
     this.close();
     if (this.onApply) this.onApply(this.from, this.to);
     this._updateTrigger();

@@ -255,6 +255,11 @@ def _start_kaspi_sync_loop():
                             existing.stock_deducted = 0
                         # Обновляем статус и основные поля
                         existing.state = new_state
+                        # Сохраняем дату выдачи при переходе в ARCHIVE
+                        if new_state == "ARCHIVE" and old_state != "ARCHIVE" and not existing.status_date:
+                            from datetime import timezone, timedelta
+                            tz_kz = timezone(timedelta(hours=5))
+                            existing.status_date = datetime.now(tz=tz_kz).strftime("%d.%m.%Y")
                         existing.total = int(o.get("total", existing.total or 0))
                         existing.customer = o.get("customer", existing.customer)
                         existing.delivery_method = o.get("deliveryMode", existing.delivery_method)
@@ -1689,14 +1694,16 @@ def products_export_xlsx(db: Session = Depends(get_db)):
 
 
 def _filter_orders_by_date(rows, date_from: str | None, date_to: str | None):
-    """Фильтр строк KaspiOrder по дате (Python-side, т.к. смешанные форматы)"""
+    """Фильтр строк KaspiOrder по дате выдачи (status_date) или дате создания"""
     df = datetime.strptime(date_from, "%Y-%m-%d") if date_from else None
     dt = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59) if date_to else None
     if not df and not dt:
         return rows
     result = []
     for r in rows:
-        d = _parse_order_date(getattr(r, "order_date", None))
+        # Для выданных заказов используем дату выдачи, иначе — дату создания
+        date_str = getattr(r, "status_date", None) if r.state in ("ARCHIVE", "Выдан") and getattr(r, "status_date", None) else getattr(r, "order_date", None)
+        d = _parse_order_date(date_str)
         if d is None:
             continue
         if df and d < df:

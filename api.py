@@ -606,6 +606,43 @@ def run_migrations():
     return {"ok": True, "message": "Миграции применены"}
 
 
+@app.post("/api/admin/dedupe-kaspi-orders")
+def dedupe_kaspi_orders(request: Request, db: Session = Depends(get_db)):
+    """Удаляет base64 дубли заказов Kaspi, оставляя числовые ID"""
+    import base64
+    from database import KaspiOrder
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+
+    all_orders = db.query(KaspiOrder).all()
+    deleted = 0
+    migrated = 0
+
+    for o in all_orders:
+        oid = o.order_id
+        # Если ID не числовой — это base64
+        if not oid.isdigit():
+            try:
+                decoded = base64.b64decode(oid + "==").decode("utf-8").strip()
+                if decoded.isdigit():
+                    # Есть ли уже числовая версия?
+                    numeric = db.query(KaspiOrder).filter(KaspiOrder.order_id == decoded).first()
+                    if numeric:
+                        # Числовая версия есть — удаляем base64 дубль
+                        db.delete(o)
+                        deleted += 1
+                    else:
+                        # Числовой нет — переименовываем
+                        o.order_id = decoded
+                        migrated += 1
+            except Exception:
+                pass
+
+    db.commit()
+    return {"ok": True, "deleted": deleted, "migrated": migrated}
+
+
 # ─── Товары ──────────────────────────────────────────────────
 @app.get("/api/products")
 def list_products(db: Session = Depends(get_db)):

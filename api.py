@@ -239,7 +239,7 @@ def _start_kaspi_sync_loop():
                 from database import SyncLog
                 from datetime import timezone, timedelta
                 tz_kz = timezone(timedelta(hours=5))
-                sync_start = datetime.now(tz=tz_kz)
+                sync_start = datetime.utcnow()
 
                 all_orders = []
                 for state in STATES:

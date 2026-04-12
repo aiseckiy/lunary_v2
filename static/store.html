@@ -884,11 +884,54 @@ function clearPrice() {
 }
 const PAGE_SIZE = 80;
 
+const STATE_KEY = 'lunary_store_state';
+
+function saveState() {
+  sessionStorage.setItem(STATE_KEY, JSON.stringify({
+    activeCategory,
+    activeBrands: [...activeBrands],
+    searchQuery,
+    currentPage,
+    priceMin,
+    priceMax,
+    sortVal: document.getElementById('sort-select')?.value || 'default',
+    scrollY: window.scrollY,
+  }));
+}
+
+function restoreState() {
+  const raw = sessionStorage.getItem(STATE_KEY);
+  if (!raw) return false;
+  sessionStorage.removeItem(STATE_KEY);
+  try {
+    const s = JSON.parse(raw);
+    activeCategory = s.activeCategory || 'all';
+    activeBrands = new Set(s.activeBrands || []);
+    searchQuery = s.searchQuery || '';
+    currentPage = s.currentPage || 1;
+    priceMin = s.priceMin || null;
+    priceMax = s.priceMax || null;
+    const sortEl = document.getElementById('sort-select');
+    if (sortEl && s.sortVal) sortEl.value = s.sortVal;
+    const searchEl = document.getElementById('search-input');
+    if (searchEl && s.searchQuery) searchEl.value = s.searchQuery;
+    if (priceMin) document.getElementById('price-min').value = priceMin;
+    if (priceMax) document.getElementById('price-max').value = priceMax;
+    if (priceMin || priceMax) document.getElementById('btn-clear-price').style.display = '';
+    return s.scrollY || 0;
+  } catch { return false; }
+}
+
 async function load() {
   const res = await fetch('/api/store/products');
   allProducts = await res.json();
   buildFilters();
+  const scrollY = restoreState();
   render();
+  if (scrollY) {
+    // Восстанавливаем скролл после рендера
+    setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' }), 50);
+  }
 }
 
 function buildFilters() {
@@ -916,6 +959,11 @@ function buildFilters() {
     mobileCats.innerHTML += `<div class="mobile-pill" data-cat="${name}" onclick="setCategory('${name}')">${name}</div>`;
   });
 
+  // Синхронизируем активную категорию в UI
+  document.querySelectorAll('[data-cat]').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === activeCategory);
+  });
+
   // Brands — нормализуем регистр (первая буква заглавная, остальные как есть)
   const brandNorm = new Map(); // lowercase → красивое название (первое встреченное)
   allProducts.forEach(p => {
@@ -927,7 +975,7 @@ function buildFilters() {
   const brandList = document.getElementById('brand-list');
   brandList.innerHTML = brands.map(key => `
     <label class="brand-check">
-      <input type="checkbox" value="${key}" onchange="toggleBrand('${key}', this.checked)">
+      <input type="checkbox" value="${key}" ${activeBrands.has(key) ? 'checked' : ''} onchange="toggleBrand('${key}', this.checked)">
       ${brandNorm.get(key)}
     </label>
   `).join('');
@@ -1043,7 +1091,7 @@ function render() {
       : '';
     return `
     <div class="product-card">
-      <a href="/shop/product/${p.id}" class="product-card-link" style="display:contents">
+      <a href="/shop/product/${p.id}" class="product-card-link" style="display:contents" onclick="saveState()">
         <div class="product-image">${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : categoryEmoji(p.category)}</div>
         <div class="product-info">
           ${p.brand ? `<div class="product-brand">${p.brand}</div>` : ''}

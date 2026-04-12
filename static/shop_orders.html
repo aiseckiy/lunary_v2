@@ -111,10 +111,11 @@
 const LABELS = { new:'Новый', confirmed:'Подтверждён', ready:'Готов', delivered:'Доставлен', cancelled:'Отменён' };
 const STATUSES = ['new','confirmed','ready','delivered','cancelled'];
 let allOrders = [];
-let currentStatus = '';
+let currentStatus = sessionStorage.getItem('lunary_shoporders_tab') || '';
 
 function setStatus(s) {
   currentStatus = s;
+  sessionStorage.setItem('lunary_shoporders_tab', s);
   document.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.dataset.s === s));
   render();
 }
@@ -198,6 +199,10 @@ async function changeStatus(id, status, el) {
 }
 
 async function load() {
+  // Восстанавливаем активную вкладку
+  if (currentStatus) {
+    document.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.dataset.s === currentStatus));
+  }
   const res = await fetch('/api/admin/shop-orders');
   if (!res.ok) { document.getElementById('orders-container').innerHTML = '<div class="empty">⚠️ Ошибка загрузки</div>'; return; }
   allOrders = await res.json();

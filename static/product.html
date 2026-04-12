@@ -156,7 +156,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <header class="store-header">
   <div class="header-inner">
     <a class="header-logo" href="/shop">LUNARY</a>
-    <a class="header-back" href="/shop">
+    <a class="header-back" href="/shop" onclick="if(document.referrer.includes('/shop')){event.preventDefault();history.back();}">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
       Назад в каталог
     </a>

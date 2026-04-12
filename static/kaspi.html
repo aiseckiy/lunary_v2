@@ -194,20 +194,32 @@ let dp;
 document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  dateFrom = fmt(now);
-  dateTo = fmt(now);
+
+  // Восстанавливаем сохранённое состояние
+  const saved = JSON.parse(sessionStorage.getItem('lunary_kaspi_state') || 'null');
+  dateFrom = saved?.dateFrom || fmt(now);
+  dateTo   = saved?.dateTo   || fmt(now);
+  if (saved?.status) {
+    currentStatus = saved.status;
+    document.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.dataset.s === currentStatus));
+  }
 
   dp = new DateRangePicker({
     trigger: '#dp-trigger',
     onApply: (from, to) => {
       dateFrom = from;
       dateTo = to;
+      saveKaspiState();
       loadOrders();
     }
   });
   dp.setRange(dateFrom, dateTo);
   loadOrders();
 });
+
+function saveKaspiState() {
+  sessionStorage.setItem('lunary_kaspi_state', JSON.stringify({ dateFrom, dateTo, status: currentStatus }));
+}
 
 const ACTIVE_STATES    = new Set(['NEW','ACCEPTED','DELIVERY','KASPI_DELIVERY','PICKUP','SIGN_REQUIRED']);
 const DONE_STATES      = new Set(['ARCHIVE','COMPLETED','Выдан']);
@@ -243,6 +255,7 @@ function setStatus(s) {
   document.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.dataset.s === s));
   const url = s ? `/api/kaspi/orders/export?state=${s}` : '/api/kaspi/orders/export';
   document.getElementById('export-btn').href = url;
+  saveKaspiState();
   loadOrders();
 }
 

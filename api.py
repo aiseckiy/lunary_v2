@@ -215,11 +215,13 @@ def _start_kaspi_sync_loop():
             return []
         try:
             result = kaspi_module.get_order_entries(oid) or []
+            print(f"[sync entries] oid={oid} is_new={is_new} got={len(result)} items: {result}", flush=True)
             if not is_new:
                 _backfill_fetched_this_cycle[0] += 1
                 time.sleep(0.2)
             return result
-        except Exception:
+        except Exception as e:
+            print(f"[sync entries] oid={oid} ОШИБКА: {e}", flush=True)
             return []
 
     def _update_entries_fields(row, entries):

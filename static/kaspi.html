@@ -86,6 +86,14 @@
 .src-xml  { font-size:10px; color:var(--text3); background:var(--bg); border-radius:4px; padding:1px 6px; }
 .src-sync { font-size:10px; color:#6366f1; background:#ede9fe; border-radius:4px; padding:1px 6px; }
 
+/* Pagination */
+.pagination { display:flex; align-items:center; justify-content:center; gap:6px; padding:20px 0 8px; flex-wrap:wrap; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
+.page-btn:hover { border-color:#d1d5db; color:var(--text); }
+.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-info { font-size:13px; color:var(--text3); padding:0 6px; }
+
 /* Sync log */
 .sync-log-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; margin-top:28px; }
 .sync-log-title { font-size:15px; font-weight:700; margin-bottom:14px; color:var(--text); }
@@ -161,6 +169,9 @@
   <div id="orders-container">
     <div class="loading"><div class="spinner"></div><br>Загрузка...</div>
   </div>
+  <div id="pagination-top"></div>
+  <div id="orders-list"></div>
+  <div id="pagination-bot"></div>
 
   <!-- Лог синхронизаций -->
   <div class="sync-log-card">
@@ -190,6 +201,8 @@ let dateFrom = null;
 let dateTo = null;
 let allOrders = [];
 let dp;
+const PAGE_SIZE = 80;
+let currentPage = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
@@ -276,6 +289,7 @@ async function loadOrders() {
 
     const orders = data.orders || [];
     allOrders = orders;
+    currentPage = 1;
     renderStats(orders, data.total);
     renderOrders(orders);
   } catch(e) {
@@ -327,51 +341,86 @@ function buildEntriesHtml(entries) {
   }).join('');
 }
 
+function buildOrderCard(o) {
+  const badge = STATE_BADGE[o.state] || 'badge-accepted';
+  const label = STATE_LABELS[o.state] || o.state;
+  const dateStr = formatDate(o.date);
+  const entriesHtml = buildEntriesHtml(o.entries);
+  const deliveryLabel = DELIVERY_LABELS[o.delivery_method] || o.delivery_method || '';
+  const paymentLabel = PAYMENT_LABELS[o.payment_method] || '';
+  const src = o.source === 'xml_import'
+    ? '<span class="src-xml">📂 XML архив</span>'
+    : (o.synced_at ? `<span class="src-sync">🔄 ${o.synced_at}</span>` : '<span class="src-sync">🔄 Kaspi API</span>');
+  const addressHtml = o.address ? `<div class="order-address">📍 ${o.address}</div>` : '';
+  const cancelHtml = o.cancel_reason ? `<div class="order-cancel">❌ ${o.cancel_reason}</div>` : '';
+  const metaHtml = (deliveryLabel || paymentLabel) ? `
+    <div class="order-meta-row">
+      ${deliveryLabel ? `<span class="order-meta">${deliveryLabel}</span>` : ''}
+      ${paymentLabel ? `<span class="order-meta">${paymentLabel}</span>` : ''}
+    </div>` : '';
+  return `
+    <div class="order-card ${orderCardClass(o.state)}">
+      <div class="order-top">
+        <div class="order-left">
+          <div class="order-id">#${o.id}</div>
+          <div class="order-customer">${o.customer || 'Покупатель'}</div>
+        </div>
+        <div class="order-right">
+          <div class="order-total-top">${(o.total||0).toLocaleString('ru')} ₸</div>
+          <span class="order-badge ${badge}">${label}</span>
+        </div>
+      </div>
+      <div class="order-items">${entriesHtml || '<span style="font-size:12px;color:var(--text3)">—</span>'}</div>
+      ${addressHtml}${cancelHtml}${metaHtml}
+      <div class="order-footer">
+        <div>${src}</div>
+        <div class="order-date-time">${dateStr}</div>
+      </div>
+    </div>`;
+}
+
+function renderPagination(total, page, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  const from = (page - 1) * PAGE_SIZE + 1;
+  const to = Math.min(page * PAGE_SIZE, total);
+  let html = `<div class="pagination">`;
+  html += `<button class="page-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>← Назад</button>`;
+  const start = Math.max(1, page - 3);
+  const end = Math.min(pages, start + 6);
+  if (start > 1) html += `<button class="page-btn" onclick="goPage(1)">1</button>${start>2?'<span class="page-info">…</span>':''}`;
+  for (let i = start; i <= end; i++)
+    html += `<button class="page-btn${i===page?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (end < pages) html += `${end<pages-1?'<span class="page-info">…</span>':''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
+  html += `<button class="page-btn" onclick="goPage(${page+1})" ${page===pages?'disabled':''}>Вперёд →</button>`;
+  html += `<span class="page-info">${from}–${to} из ${total}</span></div>`;
+  el.innerHTML = html;
+}
+
+function goPage(page) {
+  const pages = Math.ceil(allOrders.length / PAGE_SIZE);
+  if (page < 1 || page > pages) return;
+  currentPage = page;
+  renderOrders(allOrders);
+  document.getElementById('orders-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function renderOrders(orders) {
   const container = document.getElementById('orders-container');
-  if (!orders.length) { container.innerHTML = '<div class="empty">📭 Заказов нет</div>'; return; }
-
-  container.innerHTML = orders.map(o => {
-    const badge = STATE_BADGE[o.state] || 'badge-accepted';
-    const label = STATE_LABELS[o.state] || o.state;
-    const dateStr = formatDate(o.date);
-    const entriesHtml = buildEntriesHtml(o.entries);
-
-    const deliveryLabel = DELIVERY_LABELS[o.delivery_method] || o.delivery_method || '';
-    const paymentLabel = PAYMENT_LABELS[o.payment_method] || '';
-    const src = o.source === 'xml_import'
-      ? '<span class="src-xml">📂 XML архив</span>'
-      : (o.synced_at ? `<span class="src-sync">🔄 ${o.synced_at}</span>` : '<span class="src-sync">🔄 Kaspi API</span>');
-
-    const addressHtml = o.address ? `<div class="order-address">📍 ${o.address}</div>` : '';
-    const cancelHtml = o.cancel_reason ? `<div class="order-cancel">❌ ${o.cancel_reason}</div>` : '';
-
-    const metaHtml = (deliveryLabel || paymentLabel) ? `
-      <div class="order-meta-row">
-        ${deliveryLabel ? `<span class="order-meta">${deliveryLabel}</span>` : ''}
-        ${paymentLabel ? `<span class="order-meta">${paymentLabel}</span>` : ''}
-      </div>` : '';
-
-    return `
-      <div class="order-card ${orderCardClass(o.state)}">
-        <div class="order-top">
-          <div class="order-left">
-            <div class="order-id">#${o.id}</div>
-            <div class="order-customer">${o.customer || 'Покупатель'}</div>
-          </div>
-          <div class="order-right">
-            <div class="order-total-top">${(o.total||0).toLocaleString('ru')} ₸</div>
-            <span class="order-badge ${badge}">${label}</span>
-          </div>
-        </div>
-        <div class="order-items">${entriesHtml || '<span style="font-size:12px;color:var(--text3)">—</span>'}</div>
-        ${addressHtml}${cancelHtml}${metaHtml}
-        <div class="order-footer">
-          <div>${src}</div>
-          <div class="order-date-time">${dateStr}</div>
-        </div>
-      </div>`;
-  }).join('');
+  const list = document.getElementById('orders-list');
+  container.innerHTML = '';
+  if (!orders.length) {
+    list.innerHTML = '<div class="empty">📭 Заказов нет</div>';
+    document.getElementById('pagination-top').innerHTML = '';
+    document.getElementById('pagination-bot').innerHTML = '';
+    return;
+  }
+  const pageSlice = orders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  list.innerHTML = pageSlice.map(buildOrderCard).join('');
+  renderPagination(orders.length, currentPage, 'pagination-top');
+  renderPagination(orders.length, currentPage, 'pagination-bot');
 }
 
 function formatDate(val) {

@@ -378,6 +378,54 @@ def auth_logout():
     return resp
 
 
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
+class EmailLoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+def _make_user_session(user) -> str:
+    import hashlib
+    secret = os.getenv("ADMIN_PASSWORD", "lunary-secret")
+    return f"{user.id}_{hashlib.sha256(f'user-{user.id}-{user.email}-{secret}'.encode()).hexdigest()}"
+
+
+@app.post("/api/auth/register")
+def auth_register(data: RegisterRequest, db: Session = Depends(get_db)):
+    import hashlib
+    from database import User as UserModel
+    if db.query(UserModel).filter(UserModel.email == data.email.lower()).first():
+        raise HTTPException(status_code=409, detail="Пользователь с таким email уже существует")
+    pw_hash = hashlib.sha256(data.password.encode()).hexdigest()
+    user = UserModel(email=data.email.lower(), name=data.name, password_hash=pw_hash, role="customer")
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    resp = JSONResponse({"ok": True, "name": user.name, "role": user.role})
+    resp.set_cookie("lunary_session", _make_user_session(user), httponly=True, samesite="lax", max_age=60*60*24*30)
+    return resp
+
+
+@app.post("/api/auth/email-login")
+def auth_email_login(data: EmailLoginRequest, db: Session = Depends(get_db)):
+    import hashlib
+    from database import User as UserModel
+    user = db.query(UserModel).filter(UserModel.email == data.email.lower()).first()
+    if not user or not user.password_hash:
+        raise HTTPException(status_code=401, detail="Неверный email или пароль")
+    pw_hash = hashlib.sha256(data.password.encode()).hexdigest()
+    if user.password_hash != pw_hash:
+        raise HTTPException(status_code=401, detail="Неверный email или пароль")
+    resp = JSONResponse({"ok": True, "name": user.name, "role": user.role})
+    resp.set_cookie("lunary_session", _make_user_session(user), httponly=True, samesite="lax", max_age=60*60*24*30)
+    return resp
+
+
 # ─── Google OAuth ─────────────────────────────────────────────
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
@@ -446,13 +494,9 @@ def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
         user.avatar = avatar
         db.commit()
 
-    # Создать session token
-    secret = os.getenv("ADMIN_PASSWORD", "lunary-secret")
-    session_token = f"{user.id}_{hashlib.sha256(f'user-{user.id}-{user.email}-{secret}'.encode()).hexdigest()}"
-    # Все идут в магазин, у админов там будет кнопка "Админ панель"
     next_url = "/shop"
     resp = RedirectResponse(next_url, status_code=302)
-    resp.set_cookie("lunary_session", session_token, httponly=True, samesite="lax", max_age=60*60*24*30)
+    resp.set_cookie("lunary_session", _make_user_session(user), httponly=True, samesite="lax", max_age=60*60*24*30)
     return resp
 
 

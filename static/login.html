@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Вход — Lunary OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вход — Lunary</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body {
@@ -15,142 +15,118 @@ body {
   justify-content: center;
   padding: 20px;
 }
-
 .card {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 20px;
-  padding: 40px 36px;
+  padding: 36px 32px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   box-shadow: 0 8px 32px rgba(0,0,0,.06);
 }
-
-.logo {
-  font-size: 26px;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: 6px;
-  letter-spacing: -.5px;
-}
+.logo { font-size: 26px; font-weight: 900; text-align: center; margin-bottom: 4px; letter-spacing: -.5px; }
 .logo span { color: #6366f1; }
+.subtitle { font-size: 13px; color: #9ca3af; text-align: center; margin-bottom: 28px; }
 
-.subtitle {
-  font-size: 13px;
-  color: #9ca3af;
-  text-align: center;
-  margin-bottom: 32px;
-}
+.tabs { display:flex; background:#f3f4f6; border-radius:10px; padding:4px; margin-bottom:24px; }
+.tab { flex:1; text-align:center; padding:8px; font-size:14px; font-weight:500; color:#6b7280; cursor:pointer; border-radius:8px; transition:all .15s; }
+.tab.active { background:#fff; color:#111827; box-shadow:0 1px 4px rgba(0,0,0,.08); }
 
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 6px;
-  display: block;
-}
-
-.input-wrap { position: relative; margin-bottom: 16px; }
+.label { font-size:13px; font-weight:500; color:#374151; margin-bottom:6px; display:block; }
+.input-wrap { position:relative; margin-bottom:14px; }
 .input {
-  width: 100%;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 11px 42px 11px 14px;
-  font-size: 15px;
-  color: #111827;
-  outline: none;
-  transition: border-color .15s, background .15s;
-  font-family: inherit;
+  width:100%; background:#f9fafb; border:1px solid #e5e7eb;
+  border-radius:10px; padding:11px 42px 11px 14px;
+  font-size:15px; color:#111827; outline:none;
+  transition:border-color .15s, background .15s; font-family:inherit;
 }
-.input:focus { border-color: #6366f1; background: #fff; }
-
+.input:focus { border-color:#6366f1; background:#fff; }
 .eye-btn {
-  position: absolute;
-  right: 12px; top: 50%;
-  transform: translateY(-50%);
-  background: none; border: none;
-  cursor: pointer; color: #9ca3af;
-  font-size: 18px; padding: 4px;
-  line-height: 1;
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:#9ca3af; font-size:18px; padding:4px; line-height:1;
 }
-
 .btn {
-  width: 100%;
-  background: #111827;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 13px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s;
-  font-family: inherit;
-  margin-top: 4px;
+  width:100%; background:#111827; color:#fff; border:none;
+  border-radius:10px; padding:13px; font-size:15px; font-weight:600;
+  cursor:pointer; transition:background .15s; font-family:inherit; margin-top:4px;
 }
-.btn:hover { background: #374151; }
-.btn:active { background: #1f2937; }
+.btn:hover { background:#374151; }
+.btn:disabled { opacity:.6; cursor:not-allowed; }
 
-.error {
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #dc2626;
-  margin-bottom: 16px;
-  display: none;
-}
-.error.show { display: block; }
-
-.divider {
-  display: flex; align-items: center; gap: 10px;
-  margin: 20px 0;
-  color: #d1d5db; font-size: 12px;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: #e5e7eb;
-}
+.divider { display:flex; align-items:center; gap:10px; margin:18px 0; color:#d1d5db; font-size:12px; }
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:#e5e7eb; }
 
 .btn-google {
-  width: 100%;
-  background: #fff;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-  font-family: inherit;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width:100%; background:#fff; color:#374151; border:1px solid #e5e7eb;
+  border-radius:10px; padding:12px; font-size:15px; font-weight:500;
+  cursor:pointer; transition:background .15s, border-color .15s; font-family:inherit;
+  display:flex; align-items:center; justify-content:center; gap:10px;
 }
-.btn-google:hover { background: #f9fafb; border-color: #d1d5db; }
+.btn-google:hover { background:#f9fafb; border-color:#d1d5db; }
 
-.footer {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 12px;
-  color: #d1d5db;
+.error {
+  background:#fee2e2; border:1px solid #fca5a5; border-radius:10px;
+  padding:10px 14px; font-size:13px; color:#dc2626; margin-bottom:14px; display:none;
 }
+.error.show { display:block; }
+.success {
+  background:#dcfce7; border:1px solid #86efac; border-radius:10px;
+  padding:10px 14px; font-size:13px; color:#16a34a; margin-bottom:14px; display:none;
+}
+.success.show { display:block; }
+
+.admin-hint {
+  margin-top:20px; padding-top:20px; border-top:1px solid #f3f4f6;
+  text-align:center; font-size:12px; color:#d1d5db;
+}
+.admin-hint a { color:#9ca3af; text-decoration:none; }
+.admin-hint a:hover { color:#6b7280; }
 </style>
 </head>
 <body>
 <div class="card">
   <div class="logo">Lunary <span>OS</span></div>
-  <div class="subtitle">Вход в систему</div>
+  <div class="subtitle">Войди чтобы делать заказы</div>
 
-  <div class="error" id="err">Неверный пароль</div>
-
-  <label class="label">Пароль</label>
-  <div class="input-wrap">
-    <input class="input" id="pwd" type="password" placeholder="Введите пароль..." onkeydown="onEnter(event)" autofocus>
-    <button class="eye-btn" type="button" onclick="toggleEye()" id="eye-btn">👁</button>
+  <div class="tabs">
+    <div class="tab active" id="tab-login" onclick="switchTab('login')">Войти</div>
+    <div class="tab" id="tab-register" onclick="switchTab('register')">Регистрация</div>
   </div>
 
-  <button class="btn" id="btn" onclick="doLogin()">Войти как администратор</button>
+  <div id="err" class="error"></div>
+  <div id="ok" class="success"></div>
+
+  <!-- Вход -->
+  <div id="form-login">
+    <label class="label">Email</label>
+    <div class="input-wrap">
+      <input class="input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <label class="label">Пароль</label>
+    <div class="input-wrap">
+      <input class="input" id="login-pwd" type="password" placeholder="Пароль" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="eye-btn" type="button" onclick="toggleEye('login-pwd',this)">👁</button>
+    </div>
+    <button class="btn" id="btn-login" onclick="doLogin()">Войти</button>
+  </div>
+
+  <!-- Регистрация -->
+  <div id="form-register" style="display:none">
+    <label class="label">Имя</label>
+    <div class="input-wrap">
+      <input class="input" id="reg-name" type="text" placeholder="Ваше имя" autocomplete="name">
+    </div>
+    <label class="label">Email</label>
+    <div class="input-wrap">
+      <input class="input" id="reg-email" type="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <label class="label">Пароль</label>
+    <div class="input-wrap">
+      <input class="input" id="reg-pwd" type="password" placeholder="Минимум 6 символов" onkeydown="if(event.key==='Enter')doRegister()">
+      <button class="eye-btn" type="button" onclick="toggleEye('reg-pwd',this)">👁</button>
+    </div>
+    <button class="btn" id="btn-register" onclick="doRegister()">Создать аккаунт</button>
+  </div>
 
   <div class="divider">или</div>
 
@@ -159,44 +135,113 @@ body {
     Войти через Google
   </button>
 
-  <div class="footer">Lunary OS v2</div>
+  <div class="admin-hint">Администратор? <a href="/login?admin=1" id="admin-link">Войти с паролем</a></div>
+</div>
+
+<div id="admin-form" style="display:none">
+  <div class="card" style="margin-top:16px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:#374151">Вход администратора</div>
+    <div class="input-wrap">
+      <input class="input" id="admin-pwd" type="password" placeholder="Пароль администратора" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    </div>
+    <button class="btn" onclick="doAdminLogin()">Войти как администратор</button>
+  </div>
 </div>
 
 <script>
-async function doLogin() {
-  const pwd = document.getElementById('pwd').value;
-  if (!pwd) return;
-  const btn = document.getElementById('btn');
-  btn.textContent = '...';
-  btn.disabled = true;
+const next = new URLSearchParams(location.search).get('next') || '/shop';
+const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
 
+if (isAdmin) {
+  document.querySelector('.card').style.display = 'none';
+  document.getElementById('admin-form').style.display = 'block';
+  document.getElementById('admin-form').querySelector('.card').style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.06)';
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+  clearMessages();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('ok').classList.remove('show');
+}
+function showOk(msg) {
+  const el = document.getElementById('ok');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('err').classList.remove('show');
+}
+function clearMessages() {
+  document.getElementById('err').classList.remove('show');
+  document.getElementById('ok').classList.remove('show');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd = document.getElementById('login-pwd').value;
+  if (!email || !pwd) { showErr('Заполните все поля'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.textContent = '...'; btn.disabled = true;
   try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pwd })
+    const res = await fetch('/api/auth/email-login', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password: pwd})
     });
     if (res.ok) {
-      const next = new URLSearchParams(location.search).get('next') || '/admin';
+      const data = await res.json();
+      location.href = data.role === 'admin' ? '/admin' : next;
+    } else {
+      const e = await res.json();
+      showErr(e.detail || 'Ошибка входа');
+    }
+  } catch { showErr('Ошибка сети'); }
+  btn.textContent = 'Войти'; btn.disabled = false;
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pwd = document.getElementById('reg-pwd').value;
+  if (!name || !email || !pwd) { showErr('Заполните все поля'); return; }
+  if (pwd.length < 6) { showErr('Пароль минимум 6 символов'); return; }
+  const btn = document.getElementById('btn-register');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name, email, password: pwd})
+    });
+    if (res.ok) {
       location.href = next;
     } else {
-      document.getElementById('err').classList.add('show');
-      document.getElementById('pwd').value = '';
-      document.getElementById('pwd').focus();
-      btn.textContent = 'Войти';
-      btn.disabled = false;
+      const e = await res.json();
+      showErr(e.detail || 'Ошибка регистрации');
     }
-  } catch {
-    btn.textContent = 'Войти';
-    btn.disabled = false;
+  } catch { showErr('Ошибка сети'); }
+  btn.textContent = 'Создать аккаунт'; btn.disabled = false;
+}
+
+async function doAdminLogin() {
+  const pwd = document.getElementById('admin-pwd').value;
+  if (!pwd) return;
+  const res = await fetch('/api/auth/login', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({password: pwd})
+  });
+  if (res.ok) {
+    location.href = new URLSearchParams(location.search).get('next') || '/admin';
+  } else {
+    alert('Неверный пароль');
   }
 }
 
-function onEnter(e) { if (e.key === 'Enter') doLogin(); }
-
-function toggleEye() {
-  const inp = document.getElementById('pwd');
-  const btn = document.getElementById('eye-btn');
+function toggleEye(inputId, btn) {
+  const inp = document.getElementById(inputId);
   if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
   else { inp.type = 'password'; btn.textContent = '👁'; }
 }

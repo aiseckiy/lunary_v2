@@ -92,6 +92,8 @@ class User(Base):
     name = Column(String, nullable=True)
     avatar = Column(String, nullable=True)
     google_id = Column(String, unique=True, nullable=True)
+    password_hash = Column(String, nullable=True)  # None если только Google
+    phone = Column(String, nullable=True)
     role = Column(String, default="customer")  # admin | customer
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -132,6 +134,8 @@ def init_db():
         ("kaspi_orders", "delivery_compensation", "INTEGER DEFAULT 0"),
         ("kaspi_orders", "source", "TEXT DEFAULT 'kaspi_api'"),
         ("kaspi_orders", "stock_deducted", "INTEGER DEFAULT 0"),
+        ("users", "password_hash", "TEXT"),
+        ("users", "phone", "TEXT"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

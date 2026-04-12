@@ -41,19 +41,7 @@ Deno.serve(async (req) => {
     if (action === 'get_order_entries') {
       const r = await fetch(`${BASE}/orders/${params.orderId}/entries`, { headers });
       const data = await r.json();
-      // Для каждой позиции получаем название товара
-      const entries = data?.data || [];
-      await Promise.all(entries.map(async (entry: any) => {
-        try {
-          const entryId = entry.id;
-          const pr = await fetch(`${BASE}/orderentries/${entryId}/product`, { headers });
-          const pd = await pr.json();
-          const attr = pd?.data?.attributes || {};
-          entry.attributes = entry.attributes || {};
-          entry.attributes.name = attr.name || '—';
-          entry.attributes.merchantSku = attr.code || '';
-        } catch { /* ignore */ }
-      }));
+      // Вернуть сырые данные — Python разберёт структуру сам
       return new Response(JSON.stringify({ success: true, data }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

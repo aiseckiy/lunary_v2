@@ -44,12 +44,35 @@ def get_order_entries(order_id: str) -> list:
     data = _proxy("get_order_entries", {"orderId": order_id})
     if not data:
         return []
+
+    # Kaspi JSON:API — included содержит связанные ресурсы (продукты)
+    included = {item["id"]: item for item in data.get("included", []) if isinstance(item, dict)}
+
     entries = []
     for item in data.get("data", []):
         attr = item.get("attributes", {})
+
+        # Попытка достать название из relationships → included
+        name = attr.get("name") or ""
+        merchant_sku = attr.get("merchantSku") or ""
+
+        rels = item.get("relationships", {})
+        product_rel = rels.get("product", {}).get("data") or rels.get("offer", {}).get("data")
+        if product_rel and isinstance(product_rel, dict):
+            prod = included.get(product_rel.get("id"), {})
+            prod_attr = prod.get("attributes", {})
+            if not name:
+                name = prod_attr.get("name") or prod_attr.get("title") or ""
+            if not merchant_sku:
+                merchant_sku = prod_attr.get("code") or prod_attr.get("merchantSku") or ""
+
+        # Fallback — берём из category или любого доступного поля
+        if not name:
+            name = (attr.get("category") or {}).get("title") or attr.get("productName") or "—"
+
         entries.append({
-            "name": attr.get("name") or attr.get("category", {}).get("title", "—"),
-            "merchantSku": attr.get("merchantSku", ""),
+            "name": name or "—",
+            "merchantSku": merchant_sku,
             "qty": attr.get("quantity", 1),
             "basePrice": int(attr.get("basePrice", 0)),
             "price": int(attr.get("totalPrice", 0)),

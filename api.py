@@ -206,10 +206,19 @@ def _start_kaspi_sync_loop():
 
     STATES = ["NEW", "APPROVED", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
 
+    _entries_fetched_this_cycle = [0]  # счётчик запросов за один цикл
+    MAX_ENTRIES_PER_CYCLE = 10        # не более 10 заказов за один прогон
+
     def _fetch_entries(oid):
-        """Загружает состав заказа, возвращает список или []"""
+        """Загружает состав заказа, возвращает список или [].
+        Не более MAX_ENTRIES_PER_CYCLE запросов за один цикл синхронизации."""
+        if _entries_fetched_this_cycle[0] >= MAX_ENTRIES_PER_CYCLE:
+            return []
         try:
-            return kaspi_module.get_order_entries(oid) or []
+            result = kaspi_module.get_order_entries(oid) or []
+            _entries_fetched_this_cycle[0] += 1
+            time.sleep(0.3)  # небольшая пауза между запросами
+            return result
         except Exception:
             return []
 
@@ -249,6 +258,7 @@ def _start_kaspi_sync_loop():
                 returns_count = 0
                 deducted_count = 0
                 new_orders = []
+                _entries_fetched_this_cycle[0] = 0  # сброс счётчика
 
                 for o in all_orders:
                     raw_date = o.get("date", "")

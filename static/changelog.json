@@ -1,5 +1,10 @@
 [
   {
+    "hash": "1323719",
+    "date": "13.04.2026",
+    "message": "Fix: changelog.json — абсолютный путь для Railway"
+  },
+  {
     "hash": "d3bfc80",
     "date": "13.04.2026",
     "message": "Fix: phone не возвращался в /api/auth/me — добавить в сессионный объект"

@@ -2,8 +2,16 @@
  * nav.js — единая боковая и нижняя навигация для всех страниц.
  * Подключить: <script src="/static/nav.js"></script>
  * Сайдбар рендерится в #sidebar, нижняя панель — в #bottom-nav.
+ * Также применяет сохранённую тему (дизайн-токены).
  */
 (function () {
+  // Применяем сохранённую тему
+  fetch('/api/admin/theme/css').then(r => r.text()).then(css => {
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+  }).catch(() => {});
+
   const path = window.location.pathname;
 
   const LINKS = [
@@ -14,6 +22,7 @@
     { href: '/admin/kaspi',      icon: '🛒', label: 'Kaspi' },
     { href: '/admin/shop-orders',icon: '🛍️', label: 'Заказы', badge: 'orders-badge' },
     { href: '/admin/settings',   icon: '⚙️', label: 'Настройки' },
+    { href: '/admin/theme',      icon: '🎨', label: 'Тема' },
     { href: '/shop',             icon: '🏪', label: 'Магазин' },
   ];
 

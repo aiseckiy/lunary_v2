@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дизайн-токены — Lunary</title>
+<link rel="stylesheet" href="/static/layout.css">
+<style>
+.page-header-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; gap:12px; }
+
+.token-group { margin-bottom:28px; }
+.token-group-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px; }
+
+.token-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+
+.token-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:14px 16px; display:flex; align-items:center; gap:14px;
+  transition:box-shadow .15s;
+}
+.token-card:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
+
+.color-swatch {
+  width:44px; height:44px; border-radius:10px; flex-shrink:0;
+  border:1px solid rgba(0,0,0,.08); cursor:pointer; position:relative; overflow:hidden;
+}
+.color-swatch input[type=color] {
+  position:absolute; inset:-4px; width:calc(100% + 8px); height:calc(100% + 8px);
+  border:none; padding:0; cursor:pointer; opacity:0;
+}
+
+.token-info { flex:1; min-width:0; }
+.token-label { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.token-var { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:6px; }
+.token-value-input {
+  width:100%; border:1px solid var(--border); border-radius:8px;
+  padding:5px 9px; font-size:13px; font-family:monospace; color:var(--text);
+  background:var(--bg); outline:none;
+}
+.token-value-input:focus { border-color:var(--accent); }
+
+.preview-bar {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:20px 24px; margin-bottom:28px;
+}
+.preview-bar-title { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:14px; }
+.preview-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.preview-btn { padding:9px 18px; border-radius:10px; border:none; font-size:14px; font-weight:600; cursor:default; }
+
+.actions { display:flex; gap:10px; position:sticky; bottom:0; background:var(--bg); padding:16px 0 20px; border-top:1px solid var(--border); margin-top:8px; }
+.btn-primary { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:12px 28px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-primary:hover { opacity:.9; }
+.btn-reset { background:var(--surface); color:var(--text2); border:1px solid var(--border); border-radius:12px; padding:12px 20px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-reset:hover { border-color:#d1d5db; color:var(--text); }
+
+.saved-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#111827; color:#fff; padding:12px 24px; border-radius:12px; font-size:14px; font-weight:500; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; z-index:999; }
+.saved-toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="mobile-header">
+  <div class="mobile-logo">Lunary <span>OS</span></div>
+</div>
+
+<div class="main-content">
+<div class="page-container">
+  <div class="page-header-row">
+    <div>
+      <div class="page-title">🎨 Дизайн-токены</div>
+      <div class="page-sub">Цвета и переменные интерфейса</div>
+    </div>
+  </div>
+
+  <!-- Live preview -->
+  <div class="preview-bar">
+    <div class="preview-bar-title">Предпросмотр</div>
+    <div class="preview-row">
+      <button class="preview-btn" style="background:var(--accent);color:#fff">Кнопка акцент</button>
+      <button class="preview-btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border)">Вторичная</button>
+      <button class="preview-btn" style="background:var(--green);color:#fff">Успех</button>
+      <button class="preview-btn" style="background:var(--red);color:#fff">Ошибка</button>
+      <button class="preview-btn" style="background:var(--orange);color:#fff">Предупреждение</button>
+      <span style="font-size:14px;color:var(--text)">Основной текст</span>
+      <span style="font-size:14px;color:var(--text2)">Второстепенный</span>
+      <span style="font-size:14px;color:var(--text3)">Подсказка</span>
+    </div>
+  </div>
+
+  <div id="tokens-container"></div>
+
+  <div class="actions">
+    <button class="btn-primary" onclick="saveTheme()">💾 Сохранить тему</button>
+    <button class="btn-reset" onclick="resetTheme()">↩ Сбросить к дефолту</button>
+  </div>
+</div>
+</div>
+</div>
+
+<nav class="bottom-nav" id="bottom-nav"></nav>
+<div class="saved-toast" id="saved-toast"></div>
+
+<script src="/static/nav.js"></script>
+<script>
+let tokens = {};
+
+async function load() {
+  tokens = await fetch('/api/admin/theme').then(r => r.json());
+  render();
+}
+
+function render() {
+  // Группируем
+  const groups = {};
+  for (const [varName, meta] of Object.entries(tokens)) {
+    const g = meta.group || 'Другое';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push([varName, meta]);
+  }
+
+  const container = document.getElementById('tokens-container');
+  container.innerHTML = Object.entries(groups).map(([group, items]) => `
+    <div class="token-group">
+      <div class="token-group-title">${group}</div>
+      <div class="token-grid">
+        ${items.map(([varName, meta]) => `
+          <div class="token-card">
+            <div class="color-swatch" id="swatch-${varName.replace('--','')}" style="background:${meta.value}">
+              <input type="color" value="${meta.value}" oninput="updateToken('${varName}', this.value)">
+            </div>
+            <div class="token-info">
+              <div class="token-label">${meta.label}</div>
+              <div class="token-var">${varName}</div>
+              <input class="token-value-input" type="text" value="${meta.value}"
+                oninput="updateToken('${varName}', this.value)"
+                id="input-${varName.replace('--','')}">
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function updateToken(varName, value) {
+  tokens[varName].value = value;
+  // Обновляем swatch
+  const swatchId = varName.replace('--', '');
+  const swatch = document.getElementById('swatch-' + swatchId);
+  if (swatch) swatch.style.background = value;
+  // Синхронизируем text input и color picker
+  const inp = document.getElementById('input-' + swatchId);
+  if (inp && document.activeElement !== inp) inp.value = value;
+  // Применяем live на странице
+  document.documentElement.style.setProperty(varName, value);
+}
+
+async function saveTheme() {
+  const payload = {};
+  for (const [varName, meta] of Object.entries(tokens)) {
+    payload[varName] = meta.value;
+  }
+  await fetch('/api/admin/theme', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+  });
+  showToast('✅ Тема сохранена');
+}
+
+async function resetTheme() {
+  if (!confirm('Сбросить все цвета к дефолтным значениям?')) return;
+  await fetch('/api/admin/theme', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({}),
+  });
+  // Снимаем inline стили
+  document.querySelectorAll('[id^="swatch-"]').forEach(el => {});
+  document.documentElement.removeAttribute('style');
+  load();
+  showToast('↩ Тема сброшена');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('saved-toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+load();
+</script>
+<script src="/static/mobile.js"></script>
+</body>
+</html>

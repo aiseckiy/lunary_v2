@@ -5,7 +5,7 @@ import os
 import logging
 import requests
 import time
-from database import SessionLocal
+from database import SessionLocal, Product
 import crud
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def _date_range_ms(days: int = 14):
 
 
 def get_order_entries(order_id: str) -> list:
-    """Получить состав заказа"""
+    """Получить состав заказа. Название берём из нашей БД по merchantSku."""
     data = _proxy("get_order_entries", {"orderId": order_id})
     if not data:
         return []
@@ -48,25 +48,44 @@ def get_order_entries(order_id: str) -> list:
     # Kaspi JSON:API — included содержит связанные ресурсы (продукты)
     included = {item["id"]: item for item in data.get("included", []) if isinstance(item, dict)}
 
+    # Загружаем все товары из нашей базы для матчинга по kaspi_sku
+    try:
+        db = SessionLocal()
+        from sqlalchemy import or_
+        products = db.query(Product).all()
+        # Словарь kaspi_sku → название
+        sku_to_name = {}
+        for p in products:
+            if p.kaspi_sku:
+                sku_to_name[p.kaspi_sku] = p.name
+                # kaspi_sku может быть "101602457_xxx" — матчим по обеим частям
+                base = p.kaspi_sku.split("_")[0] if "_" in p.kaspi_sku else p.kaspi_sku
+                sku_to_name[base] = p.name
+        db.close()
+    except Exception:
+        sku_to_name = {}
+
     entries = []
     for item in data.get("data", []):
         attr = item.get("attributes", {})
 
-        # Попытка достать название из relationships → included
-        name = attr.get("name") or ""
         merchant_sku = attr.get("merchantSku") or ""
 
+        # Достаём merchantSku из relationships → included если нет в attributes
         rels = item.get("relationships", {})
         product_rel = rels.get("product", {}).get("data") or rels.get("offer", {}).get("data")
         if product_rel and isinstance(product_rel, dict):
             prod = included.get(product_rel.get("id"), {})
             prod_attr = prod.get("attributes", {})
-            if not name:
-                name = prod_attr.get("name") or prod_attr.get("title") or ""
             if not merchant_sku:
                 merchant_sku = prod_attr.get("code") or prod_attr.get("merchantSku") or ""
 
-        # Fallback — берём из category или любого доступного поля
+        # Ищем название в нашей базе по артикулу
+        name = sku_to_name.get(merchant_sku, "")
+        if not name and merchant_sku and "_" in merchant_sku:
+            name = sku_to_name.get(merchant_sku.split("_")[0], "")
+
+        # Fallback — категория из ответа Kaspi
         if not name:
             name = (attr.get("category") or {}).get("title") or attr.get("productName") or "—"
 

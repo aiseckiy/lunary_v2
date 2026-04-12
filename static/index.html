@@ -10,8 +10,8 @@
 /* ── Stats ── */
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
 .stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
-.stat-label { font-size:12px; color:var(--text3); margin-bottom:6px; }
-.stat-value { font-size:30px; font-weight:800; color:var(--text); }
+.stat-label { font-size:11px; color:var(--text3); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+.stat-value { font-size:28px; font-weight:800; color:var(--text); }
 .stat-value.red { color:var(--red); }
 .stat-value.green { color:var(--green); }
 .stat-value.purple { color:var(--accent); }
@@ -22,7 +22,7 @@
 .search-input::placeholder { color:var(--text3); }
 .btn-add { background:var(--text); color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
 .btn-add:hover { opacity:.85; }
-.sort-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 14px; font-size:13px; color:var(--text2); cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
+.sort-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 14px; font-size:14px; color:var(--text2); cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
 .sort-btn:hover { border-color:#d1d5db; color:var(--text); }
 .sort-btn:focus { outline:none; border-color:var(--accent); }
 /* ── Filter dropdowns ── */
@@ -72,7 +72,7 @@
 .modal-body { padding:20px; }
 .form-group { margin-bottom:14px; }
 .form-label { font-size:13px; color:var(--text2); margin-bottom:6px; display:block; font-weight:500; }
-.form-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 12px; color:var(--text); font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
+.form-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px; color:var(--text); font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
 .form-input:focus { border-color:var(--accent); background:var(--surface); }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .form-select { appearance:none; }

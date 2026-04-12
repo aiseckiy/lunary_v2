@@ -23,6 +23,7 @@
     { href: '/admin/shop-orders',icon: '🛍️', label: 'Заказы', badge: 'orders-badge' },
     { href: '/admin/settings',   icon: '⚙️', label: 'Настройки' },
     { href: '/admin/theme',      icon: '🎨', label: 'Тема' },
+    { href: '/admin/changelog',  icon: '🚀', label: 'Обновления' },
     { href: '/shop',             icon: '🏪', label: 'Магазин' },
   ];
 

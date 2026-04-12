@@ -191,6 +191,21 @@ class AISuggestRequest(BaseModel):
     barcode: Optional[str] = None
 
 
+# ─── Integration settings helper ────────────────────────────
+def _get_integration(setting_key: str, env_var: str) -> str:
+    """Читает настройку интеграции: сначала из БД (SiteSetting), потом из ENV."""
+    try:
+        from database import SiteSetting, SessionLocal as _SL
+        db = _SL()
+        row = db.query(SiteSetting).filter(SiteSetting.key == setting_key).first()
+        db.close()
+        if row and row.value and row.value.strip():
+            return row.value.strip()
+    except Exception:
+        pass
+    return os.getenv(env_var, "")
+
+
 # ─── Startup ─────────────────────────────────────────────────
 @app.on_event("startup")
 def startup():
@@ -1336,8 +1351,8 @@ def ai_suggest(data: AISuggestRequest):
 @app.get("/api/kaspi/orders")
 def get_kaspi_orders_endpoint(state: str = "ACCEPTED", page: int = 0, size: int = 20):
     """Получить заказы из Kaspi API"""
-    token = os.getenv("KASPI_TOKEN")
-    shop_id = os.getenv("KASPI_SHOP_ID")
+    token = _get_integration("kaspi_api_key", "KASPI_TOKEN")
+    shop_id = _get_integration("kaspi_shop_id", "KASPI_SHOP_ID")
     if not token or not shop_id:
         return {"orders": [], "total": 0, "error": "KASPI_TOKEN и KASPI_SHOP_ID не заданы в настройках"}
     result = kaspi_module.get_kaspi_orders(state=state, page=page, size=size)
@@ -1358,8 +1373,8 @@ class KaspiOrdersPayload(BaseModel):
 
 def _send_tg_notification(text: str):
     """Отправить сообщение в Telegram через Bot API напрямую (без polling)."""
-    bot_token = os.getenv("BOT_TOKEN")
-    chat_id = os.getenv("ADMIN_CHAT_ID")
+    bot_token = _get_integration("tg_bot_token", "BOT_TOKEN")
+    chat_id = _get_integration("tg_chat_id", "ADMIN_CHAT_ID")
     if not bot_token or not chat_id:
         return
     try:
@@ -2123,8 +2138,8 @@ def analytics_forecast(
 def sync_kaspi_products_endpoint():
 
     """Синхронизировать товары из Kaspi в склад"""
-    token = os.getenv("KASPI_TOKEN")
-    shop_id = os.getenv("KASPI_SHOP_ID")
+    token = _get_integration("kaspi_api_key", "KASPI_TOKEN")
+    shop_id = _get_integration("kaspi_shop_id", "KASPI_SHOP_ID")
     if not token or not shop_id:
         raise HTTPException(status_code=400, detail="KASPI_TOKEN и KASPI_SHOP_ID не заданы")
     result = kaspi_module.sync_kaspi_products()
@@ -2228,8 +2243,8 @@ def create_shop_order(data: ShopOrderCreate, request: Request, db: Session = Dep
 
 def _notify_new_shop_order(order, items):
     import requests as req_lib
-    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+    bot_token = _get_integration("tg_bot_token", "TELEGRAM_BOT_TOKEN")
+    chat_id = _get_integration("tg_chat_id", "TELEGRAM_CHAT_ID")
     if not bot_token or not chat_id:
         return
     lines = "\n".join([f"• {i['name']} × {i['qty']} = {i['price']*i['qty']:,} ₸" for i in items])
@@ -2442,4 +2457,13 @@ def theme_page(request: Request):
         from fastapi.responses import RedirectResponse
         return RedirectResponse("/login")
     with open("static/theme.html", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/admin/changelog", response_class=HTMLResponse)
+def changelog_page(request: Request):
+    user = _get_user_from_session(request)
+    if not user:
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse("/login")
+    with open("static/changelog.html", encoding="utf-8") as f:
         return f.read()

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Обновления — Lunary</title>
+<link rel="stylesheet" href="/static/layout.css">
+<style>
+.timeline { position:relative; padding-left:24px; }
+.timeline::before { content:''; position:absolute; left:7px; top:0; bottom:0; width:2px; background:var(--border); border-radius:2px; }
+
+.tl-item { position:relative; margin-bottom:28px; }
+.tl-dot { position:absolute; left:-24px; top:4px; width:14px; height:14px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); z-index:1; }
+.tl-dot.green { background:var(--green); }
+.tl-dot.orange { background:var(--orange); }
+
+.tl-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
+.tl-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:12px; }
+.tl-version { font-size:13px; font-weight:700; color:var(--text); }
+.tl-date { font-size:12px; color:var(--text3); white-space:nowrap; }
+.tl-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px; }
+
+.tl-changes { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+.tl-change { font-size:13px; color:var(--text2); display:flex; gap:8px; align-items:flex-start; }
+.tl-change .ch-icon { flex-shrink:0; font-size:13px; }
+.tl-tag { display:inline-flex; align-items:center; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; margin-bottom:8px; }
+.tag-feature { background:#ede9fe; color:#7c3aed; }
+.tag-fix     { background:#fef3c7; color:#b45309; }
+.tag-ui      { background:#dbeafe; color:#1d4ed8; }
+.tag-kaspi   { background:#dcfce7; color:#15803d; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="mobile-header">
+  <div class="mobile-logo">Lunary <span>OS</span></div>
+</div>
+
+<div class="main-content">
+<div class="page-container">
+  <div style="margin-bottom:24px">
+    <div class="page-title">🚀 Обновления системы</div>
+    <div class="page-sub">История изменений Lunary OS</div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.8</span>
+          <span class="tl-date">Апр 2026</span>
+        </div>
+        <div class="tl-title">Дизайн-токены и консистентность интерфейса</div>
+        <span class="tl-tag tag-ui">UI</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">🎨</span>Редактор тем: страница с цветовыми токенами, живой предпросмотр, сохранение</li>
+          <li class="tl-change"><span class="ch-icon">📐</span>Единая шкала размеров шрифтов (--fs-xs..3xl), скруглений (--r-sm..full), отступов</li>
+          <li class="tl-change"><span class="ch-icon">✒️</span>Единая шкала жирности текста: 400/500/600/700/800 по всему сайту</li>
+          <li class="tl-change"><span class="ch-icon">🔄</span>Все страницы применяют сохранённую тему через nav.js автоматически</li>
+          <li class="tl-change"><span class="ch-icon">📏</span>Аудит всех страниц: размеры шрифтов, padding кнопок, border-radius приведены к стандарту</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.7</span>
+          <span class="tl-date">Апр 2026</span>
+        </div>
+        <div class="tl-title">Навигация и сохранение состояния</div>
+        <span class="tl-tag tag-ui">UI</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">🧭</span>Единый nav.js: боковая панель и нижняя навигация из одного файла для всех страниц</li>
+          <li class="tl-change"><span class="ch-icon">💾</span>Сохранение позиции прокрутки, активных вкладок и фильтров через sessionStorage</li>
+          <li class="tl-change"><span class="ch-icon">🏪</span>Добавлена ссылка на Магазин в боковую панель</li>
+          <li class="tl-change"><span class="ch-icon">🔙</span>Возврат из карточки товара — восстанавливает бренд, прокрутку и фильтры</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot green"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.6</span>
+          <span class="tl-date">Апр 2026</span>
+        </div>
+        <div class="tl-title">Несколько фото на товар + редактирование из магазина</div>
+        <span class="tl-tag tag-feature">Функция</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">📸</span>Поддержка нескольких фотографий на один товар (хранятся как JSON-массив)</li>
+          <li class="tl-change"><span class="ch-icon">🔗</span>Добавление фото по URL или загрузка файла</li>
+          <li class="tl-change"><span class="ch-icon">✏️</span>Кнопка редактирования прямо в карточке товара в магазине (только для администратора)</li>
+          <li class="tl-change"><span class="ch-icon">🖼️</span>Галерея с переключением фото стрелками и превью миниатюр</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.5</span>
+          <span class="tl-date">Мар 2026</span>
+        </div>
+        <div class="tl-title">Редизайн карточек товара и магазина</div>
+        <span class="tl-tag tag-ui">UI</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">📋</span>Карточки товара — полноширинные строки вместо сетки карточек</li>
+          <li class="tl-change"><span class="ch-icon">🔤</span>Исправлена группировка брендов: Nike и nike теперь один бренд</li>
+          <li class="tl-change"><span class="ch-icon">📍</span>Иконка магазина перемещена в нижнюю навигацию</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot orange"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.4</span>
+          <span class="tl-date">Мар 2026</span>
+        </div>
+        <div class="tl-title">Заказы Kaspi: статусы и фильтрация</div>
+        <span class="tl-tag tag-kaspi">Kaspi</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">🟢</span>Активные заказы — зелёная левая граница, завершённые/отменённые — серая</li>
+          <li class="tl-change"><span class="ch-icon">🔴</span>Исправлено: отменённые заказы из XML (Отменен, Возврат) тоже получают красный статус</li>
+          <li class="tl-change"><span class="ch-icon">⏰</span>Исправлено время синхронизации: теперь UTC+5 (Казахстан) вместо UTC+10</li>
+          <li class="tl-change"><span class="ch-icon">🗑️</span>Авто-очистка лога синхронизации: хранятся записи только за последние 24 часа</li>
+          <li class="tl-change"><span class="ch-icon">📄</span>Пагинация заказов: получение всех страниц от Kaspi API</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot green"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.3</span>
+          <span class="tl-date">Мар 2026</span>
+        </div>
+        <div class="tl-title">Заказы с сайта lunary.kz</div>
+        <span class="tl-tag tag-feature">Функция</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">🛍️</span>Страница заказов с сайта: список, статистика, фильтрация по статусу</li>
+          <li class="tl-change"><span class="ch-icon">✅</span>Смена статуса заказа прямо в списке</li>
+          <li class="tl-change"><span class="ch-icon">💬</span>Отображение комментария к заказу и адреса доставки</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.2</span>
+          <span class="tl-date">Фев 2026</span>
+        </div>
+        <div class="tl-title">Kaspi интеграция через Supabase</div>
+        <span class="tl-tag tag-kaspi">Kaspi</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">🔌</span>Supabase Edge Function как прокси для Kaspi API (обход CORS)</li>
+          <li class="tl-change"><span class="ch-icon">🔄</span>Автосинхронизация заказов каждые 5 минут</li>
+          <li class="tl-change"><span class="ch-icon">📦</span>Синхронизация статусов CANCELLED и SIGN_REQUIRED</li>
+          <li class="tl-change"><span class="ch-icon">📊</span>Лог синхронизаций с деталями</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot green"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.1</span>
+          <span class="tl-date">Фев 2026</span>
+        </div>
+        <div class="tl-title">Аналитика, сканер, история</div>
+        <span class="tl-tag tag-feature">Функция</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">📊</span>Страница аналитики: выручка, продажи по дням, топ товаров</li>
+          <li class="tl-change"><span class="ch-icon">📷</span>Сканер штрих-кодов через камеру устройства</li>
+          <li class="tl-change"><span class="ch-icon">📋</span>История операций: все приходы и расходы товаров</li>
+          <li class="tl-change"><span class="ch-icon">⚙️</span>Страница настроек: управление пользователями и конфигурацией</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <span class="tl-version">v2.0</span>
+          <span class="tl-date">Янв 2026</span>
+        </div>
+        <div class="tl-title">Lunary OS — запуск</div>
+        <span class="tl-tag tag-feature">Функция</span>
+        <ul class="tl-changes">
+          <li class="tl-change"><span class="ch-icon">🏠</span>Склад: список товаров, фильтрация по бренду, поиск</li>
+          <li class="tl-change"><span class="ch-icon">🏪</span>Публичный магазин на lunary.kz</li>
+          <li class="tl-change"><span class="ch-icon">🔐</span>Система авторизации администратора</li>
+          <li class="tl-change"><span class="ch-icon">🚀</span>Деплой на Railway + PostgreSQL</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+</div>
+
+<nav class="bottom-nav" id="bottom-nav"></nav>
+<script src="/static/nav.js"></script>
+<script src="/static/mobile.js"></script>
+</body>
+</html>

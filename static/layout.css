@@ -580,7 +580,7 @@ body {
 /* Auth modal */
 #auth-overlay { background: rgba(0,0,0,.5); backdrop-filter: blur(8px); }
 #auth-overlay .modal-box { max-width: 360px; }
-#auth-overlay .auth-logo { font-size: 28px; font-weight: 900; text-align: center; padding: 28px 0 8px; }
+#auth-overlay .auth-logo { font-size: 28px; font-weight: 800; text-align: center; padding: 28px 0 8px; }
 #auth-overlay .auth-logo span { color: var(--accent); }
 #auth-overlay .auth-desc { font-size: 13px; color: var(--text3); text-align: center; margin-bottom: 20px; }
 #auth-msg { color: var(--red); font-size: 13px; text-align: center; margin-bottom: 12px; min-height: 18px; }

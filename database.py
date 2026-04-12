@@ -214,7 +214,8 @@ def init_db():
         ("about_description","Строительные материалы и инструменты оптом и в розницу. Широкий ассортимент, доступные цены.", "Описание компании", "general"),
         ("tg_bot_token",     "",                                           "Telegram Bot Token",      "integrations"),
         ("tg_chat_id",       "",                                           "Telegram Chat ID",        "integrations"),
-        ("kaspi_api_key",    "",                                           "Kaspi API Key",           "integrations"),
+        ("kaspi_api_key",    "",                                           "Kaspi API Key (Token)",   "integrations"),
+        ("kaspi_shop_id",    "",                                           "Kaspi Shop ID",           "integrations"),
     ]
     db2 = SessionLocal()
     try:

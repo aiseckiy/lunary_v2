@@ -94,7 +94,14 @@ body {
   flex-shrink: 0;
   position: sticky;
   top: 84px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
 }
+.store-sidebar::-webkit-scrollbar { width: 4px; }
+.store-sidebar::-webkit-scrollbar-track { background: transparent; }
+.store-sidebar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
 .filter-card {
   background: var(--surface);
   border: 1px solid var(--border);

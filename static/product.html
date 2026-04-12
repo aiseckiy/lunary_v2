@@ -62,6 +62,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .props-table td:first-child { color:var(--text3); width:40%; }
 .props-table tr:last-child td { border-bottom:none; }
 
+.product-description { font-size:14px; color:var(--text2); line-height:1.7; margin-top:24px; white-space:pre-wrap; }
+
+.specs-section { margin-top:28px; padding-top:20px; border-top:1px solid var(--border); }
+.specs-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); margin-bottom:14px; }
+.specs-table { width:100%; border-collapse:collapse; }
+.specs-table tr { border-bottom:1px solid var(--bg); }
+.specs-table tr:last-child { border-bottom:none; }
+.specs-table td { padding:9px 0; font-size:14px; }
+.specs-table td:first-child { color:var(--text2); width:45%; font-weight:500; }
+
+/* Specs editor */
+.specs-editor { margin-top:12px; }
+.spec-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; }
+.spec-row input { flex:1; border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); }
+.spec-row input:focus { border-color:#6366f1; }
+.spec-del { background:none; border:none; font-size:16px; color:var(--text3); cursor:pointer; padding:4px; flex-shrink:0; }
+.spec-del:hover { color:var(--red); }
+.btn-add-spec { background:none; border:1px dashed var(--border); border-radius:8px; padding:7px 14px; font-size:13px; color:var(--text3); cursor:pointer; font-family:inherit; width:100%; margin-top:4px; }
+.btn-add-spec:hover { border-color:#6366f1; color:#6366f1; }
+
 .toast {
   position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
   background:#111827; color:#fff; padding:12px 24px; border-radius:12px;
@@ -147,6 +167,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   .gallery-wrap { width:100%; }
   .gallery-main { width:100%; height:200px; font-size:60px; }
 }
+
+/* Stock modal */
+.stock-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:600; display:none; align-items:center; justify-content:center; padding:16px; }
+.stock-overlay.open { display:flex; }
+.stock-modal { background:#fff; border-radius:20px; width:100%; max-width:400px; padding:24px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
+.stock-modal h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
+.move-tabs { display:flex; gap:0; border:1px solid var(--border,#e5e7eb); border-radius:10px; overflow:hidden; margin-bottom:16px; }
+.move-tab { flex:1; padding:9px; text-align:center; font-size:13px; font-weight:600; cursor:pointer; background:#f9fafb; color:#6b7280; transition:all .15s; }
+.move-tab.active { background:#6366f1; color:#fff; }
+.move-input { width:100%; border:1px solid var(--border,#e5e7eb); border-radius:10px; padding:10px 12px; font-size:16px; font-family:inherit; outline:none; text-align:center; font-weight:700; margin-bottom:10px; }
+.move-input:focus { border-color:#6366f1; }
+.move-note { width:100%; border:1px solid var(--border,#e5e7eb); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; resize:none; }
+.move-note:focus { border-color:#6366f1; }
+.move-actions { display:flex; gap:8px; margin-top:14px; }
+.btn-move-confirm { flex:1; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-move-cancel { flex:1; background:#f3f4f6; color:#374151; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
 
 /* Edit modal */
 .edit-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:600; display:none; align-items:center; justify-content:center; padding:16px; }
@@ -243,6 +279,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div style="text-align:center;padding:60px 0;color:#9ca3af">Загрузка...</div>
 </div>
 
+<!-- Stock modal -->
+<div class="stock-overlay" id="stock-overlay" onclick="if(event.target===this)closeStockModal()">
+  <div class="stock-modal">
+    <h3>📦 Движение склада</h3>
+    <div id="sm-product-name" style="font-size:14px;font-weight:600;margin-bottom:4px;color:#111827"></div>
+    <div id="sm-stock-info" style="font-size:13px;color:#9ca3af;margin-bottom:14px"></div>
+    <div class="move-tabs">
+      <div class="move-tab active" id="sm-tab-income" onclick="smSetTab('income')">➕ Приход</div>
+      <div class="move-tab" id="sm-tab-sale" onclick="smSetTab('sale')">➖ Продажа</div>
+      <div class="move-tab" id="sm-tab-writeoff" onclick="smSetTab('writeoff')">🗑 Списание</div>
+    </div>
+    <input class="move-input" id="sm-qty" type="number" min="1" value="1" placeholder="Количество">
+    <textarea class="move-note" id="sm-note" rows="2" placeholder="Комментарий (необязательно)"></textarea>
+    <div class="move-actions">
+      <button class="btn-move-cancel" onclick="closeStockModal()">Отмена</button>
+      <button class="btn-move-confirm" id="sm-confirm-btn" onclick="confirmStock()">Подтвердить</button>
+    </div>
+  </div>
+</div>
+
 <!-- Edit modal -->
 <div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
   <div class="edit-modal">
@@ -263,8 +319,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <label class="edit-label">Цена (₸)</label>
       <input class="edit-input" id="e-price" type="number" min="0">
     </div>
+    <div class="edit-field">
+      <label class="edit-label">Описание</label>
+      <textarea class="edit-input" id="e-description" rows="3" style="resize:vertical;min-height:70px"></textarea>
+    </div>
 
-    <div class="img-section-title">🖼 Фотографии</div>
+    <div class="img-section-title" style="margin-bottom:8px">📋 Характеристики</div>
+    <div class="specs-editor" id="specs-editor"></div>
+    <button class="btn-add-spec" onclick="addSpecRow()">+ Добавить характеристику</button>
+
+    <div class="img-section-title" style="margin-top:16px">🖼 Фотографии</div>
     <div class="imgs-list" id="imgs-list"></div>
 
     <div class="img-add-tabs">
@@ -391,17 +455,31 @@ function renderProduct() {
           ${inStock ? `В наличии: ${p.stock} ${p.unit}` : 'Нет в наличии'}
         </div>
         ${addBtn}
-        ${isAdmin ? `<button class="btn-edit-product" style="display:block" onclick="openEdit()">✏️ Редактировать товар</button>` : ''}
+        ${isAdmin ? `
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn-edit-product" style="display:block;flex:1;margin-top:0" onclick="openEdit()">✏️ Редактировать</button>
+            <button class="btn-edit-product" style="display:block;flex:1;margin-top:0;background:var(--surface,#f9fafb)" onclick="openStockModal()">📦 Движение</button>
+          </div>` : ''}
+        ${p.description ? `<div class="product-description">${p.description}</div>` : ''}
         <table class="props-table">
           <tr><td>Категория</td><td>${p.category}</td></tr>
           ${p.brand ? `<tr><td>Бренд</td><td>${p.brand}</td></tr>` : ''}
           <tr><td>Единица</td><td>${p.unit}</td></tr>
           <tr><td>Артикул</td><td>${p.sku}</td></tr>
         </table>
+        ${renderSpecsBlock(p)}
       </div>
     </div>
   `;
   galleryIndex = 0;
+}
+
+function renderSpecsBlock(p) {
+  let specs = [];
+  try { specs = JSON.parse(p.specs || '[]'); } catch {}
+  if (!specs.length) return '';
+  const rows = specs.map(s => `<tr><td>${s.key}</td><td>${s.value}</td></tr>`).join('');
+  return `<div class="specs-section"><div class="specs-title">Характеристики</div><table class="specs-table">${rows}</table></div>`;
 }
 
 function setGallery(i) {
@@ -419,6 +497,30 @@ function shiftGallery(dir) {
 
 // ── Edit modal ──
 let editImages = [];
+let editSpecs = [];
+
+function renderSpecsEditor() {
+  const editor = document.getElementById('specs-editor');
+  if (!editor) return;
+  editor.innerHTML = editSpecs.map((s, i) => `
+    <div class="spec-row" id="spec-row-${i}">
+      <input type="text" placeholder="Название (напр. Объём)" value="${s.key}" oninput="editSpecs[${i}].key=this.value">
+      <input type="text" placeholder="Значение (напр. 310 мл)" value="${s.value}" oninput="editSpecs[${i}].value=this.value">
+      <button class="spec-del" onclick="removeSpec(${i})">×</button>
+    </div>`).join('');
+}
+
+function addSpecRow() {
+  editSpecs.push({key:'', value:''});
+  renderSpecsEditor();
+  const rows = document.querySelectorAll('.spec-row');
+  if (rows.length) rows[rows.length-1].querySelector('input').focus();
+}
+
+function removeSpec(i) {
+  editSpecs.splice(i, 1);
+  renderSpecsEditor();
+}
 
 function switchImgTab(tab) {
   document.getElementById('tab-file').classList.toggle('active', tab === 'file');
@@ -468,6 +570,9 @@ function openEdit() {
   document.getElementById('e-brand').value = p.brand || '';
   document.getElementById('e-category').value = p.category || '';
   document.getElementById('e-price').value = p.price || '';
+  document.getElementById('e-description').value = p.description || '';
+  try { editSpecs = JSON.parse(p.specs || '[]'); } catch { editSpecs = []; }
+  renderSpecsEditor();
   editImages = p.images && p.images.length ? [...p.images] : (p.image_url ? [p.image_url] : []);
   renderImgsList();
   switchImgTab('file');
@@ -491,11 +596,14 @@ async function saveEdit() {
   const btn = document.getElementById('e-save-btn');
   btn.textContent = 'Сохранение...'; btn.disabled = true;
   try {
+    const filteredSpecs = editSpecs.filter(s => s.key.trim());
     const updates = {
       name: document.getElementById('e-name').value.trim(),
       brand: document.getElementById('e-brand').value.trim(),
       category: document.getElementById('e-category').value.trim(),
       price: parseInt(document.getElementById('e-price').value) || null,
+      description: document.getElementById('e-description').value.trim() || null,
+      specs: JSON.stringify(filteredSpecs),
     };
     await fetch(`/api/products/${product.id}`, {
       method: 'PUT',
@@ -517,6 +625,51 @@ async function saveEdit() {
     showToast('❌ Ошибка сохранения');
   }
   btn.textContent = 'Сохранить'; btn.disabled = false;
+}
+
+// ── Stock modal ──
+let smMoveType = 'income';
+
+function smSetTab(type) {
+  smMoveType = type;
+  ['income','sale','writeoff'].forEach(t => {
+    document.getElementById('sm-tab-' + t).classList.toggle('active', t === type);
+  });
+}
+
+function openStockModal() {
+  if (!product) return;
+  document.getElementById('sm-product-name').textContent = product.name;
+  document.getElementById('sm-stock-info').textContent = `Текущий остаток: ${product.stock} ${product.unit || 'шт'}`;
+  document.getElementById('sm-qty').value = '1';
+  document.getElementById('sm-note').value = '';
+  smSetTab('income');
+  document.getElementById('stock-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('sm-qty').focus(), 100);
+}
+
+function closeStockModal() {
+  document.getElementById('stock-overlay').classList.remove('open');
+}
+
+async function confirmStock() {
+  const qty = parseInt(document.getElementById('sm-qty').value);
+  if (!qty || qty < 1) { showToast('Введите количество'); return; }
+  const note = document.getElementById('sm-note').value.trim();
+  const btn = document.getElementById('sm-confirm-btn');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    await fetch(`/api/products/${product.id}/movement`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ quantity: smMoveType === 'income' ? qty : -qty, type: smMoveType, note }),
+    });
+    product.stock += smMoveType === 'income' ? qty : -qty;
+    closeStockModal();
+    renderProduct();
+    showToast(smMoveType === 'income' ? `✅ Приход ${qty} ${product.unit}` : `✅ Списано ${qty} ${product.unit}`);
+  } catch { showToast('❌ Ошибка'); }
+  btn.textContent = 'Подтвердить'; btn.disabled = false;
 }
 
 // ── Auth ──

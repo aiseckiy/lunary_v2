@@ -64,6 +64,12 @@
 .comment-box { font-size:12px; color:var(--text2); background:var(--bg); border-radius:8px; padding:6px 10px; margin-bottom:10px; }
 
 .empty { text-align:center; padding:60px 20px; color:var(--text3); font-size:15px; }
+.pagination { display:flex; align-items:center; justify-content:center; gap:6px; padding:16px 0; flex-wrap:wrap; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
+.page-btn:hover { border-color:var(--border); color:var(--text); }
+.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-info { font-size:13px; color:var(--text3); padding:0 6px; }
 </style>
 </head>
 <body>
@@ -98,9 +104,11 @@
     <div class="stab" onclick="setStatus('cancelled')" data-s="cancelled">❌ Отменены</div>
   </div>
 
+  <div id="pagination-top"></div>
   <div id="orders-container">
     <div class="empty">⏳ Загрузка...</div>
   </div>
+  <div id="pagination-bot"></div>
 </div>
 </div>
 </div>
@@ -112,12 +120,41 @@ const LABELS = { new:'Новый', confirmed:'Подтверждён', ready:'Г
 const STATUSES = ['new','confirmed','ready','delivered','cancelled'];
 let allOrders = [];
 let currentStatus = sessionStorage.getItem('lunary_shoporders_tab') || '';
+const PAGE_SIZE = 50;
+let currentPage = 1;
 
 function setStatus(s) {
   currentStatus = s;
+  currentPage = 1;
   sessionStorage.setItem('lunary_shoporders_tab', s);
   document.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.dataset.s === s));
   render();
+}
+
+function renderPagination(total, page, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  const from = (page - 1) * PAGE_SIZE + 1, to = Math.min(page * PAGE_SIZE, total);
+  let h = `<div class="pagination">`;
+  h += `<button class="page-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>← Назад</button>`;
+  const s = Math.max(1, page-3), e = Math.min(pages, s+6);
+  if (s > 1) h += `<button class="page-btn" onclick="goPage(1)">1</button>${s>2?'<span class="page-info">…</span>':''}`;
+  for (let i = s; i <= e; i++) h += `<button class="page-btn${i===page?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (e < pages) h += `${e<pages-1?'<span class="page-info">…</span>':''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
+  h += `<button class="page-btn" onclick="goPage(${page+1})" ${page===pages?'disabled':''}>Вперёд →</button>`;
+  h += `<span class="page-info">${from}–${to} из ${total}</span></div>`;
+  el.innerHTML = h;
+}
+
+function goPage(p) {
+  const filtered = currentStatus ? allOrders.filter(o => o.status === currentStatus) : allOrders;
+  const pages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  render();
+  document.getElementById('pagination-top').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 function render() {
@@ -125,9 +162,14 @@ function render() {
   const container = document.getElementById('orders-container');
   if (!filtered.length) {
     container.innerHTML = '<div class="empty">📭 Заказов нет</div>';
+    document.getElementById('pagination-top').innerHTML = '';
+    document.getElementById('pagination-bot').innerHTML = '';
     return;
   }
-  container.innerHTML = filtered.map(o => {
+  renderPagination(filtered.length, currentPage, 'pagination-top');
+  renderPagination(filtered.length, currentPage, 'pagination-bot');
+  const page = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+  container.innerHTML = page.map(o => {
     let items = [];
     try { items = JSON.parse(o.items || '[]'); } catch {}
     const itemsHtml = items.map(i => `

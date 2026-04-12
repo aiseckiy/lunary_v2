@@ -41,6 +41,8 @@ class Product(Base):
     supplier = Column(String, nullable=True)  # поставщик
     image_url = Column(Text, nullable=True)  # первое изображение (устаревшее, оставлено для совместимости)
     images = Column(Text, nullable=True)  # JSON-массив URL/base64
+    description = Column(Text, nullable=True)  # описание товара
+    specs = Column(Text, nullable=True)  # JSON-массив [{key, value}] характеристики
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -183,6 +185,8 @@ def init_db():
         ("movements", "user_name", "TEXT"),
         ("products", "image_url", "TEXT"),
         ("products", "images", "TEXT"),
+        ("products", "description", "TEXT"),
+        ("products", "specs", "TEXT"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

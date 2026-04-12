@@ -169,6 +169,8 @@ class ProductUpdate(BaseModel):
     kaspi_article: Optional[str] = None
     cost_price: Optional[int] = None
     supplier: Optional[str] = None
+    description: Optional[str] = None
+    specs: Optional[str] = None
 
 
 class MovementCreate(BaseModel):
@@ -837,7 +839,9 @@ def list_products(db: Session = Depends(get_db)):
             "price": s["product"].price,
             "kaspi_sku": s["product"].kaspi_sku or "",
             "cost_price": s["product"].cost_price,
-            "supplier": s["product"].supplier or ""
+            "supplier": s["product"].supplier or "",
+            "description": s["product"].description or "",
+            "specs": s["product"].specs or "[]"
         }
         for s in stocks
     ]
@@ -936,6 +940,11 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         "category": p.category or "", "unit": p.unit or "шт",
         "price": p.price, "min_stock": p.min_stock,
         "stock": stock, "low": stock <= (p.min_stock or 0),
+        "brand": p.brand or "", "supplier": p.supplier or "",
+        "cost_price": p.cost_price, "barcode": p.barcode or "",
+        "images": p.images or "[]",
+        "description": p.description or "",
+        "specs": p.specs or "[]",
     }}
 
 
@@ -1195,6 +1204,8 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
         "stock": int(stock), "min_stock": p.min_stock or 0,
         "image_url": p.image_url or "",
         "images": _parse_images(p),
+        "description": p.description or "",
+        "specs": p.specs or "[]",
     }
 
 

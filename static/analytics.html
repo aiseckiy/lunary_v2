@@ -195,6 +195,8 @@ function dateParams(extra) {
   return p.toString() ? '?' + p : '';
 }
 let abcData = null;
+let abcPage = 1;
+const ABC_PAGE_SIZE = 50;
 
 Chart.defaults.color = '#71717a';
 Chart.defaults.borderColor = '#f3f4f6';
@@ -305,13 +307,78 @@ function switchPeriod(period, el) {
   loadRevenue(period);
 }
 
+function renderAbcPagination(total, page) {
+  const pages = Math.ceil(total / ABC_PAGE_SIZE);
+  if (pages <= 1) return '';
+  const from = (page-1)*ABC_PAGE_SIZE+1, to = Math.min(page*ABC_PAGE_SIZE, total);
+  let h = `<div class="abc-pagination">`;
+  h += `<button class="page-btn" onclick="goAbcPage(${page-1})" ${page===1?'disabled':''}>← Назад</button>`;
+  const s = Math.max(1,page-3), e = Math.min(pages,s+6);
+  if (s>1) h+=`<button class="page-btn" onclick="goAbcPage(1)">1</button>${s>2?'<span class="page-info">…</span>':''}`;
+  for(let i=s;i<=e;i++) h+=`<button class="page-btn${i===page?' active':''}" onclick="goAbcPage(${i})">${i}</button>`;
+  if(e<pages) h+=`${e<pages-1?'<span class="page-info">…</span>':''}<button class="page-btn" onclick="goAbcPage(${pages})">${pages}</button>`;
+  h+=`<button class="page-btn" onclick="goAbcPage(${page+1})" ${page===pages?'disabled':''}>Вперёд →</button>`;
+  h+=`<span class="page-info">${from}–${to} из ${total}</span></div>`;
+  return h;
+}
+
+function goAbcPage(p) {
+  const products = abcData?.products || [];
+  const pages = Math.ceil(products.length / ABC_PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  abcPage = p;
+  renderAbcTable();
+  document.getElementById('abc-container').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function renderAbcTable() {
+  const products = abcData?.products || [];
+  if (!products.length) return;
+  const maxRev = products[0].revenue;
+  const pageSlice = products.slice((abcPage-1)*ABC_PAGE_SIZE, abcPage*ABC_PAGE_SIZE);
+  document.getElementById('abc-container').innerHTML =
+    renderAbcPagination(products.length, abcPage) +
+    `<div style="overflow-x:auto">
+    <table class="abc-table">
+      <thead><tr>
+        <th>Товар</th><th>Категория</th>
+        <th style="text-align:right">Выручка</th>
+        <th style="text-align:right">Кол-во</th>
+        <th>Доля</th><th>ABC</th>
+      </tr></thead>
+      <tbody>
+        ${pageSlice.map(p => {
+          const colorClass = p.abc==='A' ? '' : (p.abc==='B' ? ' orange' : ' gray');
+          return `<tr>
+            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              <div style="font-weight:500">${p.name}</div>
+              ${p.sku ? `<div style="font-size:11px;color:var(--text3);font-family:monospace">${p.sku}</div>` : ''}
+            </td>
+            <td style="color:var(--text3);font-size:12px">${p.category||'—'}</td>
+            <td style="text-align:right;font-weight:700">${p.revenue.toLocaleString('ru')} ₸</td>
+            <td style="text-align:right;color:var(--text3)">${p.qty} шт</td>
+            <td style="min-width:100px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="bar-bg" style="flex:1"><div class="bar-fill${colorClass}" style="width:${(p.revenue/maxRev*100).toFixed(1)}%"></div></div>
+                <span style="font-size:11px;color:var(--text3);white-space:nowrap">${p.revenue_pct}%</span>
+              </div>
+            </td>
+            <td><span class="abc-badge abc-${p.abc}">${p.abc}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>` +
+    renderAbcPagination(products.length, abcPage);
+}
+
 async function loadAbc() {
   try {
     const d = await fetch('/api/analytics/abc' + dateParams()).then(r => r.json());
     abcData = d;
+    abcPage = 1;
     const products = d.products || [];
     if (!products.length) {
-      document.getElementById('abc-container').innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:20px">Нет данных</div>';
+      document.getElementById('abc-container').innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px">Нет данных</div>';
       return;
     }
 
@@ -320,42 +387,7 @@ async function loadAbc() {
     const cCount = products.filter(p=>p.abc==='C').length;
     document.getElementById('abc-summary').innerHTML = `A: ${aCount} · B: ${bCount} · C: ${cCount} товаров`;
 
-    const maxRev = products[0].revenue;
-    document.getElementById('abc-container').innerHTML = `
-      <div style="overflow-x:auto">
-      <table class="abc-table">
-        <thead><tr>
-          <th>Товар</th>
-          <th>Категория</th>
-          <th style="text-align:right">Выручка</th>
-          <th style="text-align:right">Кол-во</th>
-          <th>Доля</th>
-          <th>ABC</th>
-        </tr></thead>
-        <tbody>
-          ${products.map(p => {
-            const colorClass = p.abc === 'A' ? '' : (p.abc === 'B' ? ' orange' : ' gray');
-            return `<tr>
-              <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                <div style="font-weight:500">${p.name}</div>
-                ${p.sku ? `<div style="font-size:11px;color:#9ca3af;font-family:monospace">${p.sku}</div>` : ''}
-              </td>
-              <td style="color:#9ca3af;font-size:12px">${p.category||'—'}</td>
-              <td style="text-align:right;font-weight:700">${p.revenue.toLocaleString('ru')} ₸</td>
-              <td style="text-align:right;color:#9ca3af">${p.qty} шт</td>
-              <td style="min-width:100px">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <div class="bar-bg" style="flex:1"><div class="bar-fill${colorClass}" style="width:${(p.revenue/maxRev*100).toFixed(1)}%"></div></div>
-                  <span style="font-size:11px;color:#9ca3af;white-space:nowrap">${p.revenue_pct}%</span>
-                </div>
-              </td>
-              <td><span class="abc-badge abc-${p.abc}">${p.abc}</span></td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-      </div>`;
-
+    renderAbcTable();
     renderCategoryChart(d);
   } catch(e) {
     document.getElementById('abc-container').innerHTML = `<div style="color:#ef4444;font-size:13px">Ошибка: ${e.message}</div>`;

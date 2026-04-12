@@ -61,6 +61,13 @@
 .card-btn { background:var(--bg); border:none; border-radius:6px; padding:6px 10px; color:var(--text2); font-size:13px; cursor:pointer; }
 .card-btn:hover { background:var(--border); }
 .cat-header { font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin:20px 0 10px; grid-column:1/-1; }
+/* ── Pagination ── */
+.pagination { display:flex; align-items:center; justify-content:center; gap:6px; padding:16px 0; flex-wrap:wrap; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
+.page-btn:hover { color:var(--text); }
+.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-info { font-size:13px; color:var(--text3); padding:0 6px; }
 /* ── Modals ── */
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
 .overlay.open { display:flex; }
@@ -152,8 +159,8 @@
 
   <!-- Строка 1: поиск + сортировка + кнопки -->
   <div class="toolbar">
-    <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу, штрихкоду..." oninput="saveFilters();render()">
-    <select class="sort-btn" id="sort-select" onchange="saveFilters();render()">
+    <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу, штрихкоду..." oninput="currentPage=1;saveFilters();render()">
+    <select class="sort-btn" id="sort-select" onchange="currentPage=1;saveFilters();render()">
       <option value="default">↕ По категориям</option>
       <option value="stock-asc">↑ Остаток (меньше)</option>
       <option value="stock-desc">↓ Остаток (больше)</option>
@@ -188,9 +195,11 @@
     </div>
   </div>
 
+  <div id="pagination-top"></div>
   <div class="products-grid" id="grid">
     <div class="empty">Загрузка...</div>
   </div>
+  <div id="pagination-bot"></div>
 </div><!-- /page-container -->
 </div><!-- /main-content -->
 </div><!-- /app-shell -->
@@ -449,6 +458,8 @@ let activeCats = new Set();
 let activeBrands = new Set();
 let showLow = false;
 let selectedId = null;
+const PAGE_SIZE = 80;
+let currentPage = 1;
 
 // ── Сохранение/восстановление состояния фильтров ──────────
 function saveFilters() {
@@ -571,18 +582,18 @@ function updateBrandBtn() {
 
 function toggleCat(cat) {
   if (activeCats.has(cat)) activeCats.delete(cat); else activeCats.add(cat);
-  updateCatBtn(); saveFilters(); render();
+  currentPage = 1; updateCatBtn(); saveFilters(); render();
 }
 
 function toggleBrand(brand) {
   if (activeBrands.has(brand)) activeBrands.delete(brand); else activeBrands.add(brand);
-  updateBrandBtn(); saveFilters(); render();
+  currentPage = 1; updateBrandBtn(); saveFilters(); render();
 }
 
 function setCat(cat) {
   activeCats.clear(); if (cat) activeCats.add(cat);
   document.querySelectorAll('.fdrop-menu').forEach(m => m.classList.remove('open'));
-  updateCatBtn(); saveFilters(); render();
+  currentPage = 1; updateCatBtn(); saveFilters(); render();
 }
 function setBrand(brand) {
   activeBrands.clear(); if (brand) activeBrands.add(brand);
@@ -591,10 +602,44 @@ function setBrand(brand) {
 }
 
 function toggleLow() {
+  currentPage = 1;
   showLow = !showLow;
   document.getElementById('f-low').classList.toggle('active', showLow);
   saveFilters();
   render();
+}
+
+function renderPagination(total, page, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  const from = (page - 1) * PAGE_SIZE + 1, to = Math.min(page * PAGE_SIZE, total);
+  let h = `<div class="pagination">`;
+  h += `<button class="page-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>← Назад</button>`;
+  const s = Math.max(1, page-3), e = Math.min(pages, s+6);
+  if (s > 1) h += `<button class="page-btn" onclick="goPage(1)">1</button>${s>2?'<span class="page-info">…</span>':''}`;
+  for (let i = s; i <= e; i++) h += `<button class="page-btn${i===page?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (e < pages) h += `${e<pages-1?'<span class="page-info">…</span>':''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
+  h += `<button class="page-btn" onclick="goPage(${page+1})" ${page===pages?'disabled':''}>Вперёд →</button>`;
+  h += `<span class="page-info">${from}–${to} из ${total}</span></div>`;
+  el.innerHTML = h;
+}
+
+function goPage(p) {
+  const q = document.getElementById('search').value.toLowerCase();
+  let list = allProducts.filter(pr => {
+    if (q && !pr.name.toLowerCase().includes(q) && !pr.sku.toLowerCase().includes(q) && !(pr.barcode||'').includes(q)) return false;
+    if (showLow && !pr.low) return false;
+    if (activeCats.size && !activeCats.has(pr.category || 'Общее')) return false;
+    if (activeBrands.size && !activeBrands.has(getBrand(pr))) return false;
+    return true;
+  });
+  const pages = Math.ceil(list.length / PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  render();
+  document.getElementById('pagination-top').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 function render() {
@@ -608,7 +653,12 @@ function render() {
   });
 
   const grid = document.getElementById('grid');
-  if (!list.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty">Ничего не найдено</div>';
+    document.getElementById('pagination-top').innerHTML = '';
+    document.getElementById('pagination-bot').innerHTML = '';
+    return;
+  }
 
   const sort = document.getElementById('sort-select').value;
 
@@ -617,13 +667,17 @@ function render() {
   else if (sort === 'stock-desc') list.sort((a, b) => b.stock - a.stock);
   else if (sort === 'name-asc')  list.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
+  renderPagination(list.length, currentPage, 'pagination-top');
+  renderPagination(list.length, currentPage, 'pagination-bot');
+  const page = list.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
   let html = '';
   // При сортировке по остаткам — без группировки по категориям
   if (sort !== 'default' || activeCats.size) {
-    list.forEach(p => { html += productCard(p); });
+    page.forEach(p => { html += productCard(p); });
   } else {
     const cats = {};
-    list.forEach(p => { const c = p.category||'Общее'; (cats[c]=cats[c]||[]).push(p); });
+    page.forEach(p => { const c = p.category||'Общее'; (cats[c]=cats[c]||[]).push(p); });
     for (const [cat, items] of Object.entries(cats)) {
       html += `<div class="cat-header">${cat} — ${items.length} шт</div>`;
       items.forEach(p => { html += productCard(p); });
@@ -634,7 +688,7 @@ function render() {
 
 function productCard(p) {
   return `
-    <div class="product-card ${p.low?'low':''}" onclick="openMoveModal(${p.id})" style="cursor:pointer">
+    <div class="product-card ${p.low?'low':''}" onclick="location.href='/shop/product/${p.id}'" style="cursor:pointer">
       <div class="card-top">
         <div class="card-name">${p.name}</div>
         <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️':'✓'}</span>
@@ -646,7 +700,7 @@ function productCard(p) {
           <div class="card-stock ${p.low?'low':'ok'}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>
           ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${p.cost_price && p.price > p.cost_price ? ` <span style="color:#10b981;font-size:11px;font-weight:500">+${Math.round((p.price-p.cost_price)/p.price*100)}%</span>` : ''}</div>` : ''}
         </div>
-        <button class="card-btn" onclick="event.stopPropagation();openEditModal(${p.id})" title="Редактировать">✏️</button>
+        <button class="card-btn" onclick="event.stopPropagation();openMoveModal(${p.id})" title="Движение">⇅</button>
       </div>
       <div class="card-tags">
         ${p.category ? `<span class="card-tag">${p.category}</span>` : ''}

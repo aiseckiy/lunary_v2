@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import NullPool
 from datetime import datetime
@@ -81,6 +81,19 @@ class Movement(Base):
     type = Column(String, nullable=False)  # income, sale, writeoff, return, adjustment
     source = Column(String, default="manual")  # manual, kaspi, offline
     note = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=True)
+    avatar = Column(String, nullable=True)
+    google_id = Column(String, unique=True, nullable=True)
+    role = Column(String, default="customer")  # admin | customer
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

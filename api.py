@@ -64,26 +64,71 @@ if _slowapi_ok:
 
 
 # ─── Auth middleware ──────────────────────────────────────────
-_PUBLIC_PATHS = {"/", "/login", "/api/auth/login", "/api/auth/logout"}
-_PUBLIC_PREFIXES = ("/static/", "/api/store/")
+_PUBLIC_PATHS = {"/login", "/api/auth/login", "/api/auth/logout",
+                 "/auth/google", "/auth/google/callback",
+                 "/shop", "/api/shop/products", "/api/shop/product"}
+_PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/")
+_ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
+                "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
+                "/api/history", "/api/admin", "/api/purchases", "/api/alerts")
+
+
+def _get_user_from_session(request: Request):
+    """Возвращает user из БД по session cookie, или None"""
+    session = request.cookies.get("lunary_session", "")
+    if not session:
+        return None
+    # Старый admin-пароль
+    if session == _SESSION_TOKEN and _SESSION_TOKEN:
+        return {"role": "admin", "name": "Admin", "email": ""}
+    # Google OAuth session
+    import hashlib
+    from database import SessionLocal, User as UserModel
+    db = SessionLocal()
+    try:
+        user = db.query(UserModel).filter(UserModel.id == int(session.split("_")[0])).first() if "_" in session else None
+        if user:
+            expected = hashlib.sha256(f"user-{user.id}-{user.email}-{os.getenv('ADMIN_PASSWORD','lunary-secret')}".encode()).hexdigest()
+            if session == f"{user.id}_{expected}":
+                return {"role": user.role, "name": user.name, "email": user.email, "id": user.id}
+    except Exception:
+        pass
+    finally:
+        db.close()
+    return None
+
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        password = os.getenv("ADMIN_PASSWORD", "")
-        if not password:
-            return await call_next(request)  # Пароль не задан — открыто
-
         path = request.url.path
-        # Публичные пути — магазин и статика
+
+        # Публичные пути — без авторизации
         if path in _PUBLIC_PATHS or any(path.startswith(p) for p in _PUBLIC_PREFIXES):
             return await call_next(request)
 
-        session = request.cookies.get("lunary_session", "")
-        if session != _SESSION_TOKEN:
+        user = _get_user_from_session(request)
+
+        # Корневой путь — редирект на магазин или склад в зависимости от роли
+        if path == "/":
+            if not user:
+                return RedirectResponse("/shop", status_code=302)
+            if user["role"] == "admin":
+                return await call_next(request)
+            return RedirectResponse("/shop", status_code=302)
+
+        # Админские пути — только admin
+        is_admin_path = any(path.startswith(p) for p in _ADMIN_PATHS) or path in ("/", "/admin")
+        if is_admin_path:
+            if not user or user["role"] != "admin":
+                if path.startswith("/api/"):
+                    return JSONResponse({"error": "Forbidden"}, status_code=403)
+                return RedirectResponse(f"/login?next={path}", status_code=302)
+
+        # Остальные пути — нужна авторизация
+        if not user:
             if path.startswith("/api/"):
                 return JSONResponse({"error": "Unauthorized"}, status_code=401)
-            next_url = path
-            return RedirectResponse(f"/login?next={next_url}", status_code=302)
+            return RedirectResponse(f"/login?next={path}", status_code=302)
 
         return await call_next(request)
 
@@ -339,6 +384,118 @@ def auth_logout():
     resp = JSONResponse({"ok": True})
     resp.delete_cookie("lunary_session")
     return resp
+
+
+# ─── Google OAuth ─────────────────────────────────────────────
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "https://www.lunary.kz/auth/google/callback")
+
+@app.get("/auth/google")
+def google_auth():
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="Google OAuth не настроен")
+    import urllib.parse
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+    }
+    url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
+    return RedirectResponse(url)
+
+
+@app.get("/auth/google/callback")
+def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
+    import urllib.parse, urllib.request, json, hashlib
+    from database import User as UserModel
+
+    # Обмен code на токен
+    token_data = urllib.parse.urlencode({
+        "code": code,
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "grant_type": "authorization_code",
+    }).encode()
+    req = urllib.request.Request("https://oauth2.googleapis.com/token", data=token_data)
+    try:
+        with urllib.request.urlopen(req) as r:
+            token = json.loads(r.read())
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Ошибка токена: {e}")
+
+    # Получить профиль пользователя
+    access_token = token.get("access_token")
+    req2 = urllib.request.Request(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    with urllib.request.urlopen(req2) as r:
+        profile = json.loads(r.read())
+
+    email = profile.get("email", "")
+    google_id = profile.get("id", "")
+    name = profile.get("name", "")
+    avatar = profile.get("picture", "")
+
+    # Найти или создать пользователя
+    user = db.query(UserModel).filter(UserModel.email == email).first()
+    if not user:
+        user = UserModel(email=email, google_id=google_id, name=name, avatar=avatar, role="customer")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        user.google_id = google_id
+        user.name = name
+        user.avatar = avatar
+        db.commit()
+
+    # Создать session token
+    secret = os.getenv("ADMIN_PASSWORD", "lunary-secret")
+    session_token = f"{user.id}_{hashlib.sha256(f'user-{user.id}-{user.email}-{secret}'.encode()).hexdigest()}"
+    next_url = "/admin" if user.role == "admin" else "/shop"
+    resp = RedirectResponse(next_url, status_code=302)
+    resp.set_cookie("lunary_session", session_token, httponly=True, samesite="lax", max_age=60*60*24*30)
+    return resp
+
+
+@app.get("/api/auth/me")
+def auth_me(request: Request):
+    user = _get_user_from_session(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Не авторизован")
+    return user
+
+
+# ─── Users management ────────────────────────────────────────
+@app.get("/api/admin/users")
+def list_users(request: Request, db: Session = Depends(get_db)):
+    from database import User as UserModel
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    users = db.query(UserModel).order_by(UserModel.created_at.desc()).all()
+    return [{"id": u.id, "email": u.email, "name": u.name, "role": u.role,
+             "avatar": u.avatar, "created_at": str(u.created_at)} for u in users]
+
+
+@app.patch("/api/admin/users/{user_id}")
+def update_user_role(user_id: int, data: dict, request: Request, db: Session = Depends(get_db)):
+    from database import User as UserModel
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    u = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not u:
+        raise HTTPException(status_code=404)
+    if "role" in data:
+        u.role = data["role"]
+    db.commit()
+    return {"ok": True, "role": u.role}
 
 
 # ─── Admin ───────────────────────────────────────────────────

@@ -1793,15 +1793,33 @@ def products_export_xlsx(db: Session = Depends(get_db)):
 
 
 def _filter_orders_by_date(rows, date_from: str | None, date_to: str | None):
-    """Фильтр строк KaspiOrder по дате выдачи (status_date) или дате создания"""
+    """Фильтр строк KaspiOrder по дате.
+
+    Логика:
+    - Активные заказы (в процессе: NEW/DELIVERY/PICKUP/KASPI_DELIVERY/APPROVED/SIGN_REQUIRED)
+      показываем ВСЕГДА, независимо от фильтра — они сейчас в работе.
+    - Выданные (ARCHIVE/Выдан) — фильтруем по дате выдачи (status_date).
+    - Отменённые/Возвраты — фильтруем по дате создания (order_date).
+    """
+    ACTIVE_STATES = {"NEW", "APPROVED", "DELIVERY", "KASPI_DELIVERY", "PICKUP", "SIGN_REQUIRED"}
+    ARCHIVE_STATES = {"ARCHIVE", "Выдан"}
+
     df = datetime.strptime(date_from, "%Y-%m-%d") if date_from else None
     dt = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59) if date_to else None
     if not df and not dt:
         return rows
     result = []
     for r in rows:
-        # Для выданных заказов используем дату выдачи, иначе — дату создания
-        date_str = getattr(r, "status_date", None) if r.state in ("ARCHIVE", "Выдан") and getattr(r, "status_date", None) else getattr(r, "order_date", None)
+        state = getattr(r, "state", "")
+        # Активные заказы всегда показываем
+        if state in ACTIVE_STATES:
+            result.append(r)
+            continue
+        # Для выданных — дата выдачи, для остальных — дата создания заказа
+        if state in ARCHIVE_STATES and getattr(r, "status_date", None):
+            date_str = r.status_date
+        else:
+            date_str = getattr(r, "order_date", None)
         d = _parse_order_date(date_str)
         if d is None:
             continue

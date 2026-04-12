@@ -10,6 +10,7 @@
     { href: '/admin/history',     icon: '📋', label: 'История' },
     { href: '/admin/analytics',   icon: '📊', label: 'Аналитика' },
     { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi' },
+    { href: '/admin/shop-orders',  icon: '🛍️', label: 'Заказы' },
     { href: '/admin/settings',    icon: '⚙️', label: 'Настройки' },
   ];
 
@@ -265,10 +266,24 @@
     location.href = '/login';
   };
 
+  async function loadOrdersBadge() {
+    try {
+      const res = await fetch('/api/admin/shop-orders/new-count');
+      if (!res.ok) return;
+      const {count} = await res.json();
+      const badge = document.getElementById('orders-badge');
+      if (badge && count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline';
+      }
+    } catch {}
+  }
+
   // Run after DOM ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => { init(); loadOrdersBadge(); });
   } else {
     init();
+    loadOrdersBadge();
   }
 })();

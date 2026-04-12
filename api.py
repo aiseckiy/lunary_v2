@@ -402,7 +402,9 @@ def auth_register(data: RegisterRequest, db: Session = Depends(get_db)):
     if db.query(UserModel).filter(UserModel.email == data.email.lower()).first():
         raise HTTPException(status_code=409, detail="Пользователь с таким email уже существует")
     pw_hash = hashlib.sha256(data.password.encode()).hexdigest()
-    user = UserModel(email=data.email.lower(), name=data.name, password_hash=pw_hash, role="customer")
+    _ADMIN_EMAILS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "aiseckiy@gmail.com").split(",")}
+    role = "admin" if data.email.lower() in _ADMIN_EMAILS else "customer"
+    user = UserModel(email=data.email.lower(), name=data.name, password_hash=pw_hash, role=role)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -421,6 +423,10 @@ def auth_email_login(data: EmailLoginRequest, db: Session = Depends(get_db)):
     pw_hash = hashlib.sha256(data.password.encode()).hexdigest()
     if user.password_hash != pw_hash:
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
+    _ADMIN_EMAILS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "aiseckiy@gmail.com").split(",")}
+    if user.email in _ADMIN_EMAILS and user.role != "admin":
+        user.role = "admin"
+        db.commit()
     resp = JSONResponse({"ok": True, "name": user.name, "role": user.role})
     resp.set_cookie("lunary_session", _make_user_session(user), httponly=True, samesite="lax", max_age=60*60*24*30)
     return resp
@@ -481,10 +487,13 @@ def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
     name = profile.get("name", "")
     avatar = profile.get("picture", "")
 
+    _ADMIN_EMAILS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "aiseckiy@gmail.com").split(",")}
+    auto_role = "admin" if email.lower() in _ADMIN_EMAILS else "customer"
+
     # Найти или создать пользователя
     user = db.query(UserModel).filter(UserModel.email == email).first()
     if not user:
-        user = UserModel(email=email, google_id=google_id, name=name, avatar=avatar, role="customer")
+        user = UserModel(email=email, google_id=google_id, name=name, avatar=avatar, role=auto_role)
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -492,9 +501,11 @@ def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
         user.google_id = google_id
         user.name = name
         user.avatar = avatar
+        if email.lower() in _ADMIN_EMAILS and user.role != "admin":
+            user.role = "admin"
         db.commit()
 
-    next_url = "/shop"
+    next_url = "/admin" if user.role == "admin" else "/shop"
     resp = RedirectResponse(next_url, status_code=302)
     resp.set_cookie("lunary_session", _make_user_session(user), httponly=True, samesite="lax", max_age=60*60*24*30)
     return resp
@@ -872,6 +883,62 @@ def store_products(db: Session = Depends(get_db)):
         }
         for s in stocks
     ]
+
+
+@app.get("/api/store/products/{product_id}")
+def store_product_detail(product_id: int, db: Session = Depends(get_db)):
+    from database import Product as _P, Movement as _M
+    from sqlalchemy import func
+    row = (
+        db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
+        .outerjoin(_M, _M.product_id == _P.id)
+        .filter(_P.id == product_id)
+        .group_by(_P.id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    p, stock = row
+    return {
+        "id": p.id, "name": p.name, "sku": p.sku,
+        "category": p.category or "Другое",
+        "brand": p.brand or "",
+        "price": p.price, "unit": p.unit or "шт",
+        "stock": int(stock), "min_stock": p.min_stock or 0,
+    }
+
+
+@app.get("/shop/product/{product_id}", response_class=HTMLResponse)
+def shop_product_page(product_id: int):
+    with open("static/product.html", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get("/api/shop/my-orders")
+def my_orders(request: Request, db: Session = Depends(get_db)):
+    user = _get_user_from_session(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Не авторизован")
+    from database import ShopOrder
+    orders = db.query(ShopOrder).filter(ShopOrder.user_id == user.id).order_by(ShopOrder.created_at.desc()).all()
+    return [
+        {"id": o.id, "status": o.status, "total": o.total,
+         "items": o.items, "created_at": str(o.created_at)}
+        for o in orders
+    ]
+
+
+@app.get("/shop/my-orders", response_class=HTMLResponse)
+def my_orders_page():
+    with open("static/my_orders.html", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get("/api/admin/shop-orders/new-count")
+def shop_orders_new_count(request: Request, db: Session = Depends(get_db)):
+    from database import ShopOrder
+    count = db.query(ShopOrder).filter(ShopOrder.status == "new").count()
+    return {"count": count}
 
 
 # ─── Панель управления (только для авторизованных) ───────────
@@ -1720,6 +1787,129 @@ def history_redirect():
 @app.get("/scanner", response_class=HTMLResponse)
 def scanner_redirect():
     return RedirectResponse("/admin/scanner", status_code=301)
+
+
+# ─── Shop Orders ─────────────────────────────────────────────
+class ShopOrderCreate(BaseModel):
+    name: str
+    phone: str
+    address: Optional[str] = None
+    comment: Optional[str] = None
+    items: list  # [{product_id, qty}]
+
+
+@app.post("/api/shop/orders")
+def create_shop_order(data: ShopOrderCreate, request: Request, db: Session = Depends(get_db)):
+    import json
+    from database import ShopOrder, Product as _P
+
+    if not data.items:
+        raise HTTPException(status_code=400, detail="Корзина пуста")
+
+    # Собрать позиции с ценами
+    order_items = []
+    total = 0
+    for item in data.items:
+        pid = item.get("product_id")
+        qty = int(item.get("qty", 1))
+        p = db.query(_P).filter(_P.id == pid).first()
+        if not p:
+            continue
+        price = p.price or 0
+        order_items.append({"product_id": p.id, "name": p.name, "qty": qty, "price": price, "sku": p.sku or ""})
+        total += price * qty
+
+    if not order_items:
+        raise HTTPException(status_code=400, detail="Товары не найдены")
+
+    user = _get_user_from_session(request)
+    user_id = user.get("id") if user else None
+
+    order = ShopOrder(
+        user_id=user_id,
+        name=data.name,
+        phone=data.phone,
+        address=data.address,
+        comment=data.comment,
+        items=json.dumps(order_items, ensure_ascii=False),
+        total=total,
+        status="new"
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    # Уведомление в Telegram
+    try:
+        _notify_new_shop_order(order, order_items)
+    except Exception:
+        pass
+
+    return {"ok": True, "order_id": order.id, "total": total}
+
+
+def _notify_new_shop_order(order, items):
+    import requests as req_lib
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+    if not bot_token or not chat_id:
+        return
+    lines = "\n".join([f"• {i['name']} × {i['qty']} = {i['price']*i['qty']:,} ₸" for i in items])
+    text = (
+        f"🛒 *Новый заказ #{order.id}*\n\n"
+        f"👤 {order.name}\n"
+        f"📞 {order.phone}\n"
+        f"📍 {order.address or '—'}\n"
+        f"💬 {order.comment or '—'}\n\n"
+        f"{lines}\n\n"
+        f"💰 *Итого: {order.total:,} ₸*"
+    )
+    req_lib.post(
+        f"https://api.telegram.org/bot{bot_token}/sendMessage",
+        json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
+        timeout=5
+    )
+
+
+@app.get("/api/admin/shop-orders")
+def list_shop_orders(request: Request, status: Optional[str] = None, db: Session = Depends(get_db)):
+    import json
+    from database import ShopOrder
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    q = db.query(ShopOrder).order_by(ShopOrder.created_at.desc())
+    if status:
+        q = q.filter(ShopOrder.status == status)
+    orders = q.limit(200).all()
+    return [{
+        "id": o.id, "name": o.name, "phone": o.phone,
+        "address": o.address, "comment": o.comment,
+        "items": json.loads(o.items or "[]"),
+        "total": o.total, "status": o.status,
+        "created_at": str(o.created_at)
+    } for o in orders]
+
+
+@app.patch("/api/admin/shop-orders/{order_id}")
+def update_shop_order(order_id: int, data: dict, request: Request, db: Session = Depends(get_db)):
+    from database import ShopOrder
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    o = db.query(ShopOrder).filter(ShopOrder.id == order_id).first()
+    if not o:
+        raise HTTPException(status_code=404)
+    if "status" in data:
+        o.status = data["status"]
+    db.commit()
+    return {"ok": True, "status": o.status}
+
+
+@app.get("/admin/shop-orders", response_class=HTMLResponse)
+def shop_orders_page():
+    with open("static/shop_orders.html", encoding="utf-8") as f:
+        return f.read()
 
 
 @app.get("/api/purchases/list")

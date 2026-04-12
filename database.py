@@ -99,6 +99,21 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class ShopOrder(Base):
+    __tablename__ = "shop_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=True)  # None если гость
+    name = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    address = Column(String, nullable=True)
+    comment = Column(String, nullable=True)
+    items = Column(String, nullable=False)  # JSON: [{product_id, name, qty, price}]
+    total = Column(Integer, default=0)
+    status = Column(String, default="new")  # new | confirmed | ready | delivered | cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 def get_db():
     db = SessionLocal()
     try:

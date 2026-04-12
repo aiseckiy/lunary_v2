@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои заказы — LUNARY</title>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root { --accent:#6366f1; --bg:#f8f8fb; --surface:#fff; --border:#e5e7eb; --text:#111827; --text2:#6b7280; --text3:#9ca3af; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.store-header { background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+.header-inner { max-width:800px; margin:0 auto; padding:0 20px; height:60px; display:flex; align-items:center; gap:16px; }
+.header-logo { font-size:20px; font-weight:700; color:var(--accent); letter-spacing:-.5px; text-decoration:none; }
+.header-back { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text2); text-decoration:none; margin-left:4px; }
+.header-back:hover { color:var(--text); }
+.container { max-width:800px; margin:0 auto; padding:32px 20px; }
+.page-title { font-size:22px; font-weight:700; margin-bottom:24px; }
+
+.order-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
+.order-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.order-id { font-size:15px; font-weight:700; }
+.order-date { font-size:13px; color:var(--text3); }
+.badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-new       { background:#fef3c7; color:#b45309; }
+.badge-confirmed { background:#dbeafe; color:#1d4ed8; }
+.badge-ready     { background:#d1fae5; color:#065f46; }
+.badge-delivered { background:#dcfce7; color:#15803d; }
+.badge-cancelled { background:#fee2e2; color:#b91c1c; }
+.order-items-list { margin-bottom:14px; }
+.order-item-row { display:flex; justify-content:space-between; font-size:14px; padding:5px 0; border-bottom:1px solid var(--bg); }
+.order-item-row:last-child { border-bottom:none; }
+.order-total { display:flex; justify-content:space-between; font-size:15px; font-weight:700; padding-top:12px; border-top:1px solid var(--border); }
+.empty-state { text-align:center; padding:60px 20px; color:var(--text3); }
+.empty-state .icon { font-size:56px; margin-bottom:14px; }
+.btn-shop { display:inline-block; margin-top:16px; padding:12px 28px; background:var(--accent); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; }
+</style>
+</head>
+<body>
+
+<header class="store-header">
+  <div class="header-inner">
+    <a class="header-logo" href="/shop">LUNARY</a>
+    <a class="header-back" href="/shop">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      В каталог
+    </a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-title">Мои заказы</div>
+  <div id="content"><div class="empty-state"><div class="icon">⏳</div><div>Загрузка...</div></div></div>
+</div>
+
+<script>
+const STATUS_LABELS = {new:'Новый',confirmed:'Подтверждён',ready:'Готов к выдаче',delivered:'Доставлен',cancelled:'Отменён'};
+
+async function load() {
+  const res = await fetch('/api/shop/my-orders');
+  if (res.status === 401) {
+    location.href = '/login?next=/shop/my-orders';
+    return;
+  }
+  const orders = await res.json();
+  const el = document.getElementById('content');
+  if (!orders.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📦</div><div>У вас пока нет заказов</div><a class="btn-shop" href="/shop">Перейти в каталог</a></div>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => {
+    let items = [];
+    try { items = JSON.parse(o.items || '[]'); } catch {}
+    const dt = new Date(o.created_at).toLocaleString('ru', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const itemsHtml = items.map(i => `
+      <div class="order-item-row">
+        <span>${i.name} × ${i.qty}</span>
+        <span>${(i.price * i.qty).toLocaleString('ru')} ₸</span>
+      </div>`).join('');
+    return `
+      <div class="order-card">
+        <div class="order-head">
+          <div>
+            <div class="order-id">Заказ #${o.id}</div>
+            <div class="order-date">${dt}</div>
+          </div>
+          <span class="badge badge-${o.status}">${STATUS_LABELS[o.status] || o.status}</span>
+        </div>
+        <div class="order-items-list">${itemsHtml}</div>
+        <div class="order-total"><span>Итого</span><span>${(o.total||0).toLocaleString('ru')} ₸</span></div>
+      </div>`;
+  }).join('');
+}
+
+load();
+</script>
+</body>
+</html>

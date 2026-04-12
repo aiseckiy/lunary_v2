@@ -170,13 +170,9 @@
 
   <!-- Лог синхронизаций -->
   <div class="sync-log-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="margin-bottom:14px">
       <div class="sync-log-title" style="margin-bottom:0">🔄 История синхронизаций с Kaspi</div>
-      <button class="btn btn-secondary" onclick="backfillEntries()" id="backfill-btn" style="font-size:12px;padding:6px 12px">
-        📦 Загрузить состав заказов
-      </button>
     </div>
-    <div id="backfill-msg" style="display:none;font-size:13px;margin-bottom:10px"></div>
     <div id="sync-log-body" style="color:var(--text3);font-size:13px">Загрузка...</div>
   </div>
 </div></div></div>
@@ -330,13 +326,7 @@ function renderOrders(orders) {
       ? '<span class="src-xml">📂 XML архив</span>'
       : (o.synced_at ? `<span class="src-sync">🔄 синхр. ${o.synced_at}</span>` : '<span class="src-sync">🔄 Kaspi API</span>');
 
-    const itemsBlock = hasEntries
-      ? `<div class="order-items" id="items-${o.id}">${entriesHtml}</div>`
-      : `<div class="order-items" id="items-${o.id}">
-           <div class="entries-load-btn" onclick="loadEntries('${o.id}')" style="font-size:13px;color:var(--accent);cursor:pointer;padding:6px 0">
-             📦 Показать состав заказа
-           </div>
-         </div>`;
+    const itemsBlock = `<div class="order-items" id="items-${o.id}">${entriesHtml || '<span style="font-size:12px;color:var(--text3)">Состав загружается при следующей синхронизации</span>'}</div>`;
 
     return `
       <div class="order-card">
@@ -440,47 +430,7 @@ async function loadSyncLog() {
   }
 }
 
-async function loadEntries(orderId) {
-  const el = document.getElementById(`items-${orderId}`);
-  if (!el) return;
-  el.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:6px 0">⏳ Загрузка состава...</div>';
-  try {
-    const data = await fetch(`/api/kaspi/orders/${orderId}/entries`).then(r => r.json());
-    const html = buildEntriesHtml(data.entries || []);
-    el.innerHTML = html || '<div style="font-size:13px;color:var(--text3);padding:6px 0">Состав не найден</div>';
-  } catch(e) {
-    el.innerHTML = '<div style="font-size:13px;color:var(--red);padding:6px 0">Ошибка загрузки</div>';
-  }
-}
-
 loadSyncLog();
-
-async function backfillEntries() {
-  const btn = document.getElementById('backfill-btn');
-  const msg = document.getElementById('backfill-msg');
-  btn.disabled = true;
-  btn.textContent = '⏳ Загружаю...';
-  msg.style.display = 'block';
-  msg.style.color = 'var(--text2)';
-  msg.textContent = 'Запрашиваю состав заказов из Kaspi API, это может занять минуту...';
-  try {
-    const res = await fetch('/api/admin/kaspi/backfill-entries', {method:'POST'});
-    const data = await res.json();
-    if (data.ok) {
-      msg.style.color = 'var(--green)';
-      msg.textContent = `✓ Готово: заполнено ${data.filled} заказов, не удалось ${data.failed} (всего пустых было ${data.total})`;
-      if (data.filled > 0) loadOrders();
-    } else {
-      msg.style.color = 'var(--red)';
-      msg.textContent = 'Ошибка';
-    }
-  } catch(e) {
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'Ошибка запроса';
-  }
-  btn.disabled = false;
-  btn.textContent = '📦 Загрузить состав заказов';
-}
 </script>
 
 <script src="/static/mobile.js"></script>

@@ -206,6 +206,21 @@ def _start_kaspi_sync_loop():
 
     STATES = ["NEW", "APPROVED", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
 
+    def _fetch_entries(oid):
+        """Загружает состав заказа, возвращает список или []"""
+        try:
+            return kaspi_module.get_order_entries(oid) or []
+        except Exception:
+            return []
+
+    def _update_entries_fields(row, entries):
+        """Обновляет entries + product_name/sku/quantity"""
+        row.entries = json.dumps(entries, ensure_ascii=False)
+        if entries and not row.product_name:
+            row.product_name = entries[0].get("name")
+            row.sku = entries[0].get("merchantSku", "")
+            row.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
+
     def sync():
         while True:
             db = SL()
@@ -234,8 +249,8 @@ def _start_kaspi_sync_loop():
                 returns_count = 0
                 deducted_count = 0
                 new_orders = []
+
                 for o in all_orders:
-                    # Нормализуем дату из Unix ms → dd.mm.yyyy
                     raw_date = o.get("date", "")
                     try:
                         d = _parse_order_date(raw_date)
@@ -244,65 +259,59 @@ def _start_kaspi_sync_loop():
                         order_date = str(raw_date)
 
                     oid = _decode_kaspi_order_id(o["id"])
-                    # Ищем по числовому ID или по старому base64 ID (переходный период)
+                    addr_obj = o.get("deliveryAddress")
+                    address = addr_obj.get("formattedAddress", "") if isinstance(addr_obj, dict) else str(addr_obj or "")
+
                     existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
                     if not existing and oid != str(o["id"]):
                         existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
                         if existing:
-                            existing.order_id = oid  # мигрируем старый base64 ID на числовой
+                            existing.order_id = oid
+
                     if existing:
                         old_state = existing.state
                         new_state = o.get("state", existing.state)
-                        # Списываем остатки при переходе в доставку/архив
+
+                        # Остатки: списываем / возвращаем при смене статуса
                         if new_state in DEDUCT_STATES and old_state not in DEDUCT_STATES and not existing.stock_deducted:
                             _deduct_stock_for_order(existing, db)
                             existing.stock_deducted = 1
                             deducted_count += 1
-                        # Возвращаем остатки при отмене (если уже списали)
                         elif new_state in CANCEL_STATES and old_state not in CANCEL_STATES and existing.stock_deducted:
                             _return_stock_for_order(existing, db)
                             existing.stock_deducted = 0
                             returns_count += 1
-                        # Считаем как обновление если статус изменился
+
                         if new_state != old_state:
                             updated_count += 1
-                        # Если entries пустые — пробуем загрузить
-                        if not existing.entries or existing.entries in ("[]", ""):
-                            try:
-                                fetched = kaspi_module.get_order_entries(oid)
-                                if fetched:
-                                    existing.entries = json.dumps(fetched, ensure_ascii=False)
-                                    if not existing.product_name and fetched:
-                                        existing.product_name = fetched[0].get("name")
-                                        existing.sku = fetched[0].get("merchantSku", "")
-                                        existing.quantity = sum(e.get("qty", 1) for e in fetched if isinstance(e, dict))
-                            except Exception:
-                                pass
-                        # Обновляем статус и основные поля
+
+                        # Всегда обновляем все поля из свежего ответа Kaspi
                         existing.state = new_state
                         existing.last_synced_at = datetime.utcnow()
-                        # Сохраняем дату выдачи при переходе в ARCHIVE
-                        if new_state == "ARCHIVE" and old_state != "ARCHIVE" and not existing.status_date:
-                            existing.status_date = datetime.now(tz=tz_kz).strftime("%d.%m.%Y")
                         existing.total = int(o.get("total", existing.total or 0))
                         existing.customer = o.get("customer", existing.customer)
                         existing.delivery_method = o.get("deliveryMode", existing.delivery_method)
                         existing.payment_method = o.get("paymentMode", existing.payment_method)
-                        if o.get("deliveryAddress"):
-                            addr = o["deliveryAddress"]
-                            existing.address = addr.get("formattedAddress", existing.address) if isinstance(addr, dict) else str(addr)
+                        if address:
+                            existing.address = address
+                        if new_state == "ARCHIVE" and old_state != "ARCHIVE" and not existing.status_date:
+                            existing.status_date = datetime.now(tz=tz_kz).strftime("%d.%m.%Y")
+
+                        # Грузим состав если пустой
+                        if not existing.entries or existing.entries in ("[]", ""):
+                            entries = _fetch_entries(oid)
+                            if entries:
+                                _update_entries_fields(existing, entries)
+                                o["entries"] = entries
                     else:
-                        # Загружаем состав заказа
-                        entries = kaspi_module.get_order_entries(oid)
-                        o["entries"] = entries
-                        # Берём имя товара и SKU из первого entry
+                        # Новый заказ — грузим состав сразу
+                        entries = _fetch_entries(oid)
                         product_name, sku, quantity = None, None, None
                         if entries:
                             product_name = entries[0].get("name")
-                            sku = entries[0].get("merchantSku") or entries[0].get("sku", "") if isinstance(entries[0], dict) else None
+                            sku = entries[0].get("merchantSku") or (entries[0].get("sku", "") if isinstance(entries[0], dict) else None)
                             quantity = sum(e.get("qty", e.get("quantity", 1)) for e in entries if isinstance(e, dict))
-                        addr_obj = o.get("deliveryAddress")
-                        address = addr_obj.get("formattedAddress", "") if isinstance(addr_obj, dict) else str(addr_obj or "")
+
                         new_ko = KaspiOrder(
                             order_id=oid,
                             state=o.get("state", ""),
@@ -321,8 +330,8 @@ def _start_kaspi_sync_loop():
                         )
                         db.add(new_ko)
                         added += 1
-                        # Подставляем декодированный числовой ID для уведомления
                         o["id"] = oid
+                        o["entries"] = entries
                         new_orders.append(o)
 
                 # Записываем лог синхронизации

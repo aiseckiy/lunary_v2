@@ -1951,6 +1951,24 @@ def _filter_orders_by_date(rows, date_from: str | None, date_to: str | None):
     return result
 
 
+@app.get("/api/admin/orders-debug")
+def orders_debug(request: Request, db: Session = Depends(get_db)):
+    """Статистика заказов по статусам — для диагностики"""
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    from database import KaspiOrder
+    from sqlalchemy import func
+    rows = db.query(KaspiOrder.state, func.count(KaspiOrder.id), func.sum(KaspiOrder.total))\
+        .group_by(KaspiOrder.state).all()
+    result = []
+    for state, cnt, total in sorted(rows, key=lambda x: x[1], reverse=True):
+        result.append({"state": state, "count": cnt, "total": int(total or 0)})
+    grand_total = sum(r["total"] for r in result)
+    completed_total = sum(r["total"] for r in result if r["state"] in ("ARCHIVE", "Выдан"))
+    return {"by_state": result, "grand_total": grand_total, "completed_total": completed_total}
+
+
 @app.get("/api/analytics/overview")
 def analytics_overview(
     date_from: Optional[str] = None,

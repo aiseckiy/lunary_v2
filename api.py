@@ -215,7 +215,7 @@ def _start_kaspi_sync_loop():
             return []
         try:
             result = kaspi_module.get_order_entries(oid) or []
-            print(f"[sync entries] oid={oid} is_new={is_new} got={len(result)} items: {result}", flush=True)
+            print(f"[sync entries] oid={oid} is_new={is_new} got={len(result)}", flush=True)
             if not is_new:
                 _backfill_fetched_this_cycle[0] += 1
                 time.sleep(0.2)
@@ -309,8 +309,10 @@ def _start_kaspi_sync_loop():
                         if new_state == "ARCHIVE" and old_state != "ARCHIVE" and not existing.status_date:
                             existing.status_date = datetime.now(tz=tz_kz).strftime("%d.%m.%Y")
 
-                        # Грузим состав если пустой (ограничен лимитом)
-                        if not existing.entries or existing.entries in ("[]", ""):
+                        # Грузим состав если пустой — только для активных заказов
+                        # Kaspi не отдаёт entries для архивных/завершённых заказов
+                        ACTIVE_FOR_ENTRIES = {"NEW", "APPROVED", "DELIVERY", "KASPI_DELIVERY", "PICKUP", "SIGN_REQUIRED"}
+                        if (not existing.entries or existing.entries in ("[]", "")) and new_state in ACTIVE_FOR_ENTRIES:
                             entries = _fetch_entries(oid, is_new=False)
                             if entries:
                                 _update_entries_fields(existing, entries)

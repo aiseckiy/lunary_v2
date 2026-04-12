@@ -1303,13 +1303,15 @@ def analytics_overview(
     rows = _filter_orders_by_date(all_rows, date_from, date_to)
 
     total_orders = len(rows)
-    total_revenue = sum(r.total or 0 for r in rows)
-    avg_order = int(total_revenue / total_orders) if total_orders else 0
 
     COMPLETED_STATES = {"Выдан", "ARCHIVE"}
     CANCELLED_STATES = {"Отменен", "CANCELLED"}
     completed = sum(1 for r in rows if r.state in COMPLETED_STATES)
     cancelled = sum(1 for r in rows if r.state in CANCELLED_STATES)
+
+    # Выручка только по завершённым заказам (без отменённых и в процессе)
+    total_revenue = sum(r.total or 0 for r in rows if r.state in COMPLETED_STATES)
+    avg_order = int(total_revenue / completed) if completed else 0
 
     return {
         "total_orders": total_orders,

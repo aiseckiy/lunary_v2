@@ -41,25 +41,6 @@ Deno.serve(async (req) => {
     if (action === 'get_order_entries') {
       const r = await fetch(`${BASE}/orders/${params.orderId}/entries`, { headers });
       const data = await r.json();
-      const entries = data?.data || [];
-      // Грузим название каждого товара параллельно с таймаутом 5 сек
-      await Promise.allSettled(entries.map(async (entry: any) => {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 5000);
-        try {
-          const pr = await fetch(`${BASE}/orderentries/${entry.id}/product`, { headers, signal: ctrl.signal });
-          const pd = await pr.json();
-          const attr = pd?.data?.attributes || {};
-          entry.attributes = entry.attributes || {};
-          entry.attributes.name = attr.name || '—';
-          entry.attributes.merchantSku = attr.code || '';
-        } catch {
-          entry.attributes = entry.attributes || {};
-          entry.attributes.name = entry.attributes.name || '—';
-        } finally {
-          clearTimeout(timer);
-        }
-      }));
       return new Response(JSON.stringify({ success: true, data }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

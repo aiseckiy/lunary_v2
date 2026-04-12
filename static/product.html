@@ -126,10 +126,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 @media(max-width:600px) {
   .product-card-big { flex-direction:column; padding:20px; gap:20px; }
-  .product-image-big { width:100%; height:160px; font-size:60px; }
+  .product-image-big { width:100%; height:200px; font-size:60px; }
   .product-name-big { font-size:20px; }
   .product-price-big { font-size:26px; }
 }
+
+/* Edit modal */
+.edit-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:600; display:none; align-items:center; justify-content:center; padding:16px; }
+.edit-overlay.open { display:flex; }
+.edit-modal { background:#fff; border-radius:20px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; padding:28px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
+.edit-modal h3 { font-size:18px; font-weight:700; margin-bottom:20px; }
+.edit-field { margin-bottom:14px; }
+.edit-label { display:block; font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; }
+.edit-input { width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; }
+.edit-input:focus { border-color:#6366f1; }
+.edit-img-preview { width:100%; max-height:200px; object-fit:contain; border-radius:10px; margin-top:8px; border:1px solid #e5e7eb; display:none; }
+.edit-img-drop { border:2px dashed #e5e7eb; border-radius:10px; padding:28px; text-align:center; cursor:pointer; color:#9ca3af; font-size:14px; transition:border-color .15s; }
+.edit-img-drop:hover, .edit-img-drop.drag { border-color:#6366f1; color:#6366f1; }
+.edit-actions { display:flex; gap:10px; margin-top:20px; }
+.btn-save { flex:1; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-save:hover { background:#4f46e5; }
+.btn-cancel-edit { flex:1; background:#f3f4f6; color:#374151; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-edit-product { display:none; margin-top:12px; width:100%; padding:10px; background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-edit-product:hover { background:#e5e7eb; }
 </style>
 </head>
 <body>
@@ -188,6 +207,41 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <div class="container" id="container">
   <div style="text-align:center;padding:60px 0;color:#9ca3af">Загрузка...</div>
+</div>
+
+<!-- Edit modal -->
+<div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-modal">
+    <h3>✏️ Редактировать товар</h3>
+    <div class="edit-field">
+      <label class="edit-label">Название</label>
+      <input class="edit-input" id="e-name" type="text">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Бренд</label>
+      <input class="edit-input" id="e-brand" type="text">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Категория</label>
+      <input class="edit-input" id="e-category" type="text">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Цена (₸)</label>
+      <input class="edit-input" id="e-price" type="number" min="0">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Изображение</label>
+      <div class="edit-img-drop" id="e-img-drop" onclick="document.getElementById('e-img-input').click()">
+        📷 Нажмите чтобы выбрать фото или перетащите сюда
+      </div>
+      <input type="file" id="e-img-input" accept="image/*" style="display:none" onchange="handleImageFile(this.files[0])">
+      <img class="edit-img-preview" id="e-img-preview">
+    </div>
+    <div class="edit-actions">
+      <button class="btn-cancel-edit" onclick="closeEdit()">Отмена</button>
+      <button class="btn-save" id="e-save-btn" onclick="saveEdit()">Сохранить</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -257,13 +311,17 @@ function renderProduct() {
   const addBtn = inStock && p.price
     ? `<button class="btn-add-big" id="btn-add" onclick="addToCartBig()">В корзину</button>`
     : `<button class="btn-add-big" disabled>${inStock ? 'Цена не указана' : 'Нет в наличии'}</button>`;
+  const imgHtml = p.image_url
+    ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`
+    : categoryEmoji(p.category);
+  const isAdmin = currentUser && currentUser.role === 'admin';
 
   document.getElementById('container').innerHTML = `
     <div class="breadcrumb">
       <a href="/shop">Каталог</a> › ${p.category} › ${p.name}
     </div>
     <div class="product-card-big">
-      <div class="product-image-big">${categoryEmoji(p.category)}</div>
+      <div class="product-image-big">${imgHtml}</div>
       <div class="product-info">
         ${p.brand ? `<div class="product-brand-big">${p.brand}</div>` : ''}
         <div class="product-name-big">${p.name}</div>
@@ -273,6 +331,7 @@ function renderProduct() {
           ${inStock ? `В наличии: ${p.stock} ${p.unit}` : 'Нет в наличии'}
         </div>
         ${addBtn}
+        ${isAdmin ? `<button class="btn-edit-product" style="display:block" onclick="openEdit()">✏️ Редактировать товар</button>` : ''}
         <table class="props-table">
           <tr><td>Категория</td><td>${p.category}</td></tr>
           ${p.brand ? `<tr><td>Бренд</td><td>${p.brand}</td></tr>` : ''}
@@ -284,10 +343,87 @@ function renderProduct() {
   `;
 }
 
+// ── Edit modal ──
+let pendingImageUrl = null;
+
+function openEdit() {
+  const p = product;
+  document.getElementById('e-name').value = p.name || '';
+  document.getElementById('e-brand').value = p.brand || '';
+  document.getElementById('e-category').value = p.category || '';
+  document.getElementById('e-price').value = p.price || '';
+  pendingImageUrl = p.image_url || null;
+  const preview = document.getElementById('e-img-preview');
+  if (p.image_url) { preview.src = p.image_url; preview.style.display = 'block'; }
+  else { preview.style.display = 'none'; }
+  document.getElementById('edit-overlay').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('edit-overlay').classList.remove('open');
+  pendingImageUrl = null;
+}
+
+function handleImageFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingImageUrl = e.target.result;
+    const preview = document.getElementById('e-img-preview');
+    preview.src = pendingImageUrl;
+    preview.style.display = 'block';
+    document.getElementById('e-img-drop').textContent = '✅ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Drag & drop
+document.addEventListener('DOMContentLoaded', () => {
+  const drop = document.getElementById('e-img-drop');
+  if (!drop) return;
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); handleImageFile(e.dataTransfer.files[0]); });
+});
+
+async function saveEdit() {
+  const btn = document.getElementById('e-save-btn');
+  btn.textContent = 'Сохранение...'; btn.disabled = true;
+  try {
+    const updates = {
+      name: document.getElementById('e-name').value.trim(),
+      brand: document.getElementById('e-brand').value.trim(),
+      category: document.getElementById('e-category').value.trim(),
+      price: parseInt(document.getElementById('e-price').value) || null,
+    };
+    await fetch(`/api/products/${product.id}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(updates),
+    });
+    if (pendingImageUrl !== null) {
+      await fetch(`/api/products/${product.id}/image`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ image_url: pendingImageUrl }),
+      });
+      product.image_url = pendingImageUrl;
+    }
+    Object.assign(product, updates);
+    closeEdit();
+    renderProduct();
+    showToast('✅ Товар обновлён');
+  } catch(e) {
+    showToast('❌ Ошибка сохранения');
+  }
+  btn.textContent = 'Сохранить'; btn.disabled = false;
+}
+
 // ── Auth ──
 async function checkAuth() {
   try { const res = await fetch('/api/auth/me'); if (res.ok) currentUser = await res.json(); } catch {}
   renderAuthArea();
+  return currentUser;
 }
 function renderAuthArea() {
   const area = document.getElementById('auth-area');
@@ -344,8 +480,7 @@ async function doAuthRegister() {
 }
 function toggleAuthEye(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁':'🙈';}
 
-checkAuth();
-loadProduct();
+checkAuth().then(() => loadProduct());
 updateCartBtn();
 </script>
 </body>

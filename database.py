@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import NullPool
 from datetime import datetime
@@ -39,6 +39,7 @@ class Product(Base):
     kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
     cost_price = Column(Integer, nullable=True)  # закупочная цена
     supplier = Column(String, nullable=True)  # поставщик
+    image_url = Column(Text, nullable=True)  # base64 или внешняя ссылка
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -179,6 +180,7 @@ def init_db():
         ("users", "phone", "TEXT"),
         ("movements", "user_id", "INTEGER"),
         ("movements", "user_name", "TEXT"),
+        ("products", "image_url", "TEXT"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

@@ -1127,6 +1127,7 @@ def store_products(db: Session = Depends(get_db)):
             "price": s[0].price,
             "unit": s[0].unit or "шт",
             "stock": int(s[1]),
+            "image_url": s[0].image_url or "",
         }
         for s in stocks
     ]
@@ -1152,7 +1153,25 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
         "brand": p.brand or "",
         "price": p.price, "unit": p.unit or "шт",
         "stock": int(stock), "min_stock": p.min_stock or 0,
+        "image_url": p.image_url or "",
     }
+
+
+class ProductImageBody(BaseModel):
+    image_url: str  # base64 data URL или внешняя ссылка
+
+@app.post("/api/products/{product_id}/image")
+def save_product_image(product_id: int, data: ProductImageBody, request: Request, db: Session = Depends(get_db)):
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Только администратор")
+    from database import Product as _P
+    p = db.query(_P).filter(_P.id == product_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    p.image_url = data.image_url
+    db.commit()
+    return {"ok": True}
 
 
 @app.get("/shop/product/{product_id}", response_class=HTMLResponse)

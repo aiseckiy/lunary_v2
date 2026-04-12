@@ -1,5 +1,10 @@
 [
   {
+    "hash": "561a3c6",
+    "date": "13.04.2026",
+    "message": "Fix: форматирование телефона +7 XXX XXX XX XX в настройках и магазине"
+  },
+  {
     "hash": "de0c73e",
     "date": "13.04.2026",
     "message": "Changelog: читать из static/changelog.json (работает на Railway без git)"

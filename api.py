@@ -1961,17 +1961,20 @@ def analytics_overview(
     from database import KaspiOrder
     from sqlalchemy import func
 
-    all_rows = db.query(KaspiOrder).all()
+    COMPLETED_STATES = {"Выдан", "ARCHIVE"}
+    CANCELLED_STATES = {"Отменен", "CANCELLED", "Возврат"}
+
+    # Для аналитики берём только завершённые и отменённые (без активных)
+    all_rows = db.query(KaspiOrder).filter(
+        KaspiOrder.state.in_(list(COMPLETED_STATES) + list(CANCELLED_STATES))
+    ).all()
     rows = _filter_orders_by_date(all_rows, date_from, date_to)
 
     total_orders = len(rows)
-
-    COMPLETED_STATES = {"Выдан", "ARCHIVE"}
-    CANCELLED_STATES = {"Отменен", "CANCELLED"}
     completed = sum(1 for r in rows if r.state in COMPLETED_STATES)
     cancelled = sum(1 for r in rows if r.state in CANCELLED_STATES)
 
-    # Выручка только по завершённым заказам (без отменённых и в процессе)
+    # Выручка только по завершённым заказам
     total_revenue = sum(r.total or 0 for r in rows if r.state in COMPLETED_STATES)
     avg_order = int(total_revenue / completed) if completed else 0
 

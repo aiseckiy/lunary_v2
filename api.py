@@ -106,7 +106,7 @@ def _get_user_from_session(request: Request):
         if user:
             expected = hashlib.sha256(f"user-{user.id}-{user.email}-{os.getenv('ADMIN_PASSWORD','lunary-secret')}".encode()).hexdigest()
             if session == f"{user.id}_{expected}":
-                return {"role": user.role, "name": user.name, "email": user.email, "id": user.id}
+                return {"role": user.role, "name": user.name, "email": user.email, "id": user.id, "phone": user.phone or ""}
     except Exception:
         pass
     finally:

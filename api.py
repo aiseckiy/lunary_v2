@@ -216,6 +216,14 @@ def _start_kaspi_sync_loop():
                     if result.get("orders"):
                         all_orders.extend(result["orders"])
 
+                # Дедупликация: один заказ может прийти из нескольких state-запросов
+                seen_ids = {}
+                for o in all_orders:
+                    oid = _decode_kaspi_order_id(o["id"])
+                    if oid not in seen_ids:
+                        seen_ids[oid] = o
+                all_orders = list(seen_ids.values())
+
                 added = 0
                 new_orders = []
                 for o in all_orders:
@@ -228,7 +236,12 @@ def _start_kaspi_sync_loop():
                         order_date = str(raw_date)
 
                     oid = _decode_kaspi_order_id(o["id"])
+                    # Ищем по числовому ID или по старому base64 ID (переходный период)
                     existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
+                    if not existing and oid != str(o["id"]):
+                        existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+                        if existing:
+                            existing.order_id = oid  # мигрируем старый base64 ID на числовой
                     if existing:
                         old_state = existing.state
                         new_state = o.get("state", existing.state)
@@ -1319,9 +1332,20 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
     updated = 0
     deducted_total = 0
     new_orders = []
+    # Дедупликация входящих заказов
+    seen = {}
+    for o in orders:
+        oid = _decode_kaspi_order_id(o["id"])
+        seen[oid] = o
+    orders = list(seen.values())
+
     for o in orders:
         oid = _decode_kaspi_order_id(o["id"])
         existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
+        if not existing and oid != str(o["id"]):
+            existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+            if existing:
+                existing.order_id = oid
         new_state = o.get("state", "")
         if existing:
             old_state = existing.state

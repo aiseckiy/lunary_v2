@@ -18,8 +18,8 @@
 .section-title { font-size:16px; font-weight:700; margin-bottom:4px; }
 .section-sub { font-size:13px; color:var(--text3); margin-bottom:20px; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-.form-field label { font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; display:block; }
-.form-field input { width:100%; background:#f9fafb; border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px; color:var(--text); outline:none; font-family:inherit; transition:border-color .15s; }
+.form-field label { font-size:13px; font-weight:500; color:var(--text); margin-bottom:5px; display:block; }
+.form-field input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px; color:var(--text); outline:none; font-family:inherit; transition:border-color .15s; }
 .form-field input:focus { border-color:var(--accent); background:#fff; }
 .btn-save { background:var(--accent); color:#fff; border:none; border-radius:10px; padding:10px 24px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
 .btn-save:hover { background:#4f46e5; }
@@ -257,7 +257,7 @@ function renderSettings() {
       } else if (isLong) {
         html += `<div class="form-field" style="grid-column:1/-1">
           <label>${s.label}</label>
-          <textarea id="s-${s.key}" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;background:#f9fafb;outline:none">${s.value||''}</textarea>
+          <textarea id="s-${s.key}" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;background:var(--bg);outline:none">${s.value||''}</textarea>
         </div>`;
       } else {
         html += `<div class="form-field">

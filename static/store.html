@@ -483,35 +483,35 @@ body {
 .auth-tab { flex:1; text-align:center; padding:7px; font-size:14px; font-weight:500; color:#6b7280; cursor:pointer; border-radius:8px; transition:all .15s; }
 .auth-tab.active { background:#fff; color:#111827; box-shadow:0 1px 4px rgba(0,0,0,.08); }
 
-.auth-label { font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; display:block; }
+.auth-label { font-size:13px; font-weight:500; color:var(--text); margin-bottom:5px; display:block; }
 .auth-input-wrap { position:relative; margin-bottom:12px; }
 .auth-input {
-  width:100%; background:#f9fafb; border:1px solid #e5e7eb;
+  width:100%; background:var(--bg); border:1px solid var(--border);
   border-radius:10px; padding:10px 40px 10px 13px;
-  font-size:14px; color:#111827; outline:none; font-family:inherit;
+  font-size:14px; color:var(--text); outline:none; font-family:inherit;
   transition:border-color .15s;
 }
-.auth-input:focus { border-color: var(--accent); background:#fff; }
-.auth-eye { position:absolute; right:11px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#9ca3af; font-size:16px; padding:2px; }
+.auth-input:focus { border-color:var(--accent); background:var(--surface); }
+.auth-eye { position:absolute; right:11px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text3); font-size:16px; padding:2px; }
 
 .auth-btn {
-  width:100%; background:#111827; color:#fff; border:none;
-  border-radius:10px; padding:12px; font-size:15px; font-weight:600;
+  width:100%; background:var(--text); color:#fff; border:none;
+  border-radius:10px; padding:12px; font-size:14px; font-weight:600;
   cursor:pointer; font-family:inherit; transition:background .15s; margin-top:2px;
 }
-.auth-btn:hover { background:#374151; }
+.auth-btn:hover { opacity:.85; }
 .auth-btn:disabled { opacity:.6; cursor:not-allowed; }
 
-.auth-divider { display:flex; align-items:center; gap:10px; margin:16px 0; color:#d1d5db; font-size:12px; }
-.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:#e5e7eb; }
+.auth-divider { display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--text3); font-size:12px; }
+.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
 .auth-google {
-  width:100%; background:#fff; color:#374151; border:1px solid #e5e7eb;
+  width:100%; background:var(--surface); color:var(--text); border:1px solid var(--border);
   border-radius:10px; padding:11px; font-size:14px; font-weight:500;
   cursor:pointer; font-family:inherit; transition:background .15s;
   display:flex; align-items:center; justify-content:center; gap:9px;
 }
-.auth-google:hover { background:#f9fafb; }
+.auth-google:hover { background:var(--bg); }
 
 .auth-err {
   background:#fee2e2; border:1px solid #fca5a5; border-radius:8px;
@@ -830,10 +830,10 @@ body {
       <div class="filter-title">Цена, ₸</div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
         <input type="number" id="price-min" placeholder="от" min="0" oninput="applyPriceFilter()"
-          style="width:50%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f9fafb;outline:none;">
+          style="width:50%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);outline:none;">
         <span style="color:var(--text3);font-size:12px">—</span>
         <input type="number" id="price-max" placeholder="до" min="0" oninput="applyPriceFilter()"
-          style="width:50%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f9fafb;outline:none;">
+          style="width:50%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);outline:none;">
       </div>
       <button onclick="clearPrice()" id="btn-clear-price" style="display:none;width:100%;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:#fff;cursor:pointer;color:var(--text3)">Сбросить цену</button>
       <div class="filter-divider"></div>

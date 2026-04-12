@@ -1092,7 +1092,7 @@ function render() {
     return `
     <div class="product-card">
       <a href="/shop/product/${p.id}" class="product-card-link" style="display:contents" onclick="saveState()">
-        <div class="product-image">${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : categoryEmoji(p.category)}</div>
+        <div class="product-image">${(p.images&&p.images[0])||p.image_url ? `<img src="${(p.images&&p.images[0])||p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : categoryEmoji(p.category)}</div>
         <div class="product-info">
           ${p.brand ? `<div class="product-brand">${p.brand}</div>` : ''}
           <div class="product-name">${p.name}</div>

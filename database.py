@@ -39,7 +39,8 @@ class Product(Base):
     kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
     cost_price = Column(Integer, nullable=True)  # закупочная цена
     supplier = Column(String, nullable=True)  # поставщик
-    image_url = Column(Text, nullable=True)  # base64 или внешняя ссылка
+    image_url = Column(Text, nullable=True)  # первое изображение (устаревшее, оставлено для совместимости)
+    images = Column(Text, nullable=True)  # JSON-массив URL/base64
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -181,6 +182,7 @@ def init_db():
         ("movements", "user_id", "INTEGER"),
         ("movements", "user_name", "TEXT"),
         ("products", "image_url", "TEXT"),
+        ("products", "images", "TEXT"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

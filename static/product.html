@@ -131,19 +131,53 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   .product-price-big { font-size:26px; }
 }
 
+/* Gallery */
+.gallery-wrap { position:relative; width:220px; flex-shrink:0; }
+.gallery-main { width:220px; height:220px; background:var(--bg); border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:80px; }
+.gallery-main img { width:100%; height:100%; object-fit:cover; }
+.gallery-thumbs { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.gallery-thumb { width:44px; height:44px; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid transparent; background:#f3f4f6; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.gallery-thumb.active { border-color:var(--accent); }
+.gallery-thumb img { width:100%; height:100%; object-fit:cover; }
+.gallery-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); color:#fff; border:none; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer; display:none; align-items:center; justify-content:center; }
+.gallery-arrow.left { left:6px; }
+.gallery-arrow.right { right:6px; }
+.gallery-wrap:hover .gallery-arrow { display:flex; }
+@media(max-width:600px) {
+  .gallery-wrap { width:100%; }
+  .gallery-main { width:100%; height:200px; font-size:60px; }
+}
+
 /* Edit modal */
 .edit-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:600; display:none; align-items:center; justify-content:center; padding:16px; }
 .edit-overlay.open { display:flex; }
-.edit-modal { background:#fff; border-radius:20px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; padding:28px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
-.edit-modal h3 { font-size:18px; font-weight:700; margin-bottom:20px; }
+.edit-modal { background:#fff; border-radius:20px; width:100%; max-width:500px; max-height:92vh; overflow-y:auto; padding:24px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
+.edit-modal h3 { font-size:18px; font-weight:700; margin-bottom:18px; }
 .edit-field { margin-bottom:14px; }
 .edit-label { display:block; font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; }
 .edit-input { width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; }
 .edit-input:focus { border-color:#6366f1; }
-.edit-img-preview { width:100%; max-height:200px; object-fit:contain; border-radius:10px; margin-top:8px; border:1px solid #e5e7eb; display:none; }
-.edit-img-drop { border:2px dashed #e5e7eb; border-radius:10px; padding:28px; text-align:center; cursor:pointer; color:#9ca3af; font-size:14px; transition:border-color .15s; }
-.edit-img-drop:hover, .edit-img-drop.drag { border-color:#6366f1; color:#6366f1; }
-.edit-actions { display:flex; gap:10px; margin-top:20px; }
+
+/* Image section */
+.img-section-title { font-size:13px; font-weight:600; color:#374151; margin-bottom:10px; }
+.img-add-tabs { display:flex; gap:0; margin-bottom:12px; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
+.img-add-tab { flex:1; padding:8px; text-align:center; font-size:13px; font-weight:500; cursor:pointer; color:#6b7280; background:#f9fafb; transition:all .15s; }
+.img-add-tab.active { background:#6366f1; color:#fff; }
+.img-drop { border:2px dashed #e5e7eb; border-radius:10px; padding:22px; text-align:center; cursor:pointer; color:#9ca3af; font-size:13px; transition:border-color .15s; }
+.img-drop:hover, .img-drop.drag { border-color:#6366f1; color:#6366f1; }
+.img-url-row { display:flex; gap:8px; }
+.img-url-input { flex:1; border:1px solid #e5e7eb; border-radius:10px; padding:9px 12px; font-size:14px; font-family:inherit; outline:none; }
+.img-url-input:focus { border-color:#6366f1; }
+.btn-add-url { background:#6366f1; color:#fff; border:none; border-radius:10px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+
+/* Images list */
+.imgs-list { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; min-height:0; }
+.img-item { position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; }
+.img-item img { width:100%; height:100%; object-fit:cover; }
+.img-item-del { position:absolute; top:2px; right:2px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+.img-item-main { position:absolute; bottom:2px; left:2px; background:rgba(99,102,241,.85); color:#fff; border-radius:4px; font-size:9px; font-weight:700; padding:1px 4px; }
+
+.edit-actions { display:flex; gap:10px; margin-top:18px; }
 .btn-save { flex:1; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
 .btn-save:hover { background:#4f46e5; }
 .btn-cancel-edit { flex:1; background:#f3f4f6; color:#374151; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
@@ -229,14 +263,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <label class="edit-label">Цена (₸)</label>
       <input class="edit-input" id="e-price" type="number" min="0">
     </div>
-    <div class="edit-field">
-      <label class="edit-label">Изображение</label>
-      <div class="edit-img-drop" id="e-img-drop" onclick="document.getElementById('e-img-input').click()">
-        📷 Нажмите чтобы выбрать фото или перетащите сюда
-      </div>
-      <input type="file" id="e-img-input" accept="image/*" style="display:none" onchange="handleImageFile(this.files[0])">
-      <img class="edit-img-preview" id="e-img-preview">
+
+    <div class="img-section-title">🖼 Фотографии</div>
+    <div class="imgs-list" id="imgs-list"></div>
+
+    <div class="img-add-tabs">
+      <div class="img-add-tab active" id="tab-file" onclick="switchImgTab('file')">📁 Файл</div>
+      <div class="img-add-tab" id="tab-url" onclick="switchImgTab('url')">🔗 Ссылка URL</div>
     </div>
+    <div id="img-panel-file">
+      <div class="img-drop" id="e-img-drop" onclick="document.getElementById('e-img-input').click()">
+        📷 Нажмите или перетащите фото сюда<br><small style="color:#d1d5db">Можно несколько файлов сразу</small>
+      </div>
+      <input type="file" id="e-img-input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files)">
+    </div>
+    <div id="img-panel-url" style="display:none">
+      <div class="img-url-row">
+        <input class="img-url-input" id="e-img-url" type="url" placeholder="https://example.com/photo.jpg">
+        <button class="btn-add-url" onclick="addImageUrl()">Добавить</button>
+      </div>
+    </div>
+
     <div class="edit-actions">
       <button class="btn-cancel-edit" onclick="closeEdit()">Отмена</button>
       <button class="btn-save" id="e-save-btn" onclick="saveEdit()">Сохранить</button>
@@ -302,26 +349,39 @@ async function loadProduct() {
   } catch { document.getElementById('container').innerHTML = '<div style="text-align:center;padding:60px 0;color:#ef4444">Ошибка загрузки</div>'; }
 }
 
+let galleryIndex = 0;
+
 function renderProduct() {
   const p = product;
   const inStock = p.stock > 0;
+  const images = p.images && p.images.length ? p.images : (p.image_url ? [p.image_url] : []);
   const priceHtml = p.price
     ? `<div class="product-price-big">${p.price.toLocaleString('ru')}<span class="currency"> ₸</span></div>`
     : `<div class="product-price-big" style="color:var(--text3);font-size:20px">Цена по запросу</div>`;
   const addBtn = inStock && p.price
     ? `<button class="btn-add-big" id="btn-add" onclick="addToCartBig()">В корзину</button>`
     : `<button class="btn-add-big" disabled>${inStock ? 'Цена не указана' : 'Нет в наличии'}</button>`;
-  const imgHtml = p.image_url
-    ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`
-    : categoryEmoji(p.category);
   const isAdmin = currentUser && currentUser.role === 'admin';
+
+  const mainImg = images.length
+    ? `<img id="gallery-main-img" src="${images[0]}" style="width:100%;height:100%;object-fit:cover">`
+    : categoryEmoji(p.category);
+  const thumbsHtml = images.length > 1
+    ? images.map((src, i) => `<div class="gallery-thumb ${i===0?'active':''}" onclick="setGallery(${i})"><img src="${src}"></div>`).join('')
+    : '';
 
   document.getElementById('container').innerHTML = `
     <div class="breadcrumb">
       <a href="/shop">Каталог</a> › ${p.category} › ${p.name}
     </div>
     <div class="product-card-big">
-      <div class="product-image-big">${imgHtml}</div>
+      <div class="gallery-wrap">
+        <div class="gallery-main" id="gallery-main">${mainImg}</div>
+        ${images.length > 1 ? `
+          <button class="gallery-arrow left" onclick="shiftGallery(-1)">‹</button>
+          <button class="gallery-arrow right" onclick="shiftGallery(1)">›</button>
+          <div class="gallery-thumbs">${thumbsHtml}</div>` : ''}
+      </div>
       <div class="product-info">
         ${p.brand ? `<div class="product-brand-big">${p.brand}</div>` : ''}
         <div class="product-name-big">${p.name}</div>
@@ -341,10 +401,66 @@ function renderProduct() {
       </div>
     </div>
   `;
+  galleryIndex = 0;
+}
+
+function setGallery(i) {
+  const images = product.images && product.images.length ? product.images : (product.image_url ? [product.image_url] : []);
+  galleryIndex = i;
+  const main = document.getElementById('gallery-main');
+  if (main) main.innerHTML = `<img src="${images[i]}" style="width:100%;height:100%;object-fit:cover">`;
+  document.querySelectorAll('.gallery-thumb').forEach((el, idx) => el.classList.toggle('active', idx === i));
+}
+
+function shiftGallery(dir) {
+  const images = product.images && product.images.length ? product.images : (product.image_url ? [product.image_url] : []);
+  setGallery((galleryIndex + dir + images.length) % images.length);
 }
 
 // ── Edit modal ──
-let pendingImageUrl = null;
+let editImages = [];
+
+function switchImgTab(tab) {
+  document.getElementById('tab-file').classList.toggle('active', tab === 'file');
+  document.getElementById('tab-url').classList.toggle('active', tab === 'url');
+  document.getElementById('img-panel-file').style.display = tab === 'file' ? '' : 'none';
+  document.getElementById('img-panel-url').style.display = tab === 'url' ? '' : 'none';
+}
+
+function renderImgsList() {
+  const list = document.getElementById('imgs-list');
+  if (!editImages.length) { list.innerHTML = '<span style="font-size:12px;color:#9ca3af">Нет фотографий</span>'; return; }
+  list.innerHTML = editImages.map((src, i) => `
+    <div class="img-item">
+      <img src="${src}" onerror="this.style.display='none'">
+      ${i === 0 ? '<div class="img-item-main">главное</div>' : ''}
+      <button class="img-item-del" onclick="removeImage(${i})">×</button>
+    </div>`).join('');
+}
+
+function removeImage(i) {
+  editImages.splice(i, 1);
+  renderImgsList();
+}
+
+function addImageUrl() {
+  const inp = document.getElementById('e-img-url');
+  const url = inp.value.trim();
+  if (!url) return;
+  editImages.push(url);
+  inp.value = '';
+  renderImgsList();
+}
+
+function handleImageFiles(files) {
+  if (!files || !files.length) return;
+  [...files].forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => { editImages.push(e.target.result); renderImgsList(); };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('e-img-input').value = '';
+}
 
 function openEdit() {
   const p = product;
@@ -352,29 +468,14 @@ function openEdit() {
   document.getElementById('e-brand').value = p.brand || '';
   document.getElementById('e-category').value = p.category || '';
   document.getElementById('e-price').value = p.price || '';
-  pendingImageUrl = p.image_url || null;
-  const preview = document.getElementById('e-img-preview');
-  if (p.image_url) { preview.src = p.image_url; preview.style.display = 'block'; }
-  else { preview.style.display = 'none'; }
+  editImages = p.images && p.images.length ? [...p.images] : (p.image_url ? [p.image_url] : []);
+  renderImgsList();
+  switchImgTab('file');
   document.getElementById('edit-overlay').classList.add('open');
 }
 
 function closeEdit() {
   document.getElementById('edit-overlay').classList.remove('open');
-  pendingImageUrl = null;
-}
-
-function handleImageFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    pendingImageUrl = e.target.result;
-    const preview = document.getElementById('e-img-preview');
-    preview.src = pendingImageUrl;
-    preview.style.display = 'block';
-    document.getElementById('e-img-drop').textContent = '✅ ' + file.name;
-  };
-  reader.readAsDataURL(file);
 }
 
 // Drag & drop
@@ -383,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!drop) return;
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
   drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
-  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); handleImageFile(e.dataTransfer.files[0]); });
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); handleImageFiles(e.dataTransfer.files); });
 });
 
 async function saveEdit() {
@@ -401,15 +502,14 @@ async function saveEdit() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(updates),
     });
-    if (pendingImageUrl !== null) {
-      await fetch(`/api/products/${product.id}/image`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ image_url: pendingImageUrl }),
-      });
-      product.image_url = pendingImageUrl;
-    }
+    await fetch(`/api/products/${product.id}/image`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ images: editImages }),
+    });
     Object.assign(product, updates);
+    product.images = [...editImages];
+    product.image_url = editImages[0] || null;
     closeEdit();
     renderProduct();
     showToast('✅ Товар обновлён');

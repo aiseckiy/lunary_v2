@@ -1105,6 +1105,21 @@ def root_page():
     return RedirectResponse("/shop", status_code=302)
 
 
+def _parse_images(p) -> list:
+    """Возвращает список изображений товара."""
+    import json as _j
+    if p.images:
+        try:
+            imgs = _j.loads(p.images)
+            if isinstance(imgs, list) and imgs:
+                return imgs
+        except Exception:
+            pass
+    if p.image_url:
+        return [p.image_url]
+    return []
+
+
 @app.get("/shop", response_class=HTMLResponse)
 def shop_page():
     with open("static/store.html", encoding="utf-8") as f:
@@ -1134,6 +1149,7 @@ def store_products(db: Session = Depends(get_db)):
             "unit": s[0].unit or "шт",
             "stock": int(s[1]),
             "image_url": s[0].image_url or "",
+            "images": _parse_images(s[0]),
         }
         for s in stocks
     ]
@@ -1160,22 +1176,25 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
         "price": p.price, "unit": p.unit or "шт",
         "stock": int(stock), "min_stock": p.min_stock or 0,
         "image_url": p.image_url or "",
+        "images": _parse_images(p),
     }
 
 
-class ProductImageBody(BaseModel):
-    image_url: str  # base64 data URL или внешняя ссылка
+class ProductImagesBody(BaseModel):
+    images: list  # список URL/base64
 
 @app.post("/api/products/{product_id}/image")
-def save_product_image(product_id: int, data: ProductImageBody, request: Request, db: Session = Depends(get_db)):
+def save_product_images(product_id: int, data: ProductImagesBody, request: Request, db: Session = Depends(get_db)):
     user = _get_user_from_session(request)
     if not user or user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Только администратор")
+    import json as _json
     from database import Product as _P
     p = db.query(_P).filter(_P.id == product_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
-    p.image_url = data.image_url
+    p.images = _json.dumps(data.images, ensure_ascii=False)
+    p.image_url = data.images[0] if data.images else None
     db.commit()
     return {"ok": True}
 

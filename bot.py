@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 import os
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8236686343:AAH7WsSIgxPDywJu7jZjviop5vJM9kt7QLs")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # Состояния ConversationHandler
 (ADD_NAME, ADD_SKU, ADD_CATEGORY, ADD_UNIT, ADD_MIN_STOCK,

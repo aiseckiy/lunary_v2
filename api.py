@@ -1376,26 +1376,19 @@ def _format_order_notification(o: dict) -> str:
         lines.append(f"💳 {payment}")
     lines.append("")
 
-    # Если entries есть — показываем состав
-    if entries:
-        for e in entries:
-            qty = e.get('qty', 1)
-            price = int(e.get('basePrice', e.get('price', 0)))
-            name = e.get('name', '—')
-            if name and name != '—':
-                lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
-    else:
-        # Пробуем загрузить entries прямо сейчас для TG
+    # Если entries нет — пробуем загрузить прямо сейчас
+    if not entries:
         try:
-            fetched = kaspi_module.get_order_entries(str(code))
-            for e in fetched:
-                qty = e.get('qty', 1)
-                price = int(e.get('basePrice', e.get('price', 0)))
-                name = e.get('name', '—')
-                if name and name != '—':
-                    lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
+            entries = kaspi_module.get_order_entries(str(code)) or []
         except Exception:
-            pass
+            entries = []
+
+    # Показываем состав
+    for e in entries:
+        qty = e.get('qty', 1)
+        price = int(e.get('basePrice', e.get('price', 0)))
+        name = e.get('name') or '—'
+        lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
 
     lines.append("")
     lines.append(f"<b>Итого: {total:,} ₸</b>".replace(",", " "))

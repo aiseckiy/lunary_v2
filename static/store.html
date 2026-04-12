@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LUNARY — Строительные материалы</title>
+<title>LUNARY — Строительные материалы и инструменты в Казахстане</title>
+<meta name="description" content="Интернет-магазин строительных материалов и инструментов LUNARY. Широкий ассортимент, доступные цены, доставка по Казахстану.">
+<meta property="og:title" content="LUNARY — Строительные материалы">
+<meta property="og:description" content="Интернет-магазин строительных материалов и инструментов. Более 1000 товаров в наличии.">
+<meta property="og:type" content="website">
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
@@ -629,6 +633,36 @@ body {
 .product-card-link { display:block; text-decoration:none; color:inherit; }
 .product-card-link:hover .product-name { color:var(--accent); }
 
+/* ── BANNER ── */
+.store-banner {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #fff;
+}
+.banner-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.banner-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.banner-sub { font-size: 14px; opacity: .85; }
+.banner-btn {
+  background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.4);
+  border-radius: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600;
+  text-decoration: none; white-space: nowrap; transition: background .15s;
+  flex-shrink: 0;
+}
+.banner-btn:hover { background: rgba(255,255,255,.3); }
+@media(max-width:768px) {
+  .banner-title { font-size: 16px; }
+  .banner-sub { font-size: 13px; }
+  .banner-btn { width: 100%; text-align: center; }
+}
+
 /* ── SKELETON ── */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -760,6 +794,17 @@ body {
   </div>
 </div>
 
+<!-- Banner -->
+<div class="store-banner" id="store-banner">
+  <div class="banner-inner">
+    <div class="banner-text">
+      <div class="banner-title">Строительные материалы и инструменты</div>
+      <div class="banner-sub">Более 1000 товаров в наличии · Самовывоз и доставка по городу</div>
+    </div>
+    <a href="/about" class="banner-btn">О нас и контакты</a>
+  </div>
+</div>
+
 <!-- Mobile category pills -->
 <div class="mobile-filters" id="mobile-cats"></div>
 
@@ -769,6 +814,17 @@ body {
     <div class="filter-card">
       <div class="filter-title">Категории</div>
       <div id="cat-list"></div>
+      <div class="filter-divider"></div>
+      <div class="filter-divider"></div>
+      <div class="filter-title">Цена, ₸</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <input type="number" id="price-min" placeholder="от" min="0" oninput="applyPriceFilter()"
+          style="width:50%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f9fafb;outline:none;">
+        <span style="color:var(--text3);font-size:12px">—</span>
+        <input type="number" id="price-max" placeholder="до" min="0" oninput="applyPriceFilter()"
+          style="width:50%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f9fafb;outline:none;">
+      </div>
+      <button onclick="clearPrice()" id="btn-clear-price" style="display:none;width:100%;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:#fff;cursor:pointer;color:var(--text3)">Сбросить цену</button>
       <div class="filter-divider"></div>
       <div class="filter-title">Бренды</div>
       <div class="brand-list" id="brand-list"></div>
@@ -797,6 +853,24 @@ let activeCategory = 'all';
 let activeBrands = new Set();
 let searchQuery = '';
 let currentPage = 1;
+let priceMin = null;
+let priceMax = null;
+
+function applyPriceFilter() {
+  const mn = document.getElementById('price-min').value;
+  const mx = document.getElementById('price-max').value;
+  priceMin = mn ? parseInt(mn) : null;
+  priceMax = mx ? parseInt(mx) : null;
+  document.getElementById('btn-clear-price').style.display = (priceMin || priceMax) ? '' : 'none';
+  currentPage = 1; render();
+}
+function clearPrice() {
+  document.getElementById('price-min').value = '';
+  document.getElementById('price-max').value = '';
+  priceMin = null; priceMax = null;
+  document.getElementById('btn-clear-price').style.display = 'none';
+  currentPage = 1; render();
+}
 const PAGE_SIZE = 80;
 
 async function load() {
@@ -862,6 +936,8 @@ function filtered() {
   let list = allProducts;
   if (activeCategory !== 'all') list = list.filter(p => (p.category || 'Другое') === activeCategory);
   if (activeBrands.size) list = list.filter(p => activeBrands.has(p.brand));
+  if (priceMin !== null) list = list.filter(p => p.price && p.price >= priceMin);
+  if (priceMax !== null) list = list.filter(p => p.price && p.price <= priceMax);
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     list = list.filter(p =>

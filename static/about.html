@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>О нас — LUNARY</title>
+<meta name="description" content="LUNARY — интернет-магазин строительных материалов и инструментов. Адрес, телефон, режим работы.">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root { --accent:#6366f1; --bg:#f8f8fb; --surface:#fff; --border:#e5e7eb; --text:#111827; --text2:#6b7280; --text3:#9ca3af; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+.store-header { background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+.header-inner { max-width:1000px; margin:0 auto; padding:0 20px; height:60px; display:flex; align-items:center; gap:16px; }
+.header-logo { font-size:20px; font-weight:700; color:var(--accent); letter-spacing:-.5px; text-decoration:none; }
+.header-back { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text2); text-decoration:none; margin-left:4px; }
+.header-back:hover { color:var(--text); }
+
+.container { max-width:1000px; margin:0 auto; padding:40px 20px; }
+
+.hero { background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; border-radius:20px; padding:40px; margin-bottom:32px; }
+.hero-title { font-size:32px; font-weight:800; margin-bottom:8px; }
+.hero-sub { font-size:16px; opacity:.85; }
+
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:32px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; }
+.card-icon { font-size:32px; margin-bottom:12px; }
+.card-title { font-size:16px; font-weight:700; margin-bottom:8px; }
+.card-text { font-size:14px; color:var(--text2); line-height:1.6; }
+
+.contacts-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+.contacts-title { font-size:18px; font-weight:700; margin-bottom:20px; }
+.contact-row { display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--bg); }
+.contact-row:last-child { border-bottom:none; }
+.contact-icon { font-size:20px; flex-shrink:0; width:36px; height:36px; background:var(--bg); border-radius:10px; display:flex; align-items:center; justify-content:center; }
+.contact-label { font-size:12px; color:var(--text3); margin-bottom:3px; }
+.contact-val { font-size:15px; font-weight:500; }
+.contact-val a { color:var(--accent); text-decoration:none; }
+.contact-val a:hover { text-decoration:underline; }
+
+.hours-table { width:100%; border-collapse:collapse; margin-top:8px; }
+.hours-table td { padding:5px 0; font-size:14px; }
+.hours-table td:first-child { color:var(--text2); width:140px; }
+.hours-table tr.today td { font-weight:700; color:var(--text); }
+
+.btn-shop { display:inline-block; margin-top:24px; padding:14px 32px; background:var(--accent); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; }
+.btn-shop:hover { background:#4f46e5; }
+
+@media(max-width:600px) {
+  .grid { grid-template-columns:1fr; }
+  .hero-title { font-size:24px; }
+  .hero { padding:24px; }
+}
+</style>
+</head>
+<body>
+
+<header class="store-header">
+  <div class="header-inner">
+    <a class="header-logo" href="/shop">LUNARY</a>
+    <a class="header-back" href="/shop">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      В каталог
+    </a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-title">LUNARY</div>
+    <div class="hero-sub">Строительные материалы и инструменты<br>Более 1000 товаров в наличии</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-icon">🏪</div>
+      <div class="card-title">Широкий ассортимент</div>
+      <div class="card-text">Инструменты, расходники, крепёж, лакокрасочные материалы, пены и герметики — всё для строительства и ремонта.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🚚</div>
+      <div class="card-title">Доставка и самовывоз</div>
+      <div class="card-text">Самовывоз со склада или доставка по городу. Оформляйте заказ онлайн — перезвоним для подтверждения.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <div class="card-title">Оптовые цены</div>
+      <div class="card-text">Работаем с физическими и юридическими лицами. Специальные условия для строительных компаний и оптовых покупателей.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">✅</div>
+      <div class="card-title">Качество товаров</div>
+      <div class="card-text">Работаем только с проверенными поставщиками. Все товары сертифицированы и соответствуют стандартам качества.</div>
+    </div>
+  </div>
+
+  <div class="contacts-card">
+    <div class="contacts-title">Контакты</div>
+
+    <div class="contact-row">
+      <div class="contact-icon">📍</div>
+      <div>
+        <div class="contact-label">Адрес</div>
+        <div class="contact-val">г. Алматы, ул. Строителей 1</div>
+      </div>
+    </div>
+
+    <div class="contact-row">
+      <div class="contact-icon">📞</div>
+      <div>
+        <div class="contact-label">Телефон / WhatsApp</div>
+        <div class="contact-val"><a href="tel:+77001234567">+7 (700) 123-45-67</a></div>
+      </div>
+    </div>
+
+    <div class="contact-row">
+      <div class="contact-icon">📧</div>
+      <div>
+        <div class="contact-label">Email</div>
+        <div class="contact-val"><a href="mailto:info@lunary.kz">info@lunary.kz</a></div>
+      </div>
+    </div>
+
+    <div class="contact-row">
+      <div class="contact-icon">🕐</div>
+      <div>
+        <div class="contact-label">Режим работы</div>
+        <table class="hours-table" id="hours-table">
+          <tr><td>Пн — Пт</td><td>9:00 — 18:00</td></tr>
+          <tr><td>Суббота</td><td>10:00 — 16:00</td></tr>
+          <tr><td>Воскресенье</td><td>Выходной</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <a class="btn-shop" href="/shop">Перейти в каталог →</a>
+</div>
+
+<script>
+// Подсветить сегодняшний день
+const days = ['Воскресенье', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Суббота'];
+const today = days[new Date().getDay()];
+document.querySelectorAll('.hours-table tr').forEach(tr => {
+  if (tr.cells[0]?.textContent.trim() === today) tr.classList.add('today');
+});
+</script>
+</body>
+</html>

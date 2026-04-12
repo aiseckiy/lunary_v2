@@ -66,8 +66,8 @@ if _slowapi_ok:
 # ─── Auth middleware ──────────────────────────────────────────
 _PUBLIC_PATHS = {"/login", "/api/auth/login", "/api/auth/logout",
                  "/auth/google", "/auth/google/callback",
-                 "/shop", "/"}
-_PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/")
+                 "/shop", "/", "/about"}
+_PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/", "/shop/product/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
                 "/api/history", "/api/admin", "/api/purchases", "/api/alerts")
@@ -953,6 +953,12 @@ def my_orders(request: Request, db: Session = Depends(get_db)):
 @app.get("/shop/my-orders", response_class=HTMLResponse)
 def my_orders_page():
     with open("static/my_orders.html", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get("/about", response_class=HTMLResponse)
+def about_page():
+    with open("static/about.html", encoding="utf-8") as f:
         return f.read()
 
 

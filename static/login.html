@@ -135,28 +135,10 @@ body {
     Войти через Google
   </button>
 
-  <div class="admin-hint">Администратор? <a href="/login?admin=1" id="admin-link">Войти с паролем</a></div>
-</div>
-
-<div id="admin-form" style="display:none">
-  <div class="card" style="margin-top:16px">
-    <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:#374151">Вход администратора</div>
-    <div class="input-wrap">
-      <input class="input" id="admin-pwd" type="password" placeholder="Пароль администратора" onkeydown="if(event.key==='Enter')doAdminLogin()">
-    </div>
-    <button class="btn" onclick="doAdminLogin()">Войти как администратор</button>
-  </div>
 </div>
 
 <script>
 const next = new URLSearchParams(location.search).get('next') || '/shop';
-const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
-
-if (isAdmin) {
-  document.querySelector('.card').style.display = 'none';
-  document.getElementById('admin-form').style.display = 'block';
-  document.getElementById('admin-form').querySelector('.card').style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.06)';
-}
 
 function switchTab(tab) {
   document.getElementById('tab-login').classList.toggle('active', tab === 'login');
@@ -194,7 +176,7 @@ async function doLogin() {
     });
     if (res.ok) {
       const data = await res.json();
-      location.href = data.role === 'admin' ? '/admin' : next;
+      location.href = data.role === 'admin' ? '/admin' : (next === '/login' ? '/shop' : next);
     } else {
       const e = await res.json();
       showErr(e.detail || 'Ошибка входа');
@@ -217,7 +199,8 @@ async function doRegister() {
       body: JSON.stringify({name, email, password: pwd})
     });
     if (res.ok) {
-      location.href = next;
+      const data = await res.json();
+      location.href = data.role === 'admin' ? '/admin' : (next === '/login' ? '/shop' : next);
     } else {
       const e = await res.json();
       showErr(e.detail || 'Ошибка регистрации');
@@ -226,19 +209,6 @@ async function doRegister() {
   btn.textContent = 'Создать аккаунт'; btn.disabled = false;
 }
 
-async function doAdminLogin() {
-  const pwd = document.getElementById('admin-pwd').value;
-  if (!pwd) return;
-  const res = await fetch('/api/auth/login', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({password: pwd})
-  });
-  if (res.ok) {
-    location.href = new URLSearchParams(location.search).get('next') || '/admin';
-  } else {
-    alert('Неверный пароль');
-  }
-}
 
 function toggleEye(inputId, btn) {
   const inp = document.getElementById(inputId);

@@ -69,6 +69,7 @@ class KaspiOrder(Base):
     delivery_compensation = Column(Integer, default=0)
     source = Column(String, default="kaspi_api")  # kaspi_api | xml_import
     stock_deducted = Column(Integer, default=0)  # 1 если остатки уже списаны
+    last_synced_at = Column(DateTime, nullable=True)  # когда последний раз обновился из Kaspi API
 
 
 class Movement(Base):
@@ -116,6 +117,19 @@ class ShopOrder(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class SyncLog(Base):
+    __tablename__ = "sync_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    synced_at = Column(DateTime, default=datetime.utcnow)
+    total_found = Column(Integer, default=0)   # всего заказов от Kaspi API
+    added = Column(Integer, default=0)         # новых добавлено
+    updated = Column(Integer, default=0)       # обновлено статусов
+    returns = Column(Integer, default=0)       # возвратов остатков (отмены)
+    deducted = Column(Integer, default=0)      # списаний остатков
+    error = Column(String, nullable=True)      # текст ошибки если была
+
+
 class SiteSetting(Base):
     __tablename__ = "site_settings"
 
@@ -160,6 +174,7 @@ def init_db():
         ("kaspi_orders", "delivery_compensation", "INTEGER DEFAULT 0"),
         ("kaspi_orders", "source", "TEXT DEFAULT 'kaspi_api'"),
         ("kaspi_orders", "stock_deducted", "INTEGER DEFAULT 0"),
+        ("kaspi_orders", "last_synced_at", "TIMESTAMP"),
         ("users", "password_hash", "TEXT"),
         ("users", "phone", "TEXT"),
         ("movements", "user_id", "INTEGER"),

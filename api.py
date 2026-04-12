@@ -210,6 +210,11 @@ def _start_kaspi_sync_loop():
         while True:
             db = SL()
             try:
+                from database import SyncLog
+                from datetime import timezone, timedelta
+                tz_kz = timezone(timedelta(hours=5))
+                sync_start = datetime.now(tz=tz_kz)
+
                 all_orders = []
                 for state in STATES:
                     result = kaspi_module.get_kaspi_orders(state=state, size=100)
@@ -225,6 +230,9 @@ def _start_kaspi_sync_loop():
                 all_orders = list(seen_ids.values())
 
                 added = 0
+                updated_count = 0
+                returns_count = 0
+                deducted_count = 0
                 new_orders = []
                 for o in all_orders:
                     # Нормализуем дату из Unix ms → dd.mm.yyyy
@@ -249,16 +257,20 @@ def _start_kaspi_sync_loop():
                         if new_state in DEDUCT_STATES and old_state not in DEDUCT_STATES and not existing.stock_deducted:
                             _deduct_stock_for_order(existing, db)
                             existing.stock_deducted = 1
+                            deducted_count += 1
                         # Возвращаем остатки при отмене (если уже списали)
                         elif new_state in CANCEL_STATES and old_state not in CANCEL_STATES and existing.stock_deducted:
                             _return_stock_for_order(existing, db)
                             existing.stock_deducted = 0
+                            returns_count += 1
+                        # Считаем как обновление если статус изменился
+                        if new_state != old_state:
+                            updated_count += 1
                         # Обновляем статус и основные поля
                         existing.state = new_state
+                        existing.last_synced_at = datetime.utcnow()
                         # Сохраняем дату выдачи при переходе в ARCHIVE
                         if new_state == "ARCHIVE" and old_state != "ARCHIVE" and not existing.status_date:
-                            from datetime import timezone, timedelta
-                            tz_kz = timezone(timedelta(hours=5))
                             existing.status_date = datetime.now(tz=tz_kz).strftime("%d.%m.%Y")
                         existing.total = int(o.get("total", existing.total or 0))
                         existing.customer = o.get("customer", existing.customer)
@@ -279,7 +291,7 @@ def _start_kaspi_sync_loop():
                             quantity = sum(e.get("qty", e.get("quantity", 1)) for e in entries if isinstance(e, dict))
                         addr_obj = o.get("deliveryAddress")
                         address = addr_obj.get("formattedAddress", "") if isinstance(addr_obj, dict) else str(addr_obj or "")
-                        db.add(KaspiOrder(
+                        new_ko = KaspiOrder(
                             order_id=oid,
                             state=o.get("state", ""),
                             total=int(o.get("total", 0)),
@@ -293,9 +305,23 @@ def _start_kaspi_sync_loop():
                             payment_method=o.get("paymentMode", ""),
                             address=address,
                             source="kaspi_api",
-                        ))
+                            last_synced_at=datetime.utcnow(),
+                        )
+                        db.add(new_ko)
                         added += 1
+                        # Подставляем декодированный числовой ID для уведомления
+                        o["id"] = oid
                         new_orders.append(o)
+
+                # Записываем лог синхронизации
+                db.add(SyncLog(
+                    synced_at=sync_start.replace(tzinfo=None),
+                    total_found=len(all_orders),
+                    added=added,
+                    updated=updated_count,
+                    returns=returns_count,
+                    deducted=deducted_count,
+                ))
                 db.commit()
 
                 notify_states = {"NEW", "PICKUP", "KASPI_DELIVERY", "DELIVERY"}
@@ -303,10 +329,16 @@ def _start_kaspi_sync_loop():
                     if o.get("state") in notify_states:
                         _send_tg_notification(_format_order_notification(o))
 
-                if added:
-                    print(f"✅ Kaspi sync: +{added} новых заказов")
+                if added or returns_count:
+                    print(f"✅ Kaspi sync: +{added} новых, обновлено {updated_count}, возвратов {returns_count}")
             except Exception as e:
                 print(f"⚠️ Kaspi sync error: {e}")
+                try:
+                    from database import SyncLog
+                    db.add(SyncLog(synced_at=datetime.utcnow(), error=str(e)[:500]))
+                    db.commit()
+                except Exception:
+                    pass
             finally:
                 db.close()
             time.sleep(300)  # каждые 5 минут
@@ -646,6 +678,33 @@ def dedupe_kaspi_orders(request: Request, db: Session = Depends(get_db)):
 
     db.commit()
     return {"ok": True, "deleted": deleted, "migrated": migrated}
+
+
+@app.get("/api/admin/kaspi/sync-log")
+def get_sync_log(request: Request, db: Session = Depends(get_db)):
+    """Последние 50 запусков синхронизации Kaspi"""
+    from database import SyncLog
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    rows = db.query(SyncLog).order_by(SyncLog.id.desc()).limit(50).all()
+    from datetime import timezone, timedelta
+    tz_kz = timezone(timedelta(hours=5))
+    result = []
+    for r in rows:
+        # конвертируем utc → UTC+5
+        dt_kz = r.synced_at.replace(tzinfo=timezone.utc).astimezone(tz_kz) if r.synced_at else None
+        result.append({
+            "id": r.id,
+            "synced_at": dt_kz.strftime("%d.%m.%Y %H:%M:%S") if dt_kz else None,
+            "total_found": r.total_found,
+            "added": r.added,
+            "updated": r.updated,
+            "returns": r.returns,
+            "deducted": r.deducted,
+            "error": r.error,
+        })
+    return result
 
 
 # ─── Товары ──────────────────────────────────────────────────
@@ -1209,7 +1268,8 @@ def _format_order_notification(o: dict) -> str:
     customer = o.get("customer") or "Покупатель"
     total = int(o.get("total", 0))
     entries = o.get("entries", [])
-    code = o.get("code") or o.get("id", "")
+    raw_id = o.get("id", "")
+    code = _decode_kaspi_order_id(str(raw_id)) if raw_id else ""
     delivery_mode = DELIVERY_LABELS.get(o.get("deliveryMode", ""), o.get("deliveryMode", ""))
     payment = PAYMENT_LABELS.get(o.get("paymentMode", ""), "")
     address = o.get("deliveryAddress") or {}
@@ -1459,21 +1519,9 @@ def kaspi_orders_local(
     # Fetch all matching orders (date filter happens in Python due to mixed date formats)
     all_orders = q.order_by(KaspiOrder.id.desc()).all()
 
-    # Date filtering in Python
-    df_dt = datetime.strptime(date_from, "%Y-%m-%d") if date_from else None
-    dt_dt = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59) if date_to else None
-    if df_dt or dt_dt:
-        filtered = []
-        for o in all_orders:
-            d = _parse_order_date(o.order_date)
-            if d is None:
-                continue
-            if df_dt and d < df_dt:
-                continue
-            if dt_dt and d > dt_dt:
-                continue
-            filtered.append(o)
-        all_orders = filtered
+    # Date filtering in Python (единая логика с аналитикой)
+    if date_from or date_to:
+        all_orders = _filter_orders_by_date(all_orders, date_from, date_to)
 
     total_count = len(all_orders)
     orders = all_orders[offset: offset + limit]
@@ -1511,10 +1559,11 @@ def kaspi_orders_local(
             if product:
                 entry["product_id"] = product.id
         synced = None
-        if o.created_at:
+        sync_ts = o.last_synced_at or o.created_at
+        if sync_ts:
             try:
                 from datetime import timezone, timedelta
-                synced = o.created_at.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=5))).strftime("%d.%m %H:%M")
+                synced = sync_ts.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=5))).strftime("%d.%m %H:%M")
             except Exception:
                 pass
         return {

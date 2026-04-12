@@ -77,7 +77,21 @@
 .order-meta { font-size:11px; color:var(--text3); }
 .order-date-time { font-size:12px; color:var(--text3); }
 
-.src-xml { font-size:10px; color:var(--text3); background:var(--bg); border-radius:4px; padding:1px 6px; }
+.src-xml  { font-size:10px; color:var(--text3); background:var(--bg); border-radius:4px; padding:1px 6px; }
+.src-sync { font-size:10px; color:#6366f1; background:#ede9fe; border-radius:4px; padding:1px 6px; }
+
+/* Sync log */
+.sync-log-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-top:28px; }
+.sync-log-title { font-size:15px; font-weight:700; margin-bottom:14px; color:var(--text); }
+.sync-log-table { width:100%; border-collapse:collapse; font-size:13px; }
+.sync-log-table th { text-align:left; padding:6px 10px; font-size:11px; color:var(--text3); border-bottom:2px solid var(--border); font-weight:600; white-space:nowrap; }
+.sync-log-table td { padding:7px 10px; border-bottom:1px solid var(--border2); vertical-align:middle; }
+.sync-log-table tr:last-child td { border-bottom:none; }
+.sync-log-table tr.log-error td { color:var(--red); }
+.log-num { font-weight:700; color:var(--accent); }
+.log-added { color:var(--green); font-weight:600; }
+.log-return { color:var(--orange); font-weight:600; }
+.log-deducted { color:var(--accent); font-weight:600; }
 .error-box { background:#fee2e2; border:1px solid #fca5a5; border-radius:12px; padding:16px; color:var(--red); font-size:14px; }
 @media (max-width: 768px) {
   .order-card { padding: 14px !important; }
@@ -152,6 +166,12 @@
 
   <div id="orders-container">
     <div class="loading"><div class="spinner"></div><br>Загрузка...</div>
+  </div>
+
+  <!-- Лог синхронизаций -->
+  <div class="sync-log-card">
+    <div class="sync-log-title">🔄 История синхронизаций с Kaspi</div>
+    <div id="sync-log-body" style="color:var(--text3);font-size:13px">Загрузка...</div>
   </div>
 </div></div></div>
 
@@ -294,7 +314,9 @@ function renderOrders(orders) {
     }).join('');
 
     const delivery = o.delivery_method ? `<span class="order-meta">${o.delivery_method}</span>` : '';
-    const src = o.source === 'xml_import' ? '<span class="src-xml">архив</span>' : '';
+    const src = o.source === 'xml_import'
+      ? '<span class="src-xml">📂 XML архив</span>'
+      : (o.synced_at ? `<span class="src-sync">🔄 синхр. ${o.synced_at}</span>` : '<span class="src-sync">🔄 Kaspi API</span>');
 
     return `
       <div class="order-card">
@@ -371,6 +393,34 @@ async function openPModal(id) {
 function closePModal() {
   document.getElementById('pmodal-overlay').classList.remove('open');
 }
+
+async function loadSyncLog() {
+  const el = document.getElementById('sync-log-body');
+  try {
+    const rows = await fetch('/api/admin/kaspi/sync-log').then(r => r.json());
+    if (!rows || !rows.length) { el.textContent = 'Синхронизаций пока нет'; return; }
+    el.innerHTML = `<table class="sync-log-table">
+      <thead><tr>
+        <th>Время</th><th>Найдено</th><th>Новых</th><th>Обновлено</th><th>Списаний</th><th>Возвратов</th><th>Ошибка</th>
+      </tr></thead>
+      <tbody>${rows.map(r => `
+        <tr class="${r.error ? 'log-error' : ''}">
+          <td style="white-space:nowrap;color:var(--text2)">${r.synced_at || '—'}</td>
+          <td class="log-num">${r.total_found}</td>
+          <td class="${r.added ? 'log-added' : ''}">${r.added || 0}</td>
+          <td>${r.updated || 0}</td>
+          <td class="${r.deducted ? 'log-deducted' : ''}">${r.deducted || 0}</td>
+          <td class="${r.returns ? 'log-return' : ''}">${r.returns || 0}</td>
+          <td style="font-size:11px;color:var(--red)">${r.error || ''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    el.textContent = 'Не удалось загрузить лог';
+  }
+}
+
+loadSyncLog();
 </script>
 
 <script src="/static/mobile.js"></script>

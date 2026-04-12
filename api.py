@@ -721,7 +721,7 @@ class SetStockBody(BaseModel):
     note: Optional[str] = None
 
 @app.post("/api/products/{product_id}/set-stock")
-def set_stock_value(product_id: int, data: SetStockBody, db: Session = Depends(get_db)):
+def set_stock_value(product_id: int, data: SetStockBody, request: Request, db: Session = Depends(get_db)):
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
@@ -733,7 +733,10 @@ def set_stock_value(product_id: int, data: SetStockBody, db: Session = Depends(g
         return {"product": p.name, "new_stock": current, "delta": 0}
     move_type = "income" if delta > 0 else "writeoff"
     note = data.note or f"Коррекция остатка: было {current}, стало {data.actual}"
-    crud.add_movement(product_id, abs(delta), move_type, db, "web", note)
+    u = _get_user_from_session(request)
+    crud.add_movement(product_id, abs(delta), move_type, db, "web", note,
+                      user_id=u.get("id") if u else None,
+                      user_name=u.get("name") or u.get("email") if u else None)
     new_stock = crud.get_stock(product_id, db)
     return {"product": p.name, "new_stock": new_stock, "delta": delta}
 
@@ -748,7 +751,7 @@ def get_stock(product_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/products/{product_id}/movement")
-def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_db)):
+def add_movement(product_id: int, data: StockAdjust, request: Request, db: Session = Depends(get_db)):
     try:
         p = crud.get_product_by_id(product_id, db)
         if not p:
@@ -757,7 +760,10 @@ def add_movement(product_id: int, data: StockAdjust, db: Session = Depends(get_d
         if data.type not in ("income", "sale", "writeoff", "return", "adjustment"):
             raise HTTPException(status_code=400, detail="Неверный тип движения")
 
-        m = crud.add_movement(product_id, data.quantity, data.type, db, data.source, data.note)
+        u = _get_user_from_session(request)
+        m = crud.add_movement(product_id, data.quantity, data.type, db, data.source, data.note,
+                              user_id=u.get("id") if u else None,
+                              user_name=u.get("name") or u.get("email") if u else None)
         new_stock = crud.get_stock(product_id, db)
         return {
             "movement_id": m.id,
@@ -841,6 +847,7 @@ def get_all_history(
                 "date": m.created_at.strftime("%d.%m.%Y"),
                 "time": m.created_at.strftime("%H:%M"),
                 "datetime_iso": m.created_at.isoformat(),
+                "user_name": m.user_name or "",
             }
             for m, p in rows
         ]

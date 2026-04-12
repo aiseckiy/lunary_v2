@@ -88,7 +88,7 @@ def create_product(name: str, sku: str, db: Session, barcode=None, category="О�
 
 
 # ─── Движение склада ─────────────────────────────────────────
-def add_movement(product_id: int, quantity: int, move_type: str, db: Session, source="manual", note=None):
+def add_movement(product_id: int, quantity: int, move_type: str, db: Session, source="manual", note=None, user_id=None, user_name=None):
     """
     quantity: передаётся как положительное число
     move_type: income(+), return(+), sale(-), writeoff(-)
@@ -99,7 +99,9 @@ def add_movement(product_id: int, quantity: int, move_type: str, db: Session, so
         quantity=signed_qty,
         type=move_type,
         source=source,
-        note=note
+        note=note,
+        user_id=user_id,
+        user_name=user_name,
     )
     db.add(movement)
     db.commit()

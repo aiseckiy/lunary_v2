@@ -81,6 +81,8 @@ class Movement(Base):
     type = Column(String, nullable=False)  # income, sale, writeoff, return, adjustment
     source = Column(String, default="manual")  # manual, kaspi, offline
     note = Column(String, nullable=True)
+    user_id = Column(Integer, nullable=True)
+    user_name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -151,6 +153,8 @@ def init_db():
         ("kaspi_orders", "stock_deducted", "INTEGER DEFAULT 0"),
         ("users", "password_hash", "TEXT"),
         ("users", "phone", "TEXT"),
+        ("movements", "user_id", "INTEGER"),
+        ("movements", "user_name", "TEXT"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

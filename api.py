@@ -1388,7 +1388,9 @@ def _format_order_notification(o: dict) -> str:
         qty = e.get('qty', 1)
         price = int(e.get('basePrice', e.get('price', 0)))
         name = e.get('name') or '—'
-        lines.append(f"  • {name} — {qty} шт × {price:,} ₸".replace(",", " "))
+        sku = e.get('sku') or e.get('merchantSku') or ''
+        sku_str = f" <code>{sku}</code>" if sku else ""
+        lines.append(f"  • {name}{sku_str} — {qty} шт × {price:,} ₸".replace(",", " "))
 
     lines.append("")
     lines.append(f"<b>Итого: {total:,} ₸</b>".replace(",", " "))

@@ -91,6 +91,7 @@ def get_order_entries(order_id: str) -> list:
 
         entries.append({
             "name": name or "—",
+            "sku": merchant_sku,
             "merchantSku": merchant_sku,
             "qty": attr.get("quantity", 1),
             "basePrice": int(attr.get("basePrice", 0)),

@@ -92,6 +92,42 @@
 
   <div id="tokens-container"></div>
 
+  <!-- Типографика и размеры — только для просмотра -->
+  <div style="margin-bottom:28px">
+    <div class="token-group-title">Типографика (font-size)</div>
+    <div class="token-grid" style="margin-bottom:16px">
+      <div class="token-card"><div style="font-size:11px;font-weight:600;width:44px;text-align:center;color:var(--text3)">Aa</div><div class="token-info"><div class="token-label">xs — подписи, бейджи</div><div class="token-var">--fs-xs: 11px</div></div></div>
+      <div class="token-card"><div style="font-size:12px;font-weight:600;width:44px;text-align:center;color:var(--text3)">Aa</div><div class="token-info"><div class="token-label">sm — лейблы форм</div><div class="token-var">--fs-sm: 12px</div></div></div>
+      <div class="token-card"><div style="font-size:14px;font-weight:600;width:44px;text-align:center">Aa</div><div class="token-info"><div class="token-label">base — основной текст</div><div class="token-var">--fs-base: 14px</div></div></div>
+      <div class="token-card"><div style="font-size:16px;font-weight:600;width:44px;text-align:center">Aa</div><div class="token-info"><div class="token-label">md — заголовок секции</div><div class="token-var">--fs-md: 16px</div></div></div>
+      <div class="token-card"><div style="font-size:18px;font-weight:700;width:44px;text-align:center">Aa</div><div class="token-info"><div class="token-label">lg — логотип</div><div class="token-var">--fs-lg: 18px</div></div></div>
+      <div class="token-card"><div style="font-size:22px;font-weight:800;width:44px;text-align:center">Aa</div><div class="token-info"><div class="token-label">xl — заголовок страницы</div><div class="token-var">--fs-xl: 22px</div></div></div>
+      <div class="token-card"><div style="font-size:28px;font-weight:800;width:44px;text-align:center;color:var(--accent)">42</div><div class="token-info"><div class="token-label">2xl — числа статистики</div><div class="token-var">--fs-2xl: 28px</div></div></div>
+      <div class="token-card"><div style="font-size:32px;font-weight:800;width:44px;text-align:center;color:var(--green)">₸</div><div class="token-info"><div class="token-label">3xl — цена товара</div><div class="token-var">--fs-3xl: 32px</div></div></div>
+    </div>
+
+    <div class="token-group-title">Скругления (border-radius)</div>
+    <div class="token-grid" style="margin-bottom:16px">
+      <div class="token-card"><div style="width:44px;height:44px;background:var(--accent);border-radius:8px;flex-shrink:0"></div><div class="token-info"><div class="token-label">sm — мелкие элементы</div><div class="token-var">--r-sm: 8px</div></div></div>
+      <div class="token-card"><div style="width:44px;height:44px;background:var(--accent);border-radius:10px;flex-shrink:0"></div><div class="token-info"><div class="token-label">base — кнопки, инпуты</div><div class="token-var">--r-base: 10px</div></div></div>
+      <div class="token-card"><div style="width:44px;height:44px;background:var(--accent);border-radius:12px;flex-shrink:0"></div><div class="token-info"><div class="token-label">md — datepicker</div><div class="token-var">--r-md: 12px</div></div></div>
+      <div class="token-card"><div style="width:44px;height:44px;background:var(--accent);border-radius:14px;flex-shrink:0"></div><div class="token-info"><div class="token-label">lg — карточки, модалки</div><div class="token-var">--r-lg: 14px</div></div></div>
+      <div class="token-card"><div style="width:44px;height:44px;background:var(--accent);border-radius:20px;flex-shrink:0"></div><div class="token-info"><div class="token-label">xl — bottom nav, шторки</div><div class="token-var">--r-xl: 20px</div></div></div>
+      <div class="token-card"><div style="width:44px;height:44px;background:var(--accent);border-radius:50%;flex-shrink:0"></div><div class="token-info"><div class="token-label">full — аватары, круглые</div><div class="token-var">--r-full: 9999px</div></div></div>
+    </div>
+
+    <div class="token-group-title">Компоненты — предпросмотр</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+      <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:9999px;background:#dcfce7;color:var(--green)">Бейдж</span>
+      <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:9999px;background:#fee2e2;color:var(--red)">Отменён</span>
+      <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:9999px;background:#ede9fe;color:var(--accent)">Новый</span>
+      <button style="padding:9px 18px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:default">Кнопка</button>
+      <button style="padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:14px;font-weight:600;cursor:default">Вторичная</button>
+      <input style="padding:10px 14px;border-radius:10px;border:1px solid var(--border);font-size:14px;background:var(--bg);color:var(--text);outline:none" placeholder="Поле ввода" readonly>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Статистика</div><div style="font-size:28px;font-weight:800;color:var(--accent)">1 234</div></div>
+    </div>
+  </div>
+
   <div class="actions">
     <button class="btn-primary" onclick="saveTheme()">💾 Сохранить тему</button>
     <button class="btn-reset" onclick="resetTheme()">↩ Сбросить к дефолту</button>

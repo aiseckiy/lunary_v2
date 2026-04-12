@@ -7,6 +7,7 @@
 html { overflow-x: hidden; max-width: 100vw; }
 
 :root {
+  /* ── Цвета ── */
   --bg:        #f4f4f6;
   --surface:   #ffffff;
   --border:    #e5e7eb;
@@ -21,6 +22,39 @@ html { overflow-x: hidden; max-width: 100vw; }
   --yellow:    #eab308;
   --sidebar-w: 220px;
   --sidebar-bg:#f0f0f5;
+
+  /* ── Шрифты ── */
+  --fs-xs:    11px;   /* бейдж, мета, подписи */
+  --fs-sm:    12px;   /* лейбл формы, вторичный текст */
+  --fs-base:  14px;   /* основной текст, кнопки, инпуты */
+  --fs-md:    16px;   /* заголовок секции */
+  --fs-lg:    18px;   /* логотип */
+  --fs-xl:    22px;   /* заголовок страницы */
+  --fs-2xl:   28px;   /* числа в статистике */
+  --fs-3xl:   32px;   /* цена товара */
+
+  /* ── Жирность ── */
+  --fw-normal:   400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-extrabold:800;
+
+  /* ── Скругления ── */
+  --r-sm:   8px;    /* маленькие элементы */
+  --r-base: 10px;   /* кнопки, инпуты, пили */
+  --r-md:   12px;   /* datepicker, select */
+  --r-lg:   14px;   /* карточки, секции, модалки */
+  --r-xl:   20px;   /* bottom nav, большие листы */
+  --r-full: 9999px; /* круглые элементы */
+
+  /* ── Отступы ── */
+  --p-xs:  4px 8px;
+  --p-sm:  6px 12px;
+  --p-base:9px 18px;   /* стандартная кнопка */
+  --p-md:  12px 16px;
+  --p-lg:  16px 20px;
+  --p-card:18px;       /* отступ внутри карточки */
 }
 
 body {
@@ -265,7 +299,7 @@ body {
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
 
 /* Badges */
-.badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: var(--r-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); }
 .badge-green  { background: #dcfce7; color: var(--green); }
 .badge-red    { background: #fee2e2; color: var(--red); }
 .badge-blue   { background: #ede9fe; color: var(--accent); }
@@ -278,9 +312,9 @@ body {
   width: 100%;
   background: #f9fafb;
   border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px 13px;
-  font-size: 14px;
+  border-radius: var(--r-base);
+  padding: 10px 14px;
+  font-size: var(--fs-base);
   color: var(--text);
   outline: none;
   transition: border-color .15s;

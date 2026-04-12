@@ -355,6 +355,165 @@ body {
 .page-btn:disabled { opacity: 0.35; cursor: default; }
 .page-ellipsis { color: var(--text3); padding: 0 4px; font-size: 14px; }
 
+/* ── AUTH BUTTON ── */
+.btn-auth {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.btn-auth:hover { background: var(--accent-dark); }
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px 5px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.user-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  overflow: hidden; flex-shrink: 0;
+}
+.user-avatar img { width:100%; height:100%; object-fit:cover; }
+
+.admin-badge {
+  background: #ede9fe;
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s;
+}
+.admin-badge:hover { background: #ddd6fe; }
+
+/* ── AUTH POPUP ── */
+.auth-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.auth-overlay.open { display: flex; }
+.auth-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.15);
+  position: relative;
+}
+.auth-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 30px; height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #6b7280;
+}
+.auth-logo { font-size: 22px; font-weight: 900; text-align: center; margin-bottom: 4px; }
+.auth-logo span { color: var(--accent); }
+.auth-sub { font-size: 13px; color: #9ca3af; text-align: center; margin-bottom: 24px; }
+
+.auth-tabs { display:flex; background:#f3f4f6; border-radius:10px; padding:3px; margin-bottom:20px; }
+.auth-tab { flex:1; text-align:center; padding:7px; font-size:14px; font-weight:500; color:#6b7280; cursor:pointer; border-radius:8px; transition:all .15s; }
+.auth-tab.active { background:#fff; color:#111827; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+
+.auth-label { font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; display:block; }
+.auth-input-wrap { position:relative; margin-bottom:12px; }
+.auth-input {
+  width:100%; background:#f9fafb; border:1px solid #e5e7eb;
+  border-radius:10px; padding:10px 40px 10px 13px;
+  font-size:14px; color:#111827; outline:none; font-family:inherit;
+  transition:border-color .15s;
+}
+.auth-input:focus { border-color: var(--accent); background:#fff; }
+.auth-eye { position:absolute; right:11px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#9ca3af; font-size:16px; padding:2px; }
+
+.auth-btn {
+  width:100%; background:#111827; color:#fff; border:none;
+  border-radius:10px; padding:12px; font-size:15px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:background .15s; margin-top:2px;
+}
+.auth-btn:hover { background:#374151; }
+.auth-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+.auth-divider { display:flex; align-items:center; gap:10px; margin:16px 0; color:#d1d5db; font-size:12px; }
+.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:#e5e7eb; }
+
+.auth-google {
+  width:100%; background:#fff; color:#374151; border:1px solid #e5e7eb;
+  border-radius:10px; padding:11px; font-size:14px; font-weight:500;
+  cursor:pointer; font-family:inherit; transition:background .15s;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+}
+.auth-google:hover { background:#f9fafb; }
+
+.auth-err {
+  background:#fee2e2; border:1px solid #fca5a5; border-radius:8px;
+  padding:9px 12px; font-size:13px; color:#dc2626; margin-bottom:12px; display:none;
+}
+.auth-err.show { display:block; }
+
+/* user dropdown */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 200;
+  display: none;
+}
+.user-dropdown.open { display: block; }
+.dropdown-item {
+  padding: 11px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text);
+  text-decoration: none;
+}
+.dropdown-item:hover { background: #f9fafb; }
+.dropdown-item.red { color: var(--red); }
+.user-chip-wrap { position: relative; }
+
 /* ── SKELETON ── */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -375,8 +534,63 @@ body {
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="search-input" placeholder="Поиск товаров...">
     </div>
+    <div id="auth-area"></div>
   </div>
 </header>
+
+<!-- Auth popup -->
+<div class="auth-overlay" id="auth-overlay" onclick="if(event.target===this)closeAuth()">
+  <div class="auth-modal">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="auth-logo">Lunary <span>OS</span></div>
+    <div class="auth-sub">Войдите чтобы делать заказы</div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="at-login" onclick="switchAuthTab('login')">Войти</div>
+      <div class="auth-tab" id="at-reg" onclick="switchAuthTab('reg')">Регистрация</div>
+    </div>
+
+    <div id="auth-err" class="auth-err"></div>
+
+    <!-- Войти -->
+    <div id="auth-form-login">
+      <label class="auth-label">Email</label>
+      <div class="auth-input-wrap">
+        <input class="auth-input" id="a-email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <label class="auth-label">Пароль</label>
+      <div class="auth-input-wrap">
+        <input class="auth-input" id="a-pwd" type="password" placeholder="Пароль" onkeydown="if(event.key==='Enter')doAuthLogin()">
+        <button class="auth-eye" type="button" onclick="toggleAuthEye('a-pwd',this)">👁</button>
+      </div>
+      <button class="auth-btn" id="a-btn-login" onclick="doAuthLogin()">Войти</button>
+    </div>
+
+    <!-- Регистрация -->
+    <div id="auth-form-reg" style="display:none">
+      <label class="auth-label">Имя</label>
+      <div class="auth-input-wrap">
+        <input class="auth-input" id="a-name" type="text" placeholder="Ваше имя" autocomplete="name">
+      </div>
+      <label class="auth-label">Email</label>
+      <div class="auth-input-wrap">
+        <input class="auth-input" id="a-reg-email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <label class="auth-label">Пароль</label>
+      <div class="auth-input-wrap">
+        <input class="auth-input" id="a-reg-pwd" type="password" placeholder="Минимум 6 символов" onkeydown="if(event.key==='Enter')doAuthRegister()">
+        <button class="auth-eye" type="button" onclick="toggleAuthEye('a-reg-pwd',this)">👁</button>
+      </div>
+      <button class="auth-btn" id="a-btn-reg" onclick="doAuthRegister()">Создать аккаунт</button>
+    </div>
+
+    <div class="auth-divider">или</div>
+    <button class="auth-google" onclick="location.href='/auth/google'">
+      <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Войти через Google
+    </button>
+  </div>
+</div>
 
 <!-- Mobile category pills -->
 <div class="mobile-filters" id="mobile-cats"></div>
@@ -584,6 +798,136 @@ document.getElementById('search-input').addEventListener('input', e => {
   searchTimer = setTimeout(() => { searchQuery = e.target.value.trim(); currentPage = 1; render(); }, 250);
 });
 
+// ── Auth ──────────────────────────────────────────────────────
+let currentUser = null;
+
+async function checkAuth() {
+  try {
+    const res = await fetch('/api/auth/me');
+    if (res.ok) currentUser = await res.json();
+  } catch {}
+  renderAuthArea();
+}
+
+function renderAuthArea() {
+  const area = document.getElementById('auth-area');
+  if (!currentUser) {
+    area.innerHTML = `<button class="btn-auth" onclick="openAuth()">Войти</button>`;
+    return;
+  }
+  const initial = (currentUser.name || currentUser.email || '?')[0].toUpperCase();
+  const adminBtn = currentUser.role === 'admin'
+    ? `<a class="admin-badge" href="/admin">Админ панель</a>` : '';
+  area.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px">
+      ${adminBtn}
+      <div class="user-chip-wrap">
+        <div class="user-chip" onclick="toggleDropdown()">
+          <div class="user-avatar">${currentUser.avatar
+            ? `<img src="${currentUser.avatar}" referrerpolicy="no-referrer">`
+            : initial}</div>
+          ${currentUser.name || currentUser.email}
+        </div>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="dropdown-item red" onclick="doLogout()">🚪 Выйти</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleDropdown() {
+  document.getElementById('user-dropdown')?.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-chip-wrap')) {
+    document.getElementById('user-dropdown')?.classList.remove('open');
+  }
+});
+
+async function doLogout() {
+  await fetch('/api/auth/logout', {method: 'POST'});
+  currentUser = null;
+  renderAuthArea();
+}
+
+function openAuth() {
+  document.getElementById('auth-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('a-email').focus(), 100);
+}
+function closeAuth() {
+  document.getElementById('auth-overlay').classList.remove('open');
+  document.getElementById('auth-err').classList.remove('show');
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('at-login').classList.toggle('active', tab === 'login');
+  document.getElementById('at-reg').classList.toggle('active', tab === 'reg');
+  document.getElementById('auth-form-login').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('auth-form-reg').style.display = tab === 'reg' ? '' : 'none';
+  document.getElementById('auth-err').classList.remove('show');
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('auth-err');
+  el.textContent = msg; el.classList.add('show');
+}
+
+async function doAuthLogin() {
+  const email = document.getElementById('a-email').value.trim();
+  const pwd = document.getElementById('a-pwd').value;
+  if (!email || !pwd) { showAuthErr('Заполните все поля'); return; }
+  const btn = document.getElementById('a-btn-login');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/email-login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pwd})
+    });
+    if (res.ok) {
+      currentUser = await res.json();
+      closeAuth();
+      renderAuthArea();
+      if (currentUser.role === 'admin') location.href = '/admin';
+    } else {
+      const e = await res.json();
+      showAuthErr(e.detail || 'Неверный email или пароль');
+    }
+  } catch { showAuthErr('Ошибка сети'); }
+  btn.textContent = 'Войти'; btn.disabled = false;
+}
+
+async function doAuthRegister() {
+  const name = document.getElementById('a-name').value.trim();
+  const email = document.getElementById('a-reg-email').value.trim();
+  const pwd = document.getElementById('a-reg-pwd').value;
+  if (!name || !email || !pwd) { showAuthErr('Заполните все поля'); return; }
+  if (pwd.length < 6) { showAuthErr('Пароль минимум 6 символов'); return; }
+  const btn = document.getElementById('a-btn-reg');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password: pwd})
+    });
+    if (res.ok) {
+      currentUser = await res.json();
+      closeAuth();
+      renderAuthArea();
+    } else {
+      const e = await res.json();
+      showAuthErr(e.detail || 'Ошибка регистрации');
+    }
+  } catch { showAuthErr('Ошибка сети'); }
+  btn.textContent = 'Создать аккаунт'; btn.disabled = false;
+}
+
+function toggleAuthEye(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+checkAuth();
 load();
 </script>
 </body>

@@ -837,8 +837,13 @@ def low_stock(db: Session = Depends(get_db)):
 
 # ─── Публичный магазин ───────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
-def store_page():
-    with open("static/store.html") as f:
+def root_page():
+    return RedirectResponse("/shop", status_code=302)
+
+
+@app.get("/shop", response_class=HTMLResponse)
+def shop_page():
+    with open("static/store.html", encoding="utf-8") as f:
         return f.read()
 
 

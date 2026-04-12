@@ -119,10 +119,11 @@ body {
   border-bottom: 1px solid var(--border);
   align-items: center;
   justify-content: space-between;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
-  width: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
   box-sizing: border-box;
 }
 .mobile-logo { font-size: 18px; font-weight: 800; }
@@ -213,7 +214,7 @@ body {
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .sidebar { display: none !important; }
-  .main-content { margin-left: 0 !important; }
+  .main-content { margin-left: 0 !important; padding-top: 62px !important; }
   .mobile-header { display: flex !important; }
   .bottom-nav { display: none !important; }
   .page-container { padding: 12px 12px 32px !important; }

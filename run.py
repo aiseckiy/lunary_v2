@@ -38,8 +38,9 @@ if __name__ == "__main__":
     print("✅ API запущен на порту 8000")
 
     # Дать старому боту время завершиться перед запуском нового
+    # Railway rolling deploy: оба контейнера работают ~30 сек одновременно
     import time
-    time.sleep(5)
+    time.sleep(30)
 
     print("🤖 Запуск Telegram бота...")
     run_bot()

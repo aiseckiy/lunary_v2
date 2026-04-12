@@ -206,18 +206,18 @@ def _start_kaspi_sync_loop():
 
     STATES = ["NEW", "APPROVED", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
 
-    _entries_fetched_this_cycle = [0]  # счётчик запросов за один цикл
-    MAX_ENTRIES_PER_CYCLE = 10        # не более 10 заказов за один прогон
+    _backfill_fetched_this_cycle = [0]  # только для дозагрузки старых заказов
+    MAX_BACKFILL_PER_CYCLE = 30         # не более 30 старых заказов за цикл
 
-    def _fetch_entries(oid):
-        """Загружает состав заказа, возвращает список или [].
-        Не более MAX_ENTRIES_PER_CYCLE запросов за один цикл синхронизации."""
-        if _entries_fetched_this_cycle[0] >= MAX_ENTRIES_PER_CYCLE:
+    def _fetch_entries(oid, is_new=False):
+        """Загружает состав заказа. Новые заказы — всегда, старые — до 30 за цикл."""
+        if not is_new and _backfill_fetched_this_cycle[0] >= MAX_BACKFILL_PER_CYCLE:
             return []
         try:
             result = kaspi_module.get_order_entries(oid) or []
-            _entries_fetched_this_cycle[0] += 1
-            time.sleep(0.3)  # небольшая пауза между запросами
+            if not is_new:
+                _backfill_fetched_this_cycle[0] += 1
+                time.sleep(0.2)
             return result
         except Exception:
             return []
@@ -258,7 +258,7 @@ def _start_kaspi_sync_loop():
                 returns_count = 0
                 deducted_count = 0
                 new_orders = []
-                _entries_fetched_this_cycle[0] = 0  # сброс счётчика
+                _backfill_fetched_this_cycle[0] = 0  # сброс счётчика
 
                 for o in all_orders:
                     raw_date = o.get("date", "")
@@ -307,15 +307,15 @@ def _start_kaspi_sync_loop():
                         if new_state == "ARCHIVE" and old_state != "ARCHIVE" and not existing.status_date:
                             existing.status_date = datetime.now(tz=tz_kz).strftime("%d.%m.%Y")
 
-                        # Грузим состав если пустой
+                        # Грузим состав если пустой (ограничен лимитом)
                         if not existing.entries or existing.entries in ("[]", ""):
-                            entries = _fetch_entries(oid)
+                            entries = _fetch_entries(oid, is_new=False)
                             if entries:
                                 _update_entries_fields(existing, entries)
                                 o["entries"] = entries
                     else:
-                        # Новый заказ — грузим состав сразу
-                        entries = _fetch_entries(oid)
+                        # Новый заказ — грузим состав всегда без лимита
+                        entries = _fetch_entries(oid, is_new=True)
                         product_name, sku, quantity = None, None, None
                         if entries:
                             product_name = entries[0].get("name")
@@ -1361,25 +1361,11 @@ def _format_order_notification(o: dict) -> str:
         except Exception:
             pass
 
-    phone_raw = o.get("phone", "").strip()
-    # Приводим к формату 7XXXXXXXXXX для WhatsApp
-    # Пропускаем фиктивные номера типа +0(000)-000-00-00 (Kaspi маскирует телефоны)
-    phone_wa = ""
-    if phone_raw:
-        digits = "".join(c for c in phone_raw if c.isdigit())
-        if digits.startswith("8") and len(digits) == 11:
-            digits = "7" + digits[1:]
-        # Валидный казахстанский номер: 11 цифр начиная с 7
-        if len(digits) == 11 and digits.startswith("7") and not digits.startswith("70000"):
-            phone_wa = digits
-
     lines = [
         f"<b>{label}</b>",
         f"🛒 Заказ <b>#{code}</b>",
         f"👤 {customer}",
     ]
-    if phone_wa:
-        lines.append(f"📞 <a href='https://wa.me/{phone_wa}'>{phone_raw}</a>")
     if delivery_mode:
         lines.append(f"📦 {delivery_mode}")
     if addr_str:

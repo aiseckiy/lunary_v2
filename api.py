@@ -15,7 +15,7 @@ from datetime import datetime
 
 
 def _parse_order_date(date_str) -> datetime | None:
-    """Парсит дату заказа из dd.mm.yyyy или Unix ms timestamp"""
+    """Парсит дату заказа из dd.mm.yyyy или Unix ms timestamp (UTC+5 Казахстан)"""
     if not date_str:
         return None
     s = str(date_str).strip()
@@ -25,7 +25,10 @@ def _parse_order_date(date_str) -> datetime | None:
         ts = int(float(s))
         if ts > 1_000_000_000_000:
             ts //= 1000
-        return datetime.fromtimestamp(ts)
+        # Kaspi хранит время в UTC, добавляем +5 часов для Казахстана
+        from datetime import timezone, timedelta
+        tz_kz = timezone(timedelta(hours=5))
+        return datetime.fromtimestamp(ts, tz=tz_kz).replace(tzinfo=None)
     except Exception:
         return None
 
@@ -1384,12 +1387,17 @@ def analytics_revenue(
         [r for r in all_rows if r.state in COMPLETED], date_from, date_to
     )
 
+    # Если выбран один день — показываем по часам
+    single_day = date_from and date_to and date_from == date_to
+
     by_period: dict = defaultdict(lambda: {"revenue": 0, "orders": 0})
     for r in rows:
         d = _parse_order_date(r.order_date)
         if not d:
             continue
-        if period == "day":
+        if single_day:
+            key = d.strftime("%Y-%m-%d %H:00")
+        elif period == "day":
             key = d.strftime("%Y-%m-%d")
         elif period == "week":
             key = d.strftime("%Y-W%W")

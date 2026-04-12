@@ -10,26 +10,38 @@
 .users-table th { text-align:left; padding:10px 12px; font-size:12px; color:var(--text3); border-bottom:2px solid var(--border); font-weight:600; }
 .users-table td { padding:12px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle; }
 .users-table tr:last-child td { border-bottom:none; }
-.role-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.role-admin { background:#ede9fe; color:#6366f1; }
-.role-customer { background:#f3f4f6; color:#6b7280; }
 .avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; }
 .avatar-placeholder { width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
 .role-select { border:1px solid var(--border); border-radius:8px; padding:5px 8px; font-size:13px; background:var(--bg); color:var(--text); cursor:pointer; }
+
+.section-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-top:20px; }
+.section-title { font-size:16px; font-weight:700; margin-bottom:4px; }
+.section-sub { font-size:13px; color:var(--text3); margin-bottom:20px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.form-field label { font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; display:block; }
+.form-field input { width:100%; background:#f9fafb; border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px; color:var(--text); outline:none; font-family:inherit; transition:border-color .15s; }
+.form-field input:focus { border-color:var(--accent); background:#fff; }
+.btn-save { background:var(--accent); color:#fff; border:none; border-radius:10px; padding:10px 24px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-save:hover { background:#4f46e5; }
+.msg { font-size:13px; margin-top:10px; display:none; }
+.msg.ok { color:#16a34a; }
+.msg.err { color:#ef4444; }
+@media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <div class="sidebar-logo">Lunary <span>OS</span></div>
-  <nav class="sidebar-nav">
-    <a class="nav-item" href="/">📦 Склад</a>
-    <a class="nav-item" href="/admin/kaspi">🛍 Kaspi</a>
-    <a class="nav-item" href="/admin/analytics">📊 Аналитика</a>
-    <a class="nav-item" href="/admin/history">📋 История</a>
-    <a class="nav-item" href="/admin/scanner">📷 Сканер</a>
-    <a class="nav-item" href="/admin/shop-orders">🛍️ Заказы <span id="orders-badge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span></a>
-    <a class="nav-item active" href="/admin/settings">⚙️ Настройки</a>
-  </nav>
+  <div class="sidebar-section">Склад</div>
+  <a class="nav-link" href="/admin">🏠 Товары</a>
+  <a class="nav-link" href="/admin/scanner">📷 Сканер</a>
+  <a class="nav-link" href="/admin/history">📋 История</a>
+  <a class="nav-link" href="/admin/analytics">📊 Аналитика</a>
+  <a class="nav-link" href="/admin/kaspi">🛒 Kaspi</a>
+  <a class="nav-link" href="/admin/shop-orders">🛍️ Заказы <span id="orders-badge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span></a>
+  <a class="nav-link active" href="/admin/settings">⚙️ Настройки</a>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">Lunary OS v2</div>
 </aside>
 
 <div class="mobile-header">
@@ -40,14 +52,51 @@
 <div class="main-content">
   <div class="page-container">
     <div class="page-title">⚙️ Настройки</div>
-    <div class="page-sub">Управление пользователями и доступом</div>
+    <div class="page-sub">Профиль и управление пользователями</div>
 
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:20px">
+    <!-- Профиль -->
+    <div class="section-card">
+      <div class="section-title">Мой профиль</div>
+      <div class="section-sub">Измени имя, телефон или пароль</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Имя</label>
+          <input type="text" id="p-name" placeholder="Ваше имя">
+        </div>
+        <div class="form-field">
+          <label>Телефон</label>
+          <input type="tel" id="p-phone" placeholder="+7 (___) ___-__-__">
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveProfile()">Сохранить</button>
+      <div class="msg" id="profile-msg"></div>
+    </div>
+
+    <!-- Смена пароля -->
+    <div class="section-card">
+      <div class="section-title">Сменить пароль</div>
+      <div class="section-sub">Оставь пустым если не хочешь менять</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Новый пароль</label>
+          <input type="password" id="p-pwd" placeholder="Минимум 6 символов">
+        </div>
+        <div class="form-field">
+          <label>Повтор пароля</label>
+          <input type="password" id="p-pwd2" placeholder="Повторите пароль">
+        </div>
+      </div>
+      <button class="btn-save" onclick="savePassword()">Изменить пароль</button>
+      <div class="msg" id="pwd-msg"></div>
+    </div>
+
+    <!-- Пользователи -->
+    <div class="section-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <div style="font-size:16px;font-weight:700">Пользователи</div>
+        <div class="section-title" style="margin-bottom:0">Пользователи</div>
         <div style="font-size:13px;color:var(--text3)" id="users-count"></div>
       </div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Пользователи которые вошли через Google. Назначь роль <b>admin</b> чтобы дать доступ к админ панели.</div>
+      <div class="section-sub">Назначь роль <b>admin</b> чтобы дать доступ к админ панели</div>
 
       <div id="users-loading" style="text-align:center;padding:40px;color:var(--text3)">Загрузка...</div>
       <table class="users-table" id="users-table" style="display:none">
@@ -57,7 +106,7 @@
             <th>Пользователь</th>
             <th>Email</th>
             <th>Роль</th>
-            <th>Дата входа</th>
+            <th>Дата</th>
           </tr>
         </thead>
         <tbody id="users-tbody"></tbody>
@@ -68,15 +117,50 @@
 
 <script src="/static/mobile.js"></script>
 <script>
-async function load() {
+async function loadProfile() {
+  const res = await fetch('/api/auth/me');
+  if (!res.ok) return;
+  const u = await res.json();
+  if (u.name) document.getElementById('p-name').value = u.name;
+  if (u.phone) document.getElementById('p-phone').value = u.phone;
+}
+
+async function saveProfile() {
+  const name = document.getElementById('p-name').value.trim();
+  const phone = document.getElementById('p-phone').value.trim();
+  const msg = document.getElementById('profile-msg');
+  const res = await fetch('/api/auth/profile', {
+    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({name, phone})
+  });
+  msg.style.display = 'block';
+  if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Сохранено'; }
+  else { msg.className = 'msg err'; msg.textContent = 'Ошибка сохранения'; }
+}
+
+async function savePassword() {
+  const pwd = document.getElementById('p-pwd').value;
+  const pwd2 = document.getElementById('p-pwd2').value;
+  const msg = document.getElementById('pwd-msg');
+  msg.style.display = 'block';
+  if (!pwd) { msg.className = 'msg err'; msg.textContent = 'Введите пароль'; return; }
+  if (pwd.length < 6) { msg.className = 'msg err'; msg.textContent = 'Минимум 6 символов'; return; }
+  if (pwd !== pwd2) { msg.className = 'msg err'; msg.textContent = 'Пароли не совпадают'; return; }
+  const res = await fetch('/api/auth/profile', {
+    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({password: pwd})
+  });
+  if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Пароль изменён'; document.getElementById('p-pwd').value = ''; document.getElementById('p-pwd2').value = ''; }
+  else { msg.className = 'msg err'; msg.textContent = 'Ошибка'; }
+}
+
+async function loadUsers() {
   const res = await fetch('/api/admin/users');
   if (!res.ok) { document.getElementById('users-loading').textContent = 'Ошибка загрузки'; return; }
   const users = await res.json();
-
   document.getElementById('users-count').textContent = `${users.length} пользователей`;
   document.getElementById('users-loading').style.display = 'none';
   document.getElementById('users-table').style.display = 'table';
-
   document.getElementById('users-tbody').innerHTML = users.map(u => `
     <tr>
       <td>${u.avatar
@@ -98,14 +182,14 @@ async function load() {
 
 async function setRole(id, role) {
   const res = await fetch(`/api/admin/users/${id}`, {
-    method: 'PATCH',
-    headers: {'Content-Type': 'application/json'},
+    method: 'PATCH', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({role})
   });
   if (!res.ok) alert('Ошибка сохранения');
 }
 
-load();
+loadProfile();
+loadUsers();
 </script>
 </body>
 </html>

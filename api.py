@@ -519,6 +519,28 @@ def auth_me(request: Request):
     return user
 
 
+@app.patch("/api/auth/profile")
+def update_profile(data: dict, request: Request, db: Session = Depends(get_db)):
+    import hashlib
+    from database import User as UserModel
+    user = _get_user_from_session(request)
+    if not user or not user.get("id"):
+        raise HTTPException(status_code=401)
+    u = db.query(UserModel).filter(UserModel.id == user["id"]).first()
+    if not u:
+        raise HTTPException(status_code=404)
+    if "name" in data and data["name"]:
+        u.name = data["name"].strip()
+    if "phone" in data:
+        u.phone = data["phone"].strip()
+    if "password" in data and data["password"]:
+        if len(data["password"]) < 6:
+            raise HTTPException(status_code=400, detail="Минимум 6 символов")
+        u.password_hash = hashlib.sha256(data["password"].encode()).hexdigest()
+    db.commit()
+    return {"ok": True}
+
+
 # ─── Users management ────────────────────────────────────────
 @app.get("/api/admin/users")
 def list_users(request: Request, db: Session = Depends(get_db)):

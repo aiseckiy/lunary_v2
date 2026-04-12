@@ -905,13 +905,19 @@ function buildFilters() {
     mobileCats.innerHTML += `<div class="mobile-pill" data-cat="${name}" onclick="setCategory('${name}')">${name}</div>`;
   });
 
-  // Brands
-  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))].sort();
+  // Brands — нормализуем регистр (первая буква заглавная, остальные как есть)
+  const brandNorm = new Map(); // lowercase → красивое название (первое встреченное)
+  allProducts.forEach(p => {
+    if (!p.brand) return;
+    const key = p.brand.toLowerCase();
+    if (!brandNorm.has(key)) brandNorm.set(key, p.brand);
+  });
+  const brands = [...brandNorm.keys()].sort((a,b) => a.localeCompare(b, 'ru'));
   const brandList = document.getElementById('brand-list');
-  brandList.innerHTML = brands.map(b => `
+  brandList.innerHTML = brands.map(key => `
     <label class="brand-check">
-      <input type="checkbox" value="${b}" onchange="toggleBrand('${b}', this.checked)">
-      ${b}
+      <input type="checkbox" value="${key}" onchange="toggleBrand('${key}', this.checked)">
+      ${brandNorm.get(key)}
     </label>
   `).join('');
 }
@@ -935,7 +941,7 @@ function toggleBrand(brand, checked) {
 function filtered() {
   let list = allProducts;
   if (activeCategory !== 'all') list = list.filter(p => (p.category || 'Другое') === activeCategory);
-  if (activeBrands.size) list = list.filter(p => activeBrands.has(p.brand));
+  if (activeBrands.size) list = list.filter(p => activeBrands.has((p.brand||'').toLowerCase()));
   if (priceMin !== null) list = list.filter(p => p.price && p.price >= priceMin);
   if (priceMax !== null) list = list.filter(p => p.price && p.price <= priceMax);
   if (searchQuery) {

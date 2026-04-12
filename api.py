@@ -249,6 +249,7 @@ def _start_kaspi_sync_loop():
 
     def sync():
         while True:
+            cycle_start = time.monotonic()
             db = SL()
             try:
                 from database import SyncLog
@@ -395,7 +396,9 @@ def _start_kaspi_sync_loop():
                     pass
             finally:
                 db.close()
-            time.sleep(300)  # каждые 5 минут
+            # Ждём ровно 5 минут от начала цикла (не от конца)
+            elapsed = time.monotonic() - cycle_start
+            time.sleep(max(0, 300 - elapsed))
 
     t = threading.Thread(target=sync, daemon=True)
     t.start()

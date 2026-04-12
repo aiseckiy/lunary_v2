@@ -229,13 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
   loadOrders();
 });
 
-const ACTIVE_STATES = new Set(['NEW','ACCEPTED','DELIVERY','KASPI_DELIVERY','PICKUP','SIGN_REQUIRED']);
-const DONE_STATES   = new Set(['ARCHIVE','COMPLETED']);
+const ACTIVE_STATES    = new Set(['NEW','ACCEPTED','DELIVERY','KASPI_DELIVERY','PICKUP','SIGN_REQUIRED']);
+const DONE_STATES      = new Set(['ARCHIVE','COMPLETED','Выдан']);
+const CANCELLED_STATES = new Set(['CANCELLED','RETURN','Отменен','Возврат']);
 
 function orderCardClass(state) {
-  if (ACTIVE_STATES.has(state)) return 'order-active';
-  if (DONE_STATES.has(state))   return 'order-done';
-  return 'order-cancelled'; // CANCELLED, RETURN
+  if (ACTIVE_STATES.has(state))    return 'order-active';
+  if (DONE_STATES.has(state))      return 'order-done';
+  if (CANCELLED_STATES.has(state)) return 'order-cancelled';
+  return 'order-done'; // неизвестный статус — серый
 }
 
 const STATE_LABELS = {

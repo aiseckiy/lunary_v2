@@ -128,7 +128,7 @@
   <div id="stats-row" class="stats-row"></div>
 
   <div style="margin-bottom:16px;">
-    <button class="ppill" id="dp-trigger" style="display:inline-flex;align-items:center;gap:6px;">📅 Последние 30 дней</button>
+    <button class="ppill" id="dp-trigger" style="display:inline-flex;align-items:center;gap:6px;">📅 Сегодня</button>
   </div>
 
   <div class="status-tabs" id="status-tabs">
@@ -185,9 +185,8 @@ let dp;
 
 document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
-  const fmt = d => d.toISOString().slice(0,10);
-  const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
-  dateFrom = fmt(d30);
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  dateFrom = fmt(now);
   dateTo = fmt(now);
 
   dp = new DateRangePicker({

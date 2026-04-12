@@ -2499,7 +2499,8 @@ def get_changelog(request: Request):
     if not user:
         raise HTTPException(status_code=403)
     try:
-        with open("static/changelog.json", encoding="utf-8") as f:
+        path = os.path.join(os.path.dirname(__file__), "static", "changelog.json")
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return []

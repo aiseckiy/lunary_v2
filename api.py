@@ -1673,7 +1673,13 @@ def get_kaspi_order_entries(order_id: str, db: Session = Depends(get_db)):
     if order.entries and order.entries not in ("[]", ""):
         return {"entries": json.loads(order.entries)}
     # Загрузить из Kaspi API
-    entries = kaspi_module.get_order_entries(order_id)
+    print(f"[entries] загружаем состав для order_id={order_id}", flush=True)
+    try:
+        entries = kaspi_module.get_order_entries(order_id)
+        print(f"[entries] получено {len(entries) if entries else 0} позиций для {order_id}", flush=True)
+    except Exception as e:
+        print(f"[entries] ОШИБКА для {order_id}: {e}", flush=True)
+        entries = []
     if entries:
         order.entries = json.dumps(entries, ensure_ascii=False)
         if not order.product_name:

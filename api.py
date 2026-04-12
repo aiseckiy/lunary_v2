@@ -14,6 +14,22 @@ from datetime import datetime
 
 
 
+def _decode_kaspi_order_id(raw_id: str) -> str:
+    """Kaspi API возвращает order_id в base64. Декодируем в числовой ID."""
+    import base64
+    s = str(raw_id).strip()
+    # Если уже числовой — оставляем как есть
+    if s.isdigit():
+        return s
+    try:
+        decoded = base64.b64decode(s + "==").decode("utf-8")
+        if decoded.isdigit():
+            return decoded
+    except Exception:
+        pass
+    return s
+
+
 def _parse_order_date(date_str) -> datetime | None:
     """Парсит дату заказа из dd.mm.yyyy или Unix ms timestamp (UTC+5 Казахстан)"""
     if not date_str:
@@ -211,7 +227,8 @@ def _start_kaspi_sync_loop():
                     except Exception:
                         order_date = str(raw_date)
 
-                    existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+                    oid = _decode_kaspi_order_id(o["id"])
+                    existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
                     if existing:
                         old_state = existing.state
                         new_state = o.get("state", existing.state)
@@ -234,7 +251,7 @@ def _start_kaspi_sync_loop():
                             existing.address = addr.get("formattedAddress", existing.address) if isinstance(addr, dict) else str(addr)
                     else:
                         # Загружаем состав заказа
-                        entries = kaspi_module.get_order_entries(str(o["id"]))
+                        entries = kaspi_module.get_order_entries(oid)
                         o["entries"] = entries
                         # Берём имя товара и SKU из первого entry
                         product_name, sku, quantity = None, None, None
@@ -245,7 +262,7 @@ def _start_kaspi_sync_loop():
                         addr_obj = o.get("deliveryAddress")
                         address = addr_obj.get("formattedAddress", "") if isinstance(addr_obj, dict) else str(addr_obj or "")
                         db.add(KaspiOrder(
-                            order_id=str(o["id"]),
+                            order_id=oid,
                             state=o.get("state", ""),
                             total=int(o.get("total", 0)),
                             customer=o.get("customer", ""),
@@ -1268,7 +1285,8 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
     deducted_total = 0
     new_orders = []
     for o in orders:
-        existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == str(o["id"])).first()
+        oid = _decode_kaspi_order_id(o["id"])
+        existing = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
         new_state = o.get("state", "")
         if existing:
             old_state = existing.state
@@ -1285,7 +1303,7 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
                 existing.stock_deducted = 0
         else:
             ko = KaspiOrder(
-                order_id=str(o["id"]),
+                order_id=oid,
                 state=new_state,
                 total=int(o.get("total", 0)),
                 customer=o.get("customer", ""),

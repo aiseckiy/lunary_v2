@@ -358,11 +358,10 @@ def _start_kaspi_sync_loop():
                     deducted=deducted_count,
                 ))
                 db.commit()
-                # Оставляем только последние 1000 записей лога
-                keep_ids = [r.id for r in db.query(SyncLog.id).order_by(SyncLog.id.desc()).limit(1000).all()]
-                if keep_ids:
-                    db.query(SyncLog).filter(SyncLog.id < keep_ids[-1]).delete(synchronize_session=False)
-                    db.commit()
+                # Удаляем записи старше 1 дня
+                cutoff = datetime.utcnow() - timedelta(days=1)
+                db.query(SyncLog).filter(SyncLog.synced_at < cutoff).delete(synchronize_session=False)
+                db.commit()
 
                 notify_states = {"NEW", "PICKUP", "KASPI_DELIVERY", "DELIVERY"}
                 for o in new_orders:

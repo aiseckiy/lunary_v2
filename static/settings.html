@@ -116,13 +116,27 @@
 <script src="/static/nav.js"></script>
 <script src="/static/mobile.js"></script>
 <script>
+function formatPhone(val) {
+  const digits = val.replace(/\D/g, '').replace(/^7?/, '').slice(0, 10);
+  let r = '+7';
+  if (digits.length > 0) r += ' ' + digits.slice(0, 3);
+  if (digits.length > 3) r += ' ' + digits.slice(3, 6);
+  if (digits.length > 6) r += ' ' + digits.slice(6, 8);
+  if (digits.length > 8) r += ' ' + digits.slice(8, 10);
+  return r;
+}
 function initPhoneInput(id) {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('focus', () => { if (!el.value) el.value = '+7 '; });
   el.addEventListener('input', () => {
-    if (!el.value.startsWith('+7')) el.value = '+7 ' + el.value.replace(/^\+7\s?/, '');
+    const pos = el.selectionStart;
+    el.value = formatPhone(el.value);
   });
+}
+function applyPhoneFormat(id, val) {
+  const el = document.getElementById(id);
+  if (el && val) el.value = formatPhone(val);
 }
 
 async function loadProfile() {
@@ -130,8 +144,8 @@ async function loadProfile() {
   if (!res.ok) return;
   const u = await res.json();
   if (u.name) document.getElementById('p-name').value = u.name;
-  if (u.phone) document.getElementById('p-phone').value = u.phone;
-  else initPhoneInput('p-phone');
+  if (u.phone) applyPhoneFormat('p-phone', u.phone);
+  initPhoneInput('p-phone');
 }
 initPhoneInput('p-phone');
 

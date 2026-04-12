@@ -783,7 +783,7 @@ body {
         </div>
         <div class="form-field">
           <label>Телефон</label>
-          <input type="tel" id="co-phone" placeholder="+7 (___) ___-__-__" onfocus="if(!this.value)this.value='+7 '" oninput="if(!this.value.startsWith('+7'))this.value='+7 '+this.value.replace(/^\+7\s?/,'')">
+          <input type="tel" id="co-phone" placeholder="+7 ___ ___ __ __">
         </div>
         <div class="form-field">
           <label>Адрес доставки (необязательно)</label>
@@ -1246,6 +1246,16 @@ function toggleAuthEye(id, btn) {
   btn.textContent = inp.type === 'password' ? '👁' : '🙈';
 }
 
+function formatPhone(val) {
+  const digits = val.replace(/\D/g, '').replace(/^7?/, '').slice(0, 10);
+  let r = '+7';
+  if (digits.length > 0) r += ' ' + digits.slice(0, 3);
+  if (digits.length > 3) r += ' ' + digits.slice(3, 6);
+  if (digits.length > 6) r += ' ' + digits.slice(6, 8);
+  if (digits.length > 8) r += ' ' + digits.slice(8, 10);
+  return r;
+}
+
 // ── Cart ──────────────────────────────────────────────────────
 let cart = {}; // {id: {name, price, qty}}
 
@@ -1338,7 +1348,10 @@ function showCheckout() {
   form.classList.toggle('show');
   if (form.classList.contains('show')) {
     if (currentUser.name) document.getElementById('co-name').value = currentUser.name;
-    if (currentUser.phone) document.getElementById('co-phone').value = currentUser.phone;
+    if (currentUser.phone) document.getElementById('co-phone').value = formatPhone(currentUser.phone);
+    const ph = document.getElementById('co-phone');
+    ph.onfocus = () => { if (!ph.value) ph.value = '+7 '; };
+    ph.oninput = () => { const s = ph.selectionStart; ph.value = formatPhone(ph.value); };
     document.getElementById('btn-to-checkout').textContent = 'Свернуть';
   } else {
     document.getElementById('btn-to-checkout').textContent = 'Оформить заказ';

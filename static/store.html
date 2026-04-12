@@ -783,7 +783,7 @@ body {
         </div>
         <div class="form-field">
           <label>Телефон</label>
-          <input type="tel" id="co-phone" placeholder="+7 (___) ___-__-__">
+          <input type="tel" id="co-phone" placeholder="+7 (___) ___-__-__" onfocus="if(!this.value)this.value='+7 '" oninput="if(!this.value.startsWith('+7'))this.value='+7 '+this.value.replace(/^\+7\s?/,'')">
         </div>
         <div class="form-field">
           <label>Адрес доставки (необязательно)</label>

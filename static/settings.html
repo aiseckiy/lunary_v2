@@ -116,13 +116,24 @@
 <script src="/static/nav.js"></script>
 <script src="/static/mobile.js"></script>
 <script>
+function initPhoneInput(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('focus', () => { if (!el.value) el.value = '+7 '; });
+  el.addEventListener('input', () => {
+    if (!el.value.startsWith('+7')) el.value = '+7 ' + el.value.replace(/^\+7\s?/, '');
+  });
+}
+
 async function loadProfile() {
   const res = await fetch('/api/auth/me');
   if (!res.ok) return;
   const u = await res.json();
   if (u.name) document.getElementById('p-name').value = u.name;
   if (u.phone) document.getElementById('p-phone').value = u.phone;
+  else initPhoneInput('p-phone');
 }
+initPhoneInput('p-phone');
 
 async function saveProfile() {
   const name = document.getElementById('p-name').value.trim();

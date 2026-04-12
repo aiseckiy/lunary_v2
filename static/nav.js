@@ -1,0 +1,65 @@
+/**
+ * nav.js — единая боковая и нижняя навигация для всех страниц.
+ * Подключить: <script src="/static/nav.js"></script>
+ * Сайдбар рендерится в #sidebar, нижняя панель — в #bottom-nav.
+ */
+(function () {
+  const path = window.location.pathname;
+
+  const LINKS = [
+    { href: '/admin',            icon: '🏠', label: 'Склад' },
+    { href: '/admin/scanner',    icon: '📷', label: 'Сканер' },
+    { href: '/admin/history',    icon: '📋', label: 'История' },
+    { href: '/admin/analytics',  icon: '📊', label: 'Аналитика' },
+    { href: '/admin/kaspi',      icon: '🛒', label: 'Kaspi' },
+    { href: '/admin/shop-orders',icon: '🛍️', label: 'Заказы', badge: 'orders-badge' },
+    { href: '/admin/settings',   icon: '⚙️', label: 'Настройки' },
+    { href: '/shop',             icon: '🏪', label: 'Магазин' },
+  ];
+
+  // Определяем активную ссылку: точное совпадение или начало пути
+  function isActive(href) {
+    if (href === '/admin') return path === '/admin';
+    return path.startsWith(href);
+  }
+
+  // ── Сайдбар ──────────────────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.innerHTML = `
+      <div class="sidebar-logo">Lunary <span>OS</span></div>
+      <div class="sidebar-section">Меню</div>
+      ${LINKS.map(l => {
+        const active = isActive(l.href) ? ' active' : '';
+        const badgeHtml = l.badge
+          ? `<span id="${l.badge}" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span>`
+          : '';
+        return `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
+      }).join('\n      ')}
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-footer">Lunary OS v2</div>
+    `;
+  }
+
+  // ── Нижняя панель (мобильная) ─────────────────────────────────
+  // Показываем 5 основных + Магазин
+  const BNAV_LINKS = [
+    { href: '/admin',            icon: '🏠', label: 'Склад' },
+    { href: '/admin/scanner',    icon: '📷', label: 'Сканер' },
+    { href: '/admin/history',    icon: '📋', label: 'История' },
+    { href: '/admin/kaspi',      icon: '🛒', label: 'Kaspi' },
+    { href: '/admin/shop-orders',icon: '🛍️', label: 'Заказы' },
+    { href: '/shop',             icon: '🏪', label: 'Магазин' },
+  ];
+
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) {
+    bottomNav.className = 'bottom-nav';
+    bottomNav.innerHTML = `<div class="bottom-nav-inner">
+      ${BNAV_LINKS.map(l => {
+        const active = isActive(l.href) ? ' active' : '';
+        return `<a class="bnav-item${active}" href="${l.href}">${l.icon} ${l.label}</a>`;
+      }).join('\n      ')}
+    </div>`;
+  }
+})();

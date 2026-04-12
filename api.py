@@ -266,6 +266,18 @@ def _start_kaspi_sync_loop():
                         # Считаем как обновление если статус изменился
                         if new_state != old_state:
                             updated_count += 1
+                        # Если entries пустые — пробуем загрузить
+                        if not existing.entries or existing.entries in ("[]", ""):
+                            try:
+                                fetched = kaspi_module.get_order_entries(oid)
+                                if fetched:
+                                    existing.entries = json.dumps(fetched, ensure_ascii=False)
+                                    if not existing.product_name and fetched:
+                                        existing.product_name = fetched[0].get("name")
+                                        existing.sku = fetched[0].get("merchantSku", "")
+                                        existing.quantity = sum(e.get("qty", 1) for e in fetched if isinstance(e, dict))
+                            except Exception:
+                                pass
                         # Обновляем статус и основные поля
                         existing.state = new_state
                         existing.last_synced_at = datetime.utcnow()
@@ -641,6 +653,44 @@ def run_migrations():
     """Принудительно применить все pending миграции БД"""
     init_db()
     return {"ok": True, "message": "Миграции применены"}
+
+
+@app.post("/api/admin/kaspi/backfill-entries")
+def backfill_kaspi_entries(request: Request, db: Session = Depends(get_db)):
+    """Загружает состав заказов у которых entries пустые"""
+    import json
+    from database import KaspiOrder
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+
+    # Все заказы без состава (entries null, пустые или "[]")
+    orders = db.query(KaspiOrder).filter(
+        (KaspiOrder.entries == None) |
+        (KaspiOrder.entries == "[]") |
+        (KaspiOrder.entries == "")
+    ).all()
+
+    filled = 0
+    failed = 0
+    for o in orders:
+        try:
+            entries = kaspi_module.get_order_entries(o.order_id)
+            if entries:
+                o.entries = json.dumps(entries, ensure_ascii=False)
+                # Также обновляем product_name / sku / quantity если были пустые
+                if not o.product_name and entries:
+                    o.product_name = entries[0].get("name")
+                    o.sku = entries[0].get("merchantSku", "")
+                    o.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
+                filled += 1
+            else:
+                failed += 1
+        except Exception:
+            failed += 1
+
+    db.commit()
+    return {"ok": True, "filled": filled, "failed": failed, "total": len(orders)}
 
 
 @app.post("/api/admin/dedupe-kaspi-orders")

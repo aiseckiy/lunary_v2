@@ -508,11 +508,16 @@ async function load() {
 function renderStats() {
   const low = allProducts.filter(p => p.low).length;
   const units = allProducts.reduce((s, p) => s + p.stock, 0);
+  const totalValue = allProducts.reduce((s, p) => s + (p.price || 0) * p.stock, 0);
+  const totalValueFmt = totalValue >= 1000000
+    ? (totalValue / 1000000).toFixed(1) + ' млн ₸'
+    : totalValue.toLocaleString('ru-RU') + ' ₸';
   document.getElementById('stats').innerHTML = `
     <div class="stat"><div class="stat-label">Позиций</div><div class="stat-value purple">${allProducts.length}</div></div>
     <div class="stat"><div class="stat-label">Единиц</div><div class="stat-value">${units}</div></div>
     <div class="stat"><div class="stat-label">Заканчивается</div><div class="stat-value red">${low}</div></div>
     <div class="stat"><div class="stat-label">В норме</div><div class="stat-value green">${allProducts.length - low}</div></div>
+    <div class="stat"><div class="stat-label">На складе</div><div class="stat-value" style="font-size:20px">${totalValueFmt}</div></div>
   `;
 }
 

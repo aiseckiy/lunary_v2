@@ -617,6 +617,12 @@ def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
     return resp
 
 
+@app.get("/api/auth/check")
+def auth_check():
+    has_password = bool(os.getenv("ADMIN_PASSWORD", ""))
+    return {"required": has_password}
+
+
 @app.get("/api/auth/me")
 def auth_me(request: Request):
     user = _get_user_from_session(request)

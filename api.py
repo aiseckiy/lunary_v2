@@ -66,7 +66,7 @@ if _slowapi_ok:
 # ─── Auth middleware ──────────────────────────────────────────
 _PUBLIC_PATHS = {"/login", "/api/auth/login", "/api/auth/logout",
                  "/auth/google", "/auth/google/callback",
-                 "/shop", "/api/shop/products", "/api/shop/product"}
+                 "/shop", "/"}
 _PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
@@ -108,27 +108,19 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         user = _get_user_from_session(request)
 
-        # Корневой путь — редирект на магазин или склад в зависимости от роли
-        if path == "/":
-            if not user:
-                return RedirectResponse("/shop", status_code=302)
-            if user["role"] == "admin":
-                return await call_next(request)
-            return RedirectResponse("/shop", status_code=302)
-
         # Админские пути — только admin
-        is_admin_path = any(path.startswith(p) for p in _ADMIN_PATHS) or path in ("/", "/admin")
+        is_admin_path = any(path.startswith(p) for p in _ADMIN_PATHS)
         if is_admin_path:
             if not user or user["role"] != "admin":
                 if path.startswith("/api/"):
                     return JSONResponse({"error": "Forbidden"}, status_code=403)
                 return RedirectResponse(f"/login?next={path}", status_code=302)
 
-        # Остальные пути — нужна авторизация
-        if not user:
-            if path.startswith("/api/"):
+        # Пути требующие авторизации (оформление заказа и т.д.)
+        _AUTH_REQUIRED = ("/api/orders",)
+        if any(path.startswith(p) for p in _AUTH_REQUIRED):
+            if not user:
                 return JSONResponse({"error": "Unauthorized"}, status_code=401)
-            return RedirectResponse(f"/login?next={path}", status_code=302)
 
         return await call_next(request)
 
@@ -457,7 +449,8 @@ def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
     # Создать session token
     secret = os.getenv("ADMIN_PASSWORD", "lunary-secret")
     session_token = f"{user.id}_{hashlib.sha256(f'user-{user.id}-{user.email}-{secret}'.encode()).hexdigest()}"
-    next_url = "/admin" if user.role == "admin" else "/shop"
+    # Все идут в магазин, у админов там будет кнопка "Админ панель"
+    next_url = "/shop"
     resp = RedirectResponse(next_url, status_code=302)
     resp.set_cookie("lunary_session", session_token, httponly=True, samesite="lax", max_age=60*60*24*30)
     return resp
@@ -1653,6 +1646,12 @@ def kaspi_page():
 @app.get("/admin/analytics", response_class=HTMLResponse)
 def analytics_page():
     with open("static/analytics.html") as f:
+        return f.read()
+
+
+@app.get("/admin/settings", response_class=HTMLResponse)
+def settings_page():
+    with open("static/settings.html") as f:
         return f.read()
 
 

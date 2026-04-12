@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Настройки — Lunary OS</title>
+<link rel="stylesheet" href="/static/layout.css">
+<style>
+.users-table { width:100%; border-collapse:collapse; margin-top:16px; }
+.users-table th { text-align:left; padding:10px 12px; font-size:12px; color:var(--text3); border-bottom:2px solid var(--border); font-weight:600; }
+.users-table td { padding:12px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle; }
+.users-table tr:last-child td { border-bottom:none; }
+.role-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.role-admin { background:#ede9fe; color:#6366f1; }
+.role-customer { background:#f3f4f6; color:#6b7280; }
+.avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; }
+.avatar-placeholder { width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+.role-select { border:1px solid var(--border); border-radius:8px; padding:5px 8px; font-size:13px; background:var(--bg); color:var(--text); cursor:pointer; }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">Lunary <span>OS</span></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="/">📦 Склад</a>
+    <a class="nav-item" href="/admin/kaspi">🛍 Kaspi</a>
+    <a class="nav-item" href="/admin/analytics">📊 Аналитика</a>
+    <a class="nav-item" href="/admin/history">📋 История</a>
+    <a class="nav-item" href="/admin/scanner">📷 Сканер</a>
+    <a class="nav-item active" href="/admin/settings">⚙️ Настройки</a>
+  </nav>
+</aside>
+
+<div class="mobile-header">
+  <div class="mobile-logo">Lunary <span>OS</span></div>
+  <div class="mobile-header-actions" style="display:flex;gap:8px;align-items:center"></div>
+</div>
+
+<div class="main-content">
+  <div class="page-container">
+    <div class="page-title">⚙️ Настройки</div>
+    <div class="page-sub">Управление пользователями и доступом</div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="font-size:16px;font-weight:700">Пользователи</div>
+        <div style="font-size:13px;color:var(--text3)" id="users-count"></div>
+      </div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Пользователи которые вошли через Google. Назначь роль <b>admin</b> чтобы дать доступ к админ панели.</div>
+
+      <div id="users-loading" style="text-align:center;padding:40px;color:var(--text3)">Загрузка...</div>
+      <table class="users-table" id="users-table" style="display:none">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Пользователь</th>
+            <th>Email</th>
+            <th>Роль</th>
+            <th>Дата входа</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/static/mobile.js"></script>
+<script>
+async function load() {
+  const res = await fetch('/api/admin/users');
+  if (!res.ok) { document.getElementById('users-loading').textContent = 'Ошибка загрузки'; return; }
+  const users = await res.json();
+
+  document.getElementById('users-count').textContent = `${users.length} пользователей`;
+  document.getElementById('users-loading').style.display = 'none';
+  document.getElementById('users-table').style.display = 'table';
+
+  document.getElementById('users-tbody').innerHTML = users.map(u => `
+    <tr>
+      <td>${u.avatar
+        ? `<img class="avatar" src="${u.avatar}" referrerpolicy="no-referrer">`
+        : `<div class="avatar-placeholder">${(u.name||u.email||'?')[0].toUpperCase()}</div>`
+      }</td>
+      <td style="font-weight:500">${u.name || '—'}</td>
+      <td style="color:var(--text3);font-size:13px">${u.email}</td>
+      <td>
+        <select class="role-select" onchange="setRole(${u.id}, this.value)">
+          <option value="customer" ${u.role==='customer'?'selected':''}>Покупатель</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>Администратор</option>
+        </select>
+      </td>
+      <td style="color:var(--text3);font-size:12px">${u.created_at ? u.created_at.slice(0,10) : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+async function setRole(id, role) {
+  const res = await fetch(`/api/admin/users/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role})
+  });
+  if (!res.ok) alert('Ошибка сохранения');
+}
+
+load();
+</script>
+</body>
+</html>

@@ -5,11 +5,12 @@
 
 (function() {
   const NAV_ITEMS = [
-    { href: '/admin',           icon: '🏠', label: 'Товары' },
-    { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
-    { href: '/admin/history',   icon: '📋', label: 'История' },
-    { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
-    { href: '/admin/kaspi',     icon: '🛒', label: 'Kaspi' },
+    { href: '/admin',             icon: '🏠', label: 'Товары' },
+    { href: '/admin/scanner',     icon: '📷', label: 'Сканер' },
+    { href: '/admin/history',     icon: '📋', label: 'История' },
+    { href: '/admin/analytics',   icon: '📊', label: 'Аналитика' },
+    { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi' },
+    { href: '/admin/settings',    icon: '⚙️', label: 'Настройки' },
   ];
 
   function currentPath() {
@@ -201,8 +202,11 @@
         ${navLinks}
       </div>
       <div class="drawer-footer">
-        <a class="drawer-store-link" href="/">
+        <a class="drawer-store-link" href="/shop">
           <span style="font-size:18px">🛍</span> Перейти в магазин
+        </a>
+        <a class="drawer-store-link" href="#" onclick="logout()" style="margin-top:6px;color:#ef4444">
+          <span style="font-size:18px">🚪</span> Выйти
         </a>
       </div>
     `;
@@ -255,6 +259,11 @@
   }
 
   window.__lunaryCloseDrawer = closeDrawer;
+
+  window.logout = async function() {
+    await fetch('/api/auth/logout', {method: 'POST'});
+    location.href = '/login';
+  };
 
   // Run after DOM ready
   if (document.readyState === 'loading') {

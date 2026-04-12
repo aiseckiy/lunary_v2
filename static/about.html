@@ -101,7 +101,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <div class="contact-icon">📍</div>
       <div>
         <div class="contact-label">Адрес</div>
-        <div class="contact-val">г. Алматы, ул. Строителей 1</div>
+        <div class="contact-val" data-field="address">г. Алматы, ул. Строителей 1</div>
       </div>
     </div>
 
@@ -109,7 +109,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <div class="contact-icon">📞</div>
       <div>
         <div class="contact-label">Телефон / WhatsApp</div>
-        <div class="contact-val"><a href="tel:+77001234567">+7 (700) 123-45-67</a></div>
+        <div class="contact-val"><a data-field="phone" href="tel:+77001234567">+7 (700) 123-45-67</a></div>
       </div>
     </div>
 
@@ -117,7 +117,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <div class="contact-icon">📧</div>
       <div>
         <div class="contact-label">Email</div>
-        <div class="contact-val"><a href="mailto:info@lunary.kz">info@lunary.kz</a></div>
+        <div class="contact-val"><a data-field="email" href="mailto:info@lunary.kz">info@lunary.kz</a></div>
       </div>
     </div>
 
@@ -126,9 +126,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <div>
         <div class="contact-label">Режим работы</div>
         <table class="hours-table" id="hours-table">
-          <tr><td>Пн — Пт</td><td>9:00 — 18:00</td></tr>
-          <tr><td>Суббота</td><td>10:00 — 16:00</td></tr>
-          <tr><td>Воскресенье</td><td>Выходной</td></tr>
+          <tr><td>Пн — Пт</td><td data-field="hours_wd">9:00 — 18:00</td></tr>
+          <tr><td>Суббота</td><td data-field="hours_sat">10:00 — 16:00</td></tr>
+          <tr><td>Воскресенье</td><td data-field="hours_sun">Выходной</td></tr>
         </table>
       </div>
     </div>
@@ -138,12 +138,28 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 </div>
 
 <script>
-// Подсветить сегодняшний день
-const days = ['Воскресенье', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Суббота'];
-const today = days[new Date().getDay()];
-document.querySelectorAll('.hours-table tr').forEach(tr => {
-  if (tr.cells[0]?.textContent.trim() === today) tr.classList.add('today');
-});
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) return;
+    const s = await res.json();
+    if (s.shop_name) { document.querySelector('.header-logo').textContent = s.shop_name; document.querySelector('.hero-title').textContent = s.shop_name; }
+    if (s.about_description) document.querySelector('.hero-sub').innerHTML = s.about_description.replace(/\n/g,'<br>');
+    if (s.about_address) document.querySelector('[data-field="address"]').textContent = s.about_address;
+    if (s.about_phone) { const el = document.querySelector('[data-field="phone"]'); el.textContent = s.about_phone; el.href = 'tel:' + s.about_phone.replace(/[^+\d]/g,''); }
+    if (s.about_email) { const el = document.querySelector('[data-field="email"]'); el.textContent = s.about_email; el.href = 'mailto:' + s.about_email; }
+    if (s.about_hours_wd) document.querySelector('[data-field="hours_wd"]').textContent = s.about_hours_wd;
+    if (s.about_hours_sat) document.querySelector('[data-field="hours_sat"]').textContent = s.about_hours_sat;
+    if (s.about_hours_sun) document.querySelector('[data-field="hours_sun"]').textContent = s.about_hours_sun;
+  } catch {}
+  // Подсветить сегодняшний день
+  const days = ['Воскресенье', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Пн — Пт', 'Суббота'];
+  const today = days[new Date().getDay()];
+  document.querySelectorAll('.hours-table tr').forEach(tr => {
+    if (tr.cells[0]?.textContent.trim() === today) tr.classList.add('today');
+  });
+}
+loadSettings();
 </script>
 </body>
 </html>

@@ -82,7 +82,7 @@ if _slowapi_ok:
 # ─── Auth middleware ──────────────────────────────────────────
 _PUBLIC_PATHS = {"/login", "/api/auth/login", "/api/auth/logout",
                  "/auth/google", "/auth/google/callback",
-                 "/shop", "/", "/about"}
+                 "/shop", "/", "/about", "/api/settings"}
 _PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/", "/shop/product/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
@@ -991,6 +991,41 @@ def shop_orders_new_count(request: Request, db: Session = Depends(get_db)):
     from database import ShopOrder
     count = db.query(ShopOrder).filter(ShopOrder.status == "new").count()
     return {"count": count}
+
+
+# ─── Site Settings ───────────────────────────────────────────
+@app.get("/api/settings")
+def get_settings(db: Session = Depends(get_db)):
+    """Публичные настройки для магазина (без integrations)"""
+    from database import SiteSetting
+    rows = db.query(SiteSetting).filter(SiteSetting.group != "integrations").all()
+    return {r.key: r.value for r in rows}
+
+
+@app.get("/api/admin/settings")
+def get_admin_settings(request: Request, db: Session = Depends(get_db)):
+    from database import SiteSetting
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    rows = db.query(SiteSetting).order_by(SiteSetting.group, SiteSetting.key).all()
+    return [{"key": r.key, "value": r.value or "", "label": r.label, "group": r.group} for r in rows]
+
+
+@app.post("/api/admin/settings")
+def save_admin_settings(data: dict, request: Request, db: Session = Depends(get_db)):
+    from database import SiteSetting
+    user = _get_user_from_session(request)
+    if not user or user["role"] != "admin":
+        raise HTTPException(status_code=403)
+    for key, value in data.items():
+        row = db.query(SiteSetting).filter(SiteSetting.key == key).first()
+        if row:
+            row.value = str(value)
+        else:
+            db.add(SiteSetting(key=key, value=str(value)))
+    db.commit()
+    return {"ok": True}
 
 
 # ─── Панель управления (только для авторизованных) ───────────

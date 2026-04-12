@@ -116,6 +116,15 @@ class ShopOrder(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class SiteSetting(Base):
+    __tablename__ = "site_settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=True)
+    label = Column(String, nullable=True)   # человекочитаемое название
+    group = Column(String, default="general")  # general, contacts, shop, integrations
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -170,4 +179,35 @@ def init_db():
                     conn.rollback()
                 except Exception:
                     pass
+    # Дефолтные настройки сайта
+    default_settings = [
+        ("shop_name",        "LUNARY",                                    "Название магазина",       "general"),
+        ("shop_tagline",     "Строительные материалы и инструменты",       "Подзаголовок магазина",   "general"),
+        ("banner_title",     "Строительные материалы и инструменты",       "Баннер: заголовок",       "shop"),
+        ("banner_subtitle",  "Более 1000 товаров · Самовывоз и доставка", "Баннер: подзаголовок",    "shop"),
+        ("banner_show",      "1",                                          "Показывать баннер",       "shop"),
+        ("about_address",    "г. Алматы, ул. Строителей 1",               "Адрес",                   "contacts"),
+        ("about_phone",      "+7 (700) 123-45-67",                        "Телефон",                 "contacts"),
+        ("about_email",      "info@lunary.kz",                            "Email",                   "contacts"),
+        ("about_hours_wd",   "9:00 — 18:00",                              "Часы работы: Пн–Пт",      "contacts"),
+        ("about_hours_sat",  "10:00 — 16:00",                             "Часы работы: Суббота",    "contacts"),
+        ("about_hours_sun",  "Выходной",                                  "Часы работы: Воскресенье","contacts"),
+        ("about_description","Строительные материалы и инструменты оптом и в розницу. Широкий ассортимент, доступные цены.", "Описание компании", "general"),
+        ("tg_bot_token",     "",                                           "Telegram Bot Token",      "integrations"),
+        ("tg_chat_id",       "",                                           "Telegram Chat ID",        "integrations"),
+        ("kaspi_api_key",    "",                                           "Kaspi API Key",           "integrations"),
+    ]
+    db2 = SessionLocal()
+    try:
+        for key, value, label, group in default_settings:
+            existing = db2.query(SiteSetting).filter(SiteSetting.key == key).first()
+            if not existing:
+                db2.add(SiteSetting(key=key, value=value, label=label, group=group))
+        db2.commit()
+        print("[init_db] Настройки инициализированы", flush=True)
+    except Exception as e:
+        print(f"[init_db] Ошибка настроек: {e}", flush=True)
+        db2.rollback()
+    finally:
+        db2.close()
     print("[init_db] Готово", flush=True)

@@ -90,6 +90,16 @@
       <div class="msg" id="pwd-msg"></div>
     </div>
 
+    <!-- Настройки сайта -->
+    <div class="section-card" id="site-settings-card">
+      <div class="section-title">Настройки сайта</div>
+      <div class="section-sub">Редактируй любой контент магазина без кода</div>
+      <div id="settings-loading" style="text-align:center;padding:30px;color:var(--text3)">Загрузка...</div>
+      <div id="settings-groups" style="display:none"></div>
+      <button class="btn-save" onclick="saveSettings()" style="margin-top:16px">Сохранить все</button>
+      <div class="msg" id="settings-msg"></div>
+    </div>
+
     <!-- Пользователи -->
     <div class="section-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -188,7 +198,86 @@ async function setRole(id, role) {
   if (!res.ok) alert('Ошибка сохранения');
 }
 
+const GROUP_LABELS = {
+  general: '🏪 Общее',
+  shop: '🛍️ Магазин',
+  contacts: '📞 Контакты',
+  integrations: '🔌 Интеграции',
+};
+
+let allSettings = [];
+
+async function loadSiteSettings() {
+  const res = await fetch('/api/admin/settings');
+  if (!res.ok) { document.getElementById('settings-loading').textContent = 'Ошибка'; return; }
+  allSettings = await res.json();
+  document.getElementById('settings-loading').style.display = 'none';
+  document.getElementById('settings-groups').style.display = 'block';
+  renderSettings();
+}
+
+function renderSettings() {
+  const groups = {};
+  allSettings.forEach(s => {
+    if (!groups[s.group]) groups[s.group] = [];
+    groups[s.group].push(s);
+  });
+  const order = ['general', 'shop', 'contacts', 'integrations'];
+  let html = '';
+  order.forEach(g => {
+    if (!groups[g]) return;
+    html += `<div style="margin-bottom:20px">
+      <div style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">${GROUP_LABELS[g] || g}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">`;
+    groups[g].forEach(s => {
+      const isLong = s.key.includes('description') || s.key.includes('subtitle') || s.key.includes('hours');
+      const isSecret = s.key.includes('token') || s.key.includes('key') || s.key.includes('password');
+      const isToggle = s.key.includes('_show');
+      if (isToggle) {
+        html += `<div class="form-field" style="grid-column:1/-1">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" id="s-${s.key}" ${s.value==='1'?'checked':''} style="width:18px;height:18px;accent-color:var(--accent)">
+            ${s.label}
+          </label>
+        </div>`;
+      } else if (isLong) {
+        html += `<div class="form-field" style="grid-column:1/-1">
+          <label>${s.label}</label>
+          <textarea id="s-${s.key}" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;background:#f9fafb;outline:none">${s.value||''}</textarea>
+        </div>`;
+      } else {
+        html += `<div class="form-field">
+          <label>${s.label}</label>
+          <input type="${isSecret?'password':'text'}" id="s-${s.key}" value="${(s.value||'').replace(/"/g,'&quot;')}" placeholder="${s.label}">
+        </div>`;
+      }
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('settings-groups').innerHTML = html;
+}
+
+async function saveSettings() {
+  const data = {};
+  allSettings.forEach(s => {
+    const el = document.getElementById(`s-${s.key}`);
+    if (!el) return;
+    if (el.type === 'checkbox') data[s.key] = el.checked ? '1' : '0';
+    else data[s.key] = el.value;
+  });
+  const msg = document.getElementById('settings-msg');
+  const res = await fetch('/api/admin/settings', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  msg.style.display = 'block';
+  if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Настройки сохранены'; }
+  else { msg.className = 'msg err'; msg.textContent = 'Ошибка сохранения'; }
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+
 loadProfile();
+loadSiteSettings();
 loadUsers();
 </script>
 </body>

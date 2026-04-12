@@ -1318,7 +1318,25 @@ async function submitOrder() {
   btn.textContent = 'Отправить заказ'; btn.disabled = false;
 }
 
+async function loadSiteSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) return;
+    const s = await res.json();
+    if (s.shop_name) document.querySelector('.header-logo').textContent = s.shop_name;
+    if (s.shop_tagline) document.querySelector('.header-tagline').textContent = s.shop_tagline;
+    if (s.banner_show === '0') {
+      document.getElementById('store-banner').style.display = 'none';
+    } else {
+      if (s.banner_title) document.querySelector('.banner-title').textContent = s.banner_title;
+      if (s.banner_subtitle) document.querySelector('.banner-sub').textContent = s.banner_subtitle;
+    }
+    if (s.shop_name) document.title = s.shop_name + ' — Каталог';
+  } catch {}
+}
+
 checkAuth();
+loadSiteSettings();
 load();
 </script>
 </body>

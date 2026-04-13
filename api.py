@@ -2956,6 +2956,12 @@ def merge_preview(db: Session = Depends(get_db)):
     other_list = [{"id": op.id, "name": op.name, "sku": op.sku, "category": op.category,
                    "cost_price": op.cost_price, "supplier": op.supplier, "brand": op.brand} for op in other_products]
 
+    # Синхронизированные — Kaspi товары у которых уже есть cost_price или supplier
+    synced = [{"id": kp.id, "name": kp.name, "sku": kp.sku, "kaspi_sku": kp.kaspi_sku,
+               "price": kp.price, "cost_price": kp.cost_price, "supplier": kp.supplier or "",
+               "supplier_article": kp.supplier_article or ""}
+              for kp in kaspi_products if kp.cost_price or kp.supplier]
+
     return {
         "pairs": pairs,
         "unmatched_other": unmatched_other,
@@ -2963,6 +2969,8 @@ def merge_preview(db: Session = Depends(get_db)):
         "other_list": other_list,
         "total_kaspi": len(kaspi_products),
         "total_other": len(other_products),
+        "synced": synced,
+        "total_synced": len(synced),
     }
 
 

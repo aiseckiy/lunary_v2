@@ -90,6 +90,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
     <span class="chip chip-green" id="stat-other">Накладные: —</span>
     <span class="chip chip-yellow" id="stat-pairs">Совпадений: —</span>
     <span class="chip chip-red" id="stat-unmatched">Без пары: —</span>
+    <span class="chip" style="background:#d1fae5;color:#065f46" id="stat-synced">Синхронизировано: —</span>
   </div>
 </div>
 
@@ -104,6 +105,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
       <div class="ptab active" onclick="switchKaspiTab('all', this)">Все</div>
       <div class="ptab" onclick="switchKaspiTab('matched', this)">С парой</div>
       <div class="ptab" onclick="switchKaspiTab('unmatched', this)">Без пары</div>
+      <div class="ptab" onclick="switchKaspiTab('synced', this)">✅ Синхронизированы</div>
     </div>
     <div class="panel-body" id="kaspi-list"><div class="loading">⏳</div></div>
   </div>
@@ -156,6 +158,7 @@ async function load() {
   document.getElementById('stat-other').textContent = `Накладные: ${data.total_other}`;
   document.getElementById('stat-pairs').textContent = `Совпадений: ${data.pairs.length} (🎯${skuPairs} 🔍${fuzzyPairs})`;
   document.getElementById('stat-unmatched').textContent = `Без пары: ${data.unmatched_other.length}`;
+  document.getElementById('stat-synced').textContent = `✅ Синхронизировано: ${data.total_synced} из ${data.total_kaspi}`;
 
   renderKaspi();
   renderOther();
@@ -179,6 +182,26 @@ function hlSku(name, sku) {
 function renderKaspi() {
   const el = document.getElementById('kaspi-list');
   if (!data) return;
+
+  if (kaspiTab === 'synced') {
+    let items = data.synced || [];
+    if (kaspiSearch) items = items.filter(p => p.name.toLowerCase().includes(kaspiSearch) || p.supplier.toLowerCase().includes(kaspiSearch));
+    if (!items.length) { el.innerHTML = '<div class="empty">Нет синхронизированных товаров</div>'; return; }
+    el.innerHTML = items.map(p => `<div class="product-item matched">
+      <div style="flex:1;min-width:0">
+        <div class="p-name">${hl(p.name, kaspiSearch)}</div>
+        <div class="p-meta">
+          <span class="p-sku">${p.kaspi_sku || ''}</span>
+          ${p.supplier ? `<span class="tag">${p.supplier}</span>` : ''}
+          ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
+          ${p.supplier_article ? `<span style="font-size:11px;color:#6c63ff;margin-left:4px">арт: ${p.supplier_article}</span>` : ''}
+        </div>
+      </div>
+      <span class="match-badge badge-sku">✓ синхр.</span>
+    </div>`).join('');
+    return;
+  }
+
   let items = data.kaspi_list;
   if (kaspiTab === 'matched') items = items.filter(p => kaspiInPairs.has(p.id));
   if (kaspiTab === 'unmatched') items = items.filter(p => !kaspiInPairs.has(p.id));

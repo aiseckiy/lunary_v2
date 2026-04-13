@@ -2749,12 +2749,41 @@ def merge_preview(db: Session = Depends(get_db)):
     unmatched_other = []
     matched_other_ids = set()
 
-    # Сначала точные совпадения по артикулу (SKU в названии)
+    # Сначала точные совпадения по артикулу
+    # Строим индексы для Kaspi товаров
+    kaspi_by_sku = {kp.sku.upper(): kp for kp in kaspi_products if kp.sku}
+    kaspi_by_barcode = {kp.barcode.upper(): kp for kp in kaspi_products if kp.barcode}
+    kaspi_by_article = {kp.kaspi_article.upper(): kp for kp in kaspi_products if kp.kaspi_article}
+
     for op in other_products:
-        if not op.sku:
-            continue
-        matches = [kp for kp in kaspi_products if op.sku.upper() in kp.name.upper()]
-        for kp in matches:
+        op_sku = (op.sku or "").upper()
+        op_barcode = (op.barcode or "").upper()
+
+        matched_kp = None
+        # 1. Артикул накладной == kaspi_article
+        if not matched_kp and op_sku:
+            matched_kp = kaspi_by_article.get(op_sku)
+        if not matched_kp and op_barcode:
+            matched_kp = kaspi_by_article.get(op_barcode)
+        # 2. Артикул накладной == sku Kaspi товара
+        if not matched_kp and op_sku:
+            matched_kp = kaspi_by_sku.get(op_sku)
+        if not matched_kp and op_barcode:
+            matched_kp = kaspi_by_sku.get(op_barcode)
+        # 3. Barcode совпадает
+        if not matched_kp and op_barcode:
+            matched_kp = kaspi_by_barcode.get(op_barcode)
+        if not matched_kp and op_sku:
+            matched_kp = kaspi_by_barcode.get(op_sku)
+        # 4. Артикул накладной встречается в названии Kaspi (старое поведение как запасной вариант)
+        if not matched_kp and op_sku and len(op_sku) >= 5:
+            for kp in kaspi_products:
+                if op_sku in kp.name.upper():
+                    matched_kp = kp
+                    break
+
+        if matched_kp:
+            kp = matched_kp
             pairs.append({
                 "kaspi_id": kp.id,
                 "kaspi_name": kp.name,

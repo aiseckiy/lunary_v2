@@ -1,5 +1,10 @@
 [
   {
+    "hash": "80ac196",
+    "date": "13.04.2026",
+    "message": "Add: кнопка объединить все по артикулу в merge.html"
+  },
+  {
     "hash": "85c4ab6",
     "date": "13.04.2026",
     "message": "Fix: переименовать /api/products/review → /api/review-products (конфликт маршрутов)"

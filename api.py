@@ -2961,6 +2961,10 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
             kaspi_p.supplier = other_p.supplier
         if other_p.sku:
             kaspi_p.kaspi_article = other_p.sku
+        if other_p.barcode and not kaspi_p.barcode:
+            kaspi_p.barcode = other_p.barcode
+        if other_p.kaspi_article and not kaspi_p.kaspi_article:
+            kaspi_p.kaspi_article = other_p.kaspi_article
         # переносим движения
         db.query(Movement).filter(Movement.product_id == other_p.id).update(
             {"product_id": kaspi_p.id}, synchronize_session=False

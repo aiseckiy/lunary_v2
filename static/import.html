@@ -79,6 +79,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="result" id="result-price"></div>
   </div>
 
+  <!-- Удалить накладные -->
+  <div class="card" style="border-color:#fca5a5">
+    <div class="card-title" style="color:#991b1b">🗑 Удалить товары из прайса</div>
+    <div class="card-sub">Удалит все товары категории "Накладные" из базы — если хочешь загрузить прайс заново</div>
+    <div class="result" id="result-reset-nakl"></div>
+    <button class="btn" onclick="resetNakladnye()" style="background:#dc2626;color:#fff;margin-top:8px">Удалить товары из накладных</button>
+  </div>
+
   <!-- Следующий шаг -->
   <div style="text-align:center;padding:8px 0">
     <a href="/merge" style="color:#6c63ff;font-size:14px;font-weight:600;text-decoration:none">
@@ -125,6 +133,14 @@ function showResult(id, state, text) {
   el.style.display = 'block';
   el.className = `result result-${state}`;
   el.textContent = text;
+}
+
+async function resetNakladnye() {
+  if (!confirm('Удалить все товары из накладных (категория "Накладные")? Это нельзя отменить.')) return;
+  showResult('reset-nakl', 'loading', '⏳ Удаляю...');
+  const r = await fetch('/api/reset-nakladnye', { method: 'DELETE' });
+  const d = await r.json();
+  showResult('reset-nakl', r.ok ? 'ok' : 'err', r.ok ? `✅ Удалено: ${d.deleted} товаров` : '❌ ' + d.detail);
 }
 
 async function importKaspi() {

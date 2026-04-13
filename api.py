@@ -3003,6 +3003,19 @@ def merge_page():
     return FileResponse("static/merge.html")
 
 
+@app.delete("/api/reset-nakladnye")
+def reset_nakladnye(db: Session = Depends(get_db)):
+    """Удаляет все товары категории Накладные и их движения"""
+    from database import Product as _P, Movement
+    products = db.query(_P).filter(_P.category == "Накладные").all()
+    ids = [p.id for p in products]
+    if ids:
+        db.query(Movement).filter(Movement.product_id.in_(ids)).delete(synchronize_session=False)
+        db.query(_P).filter(_P.id.in_(ids)).delete(synchronize_session=False)
+    db.commit()
+    return {"deleted": len(ids)}
+
+
 @app.get("/import")
 def import_page():
     from fastapi.responses import FileResponse

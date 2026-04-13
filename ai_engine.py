@@ -6,12 +6,17 @@ import json
 import logging
 from datetime import datetime
 from collections import defaultdict, deque
-from openai import OpenAI
 import crud
 from database import SessionLocal
 
 logger = logging.getLogger(__name__)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def _get_openai_client():
+    from openai import OpenAI
+    key = os.getenv("OPENAI_API_KEY", "")
+    if not key:
+        raise RuntimeError("OPENAI_API_KEY не задан")
+    return OpenAI(api_key=key)
 
 # Память разговора: user_id -> последние 20 сообщений
 _conversation: dict = defaultdict(lambda: deque(maxlen=20))
@@ -248,6 +253,7 @@ async def process_ai_message(text: str, user_id: int = 0) -> str:
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history + [{"role": "user", "content": text}]
 
         # Первый вызов — AI определяет что делать
+        client = _get_openai_client()
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,

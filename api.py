@@ -9,7 +9,6 @@ import os
 from database import get_db, init_db
 import crud
 import kaspi as kaspi_module
-from datetime import datetime
 
 
 
@@ -218,7 +217,7 @@ def startup():
 
 def _start_kaspi_sync_loop():
     """Фоновая синхронизация заказов Kaspi каждые 5 минут"""
-    import threading, time, json
+
     from database import KaspiOrder, SessionLocal as SL
 
     STATES = ["NEW", "APPROVED", "PICKUP", "DELIVERY", "KASPI_DELIVERY", "ARCHIVE", "CANCELLED", "SIGN_REQUIRED"]
@@ -408,7 +407,7 @@ def _start_kaspi_sync_loop():
 
 def _auto_import_if_empty():
     """Если база пустая — автоматически импортируем товары из export_products.json"""
-    import json, os
+    import os
     from database import Product as _P, SessionLocal
     db = SessionLocal()
     try:
@@ -567,7 +566,6 @@ GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "https://www.lunary.kz/au
 def google_auth():
     if not GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=500, detail="Google OAuth не настроен")
-    import urllib.parse
     params = {
         "client_id": GOOGLE_CLIENT_ID,
         "redirect_uri": GOOGLE_REDIRECT_URI,
@@ -581,7 +579,7 @@ def google_auth():
 
 @app.get("/auth/google/callback")
 def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
-    import urllib.parse, urllib.request, json, hashlib
+    import hashlib
     from database import User as UserModel
 
     # Обмен code на токен
@@ -711,7 +709,6 @@ def run_migrations():
 @app.post("/api/admin/kaspi/backfill-entries")
 def backfill_kaspi_entries(request: Request, db: Session = Depends(get_db)):
     """Загружает состав заказов у которых entries пустые"""
-    import json
     from database import KaspiOrder
     user = _get_user_from_session(request)
     if not user or user["role"] != "admin":
@@ -871,13 +868,18 @@ def get_suppliers(db: Session = Depends(get_db)):
 @app.get("/api/products/search")
 def search_products(q: str, db: Session = Depends(get_db)):
     products = crud.find_product(q, db)
+    if not products:
+        return []
+    ids = {p.id for p in products}
+    all_stocks = crud.get_all_stocks(db)
+    stock_map = {s["product"].id: s["stock"] for s in all_stocks if s["product"].id in ids}
     return [
         {
             "id": p.id,
             "name": p.name,
             "sku": p.sku,
             "barcode": p.barcode,
-            "stock": crud.get_stock(p.id, db),
+            "stock": stock_map.get(p.id, 0),
             "unit": p.unit
         }
         for p in products
@@ -1134,10 +1136,10 @@ def root_page():
 
 def _parse_images(p) -> list:
     """Возвращает список изображений товара."""
-    import json as _j
+    
     if p.images:
         try:
-            imgs = _j.loads(p.images)
+            imgs = json.loads(p.images)
             if isinstance(imgs, list) and imgs:
                 return imgs
         except Exception:
@@ -1217,12 +1219,12 @@ def save_product_images(product_id: int, data: ProductImagesBody, request: Reque
     user = _get_user_from_session(request)
     if not user or user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Только администратор")
-    import json as _json
+    
     from database import Product as _P
     p = db.query(_P).filter(_P.id == product_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
-    p.images = _json.dumps(data.images, ensure_ascii=False)
+    p.images = json.dumps(data.images, ensure_ascii=False)
     p.image_url = data.images[0] if data.images else None
     db.commit()
     return {"ok": True}
@@ -1386,23 +1388,23 @@ class KaspiOrdersPayload(BaseModel):
 
 
 def _send_tg_notification(text: str):
-    """Отправить сообщение в Telegram через Bot API напрямую (без polling)."""
+    """Отправить сообщение в Telegram (не блокирует sync loop)."""
     bot_token = _get_integration("tg_bot_token", "BOT_TOKEN")
     chat_id = _get_integration("tg_chat_id", "ADMIN_CHAT_ID")
     if not bot_token or not chat_id:
         return
-    try:
-        import urllib.request
-        import urllib.parse
-        params = urllib.parse.urlencode({"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage?{params}"
-        urllib.request.urlopen(url, timeout=10)
-    except Exception as e:
-        print(f"⚠️ TG уведомление ошибка: {e}")
+    def _send():
+        try:
+
+            params = urllib.parse.urlencode({"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
+            url = f"https://api.telegram.org/bot{bot_token}/sendMessage?{params}"
+            urllib.request.urlopen(url, timeout=3)
+        except Exception as e:
+            print(f"⚠️ TG уведомление ошибка: {e}")
+    threading.Thread(target=_send, daemon=True).start()
 
 
 def _format_order_notification(o: dict) -> str:
-    from datetime import datetime
     STATE_LABELS = {
         "NEW": "🟡 Новый заказ",
         "KASPI_DELIVERY": "🚚 Kaspi Доставка",
@@ -1487,7 +1489,6 @@ CANCEL_STATES = {"CANCELLED", "Отменен", "RETURN", "Возврат"}
 def _return_stock_for_order(order_row, db: Session):
     """Возвращает остатки при отмене заказа (если уже были списаны)."""
     from database import Product
-    import json
     entries = []
     if order_row.entries:
         try:
@@ -1532,7 +1533,6 @@ def _find_product_by_sku(merchant_sku: str, db: Session):
 def _deduct_stock_for_order(order_row, db: Session):
     """Списывает остатки по заказу. Вызывается один раз при переходе в DEDUCT_STATES."""
     from database import Product
-    import json
 
     deducted = []
 
@@ -1584,7 +1584,6 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
     orders = payload.orders
     from database import KaspiOrder
-    import json
     added = 0
     updated = 0
     deducted_total = 0
@@ -1658,7 +1657,6 @@ def kaspi_orders_local(
 ):
     from database import KaspiOrder
     from sqlalchemy import func
-    import json
 
     # Маппинг русских статусов (XML) → внутренние
     STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
@@ -1747,7 +1745,6 @@ def kaspi_orders_local(
 @app.get("/api/kaspi/orders/{order_id}/entries")
 def get_kaspi_order_entries(order_id: str, db: Session = Depends(get_db)):
     """Получить и сохранить состав конкретного заказа"""
-    import json
     from database import KaspiOrder
     order = db.query(KaspiOrder).filter(KaspiOrder.order_id == order_id).first()
     if not order:
@@ -2228,7 +2225,6 @@ class ShopOrderCreate(BaseModel):
 
 @app.post("/api/shop/orders")
 def create_shop_order(data: ShopOrderCreate, request: Request, db: Session = Depends(get_db)):
-    import json
     from database import ShopOrder, Product as _P
 
     if not data.items:
@@ -2292,16 +2288,20 @@ def _notify_new_shop_order(order, items):
         f"{lines}\n\n"
         f"💰 *Итого: {order.total:,} ₸*"
     )
-    req_lib.post(
-        f"https://api.telegram.org/bot{bot_token}/sendMessage",
-        json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
-        timeout=5
-    )
+    def _send():
+        try:
+            req_lib.post(
+                f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
+                timeout=3
+            )
+        except Exception as e:
+            print(f"⚠️ TG shop order уведомление ошибка: {e}")
+    threading.Thread(target=_send, daemon=True).start()
 
 
 @app.get("/api/admin/shop-orders")
 def list_shop_orders(request: Request, status: Optional[str] = None, db: Session = Depends(get_db)):
-    import json
     from database import ShopOrder
     user = _get_user_from_session(request)
     if not user or user["role"] != "admin":
@@ -2343,10 +2343,11 @@ def shop_orders_page():
 @app.get("/api/purchases/list")
 def purchases_list(db: Session = Depends(get_db)):
     """Список товаров с остатком ниже минимума, сгруппированных по поставщику."""
-    products = crud.get_all_products(db)
+    all_stocks = crud.get_all_stocks(db)
     result = []
-    for p in products:
-        stock = crud.get_stock(p.id, db)
+    for s in all_stocks:
+        p = s["product"]
+        stock = s["stock"]
         min_s = p.min_stock or 0
         if stock <= min_s:
             result.append({
@@ -2390,7 +2391,7 @@ def purchases_send_tg(db: Session = Depends(get_db)):
 @app.post("/api/import-products")
 def import_products(db: Session = Depends(get_db)):
     """Одноразовый импорт товаров из export_products.json"""
-    import json, os
+    import os
     path = os.path.join(os.path.dirname(__file__), '_archive', 'export_products.json')
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="export_products.json не найден")

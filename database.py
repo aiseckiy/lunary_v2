@@ -30,10 +30,10 @@ class Product(Base):
     name = Column(String, nullable=False)
     sku = Column(String, unique=True, nullable=False)
     barcode = Column(String, nullable=True)
-    category = Column(String, default="Общее")
+    category = Column(String, default="Общее", index=True)
     unit = Column(String, default="шт")
     min_stock = Column(Integer, default=5)
-    brand = Column(String, nullable=True)
+    brand = Column(String, nullable=True, index=True)
     price = Column(Integer, nullable=True)  # цена в тенге
     kaspi_sku = Column(String, nullable=True)   # ID для матчинга заказов (101602457_xxx)
     kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
@@ -51,12 +51,12 @@ class KaspiOrder(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(String, unique=True, nullable=False)
-    state = Column(String, nullable=False)
+    state = Column(String, nullable=False, index=True)
     total = Column(Integer, default=0)
     customer = Column(String, nullable=True)
     entries = Column(String, nullable=True)  # JSON
-    order_date = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    order_date = Column(String, nullable=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     # Расширенные поля из XML / Kaspi
     product_name = Column(String, nullable=True)

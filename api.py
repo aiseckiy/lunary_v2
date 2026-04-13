@@ -3198,7 +3198,6 @@ async def import_price_list(
             name=name,
             sku=sku,
             supplier_article=article if article else None,
-            barcode=article if article else None,
             category="Накладные",
             unit=unit,
             cost_price=cost_price,

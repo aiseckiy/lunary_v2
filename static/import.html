@@ -140,7 +140,7 @@ function showResult(id, state, text) {
   const el = document.getElementById(`result-${id}`);
   el.style.display = 'block';
   el.className = `result result-${state}`;
-  el.textContent = text;
+  el.innerHTML = text;
 }
 
 async function loadStats() {
@@ -203,7 +203,7 @@ async function importPrice() {
     const r = await fetch('/api/import-price-list', { method: 'POST', body: fd });
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail);
-    showResult('price', 'ok', `✅ Обновлено: ${d.updated}, создано новых: ${d.created}`);
+    showResult('price', 'ok', `✅ Создано новых: ${d.created}`);
   } catch(e) { showResult('price', 'err', '❌ ' + e.message); }
   btn.disabled = false; btn.textContent = '📥 Импортировать';
 }

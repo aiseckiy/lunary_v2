@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
@@ -92,7 +92,8 @@ _PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/", "/shop/product/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
                 "/api/history", "/api/admin", "/api/purchases", "/api/alerts",
-                "/merge", "/review", "/api/merge", "/api/import-price-list")
+                "/merge", "/review", "/import", "/api/merge", "/api/import-price-list",
+                "/api/kaspi/import", "/api/reset-products", "/api/fill-articles")
 
 
 def _get_user_from_session(request: Request):
@@ -2614,18 +2615,24 @@ def import_products(db: Session = Depends(get_db)):
 
 
 @app.post("/api/kaspi/import-xml-products")
-def kaspi_import_xml_products(db: Session = Depends(get_db)):
-    """Импорт товаров из ACTIVE.xml (Kaspi каталог) — создаёт товары которых нет по kaspi_sku"""
+async def kaspi_import_xml_products(
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    """Импорт товаров из Kaspi каталога XML — через файл или ACTIVE.xml на сервере"""
     import xml.etree.ElementTree as ET
     from database import Product as _P
     import re
 
-    path = os.path.join(os.path.dirname(__file__), 'ACTIVE.xml')
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="ACTIVE.xml не найден рядом с api.py")
-
-    tree = ET.parse(path)
-    root = tree.getroot()
+    if file:
+        content = await file.read()
+        root = ET.fromstring(content)
+    else:
+        path = os.path.join(os.path.dirname(__file__), 'ACTIVE.xml')
+        if not os.path.exists(path):
+            raise HTTPException(status_code=404, detail="ACTIVE.xml не найден. Загрузите файл.")
+        tree = ET.parse(path)
+        root = tree.getroot()
     # убираем namespace из тегов
     ns = "kaspiShopping"
 
@@ -2723,18 +2730,24 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
 
 
 @app.post("/api/kaspi/import-archive")
-def kaspi_import_archive(db: Session = Depends(get_db)):
-    """Импорт архивных товаров из ARCHIVE.xml — добавляет только новые, существующие не трогает"""
+async def kaspi_import_archive(
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    """Импорт архивных товаров — добавляет только новые, существующие не трогает"""
     import xml.etree.ElementTree as ET
     from database import Product as _P
     import re
 
-    path = os.path.join(os.path.dirname(__file__), 'ARCHIVE.xml')
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="ARCHIVE.xml не найден рядом с api.py")
-
-    tree = ET.parse(path)
-    root = tree.getroot()
+    if file:
+        content = await file.read()
+        root = ET.fromstring(content)
+    else:
+        path = os.path.join(os.path.dirname(__file__), 'ARCHIVE.xml')
+        if not os.path.exists(path):
+            raise HTTPException(status_code=404, detail="ARCHIVE.xml не найден. Загрузите файл.")
+        tree = ET.parse(path)
+        root = tree.getroot()
 
     def tag(el):
         return re.sub(r'\{[^}]+\}', '', el.tag)
@@ -2990,6 +3003,12 @@ def merge_page():
     return FileResponse("static/merge.html")
 
 
+@app.get("/import")
+def import_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("static/import.html")
+
+
 @app.post("/api/fill-articles-from-pricelist")
 def fill_articles_from_pricelist(db: Session = Depends(get_db)):
     """Заполняет barcode/kaspi_article у всех товаров у которых они пустые,
@@ -3078,23 +3097,28 @@ def fill_articles_from_pricelist(db: Session = Depends(get_db)):
 
 
 @app.post("/api/import-price-list")
-def import_price_list(db: Session = Depends(get_db)):
-    """Импортирует закупочные цены из XML прайс-листа в таблицу products.
-    Если товар с таким артикулом уже есть — обновляет cost_price и supplier.
-    Если нет — создаёт новую карточку в категории 'Накладные'.
-    """
+async def import_price_list(
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    """Импортирует закупочные цены из XML прайс-листа в таблицу products."""
     import xml.etree.ElementTree as ET
     import re
     from database import Product as _P
 
-    xml_path = "Закупочные_цены_LUNARY.xml"
-    try:
-        tree = ET.parse(xml_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Не удалось открыть XML: {e}")
+    if file:
+        content = await file.read()
+        root = ET.fromstring(content)
+        товары = root.find("Товары")
+    else:
+        xml_path = "Закупочные_цены_LUNARY.xml"
+        try:
+            tree = ET.parse(xml_path)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Не удалось открыть XML: {e}")
+        root = tree.getroot()
+        товары = root.find("Товары")
 
-    root = tree.getroot()
-    товары = root.find("Товары")
     if товары is None:
         raise HTTPException(status_code=400, detail="Нет тега <Товары> в XML")
 

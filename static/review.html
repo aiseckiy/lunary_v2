@@ -49,9 +49,32 @@ select.filter { padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px
 .ft-article { background: #dbeafe; color: #1e40af; font-family: monospace; }
 .ft-empty   { background: #f3f4f6; color: #9ca3af; }
 
-/* Кнопка карандаш */
+/* Кнопки действий */
 .btn-edit { background: none; border: 1px solid #e5e7eb; border-radius: 7px; padding: 4px 8px; cursor: pointer; font-size: 14px; color: #6b7280; transition: all .15s; flex-shrink: 0; }
 .btn-edit:hover { background: #f3f4f6; border-color: #6c63ff; color: #6c63ff; }
+.btn-ref { background: none; border: 1px solid #ede9fe; border-radius: 7px; padding: 4px 8px; cursor: pointer; font-size: 13px; color: #7c3aed; transition: all .15s; flex-shrink: 0; }
+.btn-ref:hover { background: #f5f3ff; border-color: #7c3aed; }
+
+/* Попап привязки из справочника */
+.ref-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+.ref-modal.open { display:flex; }
+.ref-box { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:500px; box-shadow:0 20px 60px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto; }
+.ref-box-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.ref-target { font-size:12px; color:#6b7280; background:#f9fafb; border-radius:8px; padding:8px 12px; margin-bottom:14px; line-height:1.5; }
+.ref-search { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
+.ref-search:focus { border-color:#6c63ff; }
+.ref-results { margin-top:8px; max-height:260px; overflow-y:auto; border:1px solid #f3f4f6; border-radius:10px; }
+.ref-item { padding:10px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer; transition:background .1s; }
+.ref-item:last-child { border-bottom:none; }
+.ref-item:hover { background:#f5f3ff; }
+.ref-item-name { font-size:13px; font-weight:500; }
+.ref-item-meta { font-size:11px; color:#9ca3af; margin-top:2px; }
+.ref-empty { padding:20px; text-align:center; color:#9ca3af; font-size:13px; }
+.ref-fields { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+.ref-field-chk { display:flex; align-items:center; gap:5px; font-size:12px; cursor:pointer; background:#f3f4f6; border-radius:8px; padding:4px 10px; }
+.ref-field-chk input { accent-color:#6c63ff; }
+.ref-force-row { display:flex; align-items:center; gap:8px; font-size:12px; color:#6b7280; margin-bottom:4px; }
+.ref-force-row input { accent-color:#ef4444; }
 
 /* Инлайн-форма редактирования */
 .edit-form { display: none; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; margin-top: 4px; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
@@ -100,6 +123,7 @@ select.filter { padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px
   </select>
   <button class="btn btn-green" onclick="markAllVisible()">Отметить все ✓</button>
   <button class="btn btn-outline" onclick="unmarkAllVisible()">Снять отметки</button>
+  <button class="btn btn-outline" onclick="fillBrands()" id="btn-brands" title="Авто-заполнить бренды по названию">🏷 Заполнить бренды</button>
 </div>
 
 <div class="list-container" id="list-container">
@@ -201,13 +225,14 @@ function buildRow(p) {
     <input type="checkbox" class="verify-check" ${p.verified ? 'checked' : ''} onchange="toggleVerify(${p.id}, this.checked, this)" title="Отметить как проверен">
     <div class="p-info">
       <div class="p-name">${escHtml(p.name)}</div>
-      <div class="p-sub">${p.sku} · ${p.category}</div>
+      <div class="p-sub">${p.kaspi_sku ? p.kaspi_sku + ' · ' : ''}${p.category || ''}</div>
     </div>
     <div class="fields">
       ${qtyTag}
       ${priceTag}
       ${articleTag}
     </div>
+    <button class="btn-ref" onclick="openRef(${p.id}, ${JSON.stringify(escHtml(p.name)).replace(/'/g,'&#39;')})" title="Найти в справочнике накладных">🗂️</button>
     <button class="btn-edit" onclick="toggleEdit(${p.id})" title="Редактировать">✏️</button>
   `;
   return row;
@@ -357,8 +382,125 @@ function escHtml(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ── Привязка из справочника ────────────────────────────────────────────────
+let refTargetId = null;
+let refTimer = null;
+
+function openRef(productId, productName) {
+  refTargetId = productId;
+  document.getElementById('ref-target-name').textContent = productName;
+  document.getElementById('ref-search').value = '';
+  document.getElementById('ref-results').innerHTML = '<div class="ref-empty">Начни вводить название</div>';
+  document.getElementById('ref-modal').classList.add('open');
+  setTimeout(() => document.getElementById('ref-search').focus(), 50);
+}
+
+function closeRef() {
+  document.getElementById('ref-modal').classList.remove('open');
+  refTargetId = null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('ref-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('ref-modal')) closeRef();
+  });
+});
+
+async function doRefSearch() {
+  const q = document.getElementById('ref-search').value.trim();
+  const el = document.getElementById('ref-results');
+  if (!q) { el.innerHTML = '<div class="ref-empty">Начни вводить название</div>'; return; }
+  el.innerHTML = '<div class="ref-empty">⏳</div>';
+  const r = await fetch(`/api/pricelist/search?q=${encodeURIComponent(q)}&limit=15`);
+  const d = await r.json();
+  if (!d.items?.length) { el.innerHTML = '<div class="ref-empty">Ничего не найдено</div>'; return; }
+  el.innerHTML = d.items.map(i => `
+    <div class="ref-item" onclick="applyRef(${i.id}, '${escHtml(i.name).replace(/'/g,"\\'")}')">
+      <div class="ref-item-name">${escHtml(i.name)}</div>
+      <div class="ref-item-meta">
+        ${i.article ? `<span style="font-family:monospace;color:#6c63ff">${i.article}</span> · ` : ''}
+        ${i.supplier ? `<span>${i.supplier}</span> · ` : ''}
+        ${i.cost_price != null ? `<span style="color:#10b981;font-weight:600">${i.cost_price.toLocaleString()} ₸</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function getRefFields() {
+  return ['cost_price','supplier','supplier_article','name']
+    .filter(f => document.getElementById(`rf-${f}`)?.checked);
+}
+
+async function applyRef(refId, refName) {
+  if (!refTargetId) return;
+  const fields = getRefFields();
+  const force = document.getElementById('rf-force').checked;
+  if (!fields.length) { alert('Выбери хотя бы одно поле'); return; }
+
+  const r = await fetch('/api/merge-confirm', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ pairs: [{ kaspi_id: refTargetId, other_id: refId }], fields, force })
+  });
+  const d = await r.json();
+  if (r.ok && d.merged) {
+    closeRef();
+    const msg = document.createElement('div');
+    msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
+    msg.textContent = `✅ Данные из «${refName}» применены`;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+    // Обновить строку
+    load();
+  } else {
+    alert('Ошибка');
+  }
+}
+
+// ── Авто-заполнение брендов ────────────────────────────────────────────────
+async function fillBrands() {
+  const btn = document.getElementById('btn-brands');
+  btn.disabled = true; btn.textContent = '⏳ Заполняю...';
+  const r = await fetch('/api/fill-brands', { method: 'POST' });
+  const d = await r.json();
+  btn.disabled = false; btn.textContent = '🏷 Заполнить бренды';
+  const msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e40af;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
+  msg.textContent = d.filled > 0 ? `✅ Заполнено брендов: ${d.filled}` : 'Новых брендов не найдено';
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 3000);
+  if (d.filled > 0) load();
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
 Promise.all([loadStats(), loadSuppliers()]).then(() => load());
 </script>
+
+<!-- Попап справочника -->
+<div class="ref-modal" id="ref-modal">
+  <div class="ref-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div class="ref-box-title">🗂️ Найти в справочнике накладных</div>
+      <button onclick="closeRef()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;line-height:1">×</button>
+    </div>
+    <div class="ref-target" id="ref-target-name"></div>
+
+    <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Что перенести:</div>
+    <div class="ref-fields">
+      <label class="ref-field-chk"><input type="checkbox" id="rf-cost_price" checked> 💰 Цена закупа</label>
+      <label class="ref-field-chk"><input type="checkbox" id="rf-supplier" checked> 🏭 Поставщик</label>
+      <label class="ref-field-chk"><input type="checkbox" id="rf-supplier_article" checked> 🔖 Артикул</label>
+      <label class="ref-field-chk"><input type="checkbox" id="rf-name"> 📝 Название</label>
+    </div>
+    <div class="ref-force-row">
+      <input type="checkbox" id="rf-force">
+      <label for="rf-force">Перезаписать уже заполненные поля</label>
+    </div>
+
+    <input class="ref-search" id="ref-search" type="text" placeholder="Поиск по справочнику..." oninput="clearTimeout(refTimer); refTimer=setTimeout(doRefSearch,200)">
+    <div class="ref-results" id="ref-results">
+      <div class="ref-empty">Начни вводить название</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

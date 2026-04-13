@@ -177,6 +177,12 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
       <div class="field-desc">Артикул из накладной / прайс-листа</div>
     </div>
   </label>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f3f4f6">
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#6b7280">
+      <input type="checkbox" id="field-force" style="accent-color:#ef4444;width:14px;height:14px">
+      Перезаписать уже заполненные поля
+    </label>
+  </div>
 </div>
 
 <div class="bottom-bar">
@@ -576,7 +582,7 @@ async function mergeSkuOnly() {
   const r = await fetch('/api/merge-confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pairs, fields: getSelectedFields() }),
+    body: JSON.stringify({ pairs, fields: getSelectedFields(), force: document.getElementById('field-force').checked }),
   });
   const d = await r.json();
 
@@ -610,7 +616,7 @@ async function doMerge() {
   const r = await fetch('/api/merge-confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pairs, fields: getSelectedFields() }),
+    body: JSON.stringify({ pairs, fields: getSelectedFields(), force: document.getElementById('field-force').checked }),
   });
   const d = await r.json();
 

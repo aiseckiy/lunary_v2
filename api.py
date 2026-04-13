@@ -3005,6 +3005,7 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
                 return None
         return val
 
+    force = body.get("force", False)  # перезаписывать даже заполненные поля
     merged = 0
     for pair in selected:
         kaspi_p = db.query(_P).filter(_P.id == pair["kaspi_id"]).first()
@@ -3013,19 +3014,36 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
             continue
 
         if "name" in fields and ref_item.name:
-            kaspi_p.name = ref_item.name
+            if force or not kaspi_p.name:
+                kaspi_p.name = ref_item.name
         if "cost_price" in fields and ref_item.cost_price:
-            kaspi_p.cost_price = ref_item.cost_price
+            if force or not kaspi_p.cost_price:
+                kaspi_p.cost_price = ref_item.cost_price
         if "supplier" in fields and ref_item.supplier:
-            kaspi_p.supplier = ref_item.supplier
+            if force or not kaspi_p.supplier:
+                kaspi_p.supplier = ref_item.supplier
         if "supplier_article" in fields:
             article_val = clean_article(ref_item.article)
-            if article_val and not kaspi_p.supplier_article:
+            if article_val and (force or not kaspi_p.supplier_article):
                 kaspi_p.supplier_article = article_val
 
         merged += 1
     db.commit()
     return {"merged": merged}
+
+
+@app.post("/api/fill-brands")
+def fill_brands(db: Session = Depends(get_db)):
+    """Авто-заполнение бренда по названию товара для всех у кого бренд пустой."""
+    from database import Product as _P
+    filled = 0
+    for p in db.query(_P).filter(_P.brand == None).all():
+        brand = crud.detect_brand(p.name)
+        if brand:
+            p.brand = brand
+            filled += 1
+    db.commit()
+    return {"filled": filled}
 
 
 @app.get("/merge")

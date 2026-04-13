@@ -37,5 +37,6 @@ if __name__ == "__main__":
     api_thread.start()
     print("✅ API запущен на порту 8000")
 
-    print("🤖 Запуск Telegram бота...")
+    print("🤖 Запуск Telegram бота (ожидание 8 сек для rolling deploy)...")
+    import time; time.sleep(8)
     run_bot()

@@ -26,6 +26,7 @@
     { href: '/admin/changelog',  icon: '🚀', label: 'Обновления' },
     { href: '/shop',             icon: '🏪', label: 'Магазин' },
     { href: '/import',           icon: '📥', label: 'Импорт XML' },
+    { href: '/pricelist',        icon: '🗂️', label: 'Накладные' },
     { href: '/merge',            icon: '🔀', label: 'Слияние' },
     { href: '/review',           icon: '✅', label: 'Проверка' },
   ];

@@ -136,6 +136,20 @@ class SyncLog(Base):
     error = Column(String, nullable=True)      # текст ошибки если была
 
 
+class PriceListItem(Base):
+    """Справочник накладных/прайс-листов — только для поиска, не товары на складе."""
+    __tablename__ = "price_list_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, index=True)
+    article = Column(String, nullable=True, index=True)   # артикул производителя
+    supplier = Column(String, nullable=True, index=True)  # поставщик
+    cost_price = Column(Integer, nullable=True)           # закупочная цена
+    unit = Column(String, default="шт")
+    source_file = Column(String, nullable=True)           # имя файла откуда импортировали
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class SiteSetting(Base):
     __tablename__ = "site_settings"
 

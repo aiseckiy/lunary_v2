@@ -1,5 +1,10 @@
 [
   {
+    "hash": "c6001f9",
+    "date": "13.04.2026",
+    "message": "Fix: import.html — убрать undefined, рендерить HTML в статистике; убрать barcode=article"
+  },
+  {
     "hash": "893e0ce",
     "date": "13.04.2026",
     "message": "Merge: выбор полей для переноса, fix артикул в barcode, авто-обновление"

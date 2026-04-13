@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Справочник накладных</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
+.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+.header h1 { font-size: 17px; font-weight: 700; }
+.header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #ede9fe; color: #5b21b6; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Загрузка файла */
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px; }
+.card-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 14px 20px; cursor: pointer; transition: all .15s; color: #9ca3af; font-size: 13px; flex: 1; min-width: 200px; text-align: center; }
+.drop-zone:hover, .drop-zone.drag-over { border-color: #6c63ff; background: #f5f3ff; color: #6c63ff; }
+.drop-zone.has-file { border-color: #10b981; background: #f0fdf4; color: #065f46; }
+.drop-zone input[type=file] { display: none; }
+.btn { padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.btn-primary { background: #6c63ff; color: #fff; }
+.btn-primary:hover { background: #5b52e0; }
+.btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
+.btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+.btn-outline:hover { background: #f9fafb; }
+.result-msg { font-size: 13px; padding: 8px 14px; border-radius: 8px; }
+.result-ok  { background: #d1fae5; color: #065f46; }
+.result-err { background: #fee2e2; color: #991b1b; }
+
+/* Файлы в базе */
+.files-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.file-tag { display: flex; align-items: center; gap: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 5px 10px; font-size: 12px; }
+.file-tag-name { font-weight: 600; }
+.file-tag-count { color: #9ca3af; }
+.file-tag-del { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 14px; line-height: 1; padding: 0 2px; }
+.file-tag-del:hover { color: #b91c1c; }
+
+/* Поиск */
+.search-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; outline: none; }
+.search-input:focus { border-color: #6c63ff; }
+.filter-select { padding: 9px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 13px; outline: none; background: #fff; }
+
+/* Таблица */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+tbody tr { border-bottom: 1px solid #f3f4f6; }
+tbody tr:hover { background: #f9fafb; }
+tbody td { padding: 10px 12px; vertical-align: top; }
+.td-name { font-weight: 500; line-height: 1.4; }
+.td-article { font-family: monospace; font-size: 12px; color: #6c63ff; }
+.td-price { font-weight: 700; color: #10b981; white-space: nowrap; }
+.td-supplier { font-size: 12px; color: #6b7280; }
+.td-file { font-size: 11px; color: #9ca3af; }
+.empty { text-align: center; padding: 60px 20px; color: #9ca3af; }
+.loading { text-align: center; padding: 60px; color: #9ca3af; }
+.count-badge { font-size: 12px; color: #6b7280; margin-left: 4px; }
+
+.highlight { background: #fef08a; border-radius: 2px; padding: 0 1px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <h1>🗂️ Справочник накладных</h1>
+  <div class="header-right">
+    <span class="chip" id="stat-total">—</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Загрузка -->
+  <div class="card">
+    <div class="card-title">📥 Загрузить прайс-лист / накладную (XML)</div>
+    <div class="upload-row">
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <input type="file" id="file-input" accept=".xml" onchange="onFileSelect(this)">
+        <span id="file-name">Перетащи XML или нажми</span>
+      </div>
+      <button class="btn btn-primary" id="btn-import" onclick="doImport()" disabled>📥 Загрузить</button>
+      <div id="import-result" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Файлы в базе -->
+  <div class="card" id="files-card" style="display:none">
+    <div class="card-title">📂 Загруженные файлы</div>
+    <div class="files-list" id="files-list"></div>
+  </div>
+
+  <!-- Поиск -->
+  <div class="card">
+    <div class="search-bar">
+      <input class="search-input" type="text" placeholder="🔍 Поиск по названию или артикулу..." id="search-input" oninput="onSearch()">
+      <select class="filter-select" id="supplier-filter" onchange="onSearch()">
+        <option value="">Все поставщики</option>
+      </select>
+      <span class="count-badge" id="count-badge"></span>
+    </div>
+  </div>
+
+  <!-- Результаты -->
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Наименование</th>
+            <th>Артикул</th>
+            <th>Поставщик</th>
+            <th>Цена закупки</th>
+            <th>Ед.</th>
+            <th>Файл</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="6" class="loading">⏳ Загрузка...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let selectedFile = null;
+let searchTimer = null;
+
+// ── Загрузка файла ─────────────────────────────────────────────────────────
+function onFileSelect(input) {
+  const f = input.files[0];
+  if (!f) return;
+  selectedFile = f;
+  document.getElementById('file-name').textContent = f.name;
+  document.getElementById('drop-zone').classList.add('has-file');
+  document.getElementById('btn-import').disabled = false;
+}
+function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function onDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (!f || !f.name.endsWith('.xml')) return;
+  selectedFile = f;
+  document.getElementById('file-name').textContent = f.name;
+  document.getElementById('drop-zone').classList.add('has-file');
+  document.getElementById('btn-import').disabled = false;
+}
+
+async function doImport() {
+  if (!selectedFile) return;
+  const btn = document.getElementById('btn-import');
+  btn.disabled = true; btn.textContent = '⏳ Загружаю...';
+  const resultEl = document.getElementById('import-result');
+  resultEl.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('file', selectedFile);
+  try {
+    const r = await fetch('/api/pricelist/import', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail);
+    resultEl.innerHTML = `<div class="result-msg result-ok">✅ Загружено: ${d.created} позиций${d.replaced ? ` (заменено старых: ${d.replaced})` : ''}</div>`;
+    resultEl.style.display = 'block';
+    // Сбросить
+    selectedFile = null;
+    document.getElementById('file-name').textContent = 'Перетащи XML или нажми';
+    document.getElementById('drop-zone').classList.remove('has-file');
+    document.getElementById('file-input').value = '';
+    await loadStats();
+    await loadSuppliers();
+    doSearch();
+  } catch(e) {
+    resultEl.innerHTML = `<div class="result-msg result-err">❌ ${e.message}</div>`;
+    resultEl.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = '📥 Загрузить';
+}
+
+// ── Статистика и файлы ─────────────────────────────────────────────────────
+async function loadStats() {
+  const r = await fetch('/api/pricelist/stats');
+  const d = await r.json();
+  document.getElementById('stat-total').textContent = `Всего: ${d.total}`;
+
+  const filesCard = document.getElementById('files-card');
+  const filesList = document.getElementById('files-list');
+  const files = Object.entries(d.by_file || {}).filter(([f]) => f && f !== 'null');
+  if (files.length) {
+    filesCard.style.display = 'block';
+    filesList.innerHTML = files.map(([fname, cnt]) => `
+      <div class="file-tag">
+        <span class="file-tag-name">${fname}</span>
+        <span class="file-tag-count">${cnt} поз.</span>
+        <button class="file-tag-del" onclick="deleteFile('${fname}')" title="Удалить этот файл">✕</button>
+      </div>`).join('');
+  } else {
+    filesCard.style.display = 'none';
+  }
+}
+
+async function deleteFile(fname) {
+  if (!confirm(`Удалить все записи из файла «${fname}»?`)) return;
+  const r = await fetch(`/api/pricelist/clear?source_file=${encodeURIComponent(fname)}`, { method: 'DELETE' });
+  const d = await r.json();
+  await loadStats();
+  await loadSuppliers();
+  doSearch();
+}
+
+// ── Поставщики фильтр ──────────────────────────────────────────────────────
+async function loadSuppliers() {
+  const r = await fetch('/api/pricelist/suppliers');
+  const d = await r.json();
+  const sel = document.getElementById('supplier-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Все поставщики</option>' +
+    d.suppliers.map(s => `<option value="${s}" ${s === cur ? 'selected' : ''}>${s}</option>`).join('');
+}
+
+// ── Поиск ──────────────────────────────────────────────────────────────────
+function onSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(doSearch, 250);
+}
+
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  const supplier = document.getElementById('supplier-filter').value;
+  const params = new URLSearchParams({ limit: 200 });
+  if (q) params.set('q', q);
+  if (supplier) params.set('supplier', supplier);
+
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">⏳</td></tr>';
+
+  const r = await fetch('/api/pricelist/search?' + params);
+  const d = await r.json();
+
+  document.getElementById('count-badge').textContent = d.total > 200
+    ? `Показано 200 из ${d.total}` : `${d.total} позиций`;
+
+  if (!d.items.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Ничего не найдено</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = d.items.map(i => `<tr>
+    <td class="td-name">${hl(i.name, q)}</td>
+    <td class="td-article">${hl(i.article, q)}</td>
+    <td class="td-supplier">${i.supplier}</td>
+    <td class="td-price">${i.cost_price != null ? i.cost_price.toLocaleString() + ' ₸' : '—'}</td>
+    <td>${i.unit}</td>
+    <td class="td-file">${i.source_file}</td>
+  </tr>`).join('');
+}
+
+function hl(text, q) {
+  if (!q || !text) return text || '';
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return text;
+  return text.slice(0, idx) + `<span class="highlight">${text.slice(idx, idx + q.length)}</span>` + text.slice(idx + q.length);
+}
+
+// ── Инициализация ──────────────────────────────────────────────────────────
+(async () => {
+  await loadStats();
+  await loadSuppliers();
+  doSearch();
+})();
+</script>
+</body>
+</html>

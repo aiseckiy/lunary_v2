@@ -92,8 +92,8 @@ _PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/", "/shop/product/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
                 "/api/history", "/api/admin", "/api/purchases", "/api/alerts",
-                "/merge", "/review", "/import", "/api/merge", "/api/import-price-list",
-                "/api/kaspi/import", "/api/reset-products", "/api/fill-articles")
+                "/merge", "/review", "/import", "/pricelist", "/api/merge", "/api/import-price-list",
+                "/api/kaspi/import", "/api/reset-products", "/api/fill-articles", "/api/pricelist")
 
 
 def _get_user_from_session(request: Request):
@@ -3042,6 +3042,136 @@ def reset_nakladnye(db: Session = Depends(get_db)):
 def import_page():
     from fastapi.responses import FileResponse
     return FileResponse("static/import.html")
+
+
+# ── Справочник накладных (price_list_items) ───────────────────────────────────
+
+@app.post("/api/pricelist/import")
+async def pricelist_import(
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    """Импортирует XML в справочник накладных. Старые записи из того же файла заменяются."""
+    import xml.etree.ElementTree as ET
+    from database import PriceListItem
+
+    if not file:
+        raise HTTPException(status_code=400, detail="Файл не передан")
+
+    content = await file.read()
+    filename = file.filename or "unknown.xml"
+
+    try:
+        root = ET.fromstring(content)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Ошибка парсинга XML: {e}")
+
+    товары = root.find("Товары")
+    if товары is None:
+        raise HTTPException(status_code=400, detail="Нет тега <Товары> в XML")
+
+    # Удаляем старые записи из этого файла
+    deleted = db.query(PriceListItem).filter(PriceListItem.source_file == filename).delete()
+
+    created = 0
+    for товар in товары.findall("Товар"):
+        name_el    = товар.find("Наименование")
+        price_el   = товар.find("ЦенаЗакупки")
+        supplier_el= товар.find("Поставщик")
+        article_el = товар.find("Артикул")
+        unit_el    = товар.find("ЕдИзм")
+
+        name     = (name_el.text or "").strip()    if name_el    is not None else ""
+        supplier = (supplier_el.text or "").strip() if supplier_el is not None else ""
+        article  = (article_el.text or "").strip() if article_el is not None else ""
+        unit     = (unit_el.text or "шт").strip()  if unit_el    is not None else "шт"
+        cost_raw = (price_el.text or "0").strip()  if price_el   is not None else "0"
+
+        if not name:
+            continue
+        try:
+            cost_price = int(float(cost_raw))
+        except Exception:
+            cost_price = None
+
+        db.add(PriceListItem(
+            name=name,
+            article=article or None,
+            supplier=supplier or None,
+            cost_price=cost_price,
+            unit=unit,
+            source_file=filename,
+        ))
+        created += 1
+
+    db.commit()
+    return {"created": created, "replaced": deleted, "file": filename}
+
+
+@app.get("/api/pricelist/search")
+def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, db: Session = Depends(get_db)):
+    """Поиск по справочнику накладных."""
+    from database import PriceListItem
+    from sqlalchemy import or_
+    query = db.query(PriceListItem)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(or_(
+            PriceListItem.name.ilike(like),
+            PriceListItem.article.ilike(like),
+        ))
+    if supplier:
+        query = query.filter(PriceListItem.supplier == supplier)
+    items = query.order_by(PriceListItem.name).limit(limit).all()
+    return {
+        "items": [
+            {
+                "id": i.id,
+                "name": i.name,
+                "article": i.article or "",
+                "supplier": i.supplier or "",
+                "cost_price": i.cost_price,
+                "unit": i.unit,
+                "source_file": i.source_file or "",
+            }
+            for i in items
+        ],
+        "total": query.count(),
+    }
+
+
+@app.get("/api/pricelist/suppliers")
+def pricelist_suppliers(db: Session = Depends(get_db)):
+    from database import PriceListItem
+    rows = db.query(PriceListItem.supplier).distinct().filter(PriceListItem.supplier != None).all()
+    return {"suppliers": sorted([r[0] for r in rows if r[0]])}
+
+
+@app.get("/api/pricelist/stats")
+def pricelist_stats(db: Session = Depends(get_db)):
+    from database import PriceListItem
+    from sqlalchemy import func
+    total = db.query(PriceListItem).count()
+    by_file = dict(db.query(PriceListItem.source_file, func.count()).group_by(PriceListItem.source_file).all())
+    by_supplier = dict(db.query(PriceListItem.supplier, func.count()).group_by(PriceListItem.supplier).all())
+    return {"total": total, "by_file": by_file, "by_supplier": by_supplier}
+
+
+@app.delete("/api/pricelist/clear")
+def pricelist_clear(source_file: str = "", db: Session = Depends(get_db)):
+    from database import PriceListItem
+    q = db.query(PriceListItem)
+    if source_file:
+        q = q.filter(PriceListItem.source_file == source_file)
+    deleted = q.delete()
+    db.commit()
+    return {"deleted": deleted}
+
+
+@app.get("/pricelist")
+def pricelist_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("static/pricelist.html")
 
 
 @app.post("/api/fill-articles-from-pricelist")

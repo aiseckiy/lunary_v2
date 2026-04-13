@@ -3012,12 +3012,12 @@ def import_page():
 @app.post("/api/fill-articles-from-pricelist")
 def fill_articles_from_pricelist(db: Session = Depends(get_db)):
     """Заполняет barcode/kaspi_article у всех товаров у которых они пустые,
-    матчинг по нечёткому имени из Закупочные_цены_LUNARY.xml"""
+    матчинг по нечёткому имени из products_info.xml"""
     import xml.etree.ElementTree as ET
     import re
     from database import Product as _P
 
-    xml_path = "Закупочные_цены_LUNARY.xml"
+    xml_path = "products_info.xml"
     try:
         tree = ET.parse(xml_path)
     except Exception as e:
@@ -3111,7 +3111,7 @@ async def import_price_list(
         root = ET.fromstring(content)
         товары = root.find("Товары")
     else:
-        xml_path = "Закупочные_цены_LUNARY.xml"
+        xml_path = "products_info.xml"
         try:
             tree = ET.parse(xml_path)
         except Exception as e:

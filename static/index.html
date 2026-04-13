@@ -193,6 +193,36 @@
         <div style="height:1px;background:#f3f4f6;margin:4px 0"></div>
       </div>
     </div>
+    <!-- Фильтр: не хватает данных -->
+    <div style="position:relative">
+      <button class="filter-drop-btn" id="missing-btn" onclick="toggleDrop('missing')">
+        <span id="missing-label">Не заполнено</span> <span style="font-size:10px">▼</span>
+      </button>
+      <div class="fdrop-menu" id="missing-menu" style="min-width:210px">
+        <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
+        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="miss-price"   onchange="toggleMissing()" style="accent-color:#6c63ff"> Цены продажи
+        </label>
+        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="miss-cost"    onchange="toggleMissing()" style="accent-color:#6c63ff"> Закупочной цены
+        </label>
+        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="miss-article" onchange="toggleMissing()" style="accent-color:#6c63ff"> Артикула производителя
+        </label>
+        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="miss-supplier" onchange="toggleMissing()" style="accent-color:#6c63ff"> Поставщика
+        </label>
+        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="miss-barcode" onchange="toggleMissing()" style="accent-color:#6c63ff"> Штрихкода
+        </label>
+        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="miss-stock"   onchange="toggleMissing()" style="accent-color:#6c63ff"> Остатка (= 0)
+        </label>
+        <div style="padding:8px 12px 4px">
+          <button onclick="clearMissing()" style="font-size:12px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:0">Сбросить всё</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="pagination-top"></div>
@@ -463,6 +493,7 @@ let allProducts = [];
 let activeCats = new Set();
 let activeBrands = new Set();
 let showLow = false;
+let missingFields = new Set(); // 'price','cost','article','supplier','barcode','stock'
 let selectedId = null;
 const PAGE_SIZE = 80;
 let currentPage = 1;
@@ -607,6 +638,48 @@ function setBrand(brand) {
   updateBrandBtn(); saveFilters(); render();
 }
 
+function toggleMissing() {
+  missingFields.clear();
+  if (document.getElementById('miss-price').checked)    missingFields.add('price');
+  if (document.getElementById('miss-cost').checked)     missingFields.add('cost');
+  if (document.getElementById('miss-article').checked)  missingFields.add('article');
+  if (document.getElementById('miss-supplier').checked) missingFields.add('supplier');
+  if (document.getElementById('miss-barcode').checked)  missingFields.add('barcode');
+  if (document.getElementById('miss-stock').checked)    missingFields.add('stock');
+
+  const btn = document.getElementById('missing-btn');
+  if (missingFields.size) {
+    btn.classList.add('active');
+    document.getElementById('missing-label').textContent = `Не заполнено (${missingFields.size})`;
+  } else {
+    btn.classList.remove('active');
+    document.getElementById('missing-label').textContent = 'Не заполнено';
+  }
+  currentPage = 1;
+  saveFilters();
+  render();
+}
+
+function matchMissing(p) {
+  if (!missingFields.size) return true;
+  // Товар проходит фильтр если хотя бы одно из выбранных полей пусто
+  for (const f of missingFields) {
+    if (f === 'price'    && !p.price)            return true;
+    if (f === 'cost'     && !p.cost_price)        return true;
+    if (f === 'article'  && !p.supplier_article)  return true;
+    if (f === 'supplier' && !p.supplier)          return true;
+    if (f === 'barcode'  && !p.barcode)           return true;
+    if (f === 'stock'    && p.stock === 0)         return true;
+  }
+  return false;
+}
+
+function clearMissing() {
+  ['miss-price','miss-cost','miss-article','miss-supplier','miss-barcode','miss-stock']
+    .forEach(id => document.getElementById(id).checked = false);
+  toggleMissing();
+}
+
 function toggleLow() {
   currentPage = 1;
   showLow = !showLow;
@@ -639,6 +712,7 @@ function goPage(p) {
     if (showLow && !pr.low) return false;
     if (activeCats.size && !activeCats.has(pr.category || 'Общее')) return false;
     if (activeBrands.size && !activeBrands.has(getBrand(pr))) return false;
+    if (!matchMissing(pr)) return false;
     return true;
   });
   const pages = Math.ceil(list.length / PAGE_SIZE);
@@ -655,6 +729,7 @@ function render() {
     if (showLow && !p.low) return false;
     if (activeCats.size && !activeCats.has(p.category || 'Общее')) return false;
     if (activeBrands.size && !activeBrands.has(getBrand(p))) return false;
+    if (!matchMissing(p)) return false;
     return true;
   });
 

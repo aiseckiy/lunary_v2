@@ -1179,12 +1179,13 @@ def shop_page():
 # ─── Публичный API магазина ───────────────────────────────────
 @app.get("/api/store/products")
 def store_products(db: Session = Depends(get_db)):
-    """Публичный список товаров для магазина (только с ценой и в наличии)"""
+    """Публичный список товаров для магазина — только Kaspi-карточки с ценой"""
     from database import Product as _P, Movement as _M
     from sqlalchemy import func
     stocks = (
         db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
         .outerjoin(_M, _M.product_id == _P.id)
+        .filter(_P.category == "Kaspi")
         .group_by(_P.id)
         .all()
     )
@@ -1212,7 +1213,7 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
     row = (
         db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
         .outerjoin(_M, _M.product_id == _P.id)
-        .filter(_P.id == product_id)
+        .filter(_P.id == product_id, _P.category == "Kaspi")
         .group_by(_P.id)
         .first()
     )

@@ -1,5 +1,10 @@
 [
   {
+    "hash": "42ddade",
+    "date": "14.04.2026",
+    "message": "Feat: привязка из справочника в проверке, повторное слияние, авто-бренды"
+  },
+  {
     "hash": "aa38827",
     "date": "14.04.2026",
     "message": "Refactor: удалить поле sku из Product, везде использовать kaspi_sku и supplier_article"

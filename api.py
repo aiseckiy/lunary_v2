@@ -1012,7 +1012,7 @@ def patch_product(product_id: int, data: ProductPatch, db: Session = Depends(get
         if data.barcode:
             conflict = db.query(Product).filter(Product.barcode == data.barcode, Product.id != product_id).first()
             if conflict:
-                raise HTTPException(status_code=409, detail=f"Штрихкод уже привязан к товару «{conflict.name}» (арт. {conflict.sku})")
+                raise HTTPException(status_code=409, detail=f"Штрихкод уже привязан к товару «{conflict.name}» (арт. {conflict.supplier_article or conflict.kaspi_sku or '?'})")
         p.barcode = data.barcode
     db.commit()
     return {"ok": True}
@@ -1221,7 +1221,7 @@ def store_products(db: Session = Depends(get_db)):
         {
             "id": s[0].id,
             "name": s[0].name,
-            "sku": s[0].sku,
+            "kaspi_sku": s[0].kaspi_sku,
             "category": s[0].category or "Другое",
             "brand": s[0].brand or "",
             "price": s[0].price,
@@ -2888,7 +2888,7 @@ def merge_preview(db: Session = Depends(get_db)):
     matched_ref_ids = set()
 
     # Индексы для Kaspi товаров
-    kaspi_by_sku = {kp.sku.upper(): kp for kp in kaspi_products if kp.sku}
+    kaspi_by_sku = {kp.kaspi_sku.upper(): kp for kp in kaspi_products if kp.kaspi_sku}
     kaspi_by_barcode = {kp.barcode.upper(): kp for kp in kaspi_products if kp.barcode}
     kaspi_by_article = {kp.kaspi_article.upper(): kp for kp in kaspi_products if kp.kaspi_article}
 
@@ -2967,13 +2967,13 @@ def merge_preview(db: Session = Depends(get_db)):
     # Сортируем: сначала точные, потом fuzzy по убыванию score
     pairs.sort(key=lambda p: (-int(p["match_type"] == "sku"), -p["score"]))
 
-    kaspi_list = [{"id": kp.id, "name": kp.name, "sku": kp.sku, "kaspi_sku": kp.kaspi_sku,
+    kaspi_list = [{"id": kp.id, "name": kp.name, "kaspi_sku": kp.kaspi_sku,
                    "price": kp.price, "brand": kp.brand} for kp in kaspi_products]
     other_list = [{"id": ri.id, "name": ri.name, "sku": ri.article or "",
                    "cost_price": ri.cost_price, "supplier": ri.supplier or ""} for ri in ref_items]
 
     # Синхронизированные — Kaspi товары у которых уже есть cost_price или supplier
-    synced = [{"id": kp.id, "name": kp.name, "sku": kp.sku, "kaspi_sku": kp.kaspi_sku,
+    synced = [{"id": kp.id, "name": kp.name, "kaspi_sku": kp.kaspi_sku,
                "price": kp.price, "cost_price": kp.cost_price, "supplier": kp.supplier or "",
                "supplier_article": kp.supplier_article or ""}
               for kp in kaspi_products if kp.cost_price or kp.supplier]

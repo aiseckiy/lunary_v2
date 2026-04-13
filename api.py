@@ -3002,9 +3002,8 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
         )
         db.delete(other_p)
         merged += 1
-        deleted += 1
     db.commit()
-    return {"merged": merged, "deleted": deleted}
+    return {"merged": merged}
 
 
 @app.get("/merge")

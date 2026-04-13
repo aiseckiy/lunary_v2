@@ -150,9 +150,11 @@ async function load() {
   kaspiInPairs = new Set(data.pairs.map(p => p.kaspi_id));
   otherInPairs = new Set(data.pairs.map(p => p.other_id));
 
+  const skuPairs = data.pairs.filter(p => p.match_type === 'sku').length;
+  const fuzzyPairs = data.pairs.filter(p => p.match_type === 'fuzzy').length;
   document.getElementById('stat-kaspi').textContent = `Kaspi: ${data.total_kaspi}`;
   document.getElementById('stat-other').textContent = `Накладные: ${data.total_other}`;
-  document.getElementById('stat-pairs').textContent = `Совпадений: ${data.pairs.length}`;
+  document.getElementById('stat-pairs').textContent = `Совпадений: ${data.pairs.length} (🎯${skuPairs} 🔍${fuzzyPairs})`;
   document.getElementById('stat-unmatched').textContent = `Без пары: ${data.unmatched_other.length}`;
 
   renderKaspi();
@@ -377,7 +379,7 @@ async function mergeSkuOnly() {
 
   const bar = document.getElementById('result-bar');
   bar.style.display = 'block';
-  bar.textContent = `✅ По артикулу объединено: ${d.merged}, удалено дублей: ${d.deleted}`;
+  bar.textContent = `✅ По артикулу объединено: ${d.merged} пар`;
 
   btn.disabled = false;
   btn.textContent = '🎯 Объединить все по артикулу';
@@ -411,7 +413,7 @@ async function doMerge() {
 
   const bar = document.getElementById('result-bar');
   bar.style.display = 'block';
-  bar.textContent = `✅ Объединено: ${d.merged}, удалено дублей: ${d.deleted}`;
+  bar.textContent = `✅ Объединено: ${d.merged} пар`;
 
   selectedPairIds.clear();
   await load();

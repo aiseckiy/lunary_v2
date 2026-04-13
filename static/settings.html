@@ -321,7 +321,7 @@ async function importKaspiXml() {
     const r = await fetch('/api/kaspi/import-xml-products', { method: 'POST' });
     const d = await r.json();
     result.style.background = '#ecfdf5';
-    result.textContent = `✅ Удалено старых: ${d.deleted}, добавлено: ${d.added}, пропущено: ${d.skipped}`;
+    result.textContent = `✅ Удалено старых: ${d.deleted}, добавлено: ${d.added}`;
   } catch(e) {
     result.style.background = '#fef2f2';
     result.textContent = '❌ Ошибка: ' + e.message;

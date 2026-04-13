@@ -2704,7 +2704,7 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
                 changed = True
             if changed:
                 db.commit()
-                updated += 1
+                skipped += 1
             else:
                 skipped += 1
             continue

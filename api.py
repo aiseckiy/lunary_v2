@@ -2722,6 +2722,96 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
     return {"deleted": len(old_ids), "added": added}
 
 
+@app.post("/api/kaspi/import-archive")
+def kaspi_import_archive(db: Session = Depends(get_db)):
+    """Импорт архивных товаров из ARCHIVE.xml — добавляет только новые, существующие не трогает"""
+    import xml.etree.ElementTree as ET
+    from database import Product as _P
+    import re
+
+    path = os.path.join(os.path.dirname(__file__), 'ARCHIVE.xml')
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="ARCHIVE.xml не найден рядом с api.py")
+
+    tree = ET.parse(path)
+    root = tree.getroot()
+
+    def tag(el):
+        return re.sub(r'\{[^}]+\}', '', el.tag)
+
+    def find_text(el, name):
+        for child in el:
+            if tag(child) == name:
+                return (child.text or "").strip()
+        return ""
+
+    # Индекс существующих kaspi_sku
+    existing_skus = {p.kaspi_sku for p in db.query(_P).filter(_P.kaspi_sku != None).all()}
+
+    offers_el = None
+    for child in root:
+        if tag(child) == "offers":
+            offers_el = child
+            break
+
+    if offers_el is None:
+        raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
+
+    added = 0
+    skipped = 0
+
+    for offer in offers_el:
+        if tag(offer) != "offer":
+            continue
+        kaspi_sku = offer.attrib.get("sku", "").strip()
+        if not kaspi_sku:
+            continue
+
+        # Пропускаем если уже есть
+        if kaspi_sku in existing_skus:
+            skipped += 1
+            continue
+
+        model = find_text(offer, "model")
+        brand = find_text(offer, "brand")
+
+        price = None
+        for child in offer:
+            if tag(child) == "cityprices":
+                for cp in child:
+                    if tag(cp) == "cityprice":
+                        try:
+                            price = int(cp.text.strip())
+                        except Exception:
+                            pass
+                        break
+                break
+
+        base_sku = f"KSP_{kaspi_sku}"
+        sku = base_sku
+        counter = 1
+        while db.query(_P).filter(_P.sku == sku).first():
+            sku = f"{base_sku}_{counter}"
+            counter += 1
+
+        new_p = _P(
+            name=model or kaspi_sku,
+            sku=sku,
+            kaspi_sku=kaspi_sku,
+            brand=brand or None,
+            price=price,
+            category="Kaspi",
+            unit="шт",
+            min_stock=1,
+        )
+        db.add(new_p)
+        existing_skus.add(kaspi_sku)
+        added += 1
+
+    db.commit()
+    return {"added": added, "skipped": skipped}
+
+
 # ── Слияние накладных и Kaspi товаров ────────────────────────────────────────
 
 @app.get("/api/merge-preview")

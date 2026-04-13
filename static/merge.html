@@ -84,6 +84,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
 <div class="header">
   <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🔀 Слияние товаров</h1>
+  <button class="btn btn-outline btn-sm" onclick="importArchive()" id="btn-archive" style="margin-left:8px">📦 Импорт архива</button>
   <div class="stats-chips">
     <span class="chip chip-blue" id="stat-kaspi">Kaspi: —</span>
     <span class="chip chip-green" id="stat-other">Накладные: —</span>
@@ -414,6 +415,23 @@ async function doMerge() {
 
   selectedPairIds.clear();
   await load();
+}
+
+async function importArchive() {
+  const btn = document.getElementById('btn-archive');
+  btn.disabled = true;
+  btn.textContent = '⏳ Импортирую...';
+  try {
+    const r = await fetch('/api/kaspi/import-archive', { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Ошибка');
+    alert(`✅ Архив импортирован: добавлено ${d.added}, пропущено (уже есть) ${d.skipped}`);
+    await load();
+  } catch(e) {
+    alert('❌ ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '📦 Импорт архива';
 }
 
 load();

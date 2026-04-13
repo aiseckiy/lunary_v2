@@ -2637,16 +2637,16 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
                 return (child.text or "").strip()
         return ""
 
-    # Удаляем все старые товары категории Kaspi и их движения
-    old_products = db.query(_P).filter(_P.category == "Kaspi").all()
+    # Удаляем все старые товары с kaspi_sku (из любой категории) и их движения
+    from database import Movement
+    old_products = db.query(_P).filter(_P.kaspi_sku != None).all()
     old_ids = [p.id for p in old_products]
     if old_ids:
-        from database import Movement
         db.query(Movement).filter(Movement.product_id.in_(old_ids)).delete(synchronize_session=False)
         db.query(_P).filter(_P.id.in_(old_ids)).delete(synchronize_session=False)
         db.commit()
 
-    added = skipped = 0
+    added = 0
 
     offers_el = None
     for child in root:
@@ -2691,24 +2691,6 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
                         break
                 break
 
-        # Проверяем: есть ли уже товар с таким kaspi_sku
-        existing = db.query(_P).filter(_P.kaspi_sku == kaspi_sku).first()
-        if existing:
-            # обновляем только если цена/бренд изменились
-            changed = False
-            if price and existing.price != price:
-                existing.price = price
-                changed = True
-            if brand and existing.brand != brand:
-                existing.brand = brand
-                changed = True
-            if changed:
-                db.commit()
-                skipped += 1
-            else:
-                skipped += 1
-            continue
-
         # Генерируем уникальный SKU для нашей БД
         base_sku = f"KSP_{kaspi_sku}"
         sku = base_sku
@@ -2736,7 +2718,7 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
         added += 1
 
     db.commit()
-    return {"deleted": len(old_ids), "added": added, "skipped": skipped}
+    return {"deleted": len(old_ids), "added": added}
 
 
 # ── Дизайн-токены (тема) ─────────────────────────────────────────────────────

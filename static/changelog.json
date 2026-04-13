@@ -1,5 +1,10 @@
 [
   {
+    "hash": "6b97f41",
+    "date": "13.04.2026",
+    "message": "Fix: UnboundLocalError updated в kaspi_import_xml_products"
+  },
+  {
     "hash": "4635b95",
     "date": "13.04.2026",
     "message": "Fix: добавить импорт SiteSetting и Product в kaspi_export_xml"

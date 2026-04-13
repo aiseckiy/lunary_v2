@@ -150,6 +150,19 @@ class PriceListItem(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class UploadedFile(Base):
+    """История загруженных файлов."""
+    __tablename__ = "uploaded_files"
+
+    id = Column(Integer, primary_key=True, index=True)
+    original_name = Column(String, nullable=False)       # оригинальное имя файла
+    saved_name    = Column(String, nullable=True)        # имя сохранённого файла (с timestamp)
+    file_type     = Column(String, nullable=False)       # kaspi_active | kaspi_archive | price_list | pricelist_ref
+    size_bytes    = Column(Integer, nullable=True)
+    records       = Column(Integer, nullable=True)       # сколько записей импортировано
+    uploaded_at   = Column(DateTime, default=datetime.utcnow)
+
+
 class SiteSetting(Base):
     __tablename__ = "site_settings"
 

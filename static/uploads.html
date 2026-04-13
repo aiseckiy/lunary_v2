@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Загруженные файлы</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
+.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 17px; font-weight: 700; }
+
+.container { max-width: 900px; margin: 32px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
+
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; padding: 4px 0; }
+
+.file-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
+.file-card.missing { opacity: .6; }
+.file-icon { font-size: 28px; flex-shrink: 0; }
+.file-info { flex: 1; min-width: 0; }
+.file-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-meta { font-size: 12px; color: #9ca3af; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+.file-meta span { display: flex; align-items: center; gap: 3px; }
+.type-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 5px; }
+.badge-kaspi-active  { background: #dbeafe; color: #1e40af; }
+.badge-kaspi-archive { background: #ede9fe; color: #5b21b6; }
+.badge-price-list    { background: #fef9c3; color: #92400e; }
+.badge-pricelist-ref { background: #d1fae5; color: #065f46; }
+
+.file-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn { padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+.btn-outline:hover { background: #f9fafb; }
+.btn-danger  { background: #fff; color: #ef4444; border: 1px solid #fca5a5; }
+.btn-danger:hover  { background: #fee2e2; }
+.btn-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+.empty { text-align: center; padding: 60px 20px; color: #9ca3af; font-size: 14px; }
+.loading { text-align: center; padding: 60px; color: #9ca3af; }
+
+.group-header { display: flex; align-items: center; justify-content: space-between; }
+.count-chip { font-size: 12px; color: #9ca3af; }
+
+.disk-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #92400e; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <h1>📁 Загруженные файлы</h1>
+  <span style="font-size:13px;color:#9ca3af;margin-left:8px" id="total-count"></span>
+</div>
+
+<div class="container" id="container">
+  <div class="loading">⏳ Загрузка...</div>
+</div>
+
+<script>
+const TYPE_ICONS = {
+  kaspi_active:  '📦',
+  kaspi_archive: '🗂️',
+  price_list:    '💰',
+  pricelist_ref: '📋',
+};
+const BADGE_CLASS = {
+  kaspi_active:  'badge-kaspi-active',
+  kaspi_archive: 'badge-kaspi-archive',
+  price_list:    'badge-price-list',
+  pricelist_ref: 'badge-pricelist-ref',
+};
+const GROUP_NAMES = {
+  kaspi_active:  '📦 Kaspi ACTIVE — каталог товаров',
+  kaspi_archive: '🗂️ Kaspi ARCHIVE — архивные товары',
+  price_list:    '💰 Прайс-листы (накладные)',
+  pricelist_ref: '📋 Справочник накладных',
+};
+
+function fmtSize(bytes) {
+  if (!bytes) return '—';
+  if (bytes < 1024) return bytes + ' Б';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+  return (bytes / 1024 / 1024).toFixed(1) + ' МБ';
+}
+
+async function load() {
+  const container = document.getElementById('container');
+  const r = await fetch('/api/uploads');
+  const files = await r.json();
+
+  document.getElementById('total-count').textContent = `${files.length} файлов`;
+
+  if (!files.length) {
+    container.innerHTML = `
+      <div class="disk-notice">ℹ️ Файлы появятся здесь после первой загрузки через страницу <a href="/import" style="color:#92400e">Импорт XML</a> или <a href="/pricelist" style="color:#92400e">Справочник накладных</a></div>
+      <div class="empty">Нет загруженных файлов</div>`;
+    return;
+  }
+
+  // Группируем по типу
+  const groups = {};
+  for (const f of files) {
+    (groups[f.file_type] = groups[f.file_type] || []).push(f);
+  }
+
+  const ORDER = ['kaspi_active', 'kaspi_archive', 'price_list', 'pricelist_ref'];
+  let html = `<div class="disk-notice">⚠️ Файлы хранятся на сервере. После перезапуска Railway файлы могут исчезнуть с диска — но история загрузок сохраняется в базе.</div>`;
+
+  for (const type of ORDER) {
+    const group = groups[type];
+    if (!group) continue;
+
+    html += `<div class="group-header">
+      <div class="section-title">${GROUP_NAMES[type] || type}</div>
+      <span class="count-chip">${group.length} файл(ов)</span>
+    </div>`;
+
+    for (const f of group) {
+      const icon = TYPE_ICONS[f.file_type] || '📄';
+      const badge = BADGE_CLASS[f.file_type] || '';
+      const dlBtn = f.exists
+        ? `<a href="/api/uploads/${f.id}/download" class="btn btn-outline" title="Скачать">⬇️ Скачать</a>`
+        : `<span class="btn btn-outline btn-disabled" title="Файл удалён с диска">⬇️ Недоступен</span>`;
+
+      html += `<div class="file-card ${f.exists ? '' : 'missing'}">
+        <div class="file-icon">${icon}</div>
+        <div class="file-info">
+          <div class="file-name">${f.original_name}</div>
+          <div class="file-meta">
+            <span>📅 ${f.uploaded_at}</span>
+            <span>💾 ${fmtSize(f.size_bytes)}</span>
+            ${f.records != null ? `<span>📝 ${f.records} записей</span>` : ''}
+            ${!f.exists ? '<span style="color:#ef4444">⚠️ файл удалён с диска</span>' : ''}
+          </div>
+          <span class="type-badge ${badge}">${f.type_label}</span>
+        </div>
+        <div class="file-actions">
+          ${dlBtn}
+          <button class="btn btn-danger" onclick="deleteFile(${f.id}, this)">🗑</button>
+        </div>
+      </div>`;
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+async function deleteFile(id, btn) {
+  if (!confirm('Удалить запись об этом файле?')) return;
+  btn.disabled = true;
+  const r = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
+  if (r.ok) load();
+  else btn.disabled = false;
+}
+
+load();
+</script>
+</body>
+</html>

@@ -13,6 +13,31 @@ import urllib.parse
 from datetime import datetime
 
 from database import get_db, init_db
+
+# ── Папка для загрузок ────────────────────────────────────────────────────────
+UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+
+def _save_upload(content: bytes, original_name: str, file_type: str, records: int, db):
+    """Сохраняет файл на диск и пишет запись в uploaded_files."""
+    from database import UploadedFile
+    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    safe_name = original_name.replace(" ", "_")
+    saved_name = f"{ts}_{file_type}_{safe_name}"
+    path = os.path.join(UPLOADS_DIR, saved_name)
+    try:
+        with open(path, "wb") as f:
+            f.write(content)
+    except Exception:
+        saved_name = None  # если диск недоступен — не критично
+    db.add(UploadedFile(
+        original_name=original_name,
+        saved_name=saved_name,
+        file_type=file_type,
+        size_bytes=len(content),
+        records=records,
+    ))
+    db.commit()
 import crud
 import kaspi as kaspi_module
 
@@ -92,8 +117,8 @@ _PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/", "/shop/product/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
                 "/api/history", "/api/admin", "/api/purchases", "/api/alerts",
-                "/merge", "/review", "/import", "/pricelist", "/api/merge", "/api/import-price-list",
-                "/api/kaspi/import", "/api/reset-products", "/api/fill-articles", "/api/pricelist")
+                "/merge", "/review", "/import", "/pricelist", "/uploads", "/api/merge", "/api/import-price-list",
+                "/api/kaspi/import", "/api/reset-products", "/api/fill-articles", "/api/pricelist", "/api/uploads")
 
 
 def _get_user_from_session(request: Request):
@@ -2645,13 +2670,16 @@ async def kaspi_import_xml_products(
 
     if file:
         content = await file.read()
+        original_name = file.filename or "ACTIVE.xml"
         root = ET.fromstring(content)
     else:
         path = os.path.join(os.path.dirname(__file__), 'ACTIVE.xml')
         if not os.path.exists(path):
             raise HTTPException(status_code=404, detail="ACTIVE.xml не найден. Загрузите файл.")
-        tree = ET.parse(path)
-        root = tree.getroot()
+        with open(path, "rb") as f:
+            content = f.read()
+        original_name = "ACTIVE.xml"
+        root = ET.fromstring(content)
     # убираем namespace из тегов
     ns = "kaspiShopping"
 
@@ -2745,6 +2773,7 @@ async def kaspi_import_xml_products(
         added += 1
 
     db.commit()
+    _save_upload(content, original_name, "kaspi_active", added, db)
     return {"deleted": len(old_ids), "added": added}
 
 
@@ -2760,13 +2789,16 @@ async def kaspi_import_archive(
 
     if file:
         content = await file.read()
+        original_name = file.filename or "ARCHIVE.xml"
         root = ET.fromstring(content)
     else:
         path = os.path.join(os.path.dirname(__file__), 'ARCHIVE.xml')
         if not os.path.exists(path):
             raise HTTPException(status_code=404, detail="ARCHIVE.xml не найден. Загрузите файл.")
-        tree = ET.parse(path)
-        root = tree.getroot()
+        with open(path, "rb") as f:
+            content = f.read()
+        original_name = "ARCHIVE.xml"
+        root = ET.fromstring(content)
 
     def tag(el):
         return re.sub(r'\{[^}]+\}', '', el.tag)
@@ -2841,6 +2873,7 @@ async def kaspi_import_archive(
         added += 1
 
     db.commit()
+    _save_upload(content, original_name, "kaspi_archive", added, db)
     return {"added": added, "skipped": skipped}
 
 
@@ -3111,6 +3144,7 @@ async def pricelist_import(
         created += 1
 
     db.commit()
+    _save_upload(content, filename, "pricelist_ref", created, db)
     return {"created": created, "replaced": deleted, "file": filename}
 
 
@@ -3178,6 +3212,65 @@ def pricelist_clear(source_file: str = "", db: Session = Depends(get_db)):
 def pricelist_page():
     from fastapi.responses import FileResponse
     return FileResponse("static/pricelist.html")
+
+
+# ── Загруженные файлы ─────────────────────────────────────────────────────────
+
+@app.get("/api/uploads")
+def list_uploads(db: Session = Depends(get_db)):
+    from database import UploadedFile
+    files = db.query(UploadedFile).order_by(UploadedFile.uploaded_at.desc()).all()
+    type_labels = {
+        "kaspi_active":  "Kaspi ACTIVE",
+        "kaspi_archive": "Kaspi ARCHIVE",
+        "price_list":    "Прайс (накладные)",
+        "pricelist_ref": "Справочник",
+    }
+    return [
+        {
+            "id": f.id,
+            "original_name": f.original_name,
+            "saved_name": f.saved_name,
+            "file_type": f.file_type,
+            "type_label": type_labels.get(f.file_type, f.file_type),
+            "size_bytes": f.size_bytes,
+            "records": f.records,
+            "uploaded_at": f.uploaded_at.strftime("%d.%m.%Y %H:%M") if f.uploaded_at else "",
+            "exists": os.path.exists(os.path.join(UPLOADS_DIR, f.saved_name)) if f.saved_name else False,
+        }
+        for f in files
+    ]
+
+@app.get("/api/uploads/{upload_id}/download")
+def download_upload(upload_id: int, db: Session = Depends(get_db)):
+    from database import UploadedFile
+    from fastapi.responses import FileResponse
+    f = db.query(UploadedFile).filter(UploadedFile.id == upload_id).first()
+    if not f or not f.saved_name:
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    path = os.path.join(UPLOADS_DIR, f.saved_name)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Файл удалён с диска")
+    return FileResponse(path, filename=f.original_name, media_type="application/octet-stream")
+
+@app.delete("/api/uploads/{upload_id}")
+def delete_upload(upload_id: int, db: Session = Depends(get_db)):
+    from database import UploadedFile
+    f = db.query(UploadedFile).filter(UploadedFile.id == upload_id).first()
+    if not f:
+        raise HTTPException(status_code=404, detail="Не найдено")
+    if f.saved_name:
+        path = os.path.join(UPLOADS_DIR, f.saved_name)
+        if os.path.exists(path):
+            os.remove(path)
+    db.delete(f)
+    db.commit()
+    return {"ok": True}
+
+@app.get("/uploads")
+def uploads_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("static/uploads.html")
 
 
 @app.post("/api/fill-articles-from-pricelist")
@@ -3279,15 +3372,18 @@ async def import_price_list(
 
     if file:
         content = await file.read()
+        original_name = file.filename or "price_list.xml"
         root = ET.fromstring(content)
         товары = root.find("Товары")
     else:
         xml_path = "products_info.xml"
+        original_name = "products_info.xml"
         try:
-            tree = ET.parse(xml_path)
+            with open(xml_path, "rb") as f:
+                content = f.read()
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Не удалось открыть XML: {e}")
-        root = tree.getroot()
+        root = ET.fromstring(content)
         товары = root.find("Товары")
 
     if товары is None:
@@ -3346,6 +3442,7 @@ async def import_price_list(
         created += 1
 
     db.commit()
+    _save_upload(content, original_name, "price_list", created, db)
     return {"created": created}
 
 

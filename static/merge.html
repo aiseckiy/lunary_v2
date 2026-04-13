@@ -593,6 +593,18 @@ function selectRef(refId, e) {
 async function mergeOneRef(e) {
   e.stopPropagation();
   if (!selectedKaspiId || !selectedRefId) return;
+
+  // Предупреждение если у Kaspi-товара уже есть пара
+  let forceOverwrite = document.getElementById('field-force').checked;
+  if (kaspiInPairs.has(selectedKaspiId)) {
+    const kaspiItem = data.kaspi_list.find(k => k.id === selectedKaspiId);
+    const existing = [...data.pairs, ...manualPairs].find(p => p.kaspi_id === selectedKaspiId);
+    const existingName = existing ? existing.other_name : '(другой товар)';
+    const ok = confirm(`⚠️ У «${kaspiItem?.name || ''}» уже есть пара:\n«${existingName}»\n\nПерезаписать данные из нового справочника?`);
+    if (!ok) return;
+    forceOverwrite = true; // раз подтвердил — перезаписываем
+  }
+
   const btn = e.target;
   btn.disabled = true; btn.textContent = '⏳';
   try {
@@ -601,7 +613,7 @@ async function mergeOneRef(e) {
     const r = await fetch('/api/merge-confirm', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ pairs: [{ kaspi_id: selectedKaspiId, other_id: selectedRefId }], fields, force: document.getElementById('field-force').checked }),
+      body: JSON.stringify({ pairs: [{ kaspi_id: selectedKaspiId, other_id: selectedRefId }], fields, force: forceOverwrite }),
     });
     const d = await r.json();
     if (!r.ok) { showToast(`❌ ${d.detail || r.status}`, '#991b1b'); return; }

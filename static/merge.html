@@ -377,7 +377,6 @@ function selectKaspi(id) {
         });
         // Убираем из unmatched_other
         data.unmatched_other = data.unmatched_other.filter(r => r.id !== pendingLinkId);
-        data.pairs = [...data.pairs, manualPairs[manualPairs.length - 1]];
         // Авто-выбор этой пары
         selectedPairIds.add(key);
         updateMergeBtn();
@@ -431,7 +430,8 @@ function renderOther() {
 }
 
 function renderPairs(el) {
-  let pairs = data.pairs;
+  // Объединяем автоматические пары и вручную добавленные
+  let pairs = [...data.pairs, ...manualPairs];
   // Если выбран Kaspi-товар слева — показываем только его пары
   if (selectedKaspiId !== null) {
     pairs = pairs.filter(p => p.kaspi_id === selectedKaspiId);
@@ -502,28 +502,48 @@ function pairHtml(p) {
   </div>`;
 }
 
+function showToast(msg, color = '#065f46') {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${color};color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);white-space:nowrap`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
 async function mergeOne(kaspiId, otherId, e) {
   e.stopPropagation();
-  const r = await fetch('/api/merge-confirm', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      pairs: [{ kaspi_id: kaspiId, other_id: otherId }],
-      fields: getSelectedFields(),
-      force: document.getElementById('field-force').checked,
-    }),
-  });
-  const d = await r.json();
-  if (d.merged) {
-    // Убираем пару из списка и показываем зелёный флаш
-    const bar = document.getElementById('result-bar');
-    bar.style.display = 'block';
-    bar.textContent = `✅ Слито`;
-    setTimeout(() => bar.style.display = 'none', 2000);
-    // Помечаем пару как синхронизированную локально
-    const pair = data.pairs.find(p => p.kaspi_id === kaspiId && p.other_id === otherId);
+  const btn = e.target;
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  try {
+    const fields = getSelectedFields();
+    if (!fields.length) {
+      showToast('⚙️ Выбери хотя бы одно поле внизу (кнопка Поля)', '#92400e');
+      return;
+    }
+    const r = await fetch('/api/merge-confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairs: [{ kaspi_id: kaspiId, other_id: otherId }],
+        fields,
+        force: document.getElementById('field-force').checked,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(`❌ Ошибка: ${d.detail || r.status}`, '#991b1b'); return; }
+
+    showToast('✅ Слито!');
+    // Помечаем пару как слитую локально (в data.pairs и в manualPairs)
+    const pair = [...data.pairs, ...manualPairs].find(p => p.kaspi_id === kaspiId && p.other_id === otherId);
     if (pair) pair._synced = true;
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch(e2) {}
     renderOther();
+  } catch(err) {
+    showToast(`❌ ${err.message}`, '#991b1b');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Слить →';
   }
 }
 

@@ -2725,36 +2725,102 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
 
 @app.get("/api/merge-preview")
 def merge_preview(db: Session = Depends(get_db)):
+    import re
     from database import Product as _P
     kaspi_products = db.query(_P).filter(_P.category == "Kaspi").all()
     other_products = db.query(_P).filter(_P.category != "Kaspi").all()
 
+    STOPWORDS = {"и","в","на","с","для","из","по","шт","мл","л","кг","г","см","мм","м","гр","х","x","the","of","for","pcs"}
+
+    def words(text):
+        return {w for w in re.split(r'[\s\-_/,.()\[\]]+', (text or "").lower()) if len(w) > 2 and w not in STOPWORDS}
+
+    def match_score(a_words, b_words):
+        if not a_words or not b_words:
+            return 0
+        common = a_words & b_words
+        return len(common) / max(len(a_words), len(b_words))
+
+    # Предвычислим слова для Kaspi
+    kaspi_words = {kp.id: words(kp.name) for kp in kaspi_products}
+
     pairs = []
     unmatched_other = []
+    matched_other_ids = set()
 
+    # Сначала точные совпадения по артикулу (SKU в названии)
     for op in other_products:
         if not op.sku:
-            unmatched_other.append({"id": op.id, "name": op.name, "sku": op.sku, "category": op.category})
             continue
         matches = [kp for kp in kaspi_products if op.sku.upper() in kp.name.upper()]
-        if matches:
-            for kp in matches:
+        for kp in matches:
+            pairs.append({
+                "kaspi_id": kp.id,
+                "kaspi_name": kp.name,
+                "kaspi_sku": kp.kaspi_sku,
+                "kaspi_price": kp.price,
+                "other_id": op.id,
+                "other_name": op.name,
+                "other_sku": op.sku,
+                "other_category": op.category,
+                "other_cost_price": op.cost_price,
+                "other_supplier": op.supplier,
+                "match_type": "sku",
+                "score": 1.0,
+            })
+            matched_other_ids.add(op.id)
+
+    # Нечёткий поиск по словам для всех остальных
+    for op in other_products:
+        op_words = words(op.name)
+        best_score = 0
+        best_kp = None
+        for kp in kaspi_products:
+            score = match_score(op_words, kaspi_words[kp.id])
+            if score > best_score:
+                best_score = score
+                best_kp = kp
+        if best_kp and best_score >= 0.4:
+            # Не дублируем если уже есть SKU-совпадение с тем же товаром
+            already = any(p["kaspi_id"] == best_kp.id and p["other_id"] == op.id for p in pairs)
+            if not already:
                 pairs.append({
-                    "kaspi_id": kp.id,
-                    "kaspi_name": kp.name,
-                    "kaspi_sku": kp.kaspi_sku,
-                    "kaspi_price": kp.price,
+                    "kaspi_id": best_kp.id,
+                    "kaspi_name": best_kp.name,
+                    "kaspi_sku": best_kp.kaspi_sku,
+                    "kaspi_price": best_kp.price,
                     "other_id": op.id,
                     "other_name": op.name,
                     "other_sku": op.sku,
                     "other_category": op.category,
                     "other_cost_price": op.cost_price,
                     "other_supplier": op.supplier,
+                    "match_type": "fuzzy",
+                    "score": round(best_score, 2),
                 })
-        else:
-            unmatched_other.append({"id": op.id, "name": op.name, "sku": op.sku, "category": op.category})
+                matched_other_ids.add(op.id)
+        elif op.id not in matched_other_ids:
+            unmatched_other.append({
+                "id": op.id, "name": op.name, "sku": op.sku,
+                "category": op.category, "cost_price": op.cost_price, "supplier": op.supplier,
+            })
 
-    return {"pairs": pairs, "unmatched_other": unmatched_other, "total_kaspi": len(kaspi_products)}
+    # Сортируем: сначала точные, потом fuzzy по убыванию score
+    pairs.sort(key=lambda p: (-int(p["match_type"] == "sku"), -p["score"]))
+
+    kaspi_list = [{"id": kp.id, "name": kp.name, "sku": kp.sku, "kaspi_sku": kp.kaspi_sku,
+                   "price": kp.price, "brand": kp.brand, "category": kp.category} for kp in kaspi_products]
+    other_list = [{"id": op.id, "name": op.name, "sku": op.sku, "category": op.category,
+                   "cost_price": op.cost_price, "supplier": op.supplier, "brand": op.brand} for op in other_products]
+
+    return {
+        "pairs": pairs,
+        "unmatched_other": unmatched_other,
+        "kaspi_list": kaspi_list,
+        "other_list": other_list,
+        "total_kaspi": len(kaspi_products),
+        "total_other": len(other_products),
+    }
 
 
 @app.post("/api/merge-confirm")

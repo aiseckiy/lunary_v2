@@ -5,211 +5,378 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Слияние товаров</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
-  .header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
-  .header h1 { font-size: 18px; font-weight: 600; }
-  .header .stats { font-size: 13px; color: #6b7280; margin-left: auto; }
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-  .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-  .btn { padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all .15s; }
-  .btn-primary { background: #6c63ff; color: #fff; }
-  .btn-primary:hover { background: #5b52e0; }
-  .btn-primary:disabled { background: #a5a3d6; cursor: not-allowed; }
-  .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
-  .btn-outline:hover { background: #f9fafb; }
-  .btn-danger { background: #ef4444; color: #fff; }
-  .btn-danger:hover { background: #dc2626; }
-  .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #374151; }
-  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-  th { background: #f9fafb; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; padding: 10px 14px; text-align: left; border-bottom: 1px solid #e5e7eb; }
-  td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
-  tr:last-child td { border-bottom: none; }
-  tr.selected { background: #f0f0ff; }
-  .sku { font-size: 11px; color: #6c63ff; font-family: monospace; }
-  .cat-tag { display: inline-block; background: #e5e7eb; color: #374151; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
-  .price { font-weight: 600; color: #10b981; }
-  .cost { font-weight: 600; color: #f59e0b; }
-  .supplier-tag { font-size: 11px; color: #6b7280; }
-  .arrow { color: #6c63ff; font-size: 18px; text-align: center; }
-  .no-data { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
-  .loading { text-align: center; padding: 60px; color: #6b7280; }
-  .result-bar { background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 10px; padding: 14px 18px; font-size: 14px; color: #065f46; margin-bottom: 20px; display: none; }
-  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #e5e7eb; padding: 4px; border-radius: 10px; width: fit-content; }
-  .tab { padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #6b7280; }
-  .tab.active { background: #fff; color: #1a1a2e; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-  .highlight { background: #fef9c3; border-radius: 3px; padding: 0 2px; }
-  .select-all-row { background: #f9fafb; }
-  input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #6c63ff; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
+
+.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 17px; font-weight: 700; }
+.stats-chips { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.chip-blue { background: #ede9fe; color: #5b21b6; }
+.chip-green { background: #d1fae5; color: #065f46; }
+.chip-yellow { background: #fef9c3; color: #92400e; }
+.chip-red { background: #fee2e2; color: #991b1b; }
+
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; height: calc(100vh - 55px); }
+.panel { display: flex; flex-direction: column; border-right: 1px solid #e5e7eb; overflow: hidden; }
+.panel:last-child { border-right: none; }
+.panel-header { padding: 14px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.panel-title { font-size: 14px; font-weight: 700; }
+.panel-search { flex: 1; padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; }
+.panel-search:focus { border-color: #6c63ff; }
+.panel-body { overflow-y: auto; flex: 1; }
+
+.tabs-bar { display: flex; gap: 0; background: #f9fafb; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+.ptab { padding: 9px 16px; font-size: 13px; font-weight: 500; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; }
+.ptab.active { color: #6c63ff; border-bottom-color: #6c63ff; background: #fff; }
+
+.product-item { padding: 10px 16px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .1s; display: flex; align-items: flex-start; gap: 10px; }
+.product-item:hover { background: #f9fafb; }
+.product-item.matched { background: #f0fdf4; }
+.product-item.matched:hover { background: #dcfce7; }
+.product-item.selected { background: #ede9fe; }
+.p-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
+.p-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.p-sku { font-family: monospace; font-size: 11px; color: #6c63ff; }
+.p-price { font-size: 12px; font-weight: 600; color: #10b981; }
+.p-cost { font-size: 12px; font-weight: 600; color: #f59e0b; }
+.tag { display: inline-block; background: #e5e7eb; color: #374151; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-right: 3px; }
+.tag-kaspi { background: #dbeafe; color: #1e40af; }
+.match-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; flex-shrink: 0; margin-top: 2px; }
+.badge-sku { background: #d1fae5; color: #065f46; }
+.badge-fuzzy { background: #fef9c3; color: #92400e; }
+.score { font-size: 10px; color: #9ca3af; }
+
+.pair-item { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 8px; }
+.pair-item:hover { background: #fafafa; }
+.pair-row { display: flex; gap: 8px; align-items: flex-start; }
+.pair-side { flex: 1; background: #f9fafb; border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.pair-side.kaspi { background: #eff6ff; }
+.pair-side.other { background: #fefce8; }
+.pair-arrow { font-size: 18px; color: #6c63ff; align-self: center; flex-shrink: 0; }
+.pair-actions { display: flex; gap: 8px; align-items: center; }
+.pair-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #9ca3af; margin-bottom: 3px; }
+.highlight { background: #fef08a; border-radius: 3px; padding: 0 1px; }
+
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e5e7eb; padding: 12px 24px; display: flex; align-items: center; gap: 12px; z-index: 100; }
+.btn { padding: 8px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.btn-primary { background: #6c63ff; color: #fff; }
+.btn-primary:hover { background: #5b52e0; }
+.btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
+.btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+.btn-outline:hover { background: #f9fafb; }
+.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 8px; }
+.btn-merge-pair { background: #6c63ff; color: #fff; }
+.btn-skip { background: #f3f4f6; color: #6b7280; }
+.selected-count { font-size: 13px; color: #6b7280; margin-right: auto; }
+
+.result-bar { background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #065f46; display: none; }
+.empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 13px; }
+.loading { text-align: center; padding: 60px; color: #9ca3af; }
+
+input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #6c63ff; flex-shrink: 0; margin-top: 2px; }
+
+.section-divider { padding: 6px 16px; background: #f3f4f6; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e5e7eb; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:22px">←</a>
+  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🔀 Слияние товаров</h1>
-  <div class="stats" id="stats">Загрузка...</div>
+  <div class="stats-chips">
+    <span class="chip chip-blue" id="stat-kaspi">Kaspi: —</span>
+    <span class="chip chip-green" id="stat-other">Накладные: —</span>
+    <span class="chip chip-yellow" id="stat-pairs">Совпадений: —</span>
+    <span class="chip chip-red" id="stat-unmatched">Без пары: —</span>
+  </div>
 </div>
 
-<div class="container">
-  <div id="result-bar" class="result-bar"></div>
-
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('pairs')">Совпадения <span id="pairs-count"></span></div>
-    <div class="tab" onclick="showTab('unmatched')">Без пары <span id="unmatched-count"></span></div>
-  </div>
-
-  <!-- Пары -->
-  <div id="tab-pairs">
-    <div class="toolbar">
-      <button class="btn btn-outline" onclick="selectAll()">Выбрать все</button>
-      <button class="btn btn-outline" onclick="deselectAll()">Снять все</button>
-      <button class="btn btn-primary" id="btn-merge" onclick="doMerge()" disabled>Объединить выбранные</button>
+<div class="layout">
+  <!-- Левая панель: Kaspi товары -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📦 Kaspi</span>
+      <input class="panel-search" type="text" placeholder="Поиск..." oninput="filterKaspi(this.value)" id="search-kaspi">
     </div>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:16px">
-      Найдены товары из накладных, артикул которых встречается в названии Kaspi-товара.<br>
-      Отметь пары для объединения: данные (закупочная цена, поставщик, артикул) перенесутся в Kaspi-карточку, дубль удалится.
-    </p>
-    <div id="pairs-table"><div class="loading">⏳ Загрузка...</div></div>
+    <div class="tabs-bar">
+      <div class="ptab active" onclick="switchKaspiTab('all', this)">Все</div>
+      <div class="ptab" onclick="switchKaspiTab('matched', this)">С парой</div>
+      <div class="ptab" onclick="switchKaspiTab('unmatched', this)">Без пары</div>
+    </div>
+    <div class="panel-body" id="kaspi-list"><div class="loading">⏳</div></div>
   </div>
 
-  <!-- Без пары -->
-  <div id="tab-unmatched" style="display:none">
-    <p style="font-size:13px;color:#6b7280;margin-bottom:16px">
-      Товары из накладных, для которых не нашлось Kaspi-аналога по артикулу.
-    </p>
-    <div id="unmatched-table"><div class="loading">⏳ Загрузка...</div></div>
+  <!-- Правая панель: Накладные + совпадения -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">🧾 Накладные</span>
+      <input class="panel-search" type="text" placeholder="Поиск..." oninput="filterOther(this.value)" id="search-other">
+    </div>
+    <div class="tabs-bar">
+      <div class="ptab active" onclick="switchOtherTab('pairs', this)">Совпадения</div>
+      <div class="ptab" onclick="switchOtherTab('all', this)">Все товары</div>
+      <div class="ptab" onclick="switchOtherTab('unmatched', this)">Без пары</div>
+    </div>
+    <div class="panel-body" id="other-list"><div class="loading">⏳</div></div>
   </div>
+</div>
+
+<div class="bottom-bar">
+  <div id="result-bar" class="result-bar"></div>
+  <span class="selected-count" id="selected-count">Выберите пары для объединения</span>
+  <button class="btn btn-outline btn-sm" onclick="selectAllPairs()">Выбрать все совпадения</button>
+  <button class="btn btn-primary" id="btn-merge" onclick="doMerge()" disabled>Объединить выбранные</button>
 </div>
 
 <script>
-let pairsData = [];
-let unmatchedData = [];
-let selectedPairs = new Set();
+let data = null;
+let selectedPairIds = new Set(); // "kaspi_id:other_id"
+let kaspiTab = 'all';
+let otherTab = 'pairs';
+let kaspiSearch = '';
+let otherSearch = '';
+
+// Узнаём какие kaspi_id и other_id участвуют в парах
+let kaspiInPairs = new Set();
+let otherInPairs = new Set();
 
 async function load() {
   const r = await fetch('/api/merge-preview');
-  const d = await r.json();
-  pairsData = d.pairs;
-  unmatchedData = d.unmatched_other;
+  data = await r.json();
 
-  document.getElementById('stats').textContent =
-    `Kaspi-товаров: ${d.total_kaspi} | Совпадений: ${d.pairs.length} | Без пары: ${d.unmatched_other.length}`;
-  document.getElementById('pairs-count').textContent = `(${d.pairs.length})`;
-  document.getElementById('unmatched-count').textContent = `(${d.unmatched_other.length})`;
+  kaspiInPairs = new Set(data.pairs.map(p => p.kaspi_id));
+  otherInPairs = new Set(data.pairs.map(p => p.other_id));
 
-  renderPairs();
-  renderUnmatched();
+  document.getElementById('stat-kaspi').textContent = `Kaspi: ${data.total_kaspi}`;
+  document.getElementById('stat-other').textContent = `Накладные: ${data.total_other}`;
+  document.getElementById('stat-pairs').textContent = `Совпадений: ${data.pairs.length}`;
+  document.getElementById('stat-unmatched').textContent = `Без пары: ${data.unmatched_other.length}`;
+
+  renderKaspi();
+  renderOther();
 }
 
-function highlightSku(name, sku) {
+function hl(text, query) {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return text.slice(0, idx) + `<span class="highlight">${text.slice(idx, idx + query.length)}</span>` + text.slice(idx + query.length);
+}
+
+function hlSku(name, sku) {
   if (!sku) return name;
   const idx = name.toUpperCase().indexOf(sku.toUpperCase());
   if (idx === -1) return name;
   return name.slice(0, idx) + `<span class="highlight">${name.slice(idx, idx + sku.length)}</span>` + name.slice(idx + sku.length);
 }
 
-function renderPairs() {
-  const el = document.getElementById('pairs-table');
-  if (!pairsData.length) {
-    el.innerHTML = '<div class="no-data">Совпадений не найдено</div>';
-    return;
+// ── Kaspi панель ──────────────────────────────────────────────────────────────
+function renderKaspi() {
+  const el = document.getElementById('kaspi-list');
+  if (!data) return;
+  let items = data.kaspi_list;
+  if (kaspiTab === 'matched') items = items.filter(p => kaspiInPairs.has(p.id));
+  if (kaspiTab === 'unmatched') items = items.filter(p => !kaspiInPairs.has(p.id));
+  if (kaspiSearch) items = items.filter(p =>
+    p.name.toLowerCase().includes(kaspiSearch) ||
+    (p.kaspi_sku || '').toLowerCase().includes(kaspiSearch)
+  );
+
+  if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+
+  el.innerHTML = items.map(p => {
+    const hasPair = kaspiInPairs.has(p.id);
+    return `<div class="product-item ${hasPair ? 'matched' : ''}">
+      <div style="flex:1;min-width:0">
+        <div class="p-name">${hl(p.name, kaspiSearch)}</div>
+        <div class="p-meta">
+          <span class="p-sku">${p.kaspi_sku || p.sku || ''}</span>
+          ${p.price ? `<span class="p-price" style="margin-left:6px">${p.price.toLocaleString()} ₸</span>` : ''}
+          ${p.brand ? `<span class="tag">${p.brand}</span>` : ''}
+        </div>
+      </div>
+      ${hasPair ? '<span class="match-badge badge-sku">✓ пара</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function switchKaspiTab(tab, el) {
+  kaspiTab = tab;
+  document.querySelectorAll('.panel:first-child .ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderKaspi();
+}
+
+function filterKaspi(v) {
+  kaspiSearch = v.toLowerCase();
+  renderKaspi();
+}
+
+// ── Другая панель ─────────────────────────────────────────────────────────────
+function renderOther() {
+  const el = document.getElementById('other-list');
+  if (!data) return;
+
+  if (otherTab === 'pairs') {
+    renderPairs(el);
+  } else if (otherTab === 'all') {
+    renderAllOther(el);
+  } else {
+    renderUnmatched(el);
   }
-  let html = `<table>
-    <thead><tr>
-      <th><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
-      <th>Kaspi-товар</th>
-      <th></th>
-      <th>Товар из накладной</th>
-      <th>Закупочная цена</th>
-      <th>Поставщик</th>
-    </tr></thead><tbody>`;
-  pairsData.forEach((p, i) => {
-    html += `<tr id="row-${i}">
-      <td><input type="checkbox" onchange="togglePair(${i}, this)" data-i="${i}"></td>
-      <td>
-        <div style="font-weight:500">${highlightSku(p.kaspi_name, p.other_sku)}</div>
-        <div class="sku">${p.kaspi_sku || ''}</div>
-        ${p.kaspi_price ? `<div class="price">${p.kaspi_price.toLocaleString()} ₸</div>` : ''}
-      </td>
-      <td class="arrow">→</td>
-      <td>
-        <div style="font-weight:500">${p.other_name}</div>
-        <div class="sku">${p.other_sku}</div>
-        <span class="cat-tag">${p.other_category}</span>
-      </td>
-      <td class="cost">${p.other_cost_price ? p.other_cost_price.toLocaleString() + ' ₸' : '—'}</td>
-      <td class="supplier-tag">${p.other_supplier || '—'}</td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
+}
+
+function renderPairs(el) {
+  let pairs = data.pairs;
+  if (otherSearch) pairs = pairs.filter(p =>
+    p.kaspi_name.toLowerCase().includes(otherSearch) ||
+    p.other_name.toLowerCase().includes(otherSearch) ||
+    (p.other_sku || '').toLowerCase().includes(otherSearch)
+  );
+
+  if (!pairs.length) { el.innerHTML = '<div class="empty">Совпадений не найдено</div>'; return; }
+
+  const skuPairs = pairs.filter(p => p.match_type === 'sku');
+  const fuzzyPairs = pairs.filter(p => p.match_type === 'fuzzy');
+
+  let html = '';
+  if (skuPairs.length) {
+    html += `<div class="section-divider">🎯 По артикулу — ${skuPairs.length}</div>`;
+    html += skuPairs.map(p => pairHtml(p)).join('');
+  }
+  if (fuzzyPairs.length) {
+    html += `<div class="section-divider">🔍 По названию (нечёткий) — ${fuzzyPairs.length}</div>`;
+    html += fuzzyPairs.map(p => pairHtml(p)).join('');
+  }
   el.innerHTML = html;
 }
 
-function renderUnmatched() {
-  const el = document.getElementById('unmatched-table');
-  if (!unmatchedData.length) {
-    el.innerHTML = '<div class="no-data">Все товары из накладных имеют пару 🎉</div>';
-    return;
-  }
-  let html = `<table>
-    <thead><tr>
-      <th>Название</th>
-      <th>Артикул (SKU)</th>
-      <th>Категория</th>
-    </tr></thead><tbody>`;
-  unmatchedData.forEach(p => {
-    html += `<tr>
-      <td>${p.name}</td>
-      <td class="sku">${p.sku || '—'}</td>
-      <td><span class="cat-tag">${p.category || '—'}</span></td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+function pairHtml(p) {
+  const key = `${p.kaspi_id}:${p.other_id}`;
+  const checked = selectedPairIds.has(key) ? 'checked' : '';
+  const kaspiName = p.match_type === 'sku' ? hlSku(p.kaspi_name, p.other_sku) : hl(p.kaspi_name, otherSearch);
+  return `<div class="pair-item">
+    <div class="pair-row">
+      <input type="checkbox" ${checked} onchange="togglePair('${key}', this)">
+      <div class="pair-side kaspi">
+        <div class="pair-label">Kaspi</div>
+        <div class="p-name">${kaspiName}</div>
+        <div class="p-meta">
+          <span class="p-sku">${p.kaspi_sku || ''}</span>
+          ${p.kaspi_price ? `<span class="p-price" style="margin-left:6px">${p.kaspi_price.toLocaleString()} ₸</span>` : ''}
+        </div>
+      </div>
+      <div class="pair-arrow">⇄</div>
+      <div class="pair-side other">
+        <div class="pair-label">Накладная</div>
+        <div class="p-name">${hl(p.other_name, otherSearch)}</div>
+        <div class="p-meta">
+          <span class="p-sku">${p.other_sku || ''}</span>
+          <span class="tag">${p.other_category || ''}</span>
+          ${p.other_cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.other_cost_price.toLocaleString()} ₸</span>` : ''}
+          ${p.other_supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.other_supplier}</span>` : ''}
+        </div>
+      </div>
+    </div>
+    <div style="padding-left:25px">
+      <span class="match-badge ${p.match_type === 'sku' ? 'badge-sku' : 'badge-fuzzy'}">
+        ${p.match_type === 'sku' ? '🎯 артикул' : `🔍 ~${Math.round(p.score * 100)}%`}
+      </span>
+    </div>
+  </div>`;
 }
 
-function togglePair(i, chk) {
-  if (chk.checked) selectedPairs.add(i);
-  else selectedPairs.delete(i);
-  document.getElementById(`row-${i}`).classList.toggle('selected', chk.checked);
-  document.getElementById('btn-merge').disabled = selectedPairs.size === 0;
+function renderAllOther(el) {
+  let items = data.other_list;
+  if (otherSearch) items = items.filter(p =>
+    p.name.toLowerCase().includes(otherSearch) ||
+    (p.sku || '').toLowerCase().includes(otherSearch)
+  );
+  if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+  el.innerHTML = items.map(p => {
+    const hasPair = otherInPairs.has(p.id);
+    return `<div class="product-item ${hasPair ? 'matched' : ''}">
+      <div style="flex:1;min-width:0">
+        <div class="p-name">${hl(p.name, otherSearch)}</div>
+        <div class="p-meta">
+          <span class="p-sku">${p.sku || ''}</span>
+          <span class="tag">${p.category || ''}</span>
+          ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
+          ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
+        </div>
+      </div>
+      ${hasPair ? '<span class="match-badge badge-sku">✓ пара</span>' : ''}
+    </div>`;
+  }).join('');
 }
 
-function toggleAll(chk) {
-  document.querySelectorAll('[data-i]').forEach(c => {
-    c.checked = chk.checked;
-    const i = parseInt(c.dataset.i);
-    if (chk.checked) selectedPairs.add(i);
-    else selectedPairs.delete(i);
-    document.getElementById(`row-${i}`).classList.toggle('selected', chk.checked);
-  });
-  document.getElementById('btn-merge').disabled = selectedPairs.size === 0;
+function renderUnmatched(el) {
+  let items = data.unmatched_other;
+  if (otherSearch) items = items.filter(p =>
+    p.name.toLowerCase().includes(otherSearch) ||
+    (p.sku || '').toLowerCase().includes(otherSearch)
+  );
+  if (!items.length) { el.innerHTML = '<div class="empty">Все товары имеют пару 🎉</div>'; return; }
+  el.innerHTML = items.map(p => `<div class="product-item">
+    <div style="flex:1;min-width:0">
+      <div class="p-name">${hl(p.name, otherSearch)}</div>
+      <div class="p-meta">
+        <span class="p-sku">${p.sku || '—'}</span>
+        <span class="tag">${p.category || ''}</span>
+        ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
+        ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
+      </div>
+    </div>
+  </div>`).join('');
 }
 
-function selectAll() {
-  document.getElementById('chk-all').checked = true;
-  toggleAll(document.getElementById('chk-all'));
+function switchOtherTab(tab, el) {
+  otherTab = tab;
+  document.querySelectorAll('.panel:last-child .ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderOther();
 }
 
-function deselectAll() {
-  document.getElementById('chk-all').checked = false;
-  toggleAll(document.getElementById('chk-all'));
+function filterOther(v) {
+  otherSearch = v.toLowerCase();
+  renderOther();
+}
+
+// ── Выбор и объединение ───────────────────────────────────────────────────────
+function togglePair(key, chk) {
+  if (chk.checked) selectedPairIds.add(key);
+  else selectedPairIds.delete(key);
+  updateMergeBtn();
+}
+
+function selectAllPairs() {
+  data.pairs.forEach(p => selectedPairIds.add(`${p.kaspi_id}:${p.other_id}`));
+  renderOther();
+  updateMergeBtn();
+}
+
+function updateMergeBtn() {
+  const n = selectedPairIds.size;
+  document.getElementById('btn-merge').disabled = n === 0;
+  document.getElementById('selected-count').textContent =
+    n > 0 ? `Выбрано: ${n} пар` : 'Выберите пары для объединения';
 }
 
 async function doMerge() {
-  if (!selectedPairs.size) return;
-  if (!confirm(`Объединить ${selectedPairs.size} пар? Товары из накладных будут удалены.`)) return;
+  const n = selectedPairIds.size;
+  if (!n) return;
+  if (!confirm(`Объединить ${n} пар? Товары из накладных будут удалены, данные перенесены в Kaspi-карточки.`)) return;
 
-  const pairs = [...selectedPairs].map(i => ({
-    kaspi_id: pairsData[i].kaspi_id,
-    other_id: pairsData[i].other_id,
-  }));
+  const pairs = [...selectedPairIds].map(key => {
+    const [kaspi_id, other_id] = key.split(':').map(Number);
+    return { kaspi_id, other_id };
+  });
 
   const r = await fetch('/api/merge-confirm', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({pairs}),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pairs }),
   });
   const d = await r.json();
 
@@ -217,16 +384,8 @@ async function doMerge() {
   bar.style.display = 'block';
   bar.textContent = `✅ Объединено: ${d.merged}, удалено дублей: ${d.deleted}`;
 
-  selectedPairs.clear();
+  selectedPairIds.clear();
   await load();
-}
-
-function showTab(name) {
-  document.getElementById('tab-pairs').style.display = name === 'pairs' ? '' : 'none';
-  document.getElementById('tab-unmatched').style.display = name === 'unmatched' ? '' : 'none';
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', (i === 0 && name === 'pairs') || (i === 1 && name === 'unmatched'));
-  });
 }
 
 load();

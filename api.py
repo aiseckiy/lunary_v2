@@ -3116,10 +3116,16 @@ async def pricelist_import(
     if товары is None:
         raise HTTPException(status_code=400, detail="Нет тега <Товары> в XML")
 
-    # Удаляем старые записи из этого файла
-    deleted = db.query(PriceListItem).filter(PriceListItem.source_file == filename).delete()
+    # Загружаем существующие записи из этого файла для upsert
+    existing = {
+        (i.article or "", i.supplier or ""): i
+        for i in db.query(PriceListItem).filter(PriceListItem.source_file == filename).all()
+    }
 
     created = 0
+    updated = 0
+    seen_keys = set()
+
     for товар in товары.findall("Товар"):
         name_el    = товар.find("Наименование")
         price_el   = товар.find("ЦенаЗакупки")
@@ -3140,19 +3146,39 @@ async def pricelist_import(
         except Exception:
             cost_price = None
 
-        db.add(PriceListItem(
-            name=name,
-            article=article or None,
-            supplier=supplier or None,
-            cost_price=cost_price,
-            unit=unit,
-            source_file=filename,
-        ))
-        created += 1
+        key = (article, supplier)
+        if key in seen_keys:
+            continue  # пропускаем дубли внутри файла
+        seen_keys.add(key)
+
+        if key in existing:
+            # Обновляем существующую запись
+            item = existing[key]
+            item.name = name
+            item.cost_price = cost_price
+            item.unit = unit
+            updated += 1
+        else:
+            db.add(PriceListItem(
+                name=name,
+                article=article or None,
+                supplier=supplier or None,
+                cost_price=cost_price,
+                unit=unit,
+                source_file=filename,
+            ))
+            created += 1
+
+    # Удаляем записи из файла которых больше нет в XML
+    removed = 0
+    for key, item in existing.items():
+        if key not in seen_keys:
+            db.delete(item)
+            removed += 1
 
     db.commit()
-    _save_upload(content, filename, "pricelist_ref", created, db)
-    return {"created": created, "replaced": deleted, "file": filename}
+    _save_upload(content, filename, "pricelist_ref", created + updated, db)
+    return {"created": created, "updated": updated, "removed": removed, "file": filename}
 
 
 @app.get("/api/pricelist/search")
@@ -3247,12 +3273,25 @@ def pricelist_price_check(db: Session = Depends(get_db)):
 
 @app.get("/api/pricelist/stats")
 def pricelist_stats(db: Session = Depends(get_db)):
-    from database import PriceListItem
+    from database import PriceListItem, UploadedFile
     from sqlalchemy import func
     total = db.query(PriceListItem).count()
-    by_file = dict(db.query(PriceListItem.source_file, func.count()).group_by(PriceListItem.source_file).all())
+    raw_file = db.query(PriceListItem.source_file, func.count()).group_by(PriceListItem.source_file).all()
     by_supplier = dict(db.query(PriceListItem.supplier, func.count()).group_by(PriceListItem.supplier).all())
-    return {"total": total, "by_file": by_file, "by_supplier": by_supplier}
+
+    # Получаем даты загрузки из UploadedFile
+    uploads = db.query(UploadedFile).filter(UploadedFile.file_type == "pricelist_ref").order_by(UploadedFile.uploaded_at.desc()).all()
+    upload_dates = {}
+    for u in uploads:
+        if u.original_name not in upload_dates:
+            upload_dates[u.original_name] = u.uploaded_at.strftime("%d.%m.%Y %H:%M") if u.uploaded_at else ""
+
+    files = []
+    for fname, cnt in raw_file:
+        if fname:
+            files.append({"name": fname, "count": cnt, "uploaded_at": upload_dates.get(fname, "")})
+
+    return {"total": total, "files": files, "by_supplier": {k or "": v for k, v in by_supplier.items()}}
 
 
 @app.delete("/api/pricelist/clear")

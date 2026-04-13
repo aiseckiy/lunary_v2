@@ -243,9 +243,31 @@ let kaspiInPairs = new Set();
 let otherInPairs = new Set();
 let selectedKaspiId = null; // фильтр правой панели по выбранному Kaspi-товару
 
-async function load() {
+const CACHE_KEY = 'merge_preview_cache';
+
+async function load(forceRefresh = false) {
+  // Проверяем кэш в sessionStorage
+  if (!forceRefresh) {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        data = JSON.parse(cached);
+        applyData();
+        return;
+      }
+    } catch(e) {}
+  }
+
+  document.getElementById('kaspi-list').innerHTML = '<div class="loading">⏳</div>';
+  document.getElementById('other-list').innerHTML = '<div class="loading">⏳</div>';
+
   const r = await fetch('/api/merge-preview');
   data = await r.json();
+  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch(e) {}
+  applyData();
+}
+
+function applyData() {
 
   kaspiInPairs = new Set(data.pairs.map(p => p.kaspi_id));
   otherInPairs = new Set(data.pairs.map(p => p.other_id));
@@ -653,7 +675,8 @@ async function doMerge() {
   bar.textContent = `✅ Объединено: ${d.merged} пар`;
 
   selectedPairIds.clear();
-  await load();
+  try { sessionStorage.removeItem(CACHE_KEY); } catch(e) {}
+  await load(true);
 }
 
 
@@ -666,9 +689,8 @@ async function reload() {
   pendingLinkId = null;
   manualPairs = [];
   document.getElementById('result-bar').style.display = 'none';
-  document.getElementById('kaspi-list').innerHTML = '<div class="loading">⏳</div>';
-  document.getElementById('other-list').innerHTML = '<div class="loading">⏳</div>';
-  await load();
+  try { sessionStorage.removeItem(CACHE_KEY); } catch(e) {}
+  await load(true);
   btn.disabled = false;
   btn.textContent = '🔄 Обновить';
 }

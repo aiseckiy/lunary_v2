@@ -3052,6 +3052,10 @@ def import_price_list(db: Session = Depends(get_db)):
                 found.cost_price = cost_price
             if supplier:
                 found.supplier = supplier
+            if article and not found.barcode:
+                found.barcode = article
+            if article and not found.kaspi_article:
+                found.kaspi_article = article
             updated += 1
         else:
             # Создаём новую карточку

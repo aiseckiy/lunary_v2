@@ -3385,9 +3385,11 @@ def products_review(
             "supplier": p.supplier or "",
             "cost_price": p.cost_price,
             "price": p.price,
-            "unit": p.unit,
+            "unit": p.unit or "шт",
             "verified": bool(p.verified),
             "kaspi_sku": p.kaspi_sku or "",
+            "supplier_article": p.supplier_article or "",
+            "stock": crud.get_stock(p.id, db),
         } for p in products]
     }
 

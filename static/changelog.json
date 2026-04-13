@@ -1,5 +1,10 @@
 [
   {
+    "hash": "a657c25",
+    "date": "13.04.2026",
+    "message": "Справочник накладных: отдельная таблица price_list_items + страница /pricelist"
+  },
+  {
     "hash": "c6001f9",
     "date": "13.04.2026",
     "message": "Fix: import.html — убрать undefined, рендерить HTML в статистике; убрать barcode=article"

@@ -12,57 +12,68 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .header h1 { font-size: 17px; font-weight: 700; }
 .stats-chips { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; align-items: center; }
 .chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.chip-blue { background: #ede9fe; color: #5b21b6; }
+.chip-blue  { background: #ede9fe; color: #5b21b6; }
 .chip-green { background: #d1fae5; color: #065f46; }
-.chip-red { background: #fee2e2; color: #991b1b; }
+.chip-red   { background: #fee2e2; color: #991b1b; }
 
 .toolbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 10px 24px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.search-box { padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; width: 260px; }
+.search-box { padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; width: 240px; }
 .search-box:focus { border-color: #6c63ff; }
 select.filter { padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; background: #fff; }
-select.filter:focus { border-color: #6c63ff; }
-.btn { padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
-.btn-primary { background: #6c63ff; color: #fff; }
-.btn-primary:hover { background: #5b52e0; }
-.btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
+.btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; }
+.btn-green   { background: #10b981; color: #fff; }
 .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
 .btn-outline:hover { background: #f9fafb; }
-.btn-green { background: #10b981; color: #fff; }
-.btn-green:hover { background: #059669; }
-.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 7px; }
 
-.import-bar { background: #fffbeb; border-bottom: 1px solid #fde68a; padding: 10px 24px; display: flex; align-items: center; gap: 12px; font-size: 13px; }
-.import-bar span { color: #92400e; }
-#import-result { font-weight: 600; }
+.list-container { padding: 16px 24px; display: flex; flex-direction: column; gap: 6px; }
 
-.list-container { padding: 16px 24px; }
-.product-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; transition: background .1s; }
+.product-row {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 10px 14px; display: flex; align-items: center; gap: 12px;
+  transition: background .1s;
+}
 .product-row:hover { background: #fafafa; }
 .product-row.is-verified { border-color: #6ee7b7; background: #f0fdf4; }
-.product-row.is-verified:hover { background: #dcfce7; }
 
-.verify-check { width: 18px; height: 18px; cursor: pointer; accent-color: #10b981; flex-shrink: 0; }
-.p-name { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; }
-.p-name small { display: block; font-size: 11px; color: #9ca3af; margin-top: 2px; font-weight: 400; }
-.p-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
-.tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
-.tag-supplier { background: #ede9fe; color: #5b21b6; }
-.tag-cost { background: #fef9c3; color: #92400e; }
-.tag-price { background: #d1fae5; color: #065f46; }
-.tag-kaspi { background: #dbeafe; color: #1e40af; }
-.tag-nodata { background: #f3f4f6; color: #9ca3af; }
-.verified-badge { font-size: 11px; font-weight: 700; color: #10b981; flex-shrink: 0; }
-.unverified-badge { font-size: 11px; font-weight: 700; color: #f59e0b; flex-shrink: 0; }
+.verify-check { width: 16px; height: 16px; cursor: pointer; accent-color: #10b981; flex-shrink: 0; }
 
-.pagination { display: flex; gap: 8px; align-items: center; padding: 16px 24px; justify-content: center; }
+.p-info { flex: 1; min-width: 0; }
+.p-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-sub  { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+/* Поля-тэги */
+.fields { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
+.field-tag { font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 8px; white-space: nowrap; }
+.ft-qty     { background: #ede9fe; color: #5b21b6; }
+.ft-price   { background: #d1fae5; color: #065f46; }
+.ft-article { background: #dbeafe; color: #1e40af; font-family: monospace; }
+.ft-empty   { background: #f3f4f6; color: #9ca3af; }
+
+/* Кнопка карандаш */
+.btn-edit { background: none; border: 1px solid #e5e7eb; border-radius: 7px; padding: 4px 8px; cursor: pointer; font-size: 14px; color: #6b7280; transition: all .15s; flex-shrink: 0; }
+.btn-edit:hover { background: #f3f4f6; border-color: #6c63ff; color: #6c63ff; }
+
+/* Инлайн-форма редактирования */
+.edit-form { display: none; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; margin-top: 4px; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.edit-form.open { display: flex; }
+.edit-field { display: flex; flex-direction: column; gap: 4px; }
+.edit-field label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; }
+.edit-field input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 7px; font-size: 13px; outline: none; width: 140px; }
+.edit-field input:focus { border-color: #6c63ff; }
+.edit-field input.wide { width: 200px; }
+.btn-save   { padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; background: #6c63ff; color: #fff; }
+.btn-save:hover { background: #5b52e0; }
+.btn-cancel { padding: 7px 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; font-size: 13px; }
+
+.section-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; padding: 10px 0 4px; }
+
+.pagination { display: flex; gap: 8px; align-items: center; padding: 16px 24px; justify-content: center; flex-wrap: wrap; }
 .page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; }
 .page-btn:hover { background: #f9fafb; }
 .page-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
 .page-info { font-size: 13px; color: #6b7280; }
-
-.empty { text-align: center; padding: 60px 20px; color: #9ca3af; font-size: 14px; }
+.empty   { text-align: center; padding: 60px 20px; color: #9ca3af; font-size: 14px; }
 .loading { text-align: center; padding: 60px; color: #9ca3af; font-size: 14px; }
-.section-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; padding: 12px 0 6px; }
 </style>
 </head>
 <body>
@@ -71,23 +82,15 @@ select.filter:focus { border-color: #6c63ff; }
   <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>✅ Проверка товаров</h1>
   <div class="stats-chips">
-    <span class="chip chip-blue" id="stat-total">Всего: —</span>
+    <span class="chip chip-blue"  id="stat-total">Всего: —</span>
     <span class="chip chip-green" id="stat-verified">Проверено: —</span>
-    <span class="chip chip-red" id="stat-left">Осталось: —</span>
+    <span class="chip chip-red"   id="stat-left">Осталось: —</span>
   </div>
-</div>
-
-<div class="import-bar">
-  <span>📂 Загрузить закупочные цены из XML:</span>
-  <button class="btn btn-outline btn-sm" onclick="importPriceList()" id="btn-import">Импортировать прайс-лист</button>
-  <button class="btn btn-outline btn-sm" onclick="fillArticles()" id="btn-fill" style="margin-left:4px">🔖 Заполнить артикулы</button>
-  <button class="btn btn-outline btn-sm" onclick="cleanArticles()" id="btn-clean" style="margin-left:4px;color:#991b1b">🧹 Очистить KSP_ мусор</button>
-  <span id="import-result"></span>
 </div>
 
 <div class="toolbar">
   <input class="search-box" type="text" placeholder="Поиск по названию..." oninput="onSearch(this.value)" id="search-input">
-  <select class="filter" onchange="onFilter('verified', this.value)" id="filter-verified">
+  <select class="filter" onchange="onFilter('verified', this.value)">
     <option value="">Все товары</option>
     <option value="no">Не проверены</option>
     <option value="yes">Проверены</option>
@@ -95,14 +98,13 @@ select.filter:focus { border-color: #6c63ff; }
   <select class="filter" onchange="onFilter('supplier', this.value)" id="filter-supplier">
     <option value="">Все поставщики</option>
   </select>
-  <button class="btn btn-green btn-sm" onclick="markAllVisible()">Отметить все на странице</button>
-  <button class="btn btn-outline btn-sm" onclick="unmarkAllVisible()">Снять отметки</button>
+  <button class="btn btn-green" onclick="markAllVisible()">Отметить все ✓</button>
+  <button class="btn btn-outline" onclick="unmarkAllVisible()">Снять отметки</button>
 </div>
 
 <div class="list-container" id="list-container">
   <div class="loading">⏳ Загрузка...</div>
 </div>
-
 <div class="pagination" id="pagination"></div>
 
 <script>
@@ -112,65 +114,59 @@ let totalItems = 0;
 let filters = { verified: '', supplier: '', search: '' };
 let searchTimer = null;
 let stats = { total: 0, verified: 0 };
+let openEditId = null;
 
+// ── Статистика ─────────────────────────────────────────────────────────────
 async function loadStats() {
   const [all, ver] = await Promise.all([
     fetch('/api/review-products?limit=1').then(r => r.json()),
     fetch('/api/review-products?verified=yes&limit=1').then(r => r.json())
   ]);
-  stats.total = all.total;
+  stats.total    = all.total;
   stats.verified = ver.total;
-  document.getElementById('stat-total').textContent = `Всего: ${stats.total}`;
+  document.getElementById('stat-total').textContent    = `Всего: ${stats.total}`;
   document.getElementById('stat-verified').textContent = `Проверено: ${stats.verified}`;
-  document.getElementById('stat-left').textContent = `Осталось: ${stats.total - stats.verified}`;
+  document.getElementById('stat-left').textContent     = `Осталось: ${stats.total - stats.verified}`;
 }
 
 async function loadSuppliers() {
   const r = await fetch('/api/products/suppliers');
-  const data = await r.json();
+  const d = await r.json();
   const sel = document.getElementById('filter-supplier');
-  data.suppliers.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s;
-    opt.textContent = s;
-    sel.appendChild(opt);
+  (d.suppliers || []).forEach(s => {
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    sel.appendChild(o);
   });
 }
 
+// ── Список ─────────────────────────────────────────────────────────────────
 async function load() {
   const container = document.getElementById('list-container');
   container.innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+  openEditId = null;
 
-  const params = new URLSearchParams({
-    skip: currentPage * PAGE_SIZE,
-    limit: PAGE_SIZE,
-  });
+  const params = new URLSearchParams({ skip: currentPage * PAGE_SIZE, limit: PAGE_SIZE });
   if (filters.verified) params.set('verified', filters.verified);
   if (filters.supplier) params.set('supplier', filters.supplier);
-  if (filters.search) params.set('search', filters.search);
+  if (filters.search)   params.set('search',   filters.search);
 
   const r = await fetch('/api/review-products?' + params);
   const data = await r.json();
   totalItems = data.total;
-
   renderList(data.items);
   renderPagination();
 }
 
 function renderList(items) {
   const container = document.getElementById('list-container');
-  if (!items.length) {
-    container.innerHTML = '<div class="empty">Товары не найдены</div>';
-    return;
-  }
+  if (!items.length) { container.innerHTML = '<div class="empty">Товары не найдены</div>'; return; }
   container.innerHTML = '';
 
-  // Группируем по поставщику
   const bySupplier = {};
   items.forEach(p => {
     const key = p.supplier || 'Без поставщика';
-    if (!bySupplier[key]) bySupplier[key] = [];
-    bySupplier[key].push(p);
+    (bySupplier[key] = bySupplier[key] || []).push(p);
   });
 
   Object.entries(bySupplier).forEach(([supplier, products]) => {
@@ -178,9 +174,12 @@ function renderList(items) {
     hdr.className = 'section-header';
     hdr.textContent = `🏭 ${supplier} (${products.length})`;
     container.appendChild(hdr);
-
     products.forEach(p => {
-      container.appendChild(buildRow(p));
+      const wrap = document.createElement('div');
+      wrap.id = `wrap-${p.id}`;
+      wrap.appendChild(buildRow(p));
+      wrap.appendChild(buildEditForm(p));
+      container.appendChild(wrap);
     });
   });
 }
@@ -190,86 +189,154 @@ function buildRow(p) {
   row.className = 'product-row' + (p.verified ? ' is-verified' : '');
   row.id = `row-${p.id}`;
 
-  const cost = p.cost_price ? `${p.cost_price.toLocaleString()} ₸` : null;
-  const price = p.price ? `${p.price.toLocaleString()} ₸` : null;
-  const kaspiTag = p.kaspi_sku ? `<span class="tag tag-kaspi">Kaspi</span>` : '';
-  const costTag = cost ? `<span class="tag tag-cost">Закуп: ${cost}</span>` : '<span class="tag tag-nodata">Цена неизвестна</span>';
-  const priceTag = price ? `<span class="tag tag-price">Продажа: ${price}</span>` : '';
-
-  const badge = p.verified
-    ? `<span class="verified-badge">✓ Проверен</span>`
-    : `<span class="unverified-badge">⏳ Не проверен</span>`;
+  const qtyTag     = `<span class="field-tag ft-qty">${p.stock ?? 0} ${p.unit || 'шт'}</span>`;
+  const priceTag   = p.price
+    ? `<span class="field-tag ft-price">${p.price.toLocaleString()} ₸</span>`
+    : `<span class="field-tag ft-empty">Нет цены</span>`;
+  const articleTag = p.supplier_article
+    ? `<span class="field-tag ft-article">${escHtml(p.supplier_article)}</span>`
+    : `<span class="field-tag ft-empty">Нет артикула</span>`;
 
   row.innerHTML = `
     <input type="checkbox" class="verify-check" ${p.verified ? 'checked' : ''} onchange="toggleVerify(${p.id}, this.checked, this)" title="Отметить как проверен">
-    <div class="p-name">
-      ${escHtml(p.name)}
-      <small>${p.sku} · ${p.category} · ${p.unit}</small>
+    <div class="p-info">
+      <div class="p-name">${escHtml(p.name)}</div>
+      <div class="p-sub">${p.sku} · ${p.category}</div>
     </div>
-    <div class="p-meta">
-      ${kaspiTag}
-      ${costTag}
+    <div class="fields">
+      ${qtyTag}
       ${priceTag}
-      ${badge}
+      ${articleTag}
     </div>
+    <button class="btn-edit" onclick="toggleEdit(${p.id})" title="Редактировать">✏️</button>
   `;
   return row;
 }
 
-function escHtml(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function buildEditForm(p) {
+  const form = document.createElement('div');
+  form.className = 'edit-form';
+  form.id = `edit-${p.id}`;
+  form.innerHTML = `
+    <div class="edit-field">
+      <label>Количество</label>
+      <input type="number" id="ef-qty-${p.id}" value="${p.stock ?? 0}" min="0" placeholder="0">
+    </div>
+    <div class="edit-field">
+      <label>Цена продажи (₸)</label>
+      <input type="number" id="ef-price-${p.id}" value="${p.price ?? ''}" placeholder="0">
+    </div>
+    <div class="edit-field">
+      <label>Артикул производителя</label>
+      <input type="text" id="ef-article-${p.id}" class="wide" value="${escHtml(p.supplier_article || '')}" placeholder="Введи артикул">
+    </div>
+    <button class="btn-save" onclick="saveEdit(${p.id})">💾 Сохранить</button>
+    <button class="btn-cancel" onclick="toggleEdit(${p.id})">Отмена</button>
+  `;
+  return form;
 }
 
+function toggleEdit(id) {
+  // Закрываем предыдущую открытую форму
+  if (openEditId && openEditId !== id) {
+    document.getElementById(`edit-${openEditId}`)?.classList.remove('open');
+  }
+  const form = document.getElementById(`edit-${id}`);
+  if (!form) return;
+  const isOpen = form.classList.toggle('open');
+  openEditId = isOpen ? id : null;
+  if (isOpen) {
+    // фокус на первое поле
+    form.querySelector('input')?.focus();
+  }
+}
+
+async function saveEdit(id) {
+  const qty     = parseInt(document.getElementById(`ef-qty-${id}`).value) || 0;
+  const price   = parseInt(document.getElementById(`ef-price-${id}`).value) || null;
+  const article = document.getElementById(`ef-article-${id}`).value.trim() || null;
+
+  // Сохраняем поля товара
+  const r1 = await fetch(`/api/products/${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ price, supplier_article: article })
+  });
+
+  // Устанавливаем остаток
+  const r2 = await fetch(`/api/products/${id}/set-stock`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ quantity: qty, note: 'Проверка товаров' })
+  });
+
+  if (!r1.ok || !r2.ok) {
+    alert('Ошибка сохранения');
+    return;
+  }
+
+  // Обновляем строку без перезагрузки
+  const data = await r1.json();
+  const wrap = document.getElementById(`wrap-${id}`);
+  if (wrap) {
+    const oldRow = document.getElementById(`row-${id}`);
+    const verified = oldRow?.classList.contains('is-verified') || false;
+    // Строим обновлённый объект
+    const updated = {
+      id, price, supplier_article: article, stock: qty,
+      name: oldRow?.querySelector('.p-name')?.textContent || '',
+      sku:  oldRow?.querySelector('.p-sub')?.textContent?.split(' · ')[0] || '',
+      category: oldRow?.querySelector('.p-sub')?.textContent?.split(' · ')[1] || '',
+      unit: oldRow?.querySelector('.ft-qty')?.textContent?.split(' ').slice(1).join(' ') || 'шт',
+      verified,
+    };
+    const newRow  = buildRow(updated);
+    const newForm = buildEditForm(updated);
+    wrap.innerHTML = '';
+    wrap.appendChild(newRow);
+    wrap.appendChild(newForm);
+  }
+  openEditId = null;
+}
+
+// ── Чекбокс проверено ──────────────────────────────────────────────────────
 async function toggleVerify(id, checked, checkbox) {
   checkbox.disabled = true;
   const r = await fetch(`/api/products/${id}/verify`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({verified: checked})
+    body: JSON.stringify({ verified: checked })
   });
   const data = await r.json();
   checkbox.disabled = false;
-
   const row = document.getElementById(`row-${id}`);
-  if (row) {
-    row.className = 'product-row' + (data.verified ? ' is-verified' : '');
-    const badge = row.querySelector('.verified-badge, .unverified-badge');
-    if (badge) {
-      badge.className = data.verified ? 'verified-badge' : 'unverified-badge';
-      badge.textContent = data.verified ? '✓ Проверен' : '⏳ Не проверен';
-    }
-  }
-
-  // Обновим счётчики
-  if (checked) stats.verified++;
-  else stats.verified--;
+  if (row) row.className = 'product-row' + (data.verified ? ' is-verified' : '');
+  if (checked) stats.verified++; else stats.verified--;
   document.getElementById('stat-verified').textContent = `Проверено: ${stats.verified}`;
-  document.getElementById('stat-left').textContent = `Осталось: ${stats.total - stats.verified}`;
+  document.getElementById('stat-left').textContent     = `Осталось: ${stats.total - stats.verified}`;
 }
 
 async function markAllVisible() {
-  const checkboxes = document.querySelectorAll('.verify-check:not(:checked)');
-  for (const cb of checkboxes) {
-    const id = parseInt(cb.closest('.product-row').id.replace('row-', ''));
+  for (const cb of document.querySelectorAll('.verify-check:not(:checked)')) {
+    const id = parseInt(cb.closest('[id^="wrap-"]').id.replace('wrap-', ''));
     cb.checked = true;
     await toggleVerify(id, true, cb);
   }
 }
 
 async function unmarkAllVisible() {
-  const checkboxes = document.querySelectorAll('.verify-check:checked');
-  for (const cb of checkboxes) {
-    const id = parseInt(cb.closest('.product-row').id.replace('row-', ''));
+  for (const cb of document.querySelectorAll('.verify-check:checked')) {
+    const id = parseInt(cb.closest('[id^="wrap-"]').id.replace('wrap-', ''));
     cb.checked = false;
     await toggleVerify(id, false, cb);
   }
 }
 
+// ── Пагинация и фильтры ────────────────────────────────────────────────────
 function renderPagination() {
   const pages = Math.ceil(totalItems / PAGE_SIZE);
   const pag = document.getElementById('pagination');
   if (pages <= 1) { pag.innerHTML = ''; return; }
-
   let html = '';
   if (currentPage > 0) html += `<button class="page-btn" onclick="goPage(${currentPage-1})">← Назад</button>`;
   html += `<span class="page-info">Стр. ${currentPage+1} из ${pages} · ${totalItems} товаров</span>`;
@@ -277,84 +344,20 @@ function renderPagination() {
   pag.innerHTML = html;
 }
 
-function goPage(n) {
-  currentPage = n;
-  load();
-  window.scrollTo(0, 0);
-}
+function goPage(n) { currentPage = n; load(); window.scrollTo(0, 0); }
 
 function onSearch(val) {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    filters.search = val.trim();
-    currentPage = 0;
-    load();
-  }, 300);
+  searchTimer = setTimeout(() => { filters.search = val.trim(); currentPage = 0; load(); }, 300);
 }
 
-function onFilter(key, val) {
-  filters[key] = val;
-  currentPage = 0;
-  load();
+function onFilter(key, val) { filters[key] = val; currentPage = 0; load(); }
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-async function importPriceList() {
-  const btn = document.getElementById('btn-import');
-  const result = document.getElementById('import-result');
-  btn.disabled = true;
-  btn.textContent = 'Импортирую...';
-  result.textContent = '';
-  try {
-    const r = await fetch('/api/import-price-list', { method: 'POST' });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.detail || 'Ошибка');
-    result.textContent = `✅ Обновлено: ${data.updated}, создано: ${data.created}, всего: ${data.total}`;
-    result.style.color = '#065f46';
-    await loadStats();
-    load();
-  } catch(e) {
-    result.textContent = `❌ ${e.message}`;
-    result.style.color = '#991b1b';
-  }
-  btn.disabled = false;
-  btn.textContent = 'Импортировать прайс-лист';
-}
-
-async function cleanArticles() {
-  const btn = document.getElementById('btn-clean');
-  const result = document.getElementById('import-result');
-  btn.disabled = true;
-  btn.textContent = '⏳ Чищу...';
-  const r = await fetch('/api/clean-bad-articles', { method: 'POST' });
-  const data = await r.json();
-  result.textContent = `🧹 Очищено артикулов с мусором: ${data.cleaned}`;
-  result.style.color = '#065f46';
-  btn.disabled = false;
-  btn.textContent = '🧹 Очистить KSP_ мусор';
-}
-
-async function fillArticles() {
-  const btn = document.getElementById('btn-fill');
-  const result = document.getElementById('import-result');
-  btn.disabled = true;
-  btn.textContent = '⏳ Заполняю...';
-  result.textContent = '';
-  try {
-    const r = await fetch('/api/fill-articles-from-pricelist', { method: 'POST' });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.detail || 'Ошибка');
-    result.textContent = `✅ Артикулы заполнены у ${data.updated} из ${data.total_products} товаров`;
-    result.style.color = '#065f46';
-    load();
-  } catch(e) {
-    result.textContent = `❌ ${e.message}`;
-    result.style.color = '#991b1b';
-  }
-  btn.disabled = false;
-  btn.textContent = '🔖 Заполнить артикулы';
-}
-
-// Init
+// ── Init ───────────────────────────────────────────────────────────────────
 Promise.all([loadStats(), loadSuppliers()]).then(() => load());
 </script>
 </body>

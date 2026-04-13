@@ -2721,6 +2721,77 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
     return {"deleted": len(old_ids), "added": added}
 
 
+# ── Слияние накладных и Kaspi товаров ────────────────────────────────────────
+
+@app.get("/api/merge-preview")
+def merge_preview(db: Session = Depends(get_db)):
+    from database import Product as _P
+    kaspi_products = db.query(_P).filter(_P.category == "Kaspi").all()
+    other_products = db.query(_P).filter(_P.category != "Kaspi").all()
+
+    pairs = []
+    unmatched_other = []
+
+    for op in other_products:
+        if not op.sku:
+            unmatched_other.append({"id": op.id, "name": op.name, "sku": op.sku, "category": op.category})
+            continue
+        matches = [kp for kp in kaspi_products if op.sku.upper() in kp.name.upper()]
+        if matches:
+            for kp in matches:
+                pairs.append({
+                    "kaspi_id": kp.id,
+                    "kaspi_name": kp.name,
+                    "kaspi_sku": kp.kaspi_sku,
+                    "kaspi_price": kp.price,
+                    "other_id": op.id,
+                    "other_name": op.name,
+                    "other_sku": op.sku,
+                    "other_category": op.category,
+                    "other_cost_price": op.cost_price,
+                    "other_supplier": op.supplier,
+                })
+        else:
+            unmatched_other.append({"id": op.id, "name": op.name, "sku": op.sku, "category": op.category})
+
+    return {"pairs": pairs, "unmatched_other": unmatched_other, "total_kaspi": len(kaspi_products)}
+
+
+@app.post("/api/merge-confirm")
+def merge_confirm(body: dict, db: Session = Depends(get_db)):
+    """body: {"pairs": [{"kaspi_id": X, "other_id": Y}, ...]}"""
+    from database import Product as _P, Movement
+    selected = body.get("pairs", [])
+    merged = 0
+    deleted = 0
+    for pair in selected:
+        kaspi_p = db.query(_P).filter(_P.id == pair["kaspi_id"]).first()
+        other_p = db.query(_P).filter(_P.id == pair["other_id"]).first()
+        if not kaspi_p or not other_p:
+            continue
+        if other_p.cost_price:
+            kaspi_p.cost_price = other_p.cost_price
+        if other_p.supplier:
+            kaspi_p.supplier = other_p.supplier
+        if other_p.sku:
+            kaspi_p.kaspi_article = other_p.sku
+        # переносим движения
+        db.query(Movement).filter(Movement.product_id == other_p.id).update(
+            {"product_id": kaspi_p.id}, synchronize_session=False
+        )
+        db.delete(other_p)
+        merged += 1
+        deleted += 1
+    db.commit()
+    return {"merged": merged, "deleted": deleted}
+
+
+@app.get("/merge")
+def merge_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("static/merge.html")
+
+
 # ── Дизайн-токены (тема) ─────────────────────────────────────────────────────
 
 DEFAULT_TOKENS = {

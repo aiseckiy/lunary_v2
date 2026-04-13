@@ -126,6 +126,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
   <div id="result-bar" class="result-bar"></div>
   <span class="selected-count" id="selected-count">Выберите пары для объединения</span>
   <button class="btn btn-outline btn-sm" onclick="selectAllPairs()">Выбрать все совпадения</button>
+  <button class="btn btn-sm" style="background:#10b981;color:#fff" onclick="mergeSkuOnly()">🎯 Объединить все по артикулу</button>
   <button class="btn btn-primary" id="btn-merge" onclick="doMerge()" disabled>Объединить выбранные</button>
 </div>
 
@@ -354,6 +355,33 @@ function selectAllPairs() {
   data.pairs.forEach(p => selectedPairIds.add(`${p.kaspi_id}:${p.other_id}`));
   renderOther();
   updateMergeBtn();
+}
+
+async function mergeSkuOnly() {
+  const skuPairs = data.pairs.filter(p => p.match_type === 'sku');
+  if (!skuPairs.length) { alert('Нет совпадений по артикулу'); return; }
+  if (!confirm(`Объединить ${skuPairs.length} пар с совпадением по артикулу (100%)? Это действие нельзя отменить.`)) return;
+
+  const btn = document.querySelector('[onclick="mergeSkuOnly()"]');
+  btn.disabled = true;
+  btn.textContent = '⏳ Объединяю...';
+
+  const pairs = skuPairs.map(p => ({ kaspi_id: p.kaspi_id, other_id: p.other_id }));
+  const r = await fetch('/api/merge-confirm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pairs }),
+  });
+  const d = await r.json();
+
+  const bar = document.getElementById('result-bar');
+  bar.style.display = 'block';
+  bar.textContent = `✅ По артикулу объединено: ${d.merged}, удалено дублей: ${d.deleted}`;
+
+  btn.disabled = false;
+  btn.textContent = '🎯 Объединить все по артикулу';
+  selectedPairIds.clear();
+  await load();
 }
 
 function updateMergeBtn() {

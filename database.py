@@ -43,6 +43,7 @@ class Product(Base):
     images = Column(Text, nullable=True)  # JSON-массив URL/base64
     description = Column(Text, nullable=True)  # описание товара
     specs = Column(Text, nullable=True)  # JSON-массив [{key, value}] характеристики
+    verified = Column(Integer, default=0)  # 1 = проверен, 0 = не проверен
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -187,6 +188,7 @@ def init_db():
         ("products", "images", "TEXT"),
         ("products", "description", "TEXT"),
         ("products", "specs", "TEXT"),
+        ("products", "verified", "INTEGER DEFAULT 0"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

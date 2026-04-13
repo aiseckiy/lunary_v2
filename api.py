@@ -91,7 +91,8 @@ _PUBLIC_PATHS = {"/login", "/api/auth/login", "/api/auth/logout",
 _PUBLIC_PREFIXES = ("/static/", "/api/store/", "/api/shop/", "/shop/product/")
 _ADMIN_PATHS = ("/admin", "/kaspi", "/analytics", "/history", "/scanner",
                 "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
-                "/api/history", "/api/admin", "/api/purchases", "/api/alerts")
+                "/api/history", "/api/admin", "/api/purchases", "/api/alerts",
+                "/merge", "/review", "/api/merge", "/api/import-price-list")
 
 
 def _get_user_from_session(request: Request):
@@ -2637,9 +2638,9 @@ def kaspi_import_xml_products(db: Session = Depends(get_db)):
                 return (child.text or "").strip()
         return ""
 
-    # Удаляем все старые товары с kaspi_sku (из любой категории) и их движения
+    # Удаляем только товары категории "Kaspi" и их движения (накладные не трогаем)
     from database import Movement
-    old_products = db.query(_P).filter(_P.kaspi_sku != None).all()
+    old_products = db.query(_P).filter(_P.category == "Kaspi").all()
     old_ids = [p.id for p in old_products]
     if old_ids:
         db.query(Movement).filter(Movement.product_id.in_(old_ids)).delete(synchronize_session=False)
@@ -2856,6 +2857,160 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
 def merge_page():
     from fastapi.responses import FileResponse
     return FileResponse("static/merge.html")
+
+
+@app.post("/api/import-price-list")
+def import_price_list(db: Session = Depends(get_db)):
+    """Импортирует закупочные цены из XML прайс-листа в таблицу products.
+    Если товар с таким артикулом уже есть — обновляет cost_price и supplier.
+    Если нет — создаёт новую карточку в категории 'Накладные'.
+    """
+    import xml.etree.ElementTree as ET
+    import re
+    from database import Product as _P
+
+    xml_path = "Закупочные_цены_LUNARY.xml"
+    try:
+        tree = ET.parse(xml_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Не удалось открыть XML: {e}")
+
+    root = tree.getroot()
+    товары = root.find("Товары")
+    if товары is None:
+        raise HTTPException(status_code=400, detail="Нет тега <Товары> в XML")
+
+    STOPWORDS = {"и","в","на","с","для","из","по","шт","мл","л","кг","г","см","мм","м","гр","х","x","the","of","for","pcs"}
+    def words(text):
+        return {w for w in re.split(r'[\s\-_/,.()\[\]"«»\']+', (text or "").lower()) if len(w) > 2 and w not in STOPWORDS}
+
+    all_products = db.query(_P).all()
+
+    created = 0
+    updated = 0
+
+    for товар in товары.findall("Товар"):
+        name_el = товар.find("Наименование")
+        price_el = товар.find("ЦенаЗакупки")
+        supplier_el = товар.find("Поставщик")
+        article_el = товар.find("Артикул")
+        unit_el = товар.find("ЕдИзм")
+
+        name = (name_el.text or "").strip() if name_el is not None else ""
+        cost_price_raw = (price_el.text or "0").strip() if price_el is not None else "0"
+        supplier = (supplier_el.text or "").strip() if supplier_el is not None else ""
+        article = (article_el.text or "").strip() if article_el is not None else ""
+        unit = (unit_el.text or "шт").strip() if unit_el is not None else "шт"
+
+        if not name:
+            continue
+        try:
+            cost_price = int(float(cost_price_raw))
+        except Exception:
+            cost_price = None
+
+        # Ищем совпадение: сначала по артикулу, потом по нечёткому имени
+        found = None
+        if article:
+            found = next((p for p in all_products if p.barcode == article or p.sku == article.upper()), None)
+
+        if not found:
+            name_words = words(name)
+            best_score = 0.0
+            for p in all_products:
+                pw = words(p.name)
+                if not pw or not name_words:
+                    continue
+                common = name_words & pw
+                score = len(common) / max(len(name_words), len(pw))
+                if score > best_score:
+                    best_score = score
+                    if score >= 0.75:
+                        found = p
+
+        if found:
+            if cost_price is not None:
+                found.cost_price = cost_price
+            if supplier:
+                found.supplier = supplier
+            updated += 1
+        else:
+            # Создаём новую карточку
+            import uuid
+            sku = article.upper() if article else f"PL-{uuid.uuid4().hex[:8].upper()}"
+            # Проверяем уникальность SKU
+            while db.query(_P).filter(_P.sku == sku).first():
+                sku = f"PL-{uuid.uuid4().hex[:8].upper()}"
+            new_p = _P(
+                name=name,
+                sku=sku,
+                barcode=article if article else None,
+                category="Накладные",
+                unit=unit,
+                cost_price=cost_price,
+                supplier=supplier,
+            )
+            db.add(new_p)
+            all_products.append(new_p)
+            created += 1
+
+    db.commit()
+    return {"updated": updated, "created": created, "total": updated + created}
+
+
+@app.post("/api/products/{product_id}/verify")
+def toggle_verify(product_id: int, body: dict, db: Session = Depends(get_db)):
+    from database import Product as _P
+    p = db.query(_P).filter(_P.id == product_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    p.verified = 1 if body.get("verified") else 0
+    db.commit()
+    return {"id": p.id, "verified": p.verified}
+
+
+@app.get("/api/products/review")
+def products_review(
+    verified: Optional[str] = None,  # "yes" | "no" | None = все
+    search: Optional[str] = None,
+    supplier: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    from database import Product as _P
+    q = db.query(_P)
+    if verified == "yes":
+        q = q.filter(_P.verified == 1)
+    elif verified == "no":
+        q = q.filter((_P.verified == None) | (_P.verified == 0))
+    if supplier:
+        q = q.filter(_P.supplier == supplier)
+    if search:
+        q = q.filter(_P.name.ilike(f"%{search}%"))
+    total = q.count()
+    products = q.order_by(_P.supplier, _P.name).offset(skip).limit(limit).all()
+    return {
+        "total": total,
+        "items": [{
+            "id": p.id,
+            "name": p.name,
+            "sku": p.sku,
+            "category": p.category,
+            "supplier": p.supplier or "",
+            "cost_price": p.cost_price,
+            "price": p.price,
+            "unit": p.unit,
+            "verified": bool(p.verified),
+            "kaspi_sku": p.kaspi_sku or "",
+        } for p in products]
+    }
+
+
+@app.get("/review")
+def review_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("static/review.html")
 
 
 # ── Дизайн-токены (тема) ─────────────────────────────────────────────────────

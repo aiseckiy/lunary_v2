@@ -2916,9 +2916,14 @@ def merge_preview(db: Session = Depends(get_db)):
     kaspi_by_sku = {kp.kaspi_sku.upper(): kp for kp in kaspi_products if kp.kaspi_sku}
     kaspi_by_barcode = {kp.barcode.upper(): kp for kp in kaspi_products if kp.barcode}
     kaspi_by_article = {kp.kaspi_article.upper(): kp for kp in kaspi_products if kp.kaspi_article}
+    ref_by_id = {ri.id: ri for ri in ref_items}
 
-    # Собираем ВСЕ кандидатные пары с оценкой, потом жадно 1-к-1
+    # Сначала берём сохранённые вручную пары (linked_ref_id)
     candidates = []  # (score, match_type, kp, ri)
+    for kp in kaspi_products:
+        if kp.linked_ref_id and kp.linked_ref_id in ref_by_id:
+            ri = ref_by_id[kp.linked_ref_id]
+            candidates.append((2.0, "linked", kp, ri))  # score 2.0 = всегда побеждает
 
     for ri in ref_items:
         ri_article = (ri.article or "").upper()
@@ -2983,8 +2988,8 @@ def merge_preview(db: Session = Depends(get_db)):
         for ri in ref_items if ri.id not in matched_ref_ids
     ]
 
-    # Сортируем: сначала точные, потом fuzzy по убыванию score
-    pairs.sort(key=lambda p: (-int(p["match_type"] == "sku"), -p["score"]))
+    # Сортируем: сначала linked, потом sku, потом fuzzy по убыванию score
+    pairs.sort(key=lambda p: (-int(p["match_type"] == "linked"), -int(p["match_type"] == "sku"), -p["score"]))
 
     kaspi_list = [{"id": kp.id, "name": kp.name, "kaspi_sku": kp.kaspi_sku,
                    "price": kp.price, "brand": kp.brand} for kp in kaspi_products]
@@ -3046,6 +3051,7 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
             if article_val and (force or not kaspi_p.supplier_article):
                 kaspi_p.supplier_article = article_val
 
+        kaspi_p.linked_ref_id = ref_item.id  # сохраняем привязку
         merged += 1
     db.commit()
     return {"merged": merged}

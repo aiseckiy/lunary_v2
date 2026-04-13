@@ -496,8 +496,8 @@ function pairHtml(p) {
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;padding-left:25px">
-      <span class="match-badge ${p.match_type === 'sku' ? 'badge-sku' : 'badge-fuzzy'}">
-        ${p.match_type === 'sku' ? '🎯 артикул' : `🔍 ~${Math.round(p.score * 100)}%`}
+      <span class="match-badge ${p.match_type === 'linked' ? 'badge-sku' : p.match_type === 'sku' ? 'badge-sku' : 'badge-fuzzy'}">
+        ${p.match_type === 'linked' ? '🔗 вручную' : p.match_type === 'sku' ? '🎯 артикул' : `🔍 ~${Math.round(p.score * 100)}%`}
       </span>
       <button class="btn btn-sm btn-merge-pair" onclick="mergeOne(${p.kaspi_id}, ${p.other_id}, event)">Слить →</button>
     </div>

@@ -111,6 +111,13 @@
       </table>
     </div>
   </div>
+
+  <div class="section-card">
+    <div class="section-title">🖼 Автозаполнение картинок</div>
+    <div class="section-sub">Найти и заполнить картинки для всех товаров без фото через Google Images</div>
+    <div id="fill-images-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px"></div>
+    <button class="btn-save" id="btn-fill-images" onclick="fillImages()">🔍 Заполнить картинки автоматически</button>
+  </div>
 </div>
 
 <script src="/static/nav.js"></script>
@@ -288,6 +295,32 @@ async function saveSettings() {
   if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Настройки сохранены'; }
   else { msg.className = 'msg err'; msg.textContent = 'Ошибка сохранения'; }
   setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+async function fillImages() {
+  const btn = document.getElementById('btn-fill-images');
+  const result = document.getElementById('fill-images-result');
+  btn.textContent = '⏳ Идёт поиск...';
+  btn.disabled = true;
+  result.style.display = 'none';
+  try {
+    const res = await fetch('/api/admin/fill-images', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) {
+      result.style.background = '#fee2e2'; result.style.color = '#b91c1c';
+      result.textContent = '❌ ' + (data.detail || 'Ошибка');
+    } else {
+      result.style.background = '#dcfce7'; result.style.color = '#15803d';
+      result.textContent = `✅ Заполнено: ${data.filled} товаров. Пропущено: ${data.skipped}. Ошибок: ${data.errors}. Осталось без фото: ${data.remaining_without_images}`;
+    }
+    result.style.display = 'block';
+  } catch(e) {
+    result.style.background = '#fee2e2'; result.style.color = '#b91c1c';
+    result.textContent = '❌ Ошибка запроса';
+    result.style.display = 'block';
+  }
+  btn.textContent = '🔍 Заполнить картинки автоматически';
+  btn.disabled = false;
 }
 
 loadProfile();

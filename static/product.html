@@ -82,6 +82,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-add-spec { background:none; border:1px dashed var(--border); border-radius:8px; padding:7px 14px; font-size:13px; color:var(--text3); cursor:pointer; font-family:inherit; width:100%; margin-top:4px; }
 .btn-add-spec:hover { border-color:#6366f1; color:#6366f1; }
 
+/* Image search grid */
+.img-search-item { aspect-ratio:1; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid transparent; background:#f3f4f6; position:relative; }
+.img-search-item:hover { border-color:#6366f1; }
+.img-search-item.selected { border-color:#6366f1; }
+.img-search-item img { width:100%; height:100%; object-fit:cover; }
+.img-search-item .added-mark { position:absolute; top:2px; right:2px; background:#6366f1; color:#fff; border-radius:50%; width:18px; height:18px; font-size:11px; display:none; align-items:center; justify-content:center; }
+.img-search-item.selected .added-mark { display:flex; }
+
 .toast {
   position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
   background:#111827; color:#fff; padding:12px 24px; border-radius:12px;
@@ -331,6 +339,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="img-section-title" style="margin-top:16px">🖼 Фотографии</div>
     <div class="imgs-list" id="imgs-list"></div>
 
+    <button class="btn-add-spec" id="btn-search-images" onclick="searchImages()" style="margin-bottom:10px;border-color:#6366f1;color:#6366f1">
+      🔍 Найти картинки на Kaspi
+    </button>
+    <div id="image-search-results" style="display:none;margin-bottom:12px">
+      <div style="font-size:12px;color:#9ca3af;margin-bottom:8px" id="img-search-hint">Нажмите на картинку чтобы добавить</div>
+      <div id="img-search-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"></div>
+    </div>
+
     <div class="img-add-tabs">
       <div class="img-add-tab active" id="tab-file" onclick="switchImgTab('file')">📁 Файл</div>
       <div class="img-add-tab" id="tab-url" onclick="switchImgTab('url')">🔗 Ссылка URL</div>
@@ -564,6 +580,54 @@ function handleImageFiles(files) {
   document.getElementById('e-img-input').value = '';
 }
 
+async function searchImages() {
+  const btn = document.getElementById('btn-search-images');
+  const resultsDiv = document.getElementById('image-search-results');
+  const grid = document.getElementById('img-search-grid');
+  const hint = document.getElementById('img-search-hint');
+
+  btn.textContent = '⏳ Ищу на Kaspi...';
+  btn.disabled = true;
+  resultsDiv.style.display = 'none';
+
+  try {
+    const res = await fetch(`/api/products/${product.id}/search-images`);
+    const data = await res.json();
+
+    if (!data.images || !data.images.length) {
+      hint.textContent = '😕 Картинки не найдены — попробуйте добавить вручную';
+      resultsDiv.style.display = 'block';
+      grid.innerHTML = '';
+    } else {
+      hint.textContent = `Найдено ${data.images.length} картинок — нажмите чтобы добавить`;
+      grid.innerHTML = data.images.map((url, i) => `
+        <div class="img-search-item" id="search-img-${i}" onclick="toggleSearchImage('${url}', ${i})">
+          <img src="${url}" onerror="this.parentElement.style.display='none'">
+          <div class="added-mark">✓</div>
+        </div>`).join('');
+      resultsDiv.style.display = 'block';
+    }
+  } catch(e) {
+    hint.textContent = '❌ Ошибка поиска';
+    resultsDiv.style.display = 'block';
+  }
+
+  btn.textContent = '🔍 Найти картинки на Kaspi';
+  btn.disabled = false;
+}
+
+function toggleSearchImage(url, idx) {
+  const el = document.getElementById('search-img-' + idx);
+  if (editImages.includes(url)) {
+    editImages = editImages.filter(u => u !== url);
+    el.classList.remove('selected');
+  } else {
+    editImages.push(url);
+    el.classList.add('selected');
+  }
+  renderImgsList();
+}
+
 function openEdit() {
   const p = product;
   document.getElementById('e-name').value = p.name || '';
@@ -576,6 +640,8 @@ function openEdit() {
   editImages = p.images && p.images.length ? [...p.images] : (p.image_url ? [p.image_url] : []);
   renderImgsList();
   switchImgTab('file');
+  document.getElementById('image-search-results').style.display = 'none';
+  document.getElementById('img-search-grid').innerHTML = '';
   document.getElementById('edit-overlay').classList.add('open');
 }
 

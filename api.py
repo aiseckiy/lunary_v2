@@ -1236,6 +1236,126 @@ def save_product_images(product_id: int, data: ProductImagesBody, request: Reque
     return {"ok": True}
 
 
+@app.get("/api/products/{product_id}/search-images")
+def search_product_images(product_id: int, request: Request, db: Session = Depends(get_db)):
+    """Ищет картинки через Google Custom Search API"""
+    import requests as req_lib
+    from database import Product as _P
+
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+
+    p = db.query(_P).filter(_P.id == product_id).first()
+    if not p:
+        raise HTTPException(status_code=404)
+
+    api_key = os.getenv("GOOGLE_API_KEY", "")
+    cx = os.getenv("GOOGLE_CX", "")
+    if not api_key or not cx:
+        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY или GOOGLE_CX не заданы")
+
+    query = p.name
+    images = []
+
+    try:
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            "key": api_key,
+            "cx": cx,
+            "q": query,
+            "searchType": "image",
+            "num": 10,
+            "imgSize": "MEDIUM",
+            "safe": "off",
+        }
+        r = req_lib.get(url, params=params, timeout=10)
+        data = r.json()
+        for item in data.get("items", []):
+            link = item.get("link")
+            if link:
+                images.append(link)
+    except Exception as e:
+        print(f"[image search] ошибка: {e}")
+
+    return {"images": images, "query": query}
+
+
+@app.post("/api/admin/fill-images")
+def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
+    """Автоматически ищет и заполняет картинки для товаров без фото через Google"""
+    import requests as req_lib
+    from database import Product as _P
+
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+
+    api_key = os.getenv("GOOGLE_API_KEY", "")
+    cx = os.getenv("GOOGLE_CX", "")
+    if not api_key or not cx:
+        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY или GOOGLE_CX не заданы")
+
+    # Только товары без изображений
+    products = db.query(_P).filter(
+        (_P.images == None) | (_P.images == "") | (_P.images == "[]")
+    ).filter(
+        (_P.image_url == None) | (_P.image_url == "")
+    ).all()
+
+    filled = 0
+    skipped = 0
+    errors = 0
+
+    for p in products:
+        try:
+            r = req_lib.get(
+                "https://www.googleapis.com/customsearch/v1",
+                params={
+                    "key": api_key, "cx": cx,
+                    "q": p.name, "searchType": "image",
+                    "num": 5, "imgSize": "MEDIUM", "safe": "off",
+                },
+                timeout=10
+            )
+            data = r.json()
+
+            # Проверяем лимит
+            if "error" in data:
+                print(f"[fill-images] Google error: {data['error'].get('message')}")
+                errors += 1
+                break
+
+            items = data.get("items", [])
+            if not items:
+                skipped += 1
+                continue
+
+            links = [i["link"] for i in items if i.get("link")]
+            if not links:
+                skipped += 1
+                continue
+
+            p.images = json.dumps(links[:5], ensure_ascii=False)
+            p.image_url = links[0]
+            db.commit()
+            filled += 1
+            time.sleep(0.2)  # небольшая пауза чтобы не перегружать API
+
+        except Exception as e:
+            print(f"[fill-images] ошибка для {p.name}: {e}")
+            errors += 1
+
+    return {
+        "filled": filled,
+        "skipped": skipped,
+        "errors": errors,
+        "remaining_without_images": db.query(_P).filter(
+            (_P.images == None) | (_P.images == "") | (_P.images == "[]")
+        ).count()
+    }
+
+
 @app.get("/shop/product/{product_id}", response_class=HTMLResponse)
 def shop_product_page(product_id: int):
     with open("static/product.html", encoding="utf-8") as f:

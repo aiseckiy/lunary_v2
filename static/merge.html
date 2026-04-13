@@ -77,6 +77,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #6c63ff; flex-shrink: 0; margin-top: 2px; }
 
 .section-divider { padding: 6px 16px; background: #f3f4f6; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e5e7eb; }
+
+/* Попап полей */
+.fields-popup { position: fixed; bottom: 64px; left: 24px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.12); z-index: 200; min-width: 260px; display: none; }
+.fields-popup.open { display: block; }
+.fields-popup-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e; }
+.field-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+.field-row:last-child { border-bottom: none; }
+.field-row input[type=checkbox] { width: 16px; height: 16px; accent-color: #6c63ff; flex-shrink: 0; }
+.field-info { flex: 1; }
+.field-name { font-size: 13px; font-weight: 600; }
+.field-desc { font-size: 11px; color: #9ca3af; }
+.field-row.has-name { background: #fef9c3; border-radius: 8px; padding: 7px 8px; margin: 0 -8px; }
 </style>
 </head>
 <body>
@@ -85,6 +97,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
   <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🔀 Слияние товаров</h1>
   <button class="btn btn-outline btn-sm" onclick="importArchive()" id="btn-archive" style="margin-left:8px">📦 Импорт архива</button>
+  <button class="btn btn-outline btn-sm" onclick="reload()" id="btn-reload" style="margin-left:4px" title="Обновить данные">🔄 Обновить</button>
   <div class="stats-chips">
     <span class="chip chip-blue" id="stat-kaspi">Kaspi: —</span>
     <span class="chip chip-green" id="stat-other">Накладные: —</span>
@@ -125,8 +138,44 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
   </div>
 </div>
 
+<!-- Попап выбора полей -->
+<div class="fields-popup" id="fields-popup">
+  <div class="fields-popup-title">⚙️ Что переносить из накладной</div>
+  <label class="field-row has-name">
+    <input type="checkbox" id="field-name">
+    <div class="field-info">
+      <div class="field-name">📝 Наименование</div>
+      <div class="field-desc">Заменить название Kaspi-карточки на название из накладной</div>
+    </div>
+  </label>
+  <label class="field-row">
+    <input type="checkbox" id="field-cost_price" checked>
+    <div class="field-info">
+      <div class="field-name">💰 Закупочная цена</div>
+      <div class="field-desc">Перенести себестоимость из накладной</div>
+    </div>
+  </label>
+  <label class="field-row">
+    <input type="checkbox" id="field-supplier" checked>
+    <div class="field-info">
+      <div class="field-name">🏭 Поставщик</div>
+      <div class="field-desc">Название поставщика/компании</div>
+    </div>
+  </label>
+  <label class="field-row">
+    <input type="checkbox" id="field-supplier_article" checked>
+    <div class="field-info">
+      <div class="field-name">🔖 Артикул производителя</div>
+      <div class="field-desc">Артикул из накладной / прайс-листа</div>
+    </div>
+  </label>
+</div>
+
 <div class="bottom-bar">
   <div id="result-bar" class="result-bar"></div>
+  <button class="btn btn-outline btn-sm" onclick="toggleFieldsPopup()" id="btn-fields" style="position:relative">
+    ⚙️ Поля <span id="fields-count-badge" style="background:#6c63ff;color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;margin-left:4px">3</span>
+  </button>
   <span class="selected-count" id="selected-count">Выберите пары для объединения</span>
   <button class="btn btn-outline btn-sm" onclick="selectAllPairs()">Выбрать все совпадения</button>
   <button class="btn btn-sm" style="background:#10b981;color:#fff" onclick="mergeSkuOnly()">🎯 Объединить все по артикулу</button>
@@ -140,6 +189,36 @@ let kaspiTab = 'all';
 let otherTab = 'pairs';
 let kaspiSearch = '';
 let otherSearch = '';
+
+// ── Поля для переноса ─────────────────────────────────────────────────────────
+const FIELD_IDS = ['field-name', 'field-cost_price', 'field-supplier', 'field-supplier_article'];
+
+function getSelectedFields() {
+  return FIELD_IDS
+    .filter(id => document.getElementById(id).checked)
+    .map(id => id.replace('field-', ''));
+}
+
+function toggleFieldsPopup() {
+  document.getElementById('fields-popup').classList.toggle('open');
+}
+
+// Закрывать попап при клике вне него
+document.addEventListener('click', e => {
+  const popup = document.getElementById('fields-popup');
+  const btn = document.getElementById('btn-fields');
+  if (popup.classList.contains('open') && !popup.contains(e.target) && !btn.contains(e.target)) {
+    popup.classList.remove('open');
+  }
+});
+
+// Обновляем бейдж с количеством выбранных полей
+function updateFieldsBadge() {
+  document.getElementById('fields-count-badge').textContent = getSelectedFields().length;
+}
+FIELD_IDS.forEach(id => {
+  document.getElementById(id).addEventListener('change', updateFieldsBadge);
+});
 
 // Узнаём какие kaspi_id и other_id участвуют в парах
 let kaspiInPairs = new Set();
@@ -396,7 +475,7 @@ async function mergeSkuOnly() {
   const r = await fetch('/api/merge-confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pairs }),
+    body: JSON.stringify({ pairs, fields: getSelectedFields() }),
   });
   const d = await r.json();
 
@@ -430,7 +509,7 @@ async function doMerge() {
   const r = await fetch('/api/merge-confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pairs }),
+    body: JSON.stringify({ pairs, fields: getSelectedFields() }),
   });
   const d = await r.json();
 
@@ -458,6 +537,24 @@ async function importArchive() {
   btn.disabled = false;
   btn.textContent = '📦 Импорт архива';
 }
+
+async function reload() {
+  const btn = document.getElementById('btn-reload');
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  selectedPairIds.clear();
+  document.getElementById('result-bar').style.display = 'none';
+  document.getElementById('kaspi-list').innerHTML = '<div class="loading">⏳</div>';
+  document.getElementById('other-list').innerHTML = '<div class="loading">⏳</div>';
+  await load();
+  btn.disabled = false;
+  btn.textContent = '🔄 Обновить';
+}
+
+// Авто-обновление когда вкладка браузера снова становится активной
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') reload();
+});
 
 load();
 </script>

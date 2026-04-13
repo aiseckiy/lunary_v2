@@ -386,9 +386,15 @@
       </div>
       <div class="edit-modal field-row">
         <div class="form-group">
-          <label class="form-label">Артикул</label>
+          <label class="form-label">Артикул (внутренний)</label>
           <input class="form-input" id="em-sku" style="text-transform:uppercase" placeholder="SA043">
         </div>
+        <div class="form-group">
+          <label class="form-label">Артикул производителя</label>
+          <input class="form-input" id="em-supplier-article" placeholder="040100060234">
+        </div>
+      </div>
+      <div class="edit-modal field-row">
         <div class="form-group">
           <label class="form-label">Штрихкод</label>
           <div style="display:flex;gap:6px">
@@ -1108,6 +1114,7 @@ function openEditModal(id, fromMove = false) {
   document.getElementById('em-price').value = p.price || '';
   document.getElementById('em-cost-price').value = p.cost_price || '';
   document.getElementById('em-supplier').value = p.supplier || '';
+  document.getElementById('em-supplier-article').value = p.supplier_article || '';
   // Kaspi SKU список
   const skus = (p.kaspi_sku || '').split(',').map(s => s.trim()).filter(Boolean);
   renderKaspiSkuList(skus.length ? skus : ['']);
@@ -1175,11 +1182,12 @@ async function submitEdit() {
   const price = parseInt(document.getElementById('em-price').value) || null;
   const cost_price = parseInt(document.getElementById('em-cost-price').value) || null;
   const supplier = document.getElementById('em-supplier').value.trim() || null;
+  const supplier_article = document.getElementById('em-supplier-article').value.trim() || null;
   const kaspi_sku = Array.from(document.querySelectorAll('.em-kaspi-sku-input')).map(i => i.value.trim()).filter(Boolean).join(',') || null;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, kaspi_sku})
+    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, supplier_article, kaspi_sku})
   });
 
   if (!res.ok) {

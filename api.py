@@ -176,6 +176,7 @@ class ProductUpdate(BaseModel):
     kaspi_article: Optional[str] = None
     cost_price: Optional[int] = None
     supplier: Optional[str] = None
+    supplier_article: Optional[str] = None
     description: Optional[str] = None
     specs: Optional[str] = None
 
@@ -845,6 +846,7 @@ def list_products(db: Session = Depends(get_db)):
             "kaspi_sku": s["product"].kaspi_sku or "",
             "cost_price": s["product"].cost_price,
             "supplier": s["product"].supplier or "",
+            "supplier_article": s["product"].supplier_article or "",
             "description": s["product"].description or "",
             "specs": s["product"].specs or "[]"
         }
@@ -962,6 +964,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         "stock": stock, "low": stock <= (p.min_stock or 0),
         "brand": p.brand or "", "supplier": p.supplier or "",
         "cost_price": p.cost_price, "barcode": p.barcode or "",
+        "supplier_article": p.supplier_article or "",
         "images": p.images or "[]",
         "description": p.description or "",
         "specs": p.specs or "[]",
@@ -2976,35 +2979,37 @@ def merge_preview(db: Session = Depends(get_db)):
 
 @app.post("/api/merge-confirm")
 def merge_confirm(body: dict, db: Session = Depends(get_db)):
-    """body: {"pairs": [{"kaspi_id": X, "other_id": Y}, ...]}"""
+    """body: {"pairs": [{"kaspi_id": X, "other_id": Y}], "fields": ["name","cost_price","supplier","supplier_article"]}"""
     from database import Product as _P, Movement
     selected = body.get("pairs", [])
+    fields = set(body.get("fields", ["cost_price", "supplier", "supplier_article"]))
+
+    def clean_article(val):
+        if not val:
+            return None
+        for prefix in ("KSP_", "PL-"):
+            if val.upper().startswith(prefix):
+                return None
+        return val
+
     merged = 0
-    deleted = 0
     for pair in selected:
         kaspi_p = db.query(_P).filter(_P.id == pair["kaspi_id"]).first()
         other_p = db.query(_P).filter(_P.id == pair["other_id"]).first()
         if not kaspi_p or not other_p:
             continue
-        if other_p.cost_price:
-            kaspi_p.cost_price = other_p.cost_price
-        if other_p.supplier:
-            kaspi_p.supplier = other_p.supplier
-        # Артикул поставщика — берём barcode или sku без служебных префиксов
-        def clean_article(val):
-            if not val:
-                return None
-            for prefix in ("KSP_", "PL-"):
-                if val.upper().startswith(prefix):
-                    return None
-            return val
 
-        article_val = clean_article(other_p.barcode) or clean_article(other_p.supplier_article) or clean_article(other_p.sku)
-        if article_val and not kaspi_p.supplier_article:
-            kaspi_p.supplier_article = article_val
-        if article_val and not kaspi_p.barcode:
-            kaspi_p.barcode = article_val
-        # переносим движения
+        if "name" in fields and other_p.name:
+            kaspi_p.name = other_p.name
+        if "cost_price" in fields and other_p.cost_price:
+            kaspi_p.cost_price = other_p.cost_price
+        if "supplier" in fields and other_p.supplier:
+            kaspi_p.supplier = other_p.supplier
+        if "supplier_article" in fields:
+            article_val = clean_article(other_p.supplier_article) or clean_article(other_p.sku)
+            if article_val and not kaspi_p.supplier_article:
+                kaspi_p.supplier_article = article_val
+
         db.query(Movement).filter(Movement.product_id == other_p.id).update(
             {"product_id": kaspi_p.id}, synchronize_session=False
         )
@@ -3272,7 +3277,10 @@ def reset_products(body: dict, db: Session = Depends(get_db)):
 
 @app.post("/api/clean-bad-articles")
 def clean_bad_articles(db: Session = Depends(get_db)):
-    """Удаляет служебные префиксы KSP_ и PL- из полей kaspi_article и barcode"""
+    """Очищает мусор:
+    1. Удаляет служебные префиксы KSP_ и PL- из supplier_article и barcode
+    2. Если barcode == supplier_article — обнуляет barcode (артикул попал в штрихкод по ошибке)
+    """
     from database import Product as _P
     cleaned = 0
     for p in db.query(_P).all():
@@ -3282,6 +3290,10 @@ def clean_bad_articles(db: Session = Depends(get_db)):
             if val and (val.upper().startswith("KSP_") or val.upper().startswith("PL-")):
                 setattr(p, field, None)
                 changed = True
+        # Если barcode совпадает с supplier_article — это артикул, а не штрихкод
+        if p.barcode and p.supplier_article and p.barcode == p.supplier_article:
+            p.barcode = None
+            changed = True
         if changed:
             cleaned += 1
     db.commit()

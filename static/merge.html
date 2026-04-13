@@ -67,6 +67,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-outline:hover { background: #f9fafb; }
 .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 8px; }
 .btn-merge-pair { background: #6c63ff; color: #fff; }
+.btn-merge-pair:hover { background: #5b52e0; }
+.pair-item.synced { opacity: .5; pointer-events: none; }
 .btn-skip { background: #f3f4f6; color: #6b7280; }
 .selected-count { font-size: 13px; color: #6b7280; margin-right: auto; }
 
@@ -469,12 +471,38 @@ function pairHtml(p) {
         </div>
       </div>
     </div>
-    <div style="padding-left:25px">
+    <div style="display:flex;align-items:center;gap:8px;padding-left:25px">
       <span class="match-badge ${p.match_type === 'sku' ? 'badge-sku' : 'badge-fuzzy'}">
         ${p.match_type === 'sku' ? '🎯 артикул' : `🔍 ~${Math.round(p.score * 100)}%`}
       </span>
+      <button class="btn btn-sm btn-merge-pair" onclick="mergeOne(${p.kaspi_id}, ${p.other_id}, event)">Слить →</button>
     </div>
   </div>`;
+}
+
+async function mergeOne(kaspiId, otherId, e) {
+  e.stopPropagation();
+  const r = await fetch('/api/merge-confirm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      pairs: [{ kaspi_id: kaspiId, other_id: otherId }],
+      fields: getSelectedFields(),
+      force: document.getElementById('field-force').checked,
+    }),
+  });
+  const d = await r.json();
+  if (d.merged) {
+    // Убираем пару из списка и показываем зелёный флаш
+    const bar = document.getElementById('result-bar');
+    bar.style.display = 'block';
+    bar.textContent = `✅ Слито`;
+    setTimeout(() => bar.style.display = 'none', 2000);
+    // Помечаем пару как синхронизированную локально
+    const pair = data.pairs.find(p => p.kaspi_id === kaspiId && p.other_id === otherId);
+    if (pair) pair._synced = true;
+    renderOther();
+  }
 }
 
 function renderAllOther(el) {

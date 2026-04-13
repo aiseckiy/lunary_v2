@@ -2982,6 +2982,93 @@ def merge_page():
     return FileResponse("static/merge.html")
 
 
+@app.post("/api/fill-articles-from-pricelist")
+def fill_articles_from_pricelist(db: Session = Depends(get_db)):
+    """Заполняет barcode/kaspi_article у всех товаров у которых они пустые,
+    матчинг по нечёткому имени из Закупочные_цены_LUNARY.xml"""
+    import xml.etree.ElementTree as ET
+    import re
+    from database import Product as _P
+
+    xml_path = "Закупочные_цены_LUNARY.xml"
+    try:
+        tree = ET.parse(xml_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Не удалось открыть XML: {e}")
+
+    root = tree.getroot()
+    товары = root.find("Товары")
+    if товары is None:
+        raise HTTPException(status_code=400, detail="Нет тега <Товары> в XML")
+
+    STOPWORDS = {"и","в","на","с","для","из","по","шт","мл","л","кг","г","см","мм","м","гр","х","x","the","of","for","pcs"}
+    def words(text):
+        return {w for w in re.split(r'[\s\-_/,.()\[\]"«»\']+', (text or "").lower()) if len(w) > 2 and w not in STOPWORDS}
+
+    # Загружаем прайс в память
+    price_items = []
+    for товар in товары.findall("Товар"):
+        name_el = товар.find("Наименование")
+        article_el = товар.find("Артикул")
+        supplier_el = товар.find("Поставщик")
+        price_el = товар.find("ЦенаЗакупки")
+        name = (name_el.text or "").strip() if name_el is not None else ""
+        article = (article_el.text or "").strip() if article_el is not None else ""
+        supplier = (supplier_el.text or "").strip() if supplier_el is not None else ""
+        cost_price_raw = (price_el.text or "0").strip() if price_el is not None else "0"
+        if not name:
+            continue
+        try:
+            cost_price = int(float(cost_price_raw))
+        except Exception:
+            cost_price = None
+        price_items.append({"name": name, "article": article, "supplier": supplier,
+                            "cost_price": cost_price, "words": words(name)})
+
+    # Берём все товары у которых нет артикула
+    all_products = db.query(_P).all()
+    updated = 0
+
+    for p in all_products:
+        if p.barcode and p.kaspi_article:
+            continue  # артикулы уже есть
+
+        p_words = words(p.name)
+        if not p_words:
+            continue
+
+        best_score = 0.0
+        best_item = None
+        for item in price_items:
+            if not item["words"]:
+                continue
+            common = p_words & item["words"]
+            score = len(common) / max(len(p_words), len(item["words"]))
+            if score > best_score:
+                best_score = score
+                best_item = item
+
+        if best_item and best_score >= 0.75:
+            changed = False
+            if best_item["article"] and not p.barcode:
+                p.barcode = best_item["article"]
+                changed = True
+            if best_item["article"] and not p.kaspi_article:
+                p.kaspi_article = best_item["article"]
+                changed = True
+            if best_item["cost_price"] is not None and not p.cost_price:
+                p.cost_price = best_item["cost_price"]
+                changed = True
+            if best_item["supplier"] and not p.supplier:
+                p.supplier = best_item["supplier"]
+                changed = True
+            if changed:
+                updated += 1
+
+    db.commit()
+    return {"updated": updated, "total_products": len(all_products)}
+
+
 @app.post("/api/import-price-list")
 def import_price_list(db: Session = Depends(get_db)):
     """Импортирует закупочные цены из XML прайс-листа в таблицу products.

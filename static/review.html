@@ -80,6 +80,7 @@ select.filter:focus { border-color: #6c63ff; }
 <div class="import-bar">
   <span>📂 Загрузить закупочные цены из XML:</span>
   <button class="btn btn-outline btn-sm" onclick="importPriceList()" id="btn-import">Импортировать прайс-лист</button>
+  <button class="btn btn-outline btn-sm" onclick="fillArticles()" id="btn-fill" style="margin-left:4px">🔖 Заполнить артикулы</button>
   <span id="import-result"></span>
 </div>
 
@@ -316,6 +317,27 @@ async function importPriceList() {
   }
   btn.disabled = false;
   btn.textContent = 'Импортировать прайс-лист';
+}
+
+async function fillArticles() {
+  const btn = document.getElementById('btn-fill');
+  const result = document.getElementById('import-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Заполняю...';
+  result.textContent = '';
+  try {
+    const r = await fetch('/api/fill-articles-from-pricelist', { method: 'POST' });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Ошибка');
+    result.textContent = `✅ Артикулы заполнены у ${data.updated} из ${data.total_products} товаров`;
+    result.style.color = '#065f46';
+    load();
+  } catch(e) {
+    result.textContent = `❌ ${e.message}`;
+    result.style.color = '#991b1b';
+  }
+  btn.disabled = false;
+  btn.textContent = '🔖 Заполнить артикулы';
 }
 
 // Init

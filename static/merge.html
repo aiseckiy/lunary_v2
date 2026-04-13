@@ -81,6 +81,11 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
 .card-link:hover { background: #ede9fe; }
 .filter-hint { padding: 6px 16px; background: #eff6ff; font-size: 12px; color: #1e40af; border-bottom: 1px solid #bfdbfe; display: flex; align-items: center; gap: 8px; }
 .filter-hint button { background: none; border: none; cursor: pointer; color: #1e40af; font-size: 12px; font-weight: 600; padding: 0; text-decoration: underline; }
+.link-hint { padding: 8px 16px; background: #fef9c3; font-size: 12px; color: #92400e; border-bottom: 1px solid #fde68a; display: flex; align-items: center; gap: 8px; }
+.link-hint button { background: none; border: none; cursor: pointer; color: #92400e; font-weight: 600; padding: 0; text-decoration: underline; }
+.btn-link-pair { background: #f5f3ff; color: #6c63ff; border: 1px solid #ede9fe; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+.btn-link-pair:hover { background: #ede9fe; }
+.btn-link-pair.pending { background: #fef9c3; color: #92400e; border-color: #fde68a; }
 
 /* Попап полей */
 .fields-popup { position: fixed; bottom: 64px; left: 24px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.12); z-index: 200; min-width: 260px; display: none; }
@@ -100,11 +105,10 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
 <div class="header">
   <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🔀 Слияние товаров</h1>
-  <button class="btn btn-outline btn-sm" onclick="importArchive()" id="btn-archive" style="margin-left:8px">📦 Импорт архива</button>
-  <button class="btn btn-outline btn-sm" onclick="reload()" id="btn-reload" style="margin-left:4px" title="Обновить данные">🔄 Обновить</button>
+  <button class="btn btn-outline btn-sm" onclick="reload()" id="btn-reload" style="margin-left:8px" title="Обновить данные">🔄 Обновить</button>
   <div class="stats-chips">
     <span class="chip chip-blue" id="stat-kaspi">Kaspi: —</span>
-    <span class="chip chip-green" id="stat-other">Накладные: —</span>
+    <span class="chip chip-green" id="stat-other">Справочник: —</span>
     <span class="chip chip-yellow" id="stat-pairs">Совпадений: —</span>
     <span class="chip chip-red" id="stat-unmatched">Без пары: —</span>
     <span class="chip" style="background:#d1fae5;color:#065f46" id="stat-synced">Синхронизировано: —</span>
@@ -130,7 +134,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
   <!-- Правая панель: Накладные + совпадения -->
   <div class="panel">
     <div class="panel-header">
-      <span class="panel-title">🧾 Накладные</span>
+      <span class="panel-title">🗂️ Справочник накладных</span>
       <input class="panel-search" type="text" placeholder="Поиск..." oninput="filterOther(this.value)" id="search-other">
     </div>
     <div class="tabs-bar">
@@ -189,10 +193,12 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
 <script>
 let data = null;
 let selectedPairIds = new Set(); // "kaspi_id:other_id"
+let manualPairs = []; // вручную созданные пары
 let kaspiTab = 'all';
 let otherTab = 'pairs';
 let kaspiSearch = '';
 let otherSearch = '';
+let pendingLinkId = null; // id справочника ожидающий привязки
 
 // ── Поля для переноса ─────────────────────────────────────────────────────────
 const FIELD_IDS = ['field-name', 'field-cost_price', 'field-supplier', 'field-supplier_article'];
@@ -239,7 +245,7 @@ async function load() {
   const skuPairs = data.pairs.filter(p => p.match_type === 'sku').length;
   const fuzzyPairs = data.pairs.filter(p => p.match_type === 'fuzzy').length;
   document.getElementById('stat-kaspi').textContent = `Kaspi: ${data.total_kaspi}`;
-  document.getElementById('stat-other').textContent = `Накладные: ${data.total_other}`;
+  document.getElementById('stat-other').textContent = `Справочник: ${data.total_other}`;
   document.getElementById('stat-pairs').textContent = `Совпадений: ${data.pairs.length} (🎯${skuPairs} 🔍${fuzzyPairs})`;
   document.getElementById('stat-unmatched').textContent = `Без пары: ${data.unmatched_other.length}`;
   document.getElementById('stat-synced').textContent = `✅ Синхронизировано: ${data.total_synced} из ${data.total_kaspi}`;
@@ -301,7 +307,11 @@ function renderKaspi() {
 
   if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
 
-  el.innerHTML = items.map(p => {
+  const linkHint = pendingLinkId !== null
+    ? `<div class="link-hint">🔗 Выбери карточку Kaspi для привязки <button onclick="cancelLink()">✕ Отмена</button></div>`
+    : '';
+
+  el.innerHTML = linkHint + items.map(p => {
     const hasPair  = kaspiInPairs.has(p.id);
     const isActive = selectedKaspiId === p.id;
     return `<div class="product-item ${hasPair ? 'matched' : ''} ${isActive ? 'selected' : ''}" onclick="selectKaspi(${p.id})">
@@ -320,10 +330,42 @@ function renderKaspi() {
 }
 
 function selectKaspi(id) {
-  // Повторный клик снимает фильтр
+  // Режим ручной привязки
+  if (pendingLinkId !== null) {
+    const ri = data.other_list.find(r => r.id === pendingLinkId);
+    const kp = data.kaspi_list.find(p => p.id === id);
+    if (ri && kp) {
+      // Проверяем что такой пары ещё нет
+      const key = `${id}:${pendingLinkId}`;
+      const alreadyAuto = data.pairs.some(p => p.kaspi_id === id && p.other_id === pendingLinkId);
+      if (!alreadyAuto && !manualPairs.some(p => p.kaspi_id === id && p.other_id === pendingLinkId)) {
+        manualPairs.push({
+          kaspi_id: id, kaspi_name: kp.name, kaspi_sku: kp.kaspi_sku, kaspi_price: kp.price,
+          other_id: pendingLinkId, other_name: ri.name, other_sku: ri.sku,
+          other_supplier: ri.supplier, other_cost_price: ri.cost_price,
+          match_type: 'manual', score: 1.0,
+        });
+        // Убираем из unmatched_other
+        data.unmatched_other = data.unmatched_other.filter(r => r.id !== pendingLinkId);
+        data.pairs = [...data.pairs, manualPairs[manualPairs.length - 1]];
+        // Авто-выбор этой пары
+        selectedPairIds.add(key);
+        updateMergeBtn();
+      }
+    }
+    pendingLinkId = null;
+    renderKaspi();
+    // Переключить на пары
+    otherTab = 'pairs';
+    document.querySelectorAll('.panel:last-child .ptab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel:last-child .ptab')[0]?.classList.add('active');
+    renderOther();
+    return;
+  }
+
+  // Обычный режим — фильтр по Kaspi-товару
   selectedKaspiId = selectedKaspiId === id ? null : id;
   renderKaspi();
-  // Переключаем правую панель на совпадения и фильтруем
   if (selectedKaspiId !== null && otherTab !== 'pairs') {
     otherTab = 'pairs';
     document.querySelectorAll('.panel:last-child .ptab').forEach(t => t.classList.remove('active'));
@@ -412,11 +454,10 @@ function pairHtml(p) {
       </div>
       <div class="pair-arrow">⇄</div>
       <div class="pair-side other">
-        <div class="pair-label">Накладная</div>
+        <div class="pair-label">Справочник</div>
         <div class="p-name">${hl(p.other_name, otherSearch)}</div>
         <div class="p-meta">
           <span class="p-sku">${p.other_sku || ''}</span>
-          <span class="tag">${p.other_category || ''}</span>
           ${p.other_cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.other_cost_price.toLocaleString()} ₸</span>` : ''}
           ${p.other_supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.other_supplier}</span>` : ''}
         </div>
@@ -444,7 +485,6 @@ function renderAllOther(el) {
         <div class="p-name">${hl(p.name, otherSearch)}</div>
         <div class="p-meta">
           <span class="p-sku">${p.sku || ''}</span>
-          <span class="tag">${p.category || ''}</span>
           ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
           ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
         </div>
@@ -454,6 +494,19 @@ function renderAllOther(el) {
   }).join('');
 }
 
+function startLink(refId) {
+  pendingLinkId = refId;
+  renderOther(); // покажет кнопку pending на выбранном
+  // Показать подсказку в левой панели
+  renderKaspi();
+}
+
+function cancelLink() {
+  pendingLinkId = null;
+  renderKaspi();
+  renderOther();
+}
+
 function renderUnmatched(el) {
   let items = data.unmatched_other;
   if (otherSearch) items = items.filter(p =>
@@ -461,17 +514,28 @@ function renderUnmatched(el) {
     (p.sku || '').toLowerCase().includes(otherSearch)
   );
   if (!items.length) { el.innerHTML = '<div class="empty">Все товары имеют пару 🎉</div>'; return; }
-  el.innerHTML = items.map(p => `<div class="product-item">
-    <div style="flex:1;min-width:0">
-      <div class="p-name">${hl(p.name, otherSearch)}</div>
-      <div class="p-meta">
-        <span class="p-sku">${p.sku || '—'}</span>
-        <span class="tag">${p.category || ''}</span>
-        ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
-        ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
+
+  const hint = pendingLinkId
+    ? `<div class="link-hint">⬅ Нажми Kaspi-карточку слева чтобы привязать <button onclick="cancelLink()">✕ Отмена</button></div>`
+    : '';
+
+  el.innerHTML = hint + items.map(p => {
+    const isPending = pendingLinkId === p.id;
+    return `<div class="product-item ${isPending ? 'selected' : ''}">
+      <div style="flex:1;min-width:0">
+        <div class="p-name">${hl(p.name, otherSearch)}</div>
+        <div class="p-meta">
+          <span class="p-sku">${p.sku || '—'}</span>
+          ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
+          ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
+        </div>
       </div>
-    </div>
-  </div>`).join('');
+      <button class="btn-link-pair ${isPending ? 'pending' : ''}"
+        onclick="event.stopPropagation(); ${isPending ? 'cancelLink()' : `startLink(${p.id})`}">
+        ${isPending ? '✕ Отмена' : '↔ Привязать'}
+      </button>
+    </div>`;
+  }).join('');
 }
 
 function switchOtherTab(tab, el) {
@@ -536,7 +600,7 @@ function updateMergeBtn() {
 async function doMerge() {
   const n = selectedPairIds.size;
   if (!n) return;
-  if (!confirm(`Объединить ${n} пар? Товары из накладных будут удалены, данные перенесены в Kaspi-карточки.`)) return;
+  if (!confirm(`Объединить ${n} пар? Данные из справочника будут перенесены в Kaspi-карточки.`)) return;
 
   const pairs = [...selectedPairIds].map(key => {
     const [kaspi_id, other_id] = key.split(':').map(Number);
@@ -558,22 +622,6 @@ async function doMerge() {
   await load();
 }
 
-async function importArchive() {
-  const btn = document.getElementById('btn-archive');
-  btn.disabled = true;
-  btn.textContent = '⏳ Импортирую...';
-  try {
-    const r = await fetch('/api/kaspi/import-archive', { method: 'POST' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Ошибка');
-    alert(`✅ Архив импортирован: добавлено ${d.added}, пропущено (уже есть) ${d.skipped}`);
-    await load();
-  } catch(e) {
-    alert('❌ ' + e.message);
-  }
-  btn.disabled = false;
-  btn.textContent = '📦 Импорт архива';
-}
 
 async function reload() {
   const btn = document.getElementById('btn-reload');
@@ -581,6 +629,8 @@ async function reload() {
   btn.textContent = '⏳';
   selectedPairIds.clear();
   selectedKaspiId = null;
+  pendingLinkId = null;
+  manualPairs = [];
   document.getElementById('result-bar').style.display = 'none';
   document.getElementById('kaspi-list').innerHTML = '<div class="loading">⏳</div>';
   document.getElementById('other-list').innerHTML = '<div class="loading">⏳</div>';

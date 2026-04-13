@@ -1,11 +1,7 @@
 /**
  * nav.js — единая боковая и нижняя навигация для всех страниц.
- * Подключить: <script src="/static/nav.js"></script>
- * Сайдбар рендерится в #sidebar, нижняя панель — в #bottom-nav.
- * Также применяет сохранённую тему (дизайн-токены).
  */
 (function () {
-  // Применяем сохранённую тему
   fetch('/api/admin/theme/css').then(r => r.text()).then(css => {
     const style = document.createElement('style');
     style.textContent = css;
@@ -14,25 +10,44 @@
 
   const path = window.location.pathname;
 
-  const LINKS = [
-    { href: '/admin',            icon: '🏠', label: 'Склад' },
-    { href: '/admin/scanner',    icon: '📷', label: 'Сканер' },
-    { href: '/admin/history',    icon: '📋', label: 'История' },
-    { href: '/admin/analytics',  icon: '📊', label: 'Аналитика' },
-    { href: '/admin/kaspi',      icon: '🛒', label: 'Kaspi' },
-    { href: '/admin/shop-orders',icon: '🛍️', label: 'Заказы', badge: 'orders-badge' },
-    { href: '/admin/settings',   icon: '⚙️', label: 'Настройки' },
-    { href: '/admin/theme',      icon: '🎨', label: 'Тема' },
-    { href: '/admin/changelog',  icon: '🚀', label: 'Обновления' },
-    { href: '/shop',             icon: '🏪', label: 'Магазин' },
-    { href: '/import',           icon: '📥', label: 'Импорт XML' },
-    { href: '/uploads',          icon: '📁', label: 'Файлы' },
-    { href: '/pricelist',        icon: '🗂️', label: 'Накладные' },
-    { href: '/merge',            icon: '🔀', label: 'Слияние' },
-    { href: '/review',           icon: '✅', label: 'Проверка' },
+  const GROUPS = [
+    {
+      label: 'Склад',
+      links: [
+        { href: '/admin',           icon: '📦', label: 'Товары' },
+        { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
+        { href: '/admin/history',   icon: '📋', label: 'История' },
+        { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
+      ]
+    },
+    {
+      label: 'Продажи',
+      links: [
+        { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi заказы' },
+        { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы магазина', badge: 'orders-badge' },
+        { href: '/shop',              icon: '🏪', label: 'Магазин' },
+      ]
+    },
+    {
+      label: 'Импорт и данные',
+      links: [
+        { href: '/import',    icon: '📥', label: 'Импорт XML' },
+        { href: '/pricelist', icon: '🗂️', label: 'Накладные' },
+        { href: '/merge',     icon: '🔀', label: 'Слияние товаров' },
+        { href: '/review',    icon: '✅', label: 'Проверка' },
+        { href: '/uploads',   icon: '📁', label: 'Файлы' },
+      ]
+    },
+    {
+      label: 'Система',
+      links: [
+        { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },
+        { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
+        { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
+      ]
+    },
   ];
 
-  // Определяем активную ссылку: точное совпадение или начало пути
   function isActive(href) {
     if (href === '/admin') return path === '/admin';
     return path.startsWith(href);
@@ -41,30 +56,31 @@
   // ── Сайдбар ──────────────────────────────────────────────────
   const sidebar = document.getElementById('sidebar');
   if (sidebar) {
-    sidebar.innerHTML = `
-      <div class="sidebar-logo">Lunary <span>OS</span></div>
-      <div class="sidebar-section">Меню</div>
-      ${LINKS.map(l => {
+    let html = `<div class="sidebar-logo">Lunary <span>OS</span></div>`;
+
+    for (const group of GROUPS) {
+      html += `<div class="sidebar-section">${group.label}</div>`;
+      for (const l of group.links) {
         const active = isActive(l.href) ? ' active' : '';
         const badgeHtml = l.badge
           ? `<span id="${l.badge}" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span>`
           : '';
-        return `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
-      }).join('\n      ')}
-      <div class="sidebar-spacer"></div>
-      <div class="sidebar-footer">Lunary OS v2</div>
-    `;
+        html += `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
+      }
+    }
+
+    html += `<div class="sidebar-spacer"></div><div class="sidebar-footer">Lunary OS v2</div>`;
+    sidebar.innerHTML = html;
   }
 
   // ── Нижняя панель (мобильная) ─────────────────────────────────
-  // Показываем 5 основных + Магазин
   const BNAV_LINKS = [
-    { href: '/admin',            icon: '🏠', label: 'Склад' },
-    { href: '/admin/scanner',    icon: '📷', label: 'Сканер' },
-    { href: '/admin/history',    icon: '📋', label: 'История' },
-    { href: '/admin/kaspi',      icon: '🛒', label: 'Kaspi' },
-    { href: '/admin/shop-orders',icon: '🛍️', label: 'Заказы' },
-    { href: '/shop',             icon: '🏪', label: 'Магазин' },
+    { href: '/admin',             icon: '📦', label: 'Склад' },
+    { href: '/admin/scanner',     icon: '📷', label: 'Сканер' },
+    { href: '/admin/history',     icon: '📋', label: 'История' },
+    { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi' },
+    { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы' },
+    { href: '/shop',              icon: '🏪', label: 'Магазин' },
   ];
 
   const bottomNav = document.getElementById('bottom-nav');

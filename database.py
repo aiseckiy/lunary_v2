@@ -28,7 +28,6 @@ class Product(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    sku = Column(String, unique=True, nullable=False)
     barcode = Column(String, nullable=True)
     category = Column(String, default="Общее", index=True)
     unit = Column(String, default="шт")

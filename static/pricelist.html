@@ -62,7 +62,54 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 .loading { text-align: center; padding: 60px; color: #9ca3af; }
 .count-badge { font-size: 12px; color: #6b7280; margin-left: 4px; }
 
+/* Привязка к карточке */
+.assign-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; }
+.assign-modal.open { display:flex; }
+.assign-box { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.assign-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.assign-ref { font-size:12px; color:#6b7280; margin-bottom:16px; padding:8px 12px; background:#f9fafb; border-radius:8px; line-height:1.5; }
+.assign-search { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
+.assign-search:focus { border-color:#6c63ff; }
+.assign-results { margin-top:10px; max-height:280px; overflow-y:auto; border:1px solid #f3f4f6; border-radius:10px; }
+.assign-item { padding:10px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer; transition:background .1s; }
+.assign-item:last-child { border-bottom:none; }
+.assign-item:hover { background:#f5f3ff; }
+.assign-item-name { font-size:13px; font-weight:500; }
+.assign-item-meta { font-size:11px; color:#9ca3af; margin-top:2px; display:flex; gap:8px; }
+.assign-item.linked { background:#f0fdf4; }
+.assign-item.linked:hover { background:#dcfce7; }
+.assign-empty { padding:24px; text-align:center; color:#9ca3af; font-size:13px; }
+.assign-fields { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 4px; }
+.assign-field-chk { display:flex; align-items:center; gap:5px; font-size:12px; cursor:pointer; background:#f3f4f6; border-radius:8px; padding:4px 10px; }
+.assign-field-chk input { accent-color:#6c63ff; }
+.btn-assign-row { background:none; border:1px solid #e5e7eb; border-radius:6px; padding:3px 8px; font-size:11px; color:#6c63ff; cursor:pointer; white-space:nowrap; }
+.btn-assign-row:hover { background:#f5f3ff; border-color:#ede9fe; }
+
 .highlight { background: #fef08a; border-radius: 2px; padding: 0 1px; }
+.pagination { display: flex; gap: 8px; align-items: center; padding: 14px 0 4px; flex-wrap: wrap; }
+.page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; font-family: inherit; }
+.page-btn:hover:not(:disabled) { background: #f9fafb; }
+.page-btn:disabled { opacity: .4; cursor: not-allowed; }
+.page-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+.page-info { font-size: 13px; color: #6b7280; }
+
+/* Вкладки */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; }
+.tab { padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.tab.active { color: #6c63ff; border-bottom-color: #6c63ff; }
+
+/* Таблица проверки цен */
+.diff-up   { color: #dc2626; font-weight: 700; }
+.diff-down { color: #16a34a; font-weight: 700; }
+.diff-same { color: #9ca3af; }
+.no-match  { color: #9ca3af; font-style: italic; }
+.pct-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+.pct-up   { background: #fee2e2; color: #991b1b; }
+.pct-down { background: #d1fae5; color: #065f46; }
+.pc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.pc-filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+.pc-filter-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+.pc-stat { font-size: 13px; color: #6b7280; margin-left: auto; }
 </style>
 </head>
 <body>
@@ -76,6 +123,14 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 </div>
 
 <div class="container">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('ref', this)">📋 Справочник</div>
+    <div class="tab" onclick="switchTab('prices', this)">💰 Проверка цен закупа</div>
+  </div>
+
+  <!-- ═══ ВКЛАДКА: СПРАВОЧНИК ═══ -->
+  <div id="tab-ref">
 
   <!-- Загрузка -->
   <div class="card">
@@ -120,6 +175,7 @@ tbody td { padding: 10px 12px; vertical-align: top; }
             <th>Цена закупки</th>
             <th>Ед.</th>
             <th>Файл</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="table-body">
@@ -127,13 +183,53 @@ tbody td { padding: 10px 12px; vertical-align: top; }
         </tbody>
       </table>
     </div>
+    <div class="pagination" id="pagination"></div>
   </div>
+
+  </div><!-- /tab-ref -->
+
+  <!-- ═══ ВКЛАДКА: ПРОВЕРКА ЦЕН ═══ -->
+  <div id="tab-prices" style="display:none">
+
+  <div class="card">
+    <div class="pc-filters">
+      <button class="pc-filter-btn active" onclick="setPcFilter('all', this)">Все</button>
+      <button class="pc-filter-btn" onclick="setPcFilter('up', this)">📈 Выросла</button>
+      <button class="pc-filter-btn" onclick="setPcFilter('down', this)">📉 Снизилась</button>
+      <button class="pc-filter-btn" onclick="setPcFilter('nolink', this)">❓ Не привязан</button>
+      <span class="pc-stat" id="pc-stat"></span>
+      <button class="btn btn-outline" style="padding:6px 14px;font-size:12px" onclick="loadPriceCheck()">🔄 Обновить</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Наименование (справочник)</th>
+            <th>Артикул</th>
+            <th>Поставщик</th>
+            <th>Цена в справочнике</th>
+            <th>Текущая цена закупа</th>
+            <th>Изменение</th>
+            <th>Kaspi-карточка</th>
+          </tr>
+        </thead>
+        <tbody id="pc-body">
+          <tr><td colspan="7" class="loading">⏳ Загрузка...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  </div><!-- /tab-prices -->
 
 </div>
 
 <script>
 let selectedFile = null;
 let searchTimer = null;
+const PAGE_SIZE = 100;
+let currentPage = 1;
+let totalItems = 0;
 
 // ── Загрузка файла ─────────────────────────────────────────────────────────
 function onFileSelect(input) {
@@ -228,16 +324,23 @@ async function loadSuppliers() {
     d.suppliers.map(s => `<option value="${s}" ${s === cur ? 'selected' : ''}>${s}</option>`).join('');
 }
 
-// ── Поиск ──────────────────────────────────────────────────────────────────
+// ── Поиск + пагинация ──────────────────────────────────────────────────────
 function onSearch() {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(doSearch, 250);
+  searchTimer = setTimeout(() => { currentPage = 1; doSearch(); }, 250);
+}
+
+function goPage(p) {
+  currentPage = p;
+  doSearch();
+  document.getElementById('table-body').closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function doSearch() {
   const q = document.getElementById('search-input').value.trim();
   const supplier = document.getElementById('supplier-filter').value;
-  const params = new URLSearchParams({ limit: 200 });
+  const offset = (currentPage - 1) * PAGE_SIZE;
+  const params = new URLSearchParams({ limit: PAGE_SIZE, offset });
   if (q) params.set('q', q);
   if (supplier) params.set('supplier', supplier);
 
@@ -246,12 +349,17 @@ async function doSearch() {
 
   const r = await fetch('/api/pricelist/search?' + params);
   const d = await r.json();
+  totalItems = d.total;
 
-  document.getElementById('count-badge').textContent = d.total > 200
-    ? `Показано 200 из ${d.total}` : `${d.total} позиций`;
+  const pages = Math.ceil(totalItems / PAGE_SIZE);
+  const from = offset + 1;
+  const to = Math.min(offset + PAGE_SIZE, totalItems);
+  document.getElementById('count-badge').textContent = totalItems
+    ? `${from}–${to} из ${totalItems}` : '0 позиций';
 
   if (!d.items.length) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty">Ничего не найдено</td></tr>';
+    document.getElementById('pagination').innerHTML = '';
     return;
   }
 
@@ -262,7 +370,24 @@ async function doSearch() {
     <td class="td-price">${i.cost_price != null ? i.cost_price.toLocaleString() + ' ₸' : '—'}</td>
     <td>${i.unit}</td>
     <td class="td-file">${i.source_file}</td>
+    <td><button class="btn-assign-row" onclick="openAssign(${JSON.stringify(i).replace(/"/g,'&quot;')})">↔ Привязать</button></td>
   </tr>`).join('');
+
+  // Пагинация
+  if (pages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+  let pag = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Назад</button>`;
+  // Кнопки страниц (макс 7 видимых)
+  const delta = 3;
+  let start = Math.max(1, currentPage - delta);
+  let end   = Math.min(pages, currentPage + delta);
+  if (start > 1)     pag += `<button class="page-btn" onclick="goPage(1)">1</button>${start > 2 ? '<span class="page-info">…</span>' : ''}`;
+  for (let i = start; i <= end; i++) {
+    pag += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (end < pages)   pag += `${end < pages-1 ? '<span class="page-info">…</span>' : ''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
+  pag += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Вперёд →</button>`;
+  pag += `<span class="page-info">Стр. ${currentPage} из ${pages}</span>`;
+  document.getElementById('pagination').innerHTML = pag;
 }
 
 function hl(text, q) {
@@ -272,6 +397,162 @@ function hl(text, q) {
   return text.slice(0, idx) + `<span class="highlight">${text.slice(idx, idx + q.length)}</span>` + text.slice(idx + q.length);
 }
 
+// ── Вкладки ────────────────────────────────────────────────────────────────
+let activeTab = 'ref';
+let pcData = null;
+let pcFilter = 'all';
+
+function switchTab(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-ref').style.display    = tab === 'ref'    ? '' : 'none';
+  document.getElementById('tab-prices').style.display = tab === 'prices' ? '' : 'none';
+  if (tab === 'prices' && !pcData) loadPriceCheck();
+}
+
+// ── Проверка цен ───────────────────────────────────────────────────────────
+async function loadPriceCheck() {
+  document.getElementById('pc-body').innerHTML = '<tr><td colspan="7" class="loading">⏳ Загружаю...</td></tr>';
+  const r = await fetch('/api/pricelist/price-check');
+  const d = await r.json();
+  pcData = d;
+  document.getElementById('pc-stat').textContent =
+    `Всего: ${d.total} · Привязано: ${d.matched} · С изменением: ${d.changed}`;
+  renderPriceCheck();
+}
+
+function setPcFilter(f, el) {
+  pcFilter = f;
+  document.querySelectorAll('.pc-filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPriceCheck();
+}
+
+function renderPriceCheck() {
+  if (!pcData) return;
+  let rows = pcData.rows;
+  if (pcFilter === 'up')     rows = rows.filter(r => r.diff > 0);
+  if (pcFilter === 'down')   rows = rows.filter(r => r.diff < 0);
+  if (pcFilter === 'nolink') rows = rows.filter(r => !r.matched);
+
+  const tbody = document.getElementById('pc-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Ничего не найдено</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const refPriceStr = r.ref_price != null ? r.ref_price.toLocaleString() + ' ₸' : '—';
+    const curPriceStr = r.cur_price != null ? r.cur_price.toLocaleString() + ' ₸' : '—';
+
+    let diffCell = '<span class="diff-same">—</span>';
+    if (!r.matched) {
+      diffCell = '<span class="no-match">не привязан</span>';
+    } else if (r.diff != null && r.diff !== 0) {
+      const sign = r.diff > 0 ? '+' : '';
+      const cls  = r.diff > 0 ? 'diff-up' : 'diff-down';
+      const icon = r.diff > 0 ? '📈' : '📉';
+      const pctCls = r.diff > 0 ? 'pct-up' : 'pct-down';
+      diffCell = `<span class="${cls}">${icon} ${sign}${r.diff.toLocaleString()} ₸</span>
+        ${r.pct != null ? `<span class="pct-badge ${pctCls}">${r.diff > 0 ? '+' : ''}${r.pct}%</span>` : ''}`;
+    }
+
+    const kaspiLink = r.kaspi_id
+      ? `<a href="/admin?open=${r.kaspi_id}" target="_blank" style="font-size:12px;color:#6c63ff;text-decoration:none">${r.kaspi_name || '↗'} ↗</a>`
+      : '<span class="no-match">—</span>';
+
+    return `<tr>
+      <td class="td-name">${r.ref_name}</td>
+      <td class="td-article">${r.article}</td>
+      <td class="td-supplier">${r.supplier}</td>
+      <td class="td-price">${refPriceStr}</td>
+      <td style="font-weight:500">${curPriceStr}</td>
+      <td>${diffCell}</td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${kaspiLink}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Привязка к Kaspi-карточке ──────────────────────────────────────────────
+let assignRef = null;
+let assignTimer = null;
+
+function openAssign(item) {
+  assignRef = item;
+  document.getElementById('assign-ref-name').textContent = item.name;
+  document.getElementById('assign-ref-meta').textContent =
+    [item.article, item.supplier, item.cost_price != null ? item.cost_price.toLocaleString() + ' ₸' : null]
+    .filter(Boolean).join(' · ');
+  document.getElementById('assign-search').value = '';
+  document.getElementById('assign-results').innerHTML = '<div class="assign-empty">Начни вводить название товара</div>';
+  document.getElementById('assign-modal').classList.add('open');
+  setTimeout(() => document.getElementById('assign-search').focus(), 50);
+}
+
+function closeAssign() {
+  document.getElementById('assign-modal').classList.remove('open');
+  assignRef = null;
+}
+
+document.getElementById('assign-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('assign-modal')) closeAssign();
+});
+
+function onAssignSearch() {
+  clearTimeout(assignTimer);
+  assignTimer = setTimeout(doAssignSearch, 200);
+}
+
+async function doAssignSearch() {
+  const q = document.getElementById('assign-search').value.trim();
+  const el = document.getElementById('assign-results');
+  if (!q) { el.innerHTML = '<div class="assign-empty">Начни вводить название товара</div>'; return; }
+  el.innerHTML = '<div class="assign-empty">⏳</div>';
+  const r = await fetch(`/api/products/search?q=${encodeURIComponent(q)}&limit=10`);
+  const items = await r.json();
+  if (!items.length) { el.innerHTML = '<div class="assign-empty">Ничего не найдено</div>'; return; }
+  el.innerHTML = items.map(p => `
+    <div class="assign-item ${p.cost_price ? 'linked' : ''}" onclick="doAssign(${p.id}, '${(p.name||'').replace(/'/g,"\\'")}')">
+      <div class="assign-item-name">${p.name}</div>
+      <div class="assign-item-meta">
+        <span>${p.kaspi_sku || p.sku || ''}</span>
+        ${p.cost_price ? `<span style="color:#10b981">⬇ ${p.cost_price.toLocaleString()} ₸ уже есть</span>` : ''}
+        ${p.supplier ? `<span>${p.supplier}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function getAssignFields() {
+  return ['cost_price','supplier','supplier_article','name']
+    .filter(f => document.getElementById(`af-${f}`)?.checked);
+}
+
+async function doAssign(kaspiId, kaspiName) {
+  if (!assignRef) return;
+  const fields = getAssignFields();
+  if (!fields.length) { alert('Выбери хотя бы одно поле для переноса'); return; }
+  if (!confirm(`Перенести данные из справочника в карточку «${kaspiName}»?`)) return;
+
+  const r = await fetch('/api/merge-confirm', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ pairs: [{ kaspi_id: kaspiId, other_id: assignRef.id }], fields })
+  });
+  const d = await r.json();
+  if (r.ok && d.merged) {
+    closeAssign();
+    // Показать уведомление
+    const msg = document.createElement('div');
+    msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2)';
+    msg.textContent = `✅ Привязано к «${kaspiName}»`;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+  } else {
+    alert('Ошибка привязки');
+  }
+}
+
 // ── Инициализация ──────────────────────────────────────────────────────────
 (async () => {
   await loadStats();
@@ -279,5 +560,36 @@ function hl(text, q) {
   doSearch();
 })();
 </script>
+
+<!-- Попап привязки к Kaspi-карточке -->
+<div class="assign-modal" id="assign-modal">
+  <div class="assign-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <div class="assign-title">↔ Привязать к Kaspi-карточке</div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:2px">Из справочника:</div>
+      </div>
+      <button onclick="closeAssign()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;line-height:1;padding:0">×</button>
+    </div>
+    <div class="assign-ref">
+      <div style="font-weight:600;font-size:13px" id="assign-ref-name"></div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:3px" id="assign-ref-meta"></div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Что перенести:</div>
+    <div class="assign-fields">
+      <label class="assign-field-chk"><input type="checkbox" id="af-cost_price" checked> 💰 Цена закупа</label>
+      <label class="assign-field-chk"><input type="checkbox" id="af-supplier" checked> 🏭 Поставщик</label>
+      <label class="assign-field-chk"><input type="checkbox" id="af-supplier_article" checked> 🔖 Артикул</label>
+      <label class="assign-field-chk"><input type="checkbox" id="af-name"> 📝 Название</label>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:#374151;margin:14px 0 6px">Найти карточку в системе:</div>
+    <input class="assign-search" id="assign-search" type="text" placeholder="Введи название товара Kaspi..." oninput="onAssignSearch()">
+    <div class="assign-results" id="assign-results">
+      <div class="assign-empty">Начни вводить название товара</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

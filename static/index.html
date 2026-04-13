@@ -240,7 +240,7 @@
     <div class="modal-header">
       <div>
         <div class="modal-title" id="mm-name">—</div>
-        <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="mm-sku">—</div>
+        <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="mm-sku"></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button onclick="closeMoveModal();openEditModal(selectedId,true)" title="Редактировать карточку" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px;line-height:1;color:var(--text2)">✏️</button>
@@ -404,7 +404,7 @@
         <button id="em-back-btn" onclick="closeEditModal();openMoveModal(editId)" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:var(--text2)">←</button>
         <div>
           <div class="modal-title">✏️ Редактировать товар</div>
-          <div style="font-size:12px;color:#52525b;font-family:monospace;margin-top:3px" id="em-sku-label">—</div>
+          <input type="hidden" id="em-sku">
         </div>
       </div>
       <button class="modal-close" onclick="closeEditModal()">×</button>
@@ -415,11 +415,7 @@
         <input class="form-input" id="em-name">
       </div>
       <div class="edit-modal field-row">
-        <div class="form-group">
-          <label class="form-label">Артикул (внутренний)</label>
-          <input class="form-input" id="em-sku" style="text-transform:uppercase" placeholder="SA043">
-        </div>
-        <div class="form-group">
+        <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Артикул производителя</label>
           <input class="form-input" id="em-supplier-article" placeholder="040100060234">
         </div>
@@ -725,7 +721,7 @@ function goPage(p) {
 function render() {
   const q = document.getElementById('search').value.toLowerCase();
   let list = allProducts.filter(p => {
-    if (q && !p.name.toLowerCase().includes(q) && !p.sku.toLowerCase().includes(q) && !(p.barcode||'').includes(q)) return false;
+    if (q && !p.name.toLowerCase().includes(q) && !(p.kaspi_sku||'').toLowerCase().includes(q) && !(p.supplier_article||'').toLowerCase().includes(q) && !(p.barcode||'').includes(q)) return false;
     if (showLow && !p.low) return false;
     if (activeCats.size && !activeCats.has(p.category || 'Общее')) return false;
     if (activeBrands.size && !activeBrands.has(getBrand(p))) return false;
@@ -791,7 +787,7 @@ function productCard(p) {
         <div class="card-name">${p.name}</div>
         <span class="card-badge ${p.low?'badge-low':'badge-ok'}">${p.low?'⚠️':'✓'}</span>
       </div>
-      <div class="card-sku">${p.sku}</div>
+      ${p.supplier_article ? `<div class="card-sku">${p.supplier_article}</div>` : ''}
       ${p.kaspi_sku ? `<div class="card-kaspi-sku">${p.kaspi_sku}</div>` : ''}
       <div class="card-bottom">
         <div>
@@ -813,7 +809,7 @@ function openMoveModal(id) {
   const p = allProducts.find(x => x.id === id);
   selectedId = id;
   document.getElementById('mm-name').textContent = p.name;
-  document.getElementById('mm-sku').textContent = p.sku;
+  document.getElementById('mm-sku').textContent = p.supplier_article || '';
   document.getElementById('mm-stock').textContent = p.stock;
   document.getElementById('mm-stock').className = 'big-num ' + (p.low?'low':'ok');
   document.getElementById('mm-unit').textContent = p.unit;
@@ -937,8 +933,8 @@ async function doReceiptSearch(q) {
     const products = await res.json();
     if (!products.length) { sug.innerHTML = '<div style="padding:8px 12px;font-size:13px;color:var(--text3)">Не найдено</div>'; sug.style.display = 'block'; return; }
     sug.innerHTML = products.slice(0, 8).map(p =>
-      `<div class="fdrop-item" data-id="${p.id}" data-name="${encodeURIComponent(p.name)}" data-sku="${p.sku||''}" data-stock="${p.stock||0}">
-        <span style="flex:1">${p.name} <span style="font-size:11px;color:var(--text3);font-family:monospace">${p.sku}</span></span>
+      `<div class="fdrop-item" data-id="${p.id}" data-name="${encodeURIComponent(p.name)}" data-sku="${p.supplier_article||''}" data-stock="${p.stock||0}">
+        <span style="flex:1">${p.name} ${p.supplier_article ? `<span style="font-size:11px;color:var(--text3);font-family:monospace">${p.supplier_article}</span>` : ''}</span>
         <span style="font-size:12px;color:var(--text3)">${p.stock} шт</span>
       </div>`
     ).join('');
@@ -981,7 +977,7 @@ function renderReceiptList() {
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
-        <div style="font-size:11px;color:var(--text3);font-family:monospace">${item.sku} · было ${item.currentStock} шт</div>
+        <div style="font-size:11px;color:var(--text3);font-family:monospace">${item.sku ? item.sku + ' · ' : ''}было ${item.currentStock} шт</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         <button onclick="receiptChQty(${item.id},-1)" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;color:var(--text)">−</button>
@@ -1067,7 +1063,7 @@ function renderPurchases(items) {
           <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}</div>
-              <div style="font-size:11px;color:var(--text3);font-family:monospace">${it.sku}${it.brand ? ' · ' + it.brand : ''}</div>
+              <div style="font-size:11px;color:var(--text3);font-family:monospace">${it.supplier_article ? it.supplier_article + (it.brand ? ' · ' : '') : ''}${it.brand || ''}</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
               <div style="font-size:13px;font-weight:700;color:var(--red)">${it.stock} ${it.unit}</div>
@@ -1178,9 +1174,8 @@ function openEditModal(id, fromMove = false) {
   const p = allProducts.find(x => x.id === id);
   editId = id;
   document.getElementById('em-back-btn').style.display = fromMove ? '' : 'none';
-  document.getElementById('em-sku-label').textContent = p.sku;
   document.getElementById('em-name').value = p.name;
-  document.getElementById('em-sku').value = p.sku;
+  document.getElementById('em-sku').value = '';
   document.getElementById('em-barcode').value = p.barcode || '';
   document.getElementById('em-category').value = p.category || '';
   document.getElementById('em-unit').value = p.unit || 'шт';
@@ -1245,13 +1240,12 @@ async function deleteProduct() {
 
 async function submitEdit() {
   const name = document.getElementById('em-name').value.trim();
-  const sku = document.getElementById('em-sku').value.trim().toUpperCase();
   const barcode = document.getElementById('em-barcode').value.trim() || null;
   const category = document.getElementById('em-category').value.trim();
   const unit = document.getElementById('em-unit').value;
   const min_stock = parseInt(document.getElementById('em-min').value) || 0;
 
-  if (!name || !sku) { toast('Название и артикул обязательны', 'error'); return; }
+  if (!name) { toast('Введите название', 'error'); return; }
 
   const brand = document.getElementById('em-brand').value.trim() || null;
   const price = parseInt(document.getElementById('em-price').value) || null;
@@ -1262,7 +1256,7 @@ async function submitEdit() {
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, sku, barcode, category, unit, min_stock, brand, price, cost_price, supplier, supplier_article, kaspi_sku})
+    body: JSON.stringify({name, barcode, category, unit, min_stock, brand, price, cost_price, supplier, supplier_article, kaspi_sku})
   });
 
   if (!res.ok) {

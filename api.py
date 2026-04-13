@@ -104,6 +104,8 @@ except ImportError:
 
 app = FastAPI(title="Lunary OS", version="1.0")
 
+
+
 if _slowapi_ok:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -456,7 +458,7 @@ def _auto_import_if_empty():
         added = 0
         for p in data:
             sku = p['sku'].upper()
-            if db.query(_P).filter(_P.sku == sku).first():
+            if False:  # sku field removed
                 continue
             new_p = crud.create_product(
                 name=p['name'], sku=sku, db=db,
@@ -859,7 +861,6 @@ def list_products(db: Session = Depends(get_db)):
         {
             "id": s["product"].id,
             "name": s["product"].name,
-            "sku": s["product"].sku,
             "barcode": s["product"].barcode,
             "category": s["product"].category,
             "unit": s["product"].unit,
@@ -881,16 +882,12 @@ def list_products(db: Session = Depends(get_db)):
 
 @app.post("/api/products")
 def create_product(data: ProductCreate, db: Session = Depends(get_db)):
-    from database import Product as _P
-    sku = data.sku.upper()
-    if db.query(_P).filter(_P.sku == sku).first():
-        raise HTTPException(status_code=409, detail="Артикул уже занят")
     p = crud.create_product(
-        name=data.name, sku=sku, db=db,
+        name=data.name, db=db,
         barcode=data.barcode, category=data.category,
         unit=data.unit, min_stock=data.min_stock, brand=data.brand, price=data.price
     )
-    return {"id": p.id, "name": p.name, "sku": p.sku}
+    return {"id": p.id, "name": p.name}
 
 
 @app.get("/api/products/suppliers")
@@ -927,10 +924,12 @@ def search_products(q: str, db: Session = Depends(get_db)):
         {
             "id": p.id,
             "name": p.name,
-            "sku": p.sku,
+            "kaspi_sku": p.kaspi_sku or "",
             "barcode": p.barcode,
             "stock": stock_map.get(p.id, 0),
-            "unit": p.unit
+            "unit": p.unit,
+            "cost_price": p.cost_price,
+            "supplier": p.supplier or "",
         }
         for p in products
     ]
@@ -944,7 +943,7 @@ def get_by_barcode(barcode: str, db: Session = Depends(get_db)):
     return {
         "id": p.id,
         "name": p.name,
-        "sku": p.sku,
+        "sku": p.kaspi_sku or "",
         "barcode": p.barcode,
         "stock": crud.get_stock(p.id, db),
         "unit": p.unit,
@@ -971,14 +970,13 @@ def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(g
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
-    if "sku" in updates:
-        updates["sku"] = updates["sku"].upper()
+    updates.pop("sku", None)
     if "barcode" in updates and updates["barcode"]:
         conflict = db.query(_P).filter(_P.barcode == updates["barcode"], _P.id != product_id).first()
         if conflict:
-            raise HTTPException(status_code=409, detail=f"Штрихкод уже привязан к товару «{conflict.name}» (арт. {conflict.sku})")
+            raise HTTPException(status_code=409, detail=f"Штрихкод уже привязан к товару «{conflict.name}»")
     p = crud.update_product(product_id, db, **updates)
-    return {"id": p.id, "name": p.name, "sku": p.sku}
+    return {"id": p.id, "name": p.name}
 
 
 @app.get("/api/products/{product_id}")
@@ -988,7 +986,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Товар не найден")
     stock = crud.get_stock(product_id, db)
     return {"product": {
-        "id": p.id, "name": p.name, "sku": p.sku or "", "kaspi_sku": p.kaspi_sku or "", "kaspi_article": p.kaspi_article or "",
+        "id": p.id, "name": p.name, "kaspi_sku": p.kaspi_sku or "", "kaspi_article": p.kaspi_article or "",
         "category": p.category or "", "unit": p.unit or "шт",
         "price": p.price, "min_stock": p.min_stock,
         "stock": stock, "low": stock <= (p.min_stock or 0),
@@ -1142,7 +1140,7 @@ def get_all_history(
                 "id": m.id,
                 "product_id": p.id,
                 "product_name": p.name,
-                "product_sku": p.sku,
+                "product_sku": p.kaspi_sku or "",
                 "type": m.type,
                 "type_label": type_labels.get(m.type, m.type),
                 "quantity": m.quantity,
@@ -1251,7 +1249,7 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Товар не найден")
     p, stock = row
     return {
-        "id": p.id, "name": p.name, "sku": p.sku,
+        "id": p.id, "name": p.name, "sku": p.kaspi_sku or "",
         "category": p.category or "Другое",
         "brand": p.brand or "",
         "price": p.price, "unit": p.unit or "шт",
@@ -2106,7 +2104,7 @@ def products_export_xlsx(db: Session = Depends(get_db)):
         stock = int(stock)
         values = [
             p.kaspi_sku or "",
-            p.sku or "",
+            p.kaspi_sku or "",
             p.name or "",
             p.brand or "",
             p.category or "",
@@ -2482,7 +2480,7 @@ def create_shop_order(data: ShopOrderCreate, request: Request, db: Session = Dep
         if not p:
             continue
         price = p.price or 0
-        order_items.append({"product_id": p.id, "name": p.name, "qty": qty, "price": price, "sku": p.sku or ""})
+        order_items.append({"product_id": p.id, "name": p.name, "qty": qty, "price": price, "sku": p.kaspi_sku or ""})
         total += price * qty
 
     if not order_items:
@@ -2595,7 +2593,7 @@ def purchases_list(db: Session = Depends(get_db)):
             result.append({
                 "id": p.id,
                 "name": p.name,
-                "sku": p.sku or "",
+                "sku": p.kaspi_sku or "",
                 "supplier": p.supplier or "Не указан",
                 "brand": p.brand or "",
                 "stock": stock,
@@ -2643,7 +2641,7 @@ def import_products(db: Session = Depends(get_db)):
     added = skipped = 0
     for p in data:
         sku = p['sku'].upper()
-        if db.query(_P).filter(_P.sku == sku).first():
+        if False:  # sku field removed
             skipped += 1
             continue
         new_p = crud.create_product(
@@ -2746,17 +2744,9 @@ async def kaspi_import_xml_products(
                         break
                 break
 
-        # Генерируем уникальный SKU для нашей БД
-        base_sku = f"KSP_{kaspi_sku}"
-        sku = base_sku
-        counter = 1
-        while db.query(_P).filter(_P.sku == sku).first():
-            sku = f"{base_sku}_{counter}"
-            counter += 1
-
         new_p = _P(
             name=model or kaspi_sku,
-            sku=sku,
+            sku=None,
             kaspi_sku=kaspi_sku,
             brand=brand or None,
             price=price,
@@ -2851,13 +2841,6 @@ async def kaspi_import_archive(
                         break
                 break
 
-        base_sku = f"KSP_{kaspi_sku}"
-        sku = base_sku
-        counter = 1
-        while db.query(_P).filter(_P.sku == sku).first():
-            sku = f"{base_sku}_{counter}"
-            counter += 1
-
         new_p = _P(
             name=model or kaspi_sku,
             sku=sku,
@@ -2882,9 +2865,9 @@ async def kaspi_import_archive(
 @app.get("/api/merge-preview")
 def merge_preview(db: Session = Depends(get_db)):
     import re
-    from database import Product as _P
+    from database import Product as _P, PriceListItem
     kaspi_products = db.query(_P).filter(_P.category == "Kaspi").all()
-    other_products = db.query(_P).filter(_P.category != "Kaspi").all()
+    ref_items = db.query(PriceListItem).all()
 
     STOPWORDS = {"и","в","на","с","для","из","по","шт","мл","л","кг","г","см","мм","м","гр","х","x","the","of","for","pcs"}
 
@@ -2901,39 +2884,31 @@ def merge_preview(db: Session = Depends(get_db)):
     kaspi_words = {kp.id: words(kp.name) for kp in kaspi_products}
 
     pairs = []
-    unmatched_other = []
-    matched_other_ids = set()
+    unmatched_ref = []
+    matched_ref_ids = set()
 
-    # Сначала точные совпадения по артикулу
-    # Строим индексы для Kaspi товаров
+    # Индексы для Kaspi товаров
     kaspi_by_sku = {kp.sku.upper(): kp for kp in kaspi_products if kp.sku}
     kaspi_by_barcode = {kp.barcode.upper(): kp for kp in kaspi_products if kp.barcode}
     kaspi_by_article = {kp.kaspi_article.upper(): kp for kp in kaspi_products if kp.kaspi_article}
 
-    for op in other_products:
-        op_sku = (op.sku or "").upper()
-        op_barcode = (op.barcode or "").upper()
+    for ri in ref_items:
+        ri_article = (ri.article or "").upper()
 
         matched_kp = None
-        # 1. Артикул накладной == kaspi_article
-        if not matched_kp and op_sku:
-            matched_kp = kaspi_by_article.get(op_sku)
-        if not matched_kp and op_barcode:
-            matched_kp = kaspi_by_article.get(op_barcode)
-        # 2. Артикул накладной == sku Kaspi товара
-        if not matched_kp and op_sku:
-            matched_kp = kaspi_by_sku.get(op_sku)
-        if not matched_kp and op_barcode:
-            matched_kp = kaspi_by_sku.get(op_barcode)
-        # 3. Barcode совпадает
-        if not matched_kp and op_barcode:
-            matched_kp = kaspi_by_barcode.get(op_barcode)
-        if not matched_kp and op_sku:
-            matched_kp = kaspi_by_barcode.get(op_sku)
-        # 4. Артикул накладной встречается в названии Kaspi (старое поведение как запасной вариант)
-        if not matched_kp and op_sku and len(op_sku) >= 5:
+        # 1. Артикул справочника == kaspi_article
+        if not matched_kp and ri_article:
+            matched_kp = kaspi_by_article.get(ri_article)
+        # 2. Артикул справочника == sku Kaspi товара
+        if not matched_kp and ri_article:
+            matched_kp = kaspi_by_sku.get(ri_article)
+        # 3. Артикул справочника == barcode Kaspi
+        if not matched_kp and ri_article:
+            matched_kp = kaspi_by_barcode.get(ri_article)
+        # 4. Артикул встречается в названии Kaspi
+        if not matched_kp and ri_article and len(ri_article) >= 5:
             for kp in kaspi_products:
-                if op_sku in kp.name.upper():
+                if ri_article in kp.name.upper():
                     matched_kp = kp
                     break
 
@@ -2944,59 +2919,58 @@ def merge_preview(db: Session = Depends(get_db)):
                 "kaspi_name": kp.name,
                 "kaspi_sku": kp.kaspi_sku,
                 "kaspi_price": kp.price,
-                "other_id": op.id,
-                "other_name": op.name,
-                "other_sku": op.sku,
-                "other_category": op.category,
-                "other_cost_price": op.cost_price,
-                "other_supplier": op.supplier,
+                "other_id": ri.id,
+                "other_name": ri.name,
+                "other_sku": ri.article or "",
+                "other_supplier": ri.supplier or "",
+                "other_cost_price": ri.cost_price,
                 "match_type": "sku",
                 "score": 1.0,
             })
-            matched_other_ids.add(op.id)
+            matched_ref_ids.add(ri.id)
 
     # Нечёткий поиск по словам для всех остальных
-    for op in other_products:
-        op_words = words(op.name)
+    for ri in ref_items:
+        if ri.id in matched_ref_ids:
+            continue
+        ri_words = words(ri.name)
         best_score = 0
         best_kp = None
         for kp in kaspi_products:
-            score = match_score(op_words, kaspi_words[kp.id])
+            score = match_score(ri_words, kaspi_words[kp.id])
             if score > best_score:
                 best_score = score
                 best_kp = kp
         if best_kp and best_score >= 0.4:
-            # Не дублируем если уже есть SKU-совпадение с тем же товаром
-            already = any(p["kaspi_id"] == best_kp.id and p["other_id"] == op.id for p in pairs)
+            already = any(p["kaspi_id"] == best_kp.id and p["other_id"] == ri.id for p in pairs)
             if not already:
                 pairs.append({
                     "kaspi_id": best_kp.id,
                     "kaspi_name": best_kp.name,
                     "kaspi_sku": best_kp.kaspi_sku,
                     "kaspi_price": best_kp.price,
-                    "other_id": op.id,
-                    "other_name": op.name,
-                    "other_sku": op.sku,
-                    "other_category": op.category,
-                    "other_cost_price": op.cost_price,
-                    "other_supplier": op.supplier,
+                    "other_id": ri.id,
+                    "other_name": ri.name,
+                    "other_sku": ri.article or "",
+                    "other_supplier": ri.supplier or "",
+                    "other_cost_price": ri.cost_price,
                     "match_type": "fuzzy",
                     "score": round(best_score, 2),
                 })
-                matched_other_ids.add(op.id)
-        elif op.id not in matched_other_ids:
-            unmatched_other.append({
-                "id": op.id, "name": op.name, "sku": op.sku,
-                "category": op.category, "cost_price": op.cost_price, "supplier": op.supplier,
+                matched_ref_ids.add(ri.id)
+        else:
+            unmatched_ref.append({
+                "id": ri.id, "name": ri.name, "sku": ri.article or "",
+                "cost_price": ri.cost_price, "supplier": ri.supplier or "",
             })
 
     # Сортируем: сначала точные, потом fuzzy по убыванию score
     pairs.sort(key=lambda p: (-int(p["match_type"] == "sku"), -p["score"]))
 
     kaspi_list = [{"id": kp.id, "name": kp.name, "sku": kp.sku, "kaspi_sku": kp.kaspi_sku,
-                   "price": kp.price, "brand": kp.brand, "category": kp.category} for kp in kaspi_products]
-    other_list = [{"id": op.id, "name": op.name, "sku": op.sku, "category": op.category,
-                   "cost_price": op.cost_price, "supplier": op.supplier, "brand": op.brand} for op in other_products]
+                   "price": kp.price, "brand": kp.brand} for kp in kaspi_products]
+    other_list = [{"id": ri.id, "name": ri.name, "sku": ri.article or "",
+                   "cost_price": ri.cost_price, "supplier": ri.supplier or ""} for ri in ref_items]
 
     # Синхронизированные — Kaspi товары у которых уже есть cost_price или supplier
     synced = [{"id": kp.id, "name": kp.name, "sku": kp.sku, "kaspi_sku": kp.kaspi_sku,
@@ -3006,11 +2980,11 @@ def merge_preview(db: Session = Depends(get_db)):
 
     return {
         "pairs": pairs,
-        "unmatched_other": unmatched_other,
+        "unmatched_other": unmatched_ref,
         "kaspi_list": kaspi_list,
         "other_list": other_list,
         "total_kaspi": len(kaspi_products),
-        "total_other": len(other_products),
+        "total_other": len(ref_items),
         "synced": synced,
         "total_synced": len(synced),
     }
@@ -3019,7 +2993,7 @@ def merge_preview(db: Session = Depends(get_db)):
 @app.post("/api/merge-confirm")
 def merge_confirm(body: dict, db: Session = Depends(get_db)):
     """body: {"pairs": [{"kaspi_id": X, "other_id": Y}], "fields": ["name","cost_price","supplier","supplier_article"]}"""
-    from database import Product as _P, Movement
+    from database import Product as _P, PriceListItem
     selected = body.get("pairs", [])
     fields = set(body.get("fields", ["cost_price", "supplier", "supplier_article"]))
 
@@ -3034,25 +3008,21 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
     merged = 0
     for pair in selected:
         kaspi_p = db.query(_P).filter(_P.id == pair["kaspi_id"]).first()
-        other_p = db.query(_P).filter(_P.id == pair["other_id"]).first()
-        if not kaspi_p or not other_p:
+        ref_item = db.query(PriceListItem).filter(PriceListItem.id == pair["other_id"]).first()
+        if not kaspi_p or not ref_item:
             continue
 
-        if "name" in fields and other_p.name:
-            kaspi_p.name = other_p.name
-        if "cost_price" in fields and other_p.cost_price:
-            kaspi_p.cost_price = other_p.cost_price
-        if "supplier" in fields and other_p.supplier:
-            kaspi_p.supplier = other_p.supplier
+        if "name" in fields and ref_item.name:
+            kaspi_p.name = ref_item.name
+        if "cost_price" in fields and ref_item.cost_price:
+            kaspi_p.cost_price = ref_item.cost_price
+        if "supplier" in fields and ref_item.supplier:
+            kaspi_p.supplier = ref_item.supplier
         if "supplier_article" in fields:
-            article_val = clean_article(other_p.supplier_article) or clean_article(other_p.sku)
+            article_val = clean_article(ref_item.article)
             if article_val and not kaspi_p.supplier_article:
                 kaspi_p.supplier_article = article_val
 
-        db.query(Movement).filter(Movement.product_id == other_p.id).update(
-            {"product_id": kaspi_p.id}, synchronize_session=False
-        )
-        db.delete(other_p)
         merged += 1
     db.commit()
     return {"merged": merged}
@@ -3149,7 +3119,7 @@ async def pricelist_import(
 
 
 @app.get("/api/pricelist/search")
-def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, db: Session = Depends(get_db)):
+def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, offset: int = 0, db: Session = Depends(get_db)):
     """Поиск по справочнику накладных."""
     from database import PriceListItem
     from sqlalchemy import or_
@@ -3162,7 +3132,8 @@ def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, db: Sessi
         ))
     if supplier:
         query = query.filter(PriceListItem.supplier == supplier)
-    items = query.order_by(PriceListItem.name).limit(limit).all()
+    total = query.count()
+    items = query.order_by(PriceListItem.name).offset(offset).limit(limit).all()
     return {
         "items": [
             {
@@ -3176,7 +3147,7 @@ def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, db: Sessi
             }
             for i in items
         ],
-        "total": query.count(),
+        "total": total,
     }
 
 
@@ -3185,6 +3156,56 @@ def pricelist_suppliers(db: Session = Depends(get_db)):
     from database import PriceListItem
     rows = db.query(PriceListItem.supplier).distinct().filter(PriceListItem.supplier != None).all()
     return {"suppliers": sorted([r[0] for r in rows if r[0]])}
+
+
+@app.get("/api/pricelist/price-check")
+def pricelist_price_check(db: Session = Depends(get_db)):
+    """Сравнение закупочных цен справочника с текущими ценами Kaspi-карточек."""
+    from database import PriceListItem, Product as _P
+    ref_items = db.query(PriceListItem).filter(PriceListItem.cost_price != None).all()
+    kaspi_products = db.query(_P).filter(_P.category == "Kaspi").all()
+
+    # Индексы для быстрого поиска
+    kaspi_by_sku      = {p.kaspi_sku.upper(): p for p in kaspi_products if p.kaspi_sku}
+    kaspi_by_article  = {p.kaspi_article.upper(): p for p in kaspi_products if p.kaspi_article}
+    kaspi_by_barcode  = {p.barcode.upper(): p for p in kaspi_products if p.barcode}
+    kaspi_by_sup_art  = {p.supplier_article.upper(): p for p in kaspi_products if p.supplier_article}
+
+    rows = []
+    for ri in ref_items:
+        art = (ri.article or "").upper()
+        kp = None
+        if art:
+            kp = kaspi_by_article.get(art) or kaspi_by_sku.get(art) or kaspi_by_barcode.get(art) or kaspi_by_sup_art.get(art)
+
+        ref_price = ri.cost_price
+        cur_price = kp.cost_price if kp else None
+        if cur_price and ref_price:
+            diff = round(ref_price - cur_price, 2)
+            pct  = round((ref_price - cur_price) / cur_price * 100, 1) if cur_price else None
+        else:
+            diff = None
+            pct  = None
+
+        rows.append({
+            "ref_id":      ri.id,
+            "ref_name":    ri.name,
+            "article":     ri.article or "",
+            "supplier":    ri.supplier or "",
+            "ref_price":   ref_price,
+            "kaspi_id":    kp.id if kp else None,
+            "kaspi_name":  kp.name if kp else None,
+            "cur_price":   cur_price,
+            "diff":        diff,
+            "pct":         pct,
+            "matched":     kp is not None,
+        })
+
+    # Сортируем: сначала несовпавшие, потом по убыванию абс. разницы
+    rows.sort(key=lambda r: (r["matched"], -abs(r["diff"] or 0)))
+    return {"rows": rows, "total": len(rows),
+            "matched": sum(1 for r in rows if r["matched"]),
+            "changed": sum(1 for r in rows if r["diff"] and r["diff"] != 0)}
 
 
 @app.get("/api/pricelist/stats")
@@ -3394,7 +3415,7 @@ async def import_price_list(
 
     # Индекс существующих артикулов чтобы не дублировать
     existing_articles = {p.supplier_article for p in db.query(_P).filter(_P.supplier_article != None).all()}
-    existing_skus = {p.sku for p in db.query(_P).all()}
+    existing_kaspi_skus = {p.kaspi_sku for p in db.query(_P).filter(_P.kaspi_sku != None).all()}
 
     for товар in товары.findall("Товар"):
         name_el = товар.find("Наименование")
@@ -3436,7 +3457,7 @@ async def import_price_list(
             supplier=supplier,
         )
         db.add(new_p)
-        existing_skus.add(sku)
+        existing_kaspi_skus.add(sku)
         if article:
             existing_articles.add(article)
         created += 1
@@ -3483,7 +3504,7 @@ def products_review(
         "items": [{
             "id": p.id,
             "name": p.name,
-            "sku": p.sku,
+            "sku": p.kaspi_sku or "",
             "category": p.category,
             "supplier": p.supplier or "",
             "cost_price": p.cost_price,
@@ -3512,8 +3533,9 @@ def reset_products(body: dict, db: Session = Depends(get_db)):
 @app.post("/api/clean-bad-articles")
 def clean_bad_articles(db: Session = Depends(get_db)):
     """Очищает мусор:
-    1. Удаляет служебные префиксы KSP_ и PL- из supplier_article и barcode
-    2. Если barcode == supplier_article — обнуляет barcode (артикул попал в штрихкод по ошибке)
+    1. Обнуляет KSP_... в поле sku (технический мусор, kaspi_sku хранится отдельно)
+    2. Удаляет KSP_ и PL- из supplier_article и barcode
+    3. Если barcode == supplier_article — обнуляет barcode
     """
     from database import Product as _P
     cleaned = 0
@@ -3524,7 +3546,6 @@ def clean_bad_articles(db: Session = Depends(get_db)):
             if val and (val.upper().startswith("KSP_") or val.upper().startswith("PL-")):
                 setattr(p, field, None)
                 changed = True
-        # Если barcode совпадает с supplier_article — это артикул, а не штрихкод
         if p.barcode and p.supplier_article and p.barcode == p.supplier_article:
             p.barcode = None
             changed = True

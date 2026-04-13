@@ -6,389 +6,292 @@
 <title>Настройки — Lunary OS</title>
 <link rel="stylesheet" href="/static/layout.css">
 <style>
-.users-table { width:100%; border-collapse:collapse; margin-top:16px; }
-.users-table th { text-align:left; padding:10px 12px; font-size:12px; color:var(--text3); border-bottom:2px solid var(--border); font-weight:600; }
-.users-table td { padding:12px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle; }
-.users-table tr:last-child td { border-bottom:none; }
-.avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; }
-.avatar-placeholder { width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
-.role-select { border:1px solid var(--border); border-radius:8px; padding:5px 8px; font-size:13px; background:var(--bg); color:var(--text); cursor:pointer; }
+.settings-grid { display: flex; flex-direction: column; gap: 20px; }
 
-.section-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-top:20px; }
-.section-title { font-size:16px; font-weight:700; margin-bottom:4px; }
-.section-sub { font-size:13px; color:var(--text3); margin-bottom:20px; }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-.form-field label { font-size:13px; font-weight:500; color:var(--text); margin-bottom:5px; display:block; }
-.form-field input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px; color:var(--text); outline:none; font-family:inherit; transition:border-color .15s; }
-.form-field input:focus { border-color:var(--accent); background:#fff; }
-.btn-save { background:var(--accent); color:#fff; border:none; border-radius:10px; padding:10px 24px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
-.btn-save:hover { background:#4f46e5; }
-.msg { font-size:13px; margin-top:10px; display:none; }
-.msg.ok { color:#16a34a; }
-.msg.err { color:#ef4444; }
-@media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
+.s-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+.s-card-danger { border-color: #fca5a5; }
+
+.s-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.s-sub   { font-size: 13px; color: var(--text3); margin-bottom: 20px; line-height: 1.5; }
+
+.form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-field label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; display: block; }
+.form-field input,
+.form-field textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 14px; color: var(--text); outline: none; font-family: inherit; transition: border-color .15s; }
+.form-field input:focus,
+.form-field textarea:focus { border-color: var(--accent); }
+.form-field textarea { resize: vertical; }
+.form-field.full { grid-column: 1 / -1; }
+
+.btn-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+.btn-save:hover { background: #4f46e5; }
+.btn-danger { background: #dc2626; color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-danger:hover { background: #b91c1c; }
+
+.msg { font-size: 13px; margin-top: 10px; display: none; }
+.msg.ok  { color: #16a34a; }
+.msg.err { color: #ef4444; }
+
+/* Пользователи */
+.users-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.users-table th { text-align: left; padding: 9px 12px; font-size: 11px; color: var(--text3); border-bottom: 2px solid var(--border); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.users-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+.users-table tr:last-child td { border-bottom: none; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.role-select { border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 13px; background: var(--bg); color: var(--text); cursor: pointer; outline: none; }
+.role-select:focus { border-color: var(--accent); }
+
+/* Настройки сайта */
+.settings-group-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.settings-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+
+/* Опасная зона */
+.danger-input { width: 100%; padding: 10px 13px; border: 1px solid #fca5a5; border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none; font-family: inherit; background: #fff5f5; }
+.danger-input:focus { border-color: #ef4444; }
+
+@media(max-width: 640px) { .form-row, .settings-sub-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <aside class="sidebar" id="sidebar"></aside>
-
 <div class="mobile-header">
   <div class="mobile-logo">Lunary <span>OS</span></div>
-  <div class="mobile-header-actions" style="display:flex;gap:8px;align-items:center"></div>
 </div>
 
 <div class="main-content">
   <div class="page-container">
     <div class="page-title">⚙️ Настройки</div>
-    <div class="page-sub">Профиль и управление пользователями</div>
+    <div class="page-sub">Профиль, пользователи и параметры магазина</div>
 
-    <!-- Профиль -->
-    <div class="section-card">
-      <div class="section-title">Мой профиль</div>
-      <div class="section-sub">Измени имя, телефон или пароль</div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Имя</label>
-          <input type="text" id="p-name" placeholder="Ваше имя">
+    <div class="settings-grid">
+
+      <!-- Профиль -->
+      <div class="s-card">
+        <div class="s-title">👤 Мой профиль</div>
+        <div class="s-sub">Имя и номер телефона</div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Имя</label>
+            <input type="text" id="p-name" placeholder="Ваше имя">
+          </div>
+          <div class="form-field">
+            <label>Телефон</label>
+            <input type="tel" id="p-phone" placeholder="+7 (___) ___-__-__">
+          </div>
         </div>
-        <div class="form-field">
-          <label>Телефон</label>
-          <input type="tel" id="p-phone" placeholder="+7 (___) ___-__-__">
-        </div>
+        <button class="btn-save" onclick="saveProfile()">Сохранить</button>
+        <div class="msg" id="profile-msg"></div>
       </div>
-      <button class="btn-save" onclick="saveProfile()">Сохранить</button>
-      <div class="msg" id="profile-msg"></div>
-    </div>
 
-    <!-- Смена пароля -->
-    <div class="section-card">
-      <div class="section-title">Сменить пароль</div>
-      <div class="section-sub">Оставь пустым если не хочешь менять</div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Новый пароль</label>
-          <input type="password" id="p-pwd" placeholder="Минимум 6 символов">
+      <!-- Пароль -->
+      <div class="s-card">
+        <div class="s-title">🔑 Изменить пароль</div>
+        <div class="s-sub">Оставь пустым если менять не нужно</div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Новый пароль</label>
+            <input type="password" id="p-pwd" placeholder="Минимум 6 символов">
+          </div>
+          <div class="form-field">
+            <label>Повтор пароля</label>
+            <input type="password" id="p-pwd2" placeholder="Повторите пароль">
+          </div>
         </div>
-        <div class="form-field">
-          <label>Повтор пароля</label>
-          <input type="password" id="p-pwd2" placeholder="Повторите пароль">
+        <button class="btn-save" onclick="savePassword()">Изменить пароль</button>
+        <div class="msg" id="pwd-msg"></div>
+      </div>
+
+      <!-- Настройки сайта -->
+      <div class="s-card" id="site-settings-card">
+        <div class="s-title">🏪 Настройки магазина</div>
+        <div class="s-sub">Контент, контакты и интеграции — без кода</div>
+        <div id="settings-loading" style="text-align:center;padding:30px;color:var(--text3)">Загрузка...</div>
+        <div id="settings-groups" style="display:none"></div>
+        <button class="btn-save" onclick="saveSettings()" style="margin-top:4px">Сохранить всё</button>
+        <div class="msg" id="settings-msg"></div>
+      </div>
+
+      <!-- Пользователи -->
+      <div class="s-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div class="s-title" style="margin-bottom:0">👥 Пользователи</div>
+          <div style="font-size:12px;color:var(--text3)" id="users-count"></div>
         </div>
+        <div class="s-sub">Назначь роль <b>admin</b> чтобы дать доступ к панели управления</div>
+        <div id="users-loading" style="text-align:center;padding:30px;color:var(--text3)">Загрузка...</div>
+        <table class="users-table" id="users-table" style="display:none">
+          <thead>
+            <tr>
+              <th style="width:44px"></th>
+              <th>Пользователь</th>
+              <th>Email</th>
+              <th>Роль</th>
+              <th>Дата</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
       </div>
-      <button class="btn-save" onclick="savePassword()">Изменить пароль</button>
-      <div class="msg" id="pwd-msg"></div>
-    </div>
 
-    <!-- Настройки сайта -->
-    <div class="section-card" id="site-settings-card">
-      <div class="section-title">Настройки сайта</div>
-      <div class="section-sub">Редактируй любой контент магазина без кода</div>
-      <div id="settings-loading" style="text-align:center;padding:30px;color:var(--text3)">Загрузка...</div>
-      <div id="settings-groups" style="display:none"></div>
-      <button class="btn-save" onclick="saveSettings()" style="margin-top:16px">Сохранить все</button>
-      <div class="msg" id="settings-msg"></div>
-    </div>
-
-    <!-- Пользователи -->
-    <div class="section-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <div class="section-title" style="margin-bottom:0">Пользователи</div>
-        <div style="font-size:13px;color:var(--text3)" id="users-count"></div>
+      <!-- Опасная зона -->
+      <div class="s-card s-card-danger">
+        <div class="s-title" style="color:#991b1b">⚠️ Опасная зона</div>
+        <div class="s-sub">Удалить все товары и движения из базы. Действие необратимо.</div>
+        <div id="reset-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:12px"></div>
+        <input class="danger-input" type="text" id="reset-confirm-input" placeholder='Введите "DELETE ALL PRODUCTS"'>
+        <button class="btn-danger" onclick="resetProducts()">🗑 Удалить все товары</button>
       </div>
-      <div class="section-sub">Назначь роль <b>admin</b> чтобы дать доступ к админ панели</div>
 
-      <div id="users-loading" style="text-align:center;padding:40px;color:var(--text3)">Загрузка...</div>
-      <table class="users-table" id="users-table" style="display:none">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Пользователь</th>
-            <th>Email</th>
-            <th>Роль</th>
-            <th>Дата</th>
-          </tr>
-        </thead>
-        <tbody id="users-tbody"></tbody>
-      </table>
     </div>
-  </div>
-
-  <div class="section-card">
-    <div class="section-title">📥 Импорт товаров из Kaspi XML</div>
-    <div class="section-sub">Загрузить все товары из ACTIVE.xml в каталог с категорией "Kaspi". Файл должен лежать в корне сервера.</div>
-    <div id="kaspi-import-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px"></div>
-    <button class="btn-save" onclick="importKaspiXml()">📥 Импортировать товары из ACTIVE.xml</button>
-  </div>
-
-  <div class="section-card">
-    <div class="section-title">📦 Экспорт остатков для Kaspi</div>
-    <div class="section-sub">Скачать XML-файл с остатками и ценами для загрузки в кабинет Kaspi</div>
-    <a href="/api/kaspi/export-xml" download="ACTIVE.xml">
-      <button class="btn-save">⬇ Скачать ACTIVE.xml</button>
-    </a>
-  </div>
-
-  <div class="section-card" style="border:1.5px solid #fca5a5">
-    <div class="section-title" style="color:#991b1b">⚠️ Опасная зона</div>
-    <div class="section-sub">Удалить все товары и движения из базы. Действие необратимо.</div>
-    <div id="reset-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px"></div>
-    <input type="text" id="reset-confirm-input" placeholder='Введите "DELETE ALL PRODUCTS"' style="width:100%;padding:8px 12px;border:1px solid #fca5a5;border-radius:8px;font-size:13px;margin-bottom:10px;outline:none">
-    <button class="btn-save" onclick="resetProducts()" style="background:#dc2626">🗑 Удалить все товары</button>
-  </div>
-
-  <div class="section-card">
-    <div class="section-title">🖼 Автозаполнение картинок</div>
-    <div class="section-sub">Найти и заполнить картинки для всех товаров без фото через Google Images</div>
-    <div id="fill-images-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px"></div>
-    <button class="btn-save" id="btn-fill-images" onclick="fillImages()">🔍 Заполнить картинки автоматически</button>
   </div>
 </div>
 
 <script src="/static/nav.js"></script>
 <script src="/static/mobile.js"></script>
 <script>
-async function resetProducts() {
-  const input = document.getElementById('reset-confirm-input').value.trim();
-  const result = document.getElementById('reset-result');
-  result.style.display = 'block';
-  if (input !== 'DELETE ALL PRODUCTS') {
-    result.style.background = '#fee2e2'; result.style.color = '#991b1b';
-    result.textContent = '❌ Введите точный текст подтверждения';
-    return;
-  }
-  result.style.background = '#fef9c3'; result.style.color = '#92400e';
-  result.textContent = '⏳ Удаляю...';
-  const r = await fetch('/api/reset-products', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({confirm: 'DELETE ALL PRODUCTS'})
-  });
-  const d = await r.json();
-  if (!r.ok) {
-    result.style.background = '#fee2e2'; result.style.color = '#991b1b';
-    result.textContent = '❌ ' + (d.detail || 'Ошибка');
-  } else {
-    result.style.background = '#d1fae5'; result.style.color = '#065f46';
-    result.textContent = `✅ Удалено товаров: ${d.deleted_products}, движений: ${d.deleted_movements}`;
-    document.getElementById('reset-confirm-input').value = '';
-  }
-}
-
+// ── Профиль ────────────────────────────────────────────────────────────────
 function formatPhone(val) {
-  const digits = val.replace(/\D/g, '').replace(/^7?/, '').slice(0, 10);
+  const d = val.replace(/\D/g,'').replace(/^7?/,'').slice(0,10);
   let r = '+7';
-  if (digits.length > 0) r += ' ' + digits.slice(0, 3);
-  if (digits.length > 3) r += ' ' + digits.slice(3, 6);
-  if (digits.length > 6) r += ' ' + digits.slice(6, 8);
-  if (digits.length > 8) r += ' ' + digits.slice(8, 10);
+  if (d.length>0) r += ' '+d.slice(0,3);
+  if (d.length>3) r += ' '+d.slice(3,6);
+  if (d.length>6) r += ' '+d.slice(6,8);
+  if (d.length>8) r += ' '+d.slice(8,10);
   return r;
 }
-function initPhoneInput(id) {
+function initPhone(id) {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('focus', () => { if (!el.value) el.value = '+7 '; });
-  el.addEventListener('input', () => {
-    const pos = el.selectionStart;
-    el.value = formatPhone(el.value);
-  });
+  el.addEventListener('input', () => { el.value = formatPhone(el.value); });
 }
-function applyPhoneFormat(id, val) {
-  const el = document.getElementById(id);
-  if (el && val) el.value = formatPhone(val);
-}
-
 async function loadProfile() {
   const res = await fetch('/api/auth/me');
   if (!res.ok) return;
   const u = await res.json();
-  if (u.name) document.getElementById('p-name').value = u.name;
-  if (u.phone) applyPhoneFormat('p-phone', u.phone);
-  initPhoneInput('p-phone');
+  if (u.name)  document.getElementById('p-name').value = u.name;
+  if (u.phone) document.getElementById('p-phone').value = formatPhone(u.phone);
 }
-initPhoneInput('p-phone');
-
 async function saveProfile() {
-  const name = document.getElementById('p-name').value.trim();
-  const phone = document.getElementById('p-phone').value.trim();
   const msg = document.getElementById('profile-msg');
   const res = await fetch('/api/auth/profile', {
-    method: 'PATCH', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({name, phone})
+    method:'PATCH', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name: document.getElementById('p-name').value.trim(), phone: document.getElementById('p-phone').value.trim() })
   });
   msg.style.display = 'block';
-  if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Сохранено'; }
-  else { msg.className = 'msg err'; msg.textContent = 'Ошибка сохранения'; }
+  msg.className = res.ok ? 'msg ok' : 'msg err';
+  msg.textContent = res.ok ? '✓ Сохранено' : 'Ошибка сохранения';
 }
-
 async function savePassword() {
   const pwd = document.getElementById('p-pwd').value;
   const pwd2 = document.getElementById('p-pwd2').value;
   const msg = document.getElementById('pwd-msg');
   msg.style.display = 'block';
-  if (!pwd) { msg.className = 'msg err'; msg.textContent = 'Введите пароль'; return; }
-  if (pwd.length < 6) { msg.className = 'msg err'; msg.textContent = 'Минимум 6 символов'; return; }
-  if (pwd !== pwd2) { msg.className = 'msg err'; msg.textContent = 'Пароли не совпадают'; return; }
+  if (!pwd)          { msg.className='msg err'; msg.textContent='Введите пароль'; return; }
+  if (pwd.length<6)  { msg.className='msg err'; msg.textContent='Минимум 6 символов'; return; }
+  if (pwd!==pwd2)    { msg.className='msg err'; msg.textContent='Пароли не совпадают'; return; }
   const res = await fetch('/api/auth/profile', {
-    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    method:'PATCH', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({password: pwd})
   });
-  if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Пароль изменён'; document.getElementById('p-pwd').value = ''; document.getElementById('p-pwd2').value = ''; }
-  else { msg.className = 'msg err'; msg.textContent = 'Ошибка'; }
+  msg.className = res.ok ? 'msg ok' : 'msg err';
+  msg.textContent = res.ok ? '✓ Пароль изменён' : 'Ошибка';
+  if (res.ok) { document.getElementById('p-pwd').value=''; document.getElementById('p-pwd2').value=''; }
 }
 
+// ── Пользователи ───────────────────────────────────────────────────────────
 async function loadUsers() {
   const res = await fetch('/api/admin/users');
-  if (!res.ok) { document.getElementById('users-loading').textContent = 'Ошибка загрузки'; return; }
+  if (!res.ok) { document.getElementById('users-loading').textContent='Ошибка загрузки'; return; }
   const users = await res.json();
-  document.getElementById('users-count').textContent = `${users.length} пользователей`;
-  document.getElementById('users-loading').style.display = 'none';
-  document.getElementById('users-table').style.display = 'table';
+  document.getElementById('users-count').textContent = `${users.length} чел.`;
+  document.getElementById('users-loading').style.display='none';
+  document.getElementById('users-table').style.display='table';
   document.getElementById('users-tbody').innerHTML = users.map(u => `
     <tr>
-      <td>${u.avatar
-        ? `<img class="avatar" src="${u.avatar}" referrerpolicy="no-referrer">`
-        : `<div class="avatar-placeholder">${(u.name||u.email||'?')[0].toUpperCase()}</div>`
-      }</td>
-      <td style="font-weight:500">${u.name || '—'}</td>
+      <td>${u.avatar ? `<img class="avatar" src="${u.avatar}" referrerpolicy="no-referrer">` : `<div class="avatar-placeholder">${(u.name||u.email||'?')[0].toUpperCase()}</div>`}</td>
+      <td style="font-weight:500">${u.name||'—'}</td>
       <td style="color:var(--text3);font-size:13px">${u.email}</td>
       <td>
-        <select class="role-select" onchange="setRole(${u.id}, this.value)">
+        <select class="role-select" onchange="setRole(${u.id},this.value)">
           <option value="customer" ${u.role==='customer'?'selected':''}>Покупатель</option>
-          <option value="admin" ${u.role==='admin'?'selected':''}>Администратор</option>
+          <option value="admin"    ${u.role==='admin'?'selected':''}>Администратор</option>
         </select>
       </td>
-      <td style="color:var(--text3);font-size:12px">${u.created_at ? u.created_at.slice(0,10) : '—'}</td>
-    </tr>
-  `).join('');
+      <td style="color:var(--text3);font-size:12px">${u.created_at?u.created_at.slice(0,10):'—'}</td>
+    </tr>`).join('');
+}
+async function setRole(id,role){
+  const res=await fetch(`/api/admin/users/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({role})});
+  if(!res.ok) alert('Ошибка сохранения');
 }
 
-async function setRole(id, role) {
-  const res = await fetch(`/api/admin/users/${id}`, {
-    method: 'PATCH', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({role})
-  });
-  if (!res.ok) alert('Ошибка сохранения');
-}
-
-const GROUP_LABELS = {
-  general: '🏪 Общее',
-  shop: '🛍️ Магазин',
-  contacts: '📞 Контакты',
-  integrations: '🔌 Интеграции',
-};
-
+// ── Настройки сайта ────────────────────────────────────────────────────────
+const GROUP_LABELS = { general:'🏪 Общее', shop:'🛍️ Магазин', contacts:'📞 Контакты', integrations:'🔌 Интеграции' };
 let allSettings = [];
 
 async function loadSiteSettings() {
   const res = await fetch('/api/admin/settings');
-  if (!res.ok) { document.getElementById('settings-loading').textContent = 'Ошибка'; return; }
+  if (!res.ok) { document.getElementById('settings-loading').textContent='Ошибка'; return; }
   allSettings = await res.json();
-  document.getElementById('settings-loading').style.display = 'none';
-  document.getElementById('settings-groups').style.display = 'block';
+  document.getElementById('settings-loading').style.display='none';
+  document.getElementById('settings-groups').style.display='block';
   renderSettings();
 }
-
 function renderSettings() {
-  const groups = {};
-  allSettings.forEach(s => {
-    if (!groups[s.group]) groups[s.group] = [];
-    groups[s.group].push(s);
-  });
-  const order = ['general', 'shop', 'contacts', 'integrations'];
-  let html = '';
-  order.forEach(g => {
+  const groups={};
+  allSettings.forEach(s=>{ (groups[s.group]=groups[s.group]||[]).push(s); });
+  let html='';
+  ['general','shop','contacts','integrations'].forEach(g=>{
     if (!groups[g]) return;
-    html += `<div style="margin-bottom:20px">
-      <div style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">${GROUP_LABELS[g] || g}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">`;
-    groups[g].forEach(s => {
-      const isLong = s.key.includes('description') || s.key.includes('subtitle') || s.key.includes('hours');
-      const isSecret = s.key.includes('token') || s.key.includes('key') || s.key.includes('password');
-      const isToggle = s.key.includes('_show');
+    html += `<div><div class="settings-group-title">${GROUP_LABELS[g]||g}</div><div class="settings-sub-grid">`;
+    groups[g].forEach(s=>{
+      const isLong    = s.key.includes('description')||s.key.includes('subtitle')||s.key.includes('hours');
+      const isSecret  = s.key.includes('token')||s.key.includes('key')||s.key.includes('password');
+      const isToggle  = s.key.includes('_show');
       if (isToggle) {
-        html += `<div class="form-field" style="grid-column:1/-1">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-            <input type="checkbox" id="s-${s.key}" ${s.value==='1'?'checked':''} style="width:18px;height:18px;accent-color:var(--accent)">
-            ${s.label}
-          </label>
-        </div>`;
+        html += `<div class="form-field full"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:14px;font-weight:500"><input type="checkbox" id="s-${s.key}" ${s.value==='1'?'checked':''} style="width:17px;height:17px;accent-color:var(--accent)">${s.label}</label></div>`;
       } else if (isLong) {
-        html += `<div class="form-field" style="grid-column:1/-1">
-          <label>${s.label}</label>
-          <textarea id="s-${s.key}" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;background:var(--bg);outline:none">${s.value||''}</textarea>
-        </div>`;
+        html += `<div class="form-field full"><label>${s.label}</label><textarea id="s-${s.key}" rows="2">${s.value||''}</textarea></div>`;
       } else {
-        html += `<div class="form-field">
-          <label>${s.label}</label>
-          <input type="${isSecret?'password':'text'}" id="s-${s.key}" value="${(s.value||'').replace(/"/g,'&quot;')}" placeholder="${s.label}">
-        </div>`;
+        html += `<div class="form-field"><label>${s.label}</label><input type="${isSecret?'password':'text'}" id="s-${s.key}" value="${(s.value||'').replace(/"/g,'&quot;')}" placeholder="${s.label}"></div>`;
       }
     });
     html += `</div></div>`;
   });
   document.getElementById('settings-groups').innerHTML = html;
 }
-
 async function saveSettings() {
-  const data = {};
-  allSettings.forEach(s => {
-    const el = document.getElementById(`s-${s.key}`);
-    if (!el) return;
-    if (el.type === 'checkbox') data[s.key] = el.checked ? '1' : '0';
-    else data[s.key] = el.value;
-  });
-  const msg = document.getElementById('settings-msg');
-  const res = await fetch('/api/admin/settings', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
-  msg.style.display = 'block';
-  if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Настройки сохранены'; }
-  else { msg.className = 'msg err'; msg.textContent = 'Ошибка сохранения'; }
-  setTimeout(() => msg.style.display = 'none', 3000);
+  const data={};
+  allSettings.forEach(s=>{ const el=document.getElementById(`s-${s.key}`); if(!el) return; data[s.key]=el.type==='checkbox'?(el.checked?'1':'0'):el.value; });
+  const msg=document.getElementById('settings-msg');
+  const res=await fetch('/api/admin/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  msg.style.display='block';
+  msg.className=res.ok?'msg ok':'msg err';
+  msg.textContent=res.ok?'✓ Сохранено':'Ошибка';
+  setTimeout(()=>msg.style.display='none',3000);
 }
 
-async function importKaspiXml() {
-  const result = document.getElementById('kaspi-import-result');
-  result.style.display = 'block';
-  result.style.background = '#f0f4ff';
-  result.textContent = 'Импортируем...';
-  try {
-    const r = await fetch('/api/kaspi/import-xml-products', { method: 'POST' });
-    const d = await r.json();
-    result.style.background = '#ecfdf5';
-    result.textContent = `✅ Удалено старых: ${d.deleted}, добавлено: ${d.added}`;
-  } catch(e) {
-    result.style.background = '#fef2f2';
-    result.textContent = '❌ Ошибка: ' + e.message;
+// ── Опасная зона ───────────────────────────────────────────────────────────
+async function resetProducts() {
+  const input = document.getElementById('reset-confirm-input').value.trim();
+  const result = document.getElementById('reset-result');
+  result.style.display='block';
+  if (input!=='DELETE ALL PRODUCTS') {
+    result.style.cssText='display:block;background:#fee2e2;color:#991b1b';
+    result.textContent='❌ Введите точный текст подтверждения'; return;
   }
+  result.style.cssText='display:block;background:#fef9c3;color:#92400e';
+  result.textContent='⏳ Удаляю...';
+  const r=await fetch('/api/reset-products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:'DELETE ALL PRODUCTS'})});
+  const d=await r.json();
+  if (!r.ok) { result.style.cssText='display:block;background:#fee2e2;color:#991b1b'; result.textContent='❌ '+(d.detail||'Ошибка'); }
+  else { result.style.cssText='display:block;background:#d1fae5;color:#065f46'; result.textContent=`✅ Удалено: ${d.deleted_products} товаров, ${d.deleted_movements} движений`; document.getElementById('reset-confirm-input').value=''; }
 }
 
-async function fillImages() {
-  const btn = document.getElementById('btn-fill-images');
-  const result = document.getElementById('fill-images-result');
-  btn.textContent = '⏳ Идёт поиск...';
-  btn.disabled = true;
-  result.style.display = 'none';
-  try {
-    const res = await fetch('/api/admin/fill-images', { method: 'POST' });
-    const data = await res.json();
-    if (!res.ok) {
-      result.style.background = '#fee2e2'; result.style.color = '#b91c1c';
-      result.textContent = '❌ ' + (data.detail || 'Ошибка');
-    } else {
-      result.style.background = '#dcfce7'; result.style.color = '#15803d';
-      result.textContent = `✅ Заполнено: ${data.filled} товаров. Пропущено: ${data.skipped}. Ошибок: ${data.errors}. Осталось без фото: ${data.remaining_without_images}`;
-    }
-    result.style.display = 'block';
-  } catch(e) {
-    result.style.background = '#fee2e2'; result.style.color = '#b91c1c';
-    result.textContent = '❌ Ошибка запроса';
-    result.style.display = 'block';
-  }
-  btn.textContent = '🔍 Заполнить картинки автоматически';
-  btn.disabled = false;
-}
-
+// Init
+initPhone('p-phone');
 loadProfile();
 loadSiteSettings();
 loadUsers();

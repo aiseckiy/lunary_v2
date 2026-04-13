@@ -1112,7 +1112,8 @@ function openEditModal(id, fromMove = false) {
   const skus = (p.kaspi_sku || '').split(',').map(s => s.trim()).filter(Boolean);
   renderKaspiSkuList(skus.length ? skus : ['']);
   document.getElementById('edit-modal').classList.add('open');
-  fetch('/api/products/suppliers').then(r => r.json()).then(list => {
+  fetch('/api/products/suppliers').then(r => r.json()).then(data => {
+    const list = data.suppliers || data;
     const dl = document.getElementById('suppliers-list');
     dl.innerHTML = list.map(s => `<option value="${s}">`).join('');
   }).catch(() => {});

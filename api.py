@@ -870,7 +870,17 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
 def get_suppliers(db: Session = Depends(get_db)):
     from database import Product as _P
     rows = db.query(_P.supplier).filter(_P.supplier != None, _P.supplier != "").distinct().all()
-    return sorted([r[0] for r in rows if r[0]])
+    return {"suppliers": sorted([r[0] for r in rows if r[0]])}
+
+
+@app.get("/api/products/stats")
+def products_stats(db: Session = Depends(get_db)):
+    from database import Product as _P
+    from sqlalchemy import func
+    rows = db.query(_P.category, func.count(_P.id)).group_by(_P.category).all()
+    by_category = {cat: cnt for cat, cnt in rows}
+    total = sum(by_category.values())
+    return {"total": total, "by_category": by_category}
 
 
 @app.get("/api/products/search")

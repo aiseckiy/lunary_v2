@@ -384,6 +384,9 @@ function selectKaspi(id) {
         });
         // Убираем из unmatched_other
         data.unmatched_other = data.unmatched_other.filter(r => r.id !== pendingLinkId);
+        // Помечаем как "с парой" чтобы зелёный бейдж появился
+        kaspiInPairs.add(id);
+        otherInPairs.add(pendingLinkId);
         // Авто-выбор этой пары
         selectedPairIds.add(key);
         updateMergeBtn();

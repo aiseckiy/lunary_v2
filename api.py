@@ -3229,6 +3229,18 @@ def products_review(
     }
 
 
+@app.post("/api/reset-products")
+def reset_products(body: dict, db: Session = Depends(get_db)):
+    """Удаляет все товары и движения. Требует подтверждения."""
+    from database import Product as _P, Movement
+    if body.get("confirm") != "DELETE ALL PRODUCTS":
+        raise HTTPException(status_code=400, detail="Неверное подтверждение")
+    movements = db.query(Movement).delete()
+    products = db.query(_P).delete()
+    db.commit()
+    return {"deleted_products": products, "deleted_movements": movements}
+
+
 @app.post("/api/clean-bad-articles")
 def clean_bad_articles(db: Session = Depends(get_db)):
     """Удаляет служебные префиксы KSP_ и PL- из полей kaspi_article и barcode"""

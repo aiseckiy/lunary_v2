@@ -284,6 +284,13 @@ function applyData() {
   renderOther();
 }
 
+// Поиск по всем словам в любом порядке, без учёта регистра
+function matchWords(text, query) {
+  if (!query) return true;
+  const t = (text || '').toLowerCase();
+  return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => t.includes(w));
+}
+
 function hl(text, query) {
   if (!query) return text;
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
@@ -306,8 +313,8 @@ function renderKaspi() {
   if (kaspiTab === 'synced') {
     let items = data.synced || [];
     if (kaspiSearch) items = items.filter(p =>
-      p.name.toLowerCase().includes(kaspiSearch) ||
-      (p.supplier || '').toLowerCase().includes(kaspiSearch)
+      matchWords(p.name, kaspiSearch) ||
+      matchWords(p.supplier, kaspiSearch)
     );
     if (!items.length) { el.innerHTML = '<div class="empty">Нет синхронизированных товаров</div>'; return; }
     el.innerHTML = items.map(p => `
@@ -331,8 +338,8 @@ function renderKaspi() {
   if (kaspiTab === 'matched')   items = items.filter(p => kaspiInPairs.has(p.id));
   if (kaspiTab === 'unmatched') items = items.filter(p => !kaspiInPairs.has(p.id));
   if (kaspiSearch) items = items.filter(p =>
-    p.name.toLowerCase().includes(kaspiSearch) ||
-    (p.kaspi_sku || '').toLowerCase().includes(kaspiSearch)
+    matchWords(p.name, kaspiSearch) ||
+    matchWords(p.kaspi_sku, kaspiSearch)
   );
 
   if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
@@ -439,9 +446,9 @@ function renderPairs(el) {
     pairs = pairs.filter(p => p.kaspi_id === selectedKaspiId);
   }
   if (otherSearch) pairs = pairs.filter(p =>
-    p.kaspi_name.toLowerCase().includes(otherSearch) ||
-    p.other_name.toLowerCase().includes(otherSearch) ||
-    (p.other_sku || '').toLowerCase().includes(otherSearch)
+    matchWords(p.kaspi_name, otherSearch) ||
+    matchWords(p.other_name, otherSearch) ||
+    matchWords(p.other_sku, otherSearch)
   );
 
   // Показываем баннер активного фильтра
@@ -554,8 +561,8 @@ let selectedRefId = null; // выбранный справочник-товар 
 function renderAllOther(el) {
   let items = data.other_list;
   if (otherSearch) items = items.filter(p =>
-    p.name.toLowerCase().includes(otherSearch) ||
-    (p.sku || '').toLowerCase().includes(otherSearch)
+    matchWords(p.name, otherSearch) ||
+    matchWords(p.sku, otherSearch)
   );
   if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
 
@@ -661,8 +668,8 @@ function cancelLink() {
 function renderUnmatched(el) {
   let items = data.unmatched_other;
   if (otherSearch) items = items.filter(p =>
-    p.name.toLowerCase().includes(otherSearch) ||
-    (p.sku || '').toLowerCase().includes(otherSearch)
+    matchWords(p.name, otherSearch) ||
+    matchWords(p.sku, otherSearch)
   );
   if (!items.length) { el.innerHTML = '<div class="empty">Все товары имеют пару 🎉</div>'; return; }
 

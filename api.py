@@ -3194,11 +3194,14 @@ def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, offset: i
     from sqlalchemy import or_
     query = db.query(PriceListItem)
     if q:
-        like = f"%{q}%"
-        query = query.filter(or_(
-            PriceListItem.name.ilike(like),
-            PriceListItem.article.ilike(like),
-        ))
+        from sqlalchemy import and_
+        words = [w for w in q.strip().split() if w]
+        for w in words:
+            like = f"%{w}%"
+            query = query.filter(or_(
+                PriceListItem.name.ilike(like),
+                PriceListItem.article.ilike(like),
+            ))
     if supplier:
         query = query.filter(PriceListItem.supplier == supplier)
     total = query.count()

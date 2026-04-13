@@ -1327,7 +1327,7 @@ load().then(() => {
   }
   if (params.get('open')) {
     const pid = parseInt(params.get('open'));
-    if (pid) { openMoveModal(pid); history.replaceState({}, '', '/'); }
+    if (pid) { openEditModal(pid); history.replaceState({}, '', '/admin'); }
   }
 });
 setInterval(load, 30000);

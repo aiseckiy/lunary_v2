@@ -77,6 +77,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #6c63ff; flex-shrink: 0; margin-top: 2px; }
 
 .section-divider { padding: 6px 16px; background: #f3f4f6; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e5e7eb; }
+.card-link { font-size: 12px; color: #6c63ff; text-decoration: none; padding: 3px 6px; border-radius: 6px; border: 1px solid #ede9fe; flex-shrink: 0; transition: all .15s; }
+.card-link:hover { background: #ede9fe; }
+.filter-hint { padding: 6px 16px; background: #eff6ff; font-size: 12px; color: #1e40af; border-bottom: 1px solid #bfdbfe; display: flex; align-items: center; gap: 8px; }
+.filter-hint button { background: none; border: none; cursor: pointer; color: #1e40af; font-size: 12px; font-weight: 600; padding: 0; text-decoration: underline; }
 
 /* Попап полей */
 .fields-popup { position: fixed; bottom: 64px; left: 24px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.12); z-index: 200; min-width: 260px; display: none; }
@@ -223,6 +227,7 @@ FIELD_IDS.forEach(id => {
 // Узнаём какие kaspi_id и other_id участвуют в парах
 let kaspiInPairs = new Set();
 let otherInPairs = new Set();
+let selectedKaspiId = null; // фильтр правой панели по выбранному Kaspi-товару
 
 async function load() {
   const r = await fetch('/api/merge-preview');
@@ -264,25 +269,30 @@ function renderKaspi() {
 
   if (kaspiTab === 'synced') {
     let items = data.synced || [];
-    if (kaspiSearch) items = items.filter(p => p.name.toLowerCase().includes(kaspiSearch) || p.supplier.toLowerCase().includes(kaspiSearch));
+    if (kaspiSearch) items = items.filter(p =>
+      p.name.toLowerCase().includes(kaspiSearch) ||
+      (p.supplier || '').toLowerCase().includes(kaspiSearch)
+    );
     if (!items.length) { el.innerHTML = '<div class="empty">Нет синхронизированных товаров</div>'; return; }
-    el.innerHTML = items.map(p => `<div class="product-item matched">
-      <div style="flex:1;min-width:0">
-        <div class="p-name">${hl(p.name, kaspiSearch)}</div>
-        <div class="p-meta">
-          <span class="p-sku">${p.kaspi_sku || ''}</span>
-          ${p.supplier ? `<span class="tag">${p.supplier}</span>` : ''}
-          ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
-          ${p.supplier_article ? `<span style="font-size:11px;color:#6c63ff;margin-left:4px">арт: ${p.supplier_article}</span>` : ''}
+    el.innerHTML = items.map(p => `
+      <div class="product-item matched" onclick="selectKaspi(${p.id})">
+        <div style="flex:1;min-width:0">
+          <div class="p-name">${hl(p.name, kaspiSearch)}</div>
+          <div class="p-meta">
+            <span class="p-sku">${p.kaspi_sku || ''}</span>
+            ${p.supplier ? `<span class="tag">${p.supplier}</span>` : ''}
+            ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
+            ${p.supplier_article ? `<span style="font-size:11px;color:#6c63ff;margin-left:4px">арт: ${p.supplier_article}</span>` : ''}
+          </div>
         </div>
-      </div>
-      <span class="match-badge badge-sku">✓ синхр.</span>
-    </div>`).join('');
+        <a href="/admin?open=${p.id}" target="_blank" class="card-link" title="Открыть карточку" onclick="event.stopPropagation()">↗</a>
+        <span class="match-badge badge-sku">✓ синхр.</span>
+      </div>`).join('');
     return;
   }
 
   let items = data.kaspi_list;
-  if (kaspiTab === 'matched') items = items.filter(p => kaspiInPairs.has(p.id));
+  if (kaspiTab === 'matched')   items = items.filter(p => kaspiInPairs.has(p.id));
   if (kaspiTab === 'unmatched') items = items.filter(p => !kaspiInPairs.has(p.id));
   if (kaspiSearch) items = items.filter(p =>
     p.name.toLowerCase().includes(kaspiSearch) ||
@@ -292,8 +302,9 @@ function renderKaspi() {
   if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
 
   el.innerHTML = items.map(p => {
-    const hasPair = kaspiInPairs.has(p.id);
-    return `<div class="product-item ${hasPair ? 'matched' : ''}">
+    const hasPair  = kaspiInPairs.has(p.id);
+    const isActive = selectedKaspiId === p.id;
+    return `<div class="product-item ${hasPair ? 'matched' : ''} ${isActive ? 'selected' : ''}" onclick="selectKaspi(${p.id})">
       <div style="flex:1;min-width:0">
         <div class="p-name">${hl(p.name, kaspiSearch)}</div>
         <div class="p-meta">
@@ -302,9 +313,23 @@ function renderKaspi() {
           ${p.brand ? `<span class="tag">${p.brand}</span>` : ''}
         </div>
       </div>
+      <a href="/admin?open=${p.id}" target="_blank" class="card-link" title="Открыть карточку" onclick="event.stopPropagation()">↗</a>
       ${hasPair ? '<span class="match-badge badge-sku">✓ пара</span>' : ''}
     </div>`;
   }).join('');
+}
+
+function selectKaspi(id) {
+  // Повторный клик снимает фильтр
+  selectedKaspiId = selectedKaspiId === id ? null : id;
+  renderKaspi();
+  // Переключаем правую панель на совпадения и фильтруем
+  if (selectedKaspiId !== null && otherTab !== 'pairs') {
+    otherTab = 'pairs';
+    document.querySelectorAll('.panel:last-child .ptab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel:last-child .ptab')[0]?.classList.add('active');
+  }
+  renderOther();
 }
 
 function switchKaspiTab(tab, el) {
@@ -335,18 +360,30 @@ function renderOther() {
 
 function renderPairs(el) {
   let pairs = data.pairs;
+  // Если выбран Kaspi-товар слева — показываем только его пары
+  if (selectedKaspiId !== null) {
+    pairs = pairs.filter(p => p.kaspi_id === selectedKaspiId);
+  }
   if (otherSearch) pairs = pairs.filter(p =>
     p.kaspi_name.toLowerCase().includes(otherSearch) ||
     p.other_name.toLowerCase().includes(otherSearch) ||
     (p.other_sku || '').toLowerCase().includes(otherSearch)
   );
 
-  if (!pairs.length) { el.innerHTML = '<div class="empty">Совпадений не найдено</div>'; return; }
+  // Показываем баннер активного фильтра
+  let filterBanner = '';
+  if (selectedKaspiId !== null) {
+    const kp = data.kaspi_list.find(p => p.id === selectedKaspiId);
+    const kname = kp ? kp.name : `#${selectedKaspiId}`;
+    filterBanner = `<div class="filter-hint">🔍 Пары для: <b>${kname}</b> <button onclick="selectKaspi(${selectedKaspiId})">✕ Сбросить</button></div>`;
+  }
+
+  if (!pairs.length) { el.innerHTML = filterBanner + '<div class="empty">Совпадений не найдено</div>'; return; }
 
   const skuPairs = pairs.filter(p => p.match_type === 'sku');
   const fuzzyPairs = pairs.filter(p => p.match_type === 'fuzzy');
 
-  let html = '';
+  let html = filterBanner;
   if (skuPairs.length) {
     html += `<div class="section-divider">🎯 По артикулу — ${skuPairs.length}</div>`;
     html += skuPairs.map(p => pairHtml(p)).join('');
@@ -543,6 +580,7 @@ async function reload() {
   btn.disabled = true;
   btn.textContent = '⏳';
   selectedPairIds.clear();
+  selectedKaspiId = null;
   document.getElementById('result-bar').style.display = 'none';
   document.getElementById('kaspi-list').innerHTML = '<div class="loading">⏳</div>';
   document.getElementById('other-list').innerHTML = '<div class="loading">⏳</div>';

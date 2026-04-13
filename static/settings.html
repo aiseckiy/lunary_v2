@@ -134,13 +134,13 @@
         </table>
       </div>
 
-      <!-- Опасная зона -->
+      <!-- Ссылка на опасную зону -->
       <div class="s-card s-card-danger">
         <div class="s-title" style="color:#991b1b">⚠️ Опасная зона</div>
-        <div class="s-sub">Удалить все товары и движения из базы. Действие необратимо.</div>
-        <div id="reset-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:12px"></div>
-        <input class="danger-input" type="text" id="reset-confirm-input" placeholder='Введите "DELETE ALL PRODUCTS"'>
-        <button class="btn-danger" onclick="resetProducts()">🗑 Удалить все товары</button>
+        <div class="s-sub">Удалить все товары и движения из базы — доступно на странице импорта.</div>
+        <a href="/import" style="display:inline-flex;align-items:center;gap:6px;color:#991b1b;font-size:13px;font-weight:600;text-decoration:none;background:#fee2e2;padding:8px 16px;border-radius:8px;border:1px solid #fca5a5">
+          → Перейти к импорту
+        </a>
       </div>
 
     </div>
@@ -271,23 +271,6 @@ async function saveSettings() {
   msg.className=res.ok?'msg ok':'msg err';
   msg.textContent=res.ok?'✓ Сохранено':'Ошибка';
   setTimeout(()=>msg.style.display='none',3000);
-}
-
-// ── Опасная зона ───────────────────────────────────────────────────────────
-async function resetProducts() {
-  const input = document.getElementById('reset-confirm-input').value.trim();
-  const result = document.getElementById('reset-result');
-  result.style.display='block';
-  if (input!=='DELETE ALL PRODUCTS') {
-    result.style.cssText='display:block;background:#fee2e2;color:#991b1b';
-    result.textContent='❌ Введите точный текст подтверждения'; return;
-  }
-  result.style.cssText='display:block;background:#fef9c3;color:#92400e';
-  result.textContent='⏳ Удаляю...';
-  const r=await fetch('/api/reset-products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:'DELETE ALL PRODUCTS'})});
-  const d=await r.json();
-  if (!r.ok) { result.style.cssText='display:block;background:#fee2e2;color:#991b1b'; result.textContent='❌ '+(d.detail||'Ошибка'); }
-  else { result.style.cssText='display:block;background:#d1fae5;color:#065f46'; result.textContent=`✅ Удалено: ${d.deleted_products} товаров, ${d.deleted_movements} движений`; document.getElementById('reset-confirm-input').value=''; }
 }
 
 // Init

@@ -3,47 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Импорт товаров</title>
+<title>Импорт Kaspi XML</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
 .header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 17px; font-weight: 700; }
-.container { max-width: 700px; margin: 32px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 16px; }
+.container { max-width: 640px; margin: 32px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 16px; }
+
 .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px; }
-.card-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.card-sub { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
-.drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: all .15s; color: #9ca3af; font-size: 13px; }
+.card-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.card-sub   { font-size: 13px; color: #6b7280; margin-bottom: 16px; line-height: 1.5; }
+
+.drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all .15s; color: #9ca3af; font-size: 13px; }
 .drop-zone:hover, .drop-zone.drag-over { border-color: #6c63ff; background: #f5f3ff; color: #6c63ff; }
 .drop-zone.has-file { border-color: #10b981; background: #f0fdf4; color: #065f46; }
 .drop-zone input[type=file] { display: none; }
+.file-name { font-size: 12px; margin-top: 5px; color: #6b7280; }
+
 .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s; width: 100%; margin-top: 12px; }
 .btn-primary { background: #6c63ff; color: #fff; }
 .btn-primary:hover { background: #5b52e0; }
 .btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
-.result { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
-.result-ok { background: #d1fae5; color: #065f46; }
-.result-err { background: #fee2e2; color: #991b1b; }
+
+.result { margin-top: 10px; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
+.result-ok      { background: #d1fae5; color: #065f46; }
+.result-err     { background: #fee2e2; color: #991b1b; }
 .result-loading { background: #fef9c3; color: #92400e; }
-.file-name { font-size: 12px; margin-top: 6px; color: #6b7280; }
+
+/* Ссылка-блок на справочник */
+.ref-link { display: flex; align-items: center; gap: 14px; background: #f5f3ff; border: 1px solid #ede9fe; border-radius: 12px; padding: 16px 18px; text-decoration: none; color: inherit; transition: background .15s; }
+.ref-link:hover { background: #ede9fe; }
+.ref-link-icon { font-size: 28px; flex-shrink: 0; }
+.ref-link-text { flex: 1; }
+.ref-link-title { font-size: 14px; font-weight: 700; color: #5b21b6; }
+.ref-link-sub   { font-size: 12px; color: #7c3aed; margin-top: 2px; }
+.ref-link-arrow { font-size: 18px; color: #7c3aed; }
+
+/* Шаги */
+.steps { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.step  { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #6b7280; }
+.step.done { color: #10b981; }
+.step-num  { width: 22px; height: 22px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.step.done .step-num { background: #10b981; color: #fff; }
+.step-arrow { color: #d1d5db; margin: 0 8px; font-size: 14px; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
-  <h1>📥 Импорт товаров</h1>
+  <h1>📥 Импорт Kaspi XML</h1>
 </div>
 
 <div class="container">
 
-  <!-- Kaspi каталог (ACTIVE) -->
+  <!-- Шаги workflow -->
+  <div class="card" style="padding:16px 20px">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:12px">Порядок работы</div>
+    <div class="steps">
+      <div class="step done"><div class="step-num">1</div> Справочник накладных</div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">2</div> Импорт Kaspi XML</div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">3</div> Слияние товаров</div>
+    </div>
+  </div>
+
+  <!-- Kaspi ACTIVE -->
   <div class="card">
     <div class="card-title">📦 Kaspi каталог (ACTIVE.xml)</div>
-    <div class="card-sub">Загрузи файл из кабинета Kaspi — все старые Kaspi товары будут заменены новыми</div>
+    <div class="card-sub">Основной каталог из Kaspi кабинета — все старые Kaspi-товары заменятся новыми</div>
     <div class="drop-zone" id="zone-active" onclick="document.getElementById('file-active').click()"
          ondragover="onDragOver(event,'zone-active')" ondragleave="onDragLeave('zone-active')" ondrop="onDrop(event,'active')">
-      <input type="file" id="file-active" accept=".xml" onchange="onFileSelect('active', this)">
+      <input type="file" id="file-active" accept=".xml" onchange="onFileSelect('active',this)">
       <div>Перетащи файл сюда или нажми</div>
       <div class="file-name" id="name-active">XML файл не выбран</div>
     </div>
@@ -51,13 +84,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="result" id="result-active"></div>
   </div>
 
-  <!-- Архив -->
+  <!-- Kaspi ARCHIVE -->
   <div class="card">
     <div class="card-title">🗂 Архивные товары (ARCHIVE.xml)</div>
-    <div class="card-sub">Товары которые были в архиве Kaspi — добавятся только новые, существующие не тронутся</div>
+    <div class="card-sub">Архив из Kaspi кабинета — добавятся только новые, существующие не тронутся</div>
     <div class="drop-zone" id="zone-archive" onclick="document.getElementById('file-archive').click()"
          ondragover="onDragOver(event,'zone-archive')" ondragleave="onDragLeave('zone-archive')" ondrop="onDrop(event,'archive')">
-      <input type="file" id="file-archive" accept=".xml" onchange="onFileSelect('archive', this)">
+      <input type="file" id="file-archive" accept=".xml" onchange="onFileSelect('archive',this)">
       <div>Перетащи файл сюда или нажми</div>
       <div class="file-name" id="name-archive">XML файл не выбран</div>
     </div>
@@ -65,47 +98,40 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="result" id="result-archive"></div>
   </div>
 
-  <!-- Прайс-лист -->
-  <div class="card">
-    <div class="card-title">💰 Прайс-лист (закупочные цены)</div>
-    <div class="card-sub">XML с закупочными ценами и артикулами поставщиков — обновит цены и артикулы у существующих товаров</div>
-    <div class="drop-zone" id="zone-price" onclick="document.getElementById('file-price').click()"
-         ondragover="onDragOver(event,'zone-price')" ondragleave="onDragLeave('zone-price')" ondrop="onDrop(event,'price')">
-      <input type="file" id="file-price" accept=".xml" onchange="onFileSelect('price', this)">
-      <div>Перетащи файл сюда или нажми</div>
-      <div class="file-name" id="name-price">XML файл не выбран</div>
+  <!-- Ссылка на справочник -->
+  <a href="/pricelist" class="ref-link">
+    <div class="ref-link-icon">🗂️</div>
+    <div class="ref-link-text">
+      <div class="ref-link-title">Прайс-листы и накладные → Справочник</div>
+      <div class="ref-link-sub">Загрузка и управление закупочными ценами только там</div>
     </div>
-    <button class="btn btn-primary" id="btn-price" onclick="importPrice()" disabled>📥 Импортировать</button>
-    <div class="result" id="result-price"></div>
-  </div>
-
-  <!-- Статистика -->
-  <div class="card">
-    <div class="card-title">📊 Статистика базы</div>
-    <div class="card-sub">Сколько товаров сейчас в каждой категории</div>
-    <button class="btn btn-primary" onclick="loadStats()" style="margin-top:0">Показать</button>
-    <div class="result" id="result-stats"></div>
-  </div>
-
-  <!-- Удалить накладные -->
-  <div class="card" style="border-color:#fca5a5">
-    <div class="card-title" style="color:#991b1b">🗑 Удалить товары из прайса</div>
-    <div class="card-sub">Удалит все товары категории "Накладные" из базы — если хочешь загрузить прайс заново</div>
-    <div class="result" id="result-reset-nakl"></div>
-    <button class="btn" onclick="resetNakladnye()" style="background:#dc2626;color:#fff;margin-top:8px">Удалить товары из накладных</button>
-  </div>
+    <div class="ref-link-arrow">→</div>
+  </a>
 
   <!-- Следующий шаг -->
-  <div style="text-align:center;padding:8px 0">
-    <a href="/merge" style="color:#6c63ff;font-size:14px;font-weight:600;text-decoration:none">
-      После импорта → перейти к слиянию товаров →
-    </a>
+  <a href="/merge" style="display:flex;align-items:center;gap:14px;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:12px;padding:16px 18px;text-decoration:none;color:inherit;transition:background .15s">
+    <div style="font-size:28px">🔀</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:700;color:#065f46">После импорта → Слияние товаров</div>
+      <div style="font-size:12px;color:#059669;margin-top:2px">Сопоставить Kaspi-карточки с данными из справочника</div>
+    </div>
+    <div style="font-size:18px;color:#10b981">→</div>
+  </a>
+
+  <!-- Опасная зона -->
+  <div class="card" style="border-color:#fca5a5">
+    <div class="card-title" style="color:#991b1b">⚠️ Опасная зона</div>
+    <div class="card-sub">Удалить все товары и движения из базы — для полного перезапуска импорта. Необратимо.</div>
+    <div class="result" id="result-reset" style="display:none"></div>
+    <input type="text" id="reset-confirm" placeholder='Введите "DELETE ALL PRODUCTS"'
+      style="width:100%;padding:10px 13px;border:1px solid #fca5a5;border-radius:10px;font-size:13px;outline:none;background:#fff5f5;margin-bottom:10px;font-family:inherit">
+    <button class="btn" onclick="resetAll()" style="background:#dc2626;color:#fff;margin-top:0">🗑 Удалить все товары</button>
   </div>
 
 </div>
 
 <script>
-const files = { active: null, archive: null, price: null };
+const files = { active: null, archive: null };
 
 function onFileSelect(type, input) {
   const f = input.files[0];
@@ -113,27 +139,19 @@ function onFileSelect(type, input) {
   files[type] = f;
   document.getElementById(`name-${type}`).textContent = f.name;
   document.getElementById(`zone-${type}`).classList.add('has-file');
-  document.getElementById(`btn-${type === 'active' ? 'active' : type === 'archive' ? 'archive' : 'price'}`).disabled = false;
+  document.getElementById(`btn-${type}`).disabled = false;
 }
-
-function onDragOver(e, zoneId) {
-  e.preventDefault();
-  document.getElementById(zoneId).classList.add('drag-over');
-}
-function onDragLeave(zoneId) {
-  document.getElementById(zoneId).classList.remove('drag-over');
-}
+function onDragOver(e, zoneId) { e.preventDefault(); document.getElementById(zoneId).classList.add('drag-over'); }
+function onDragLeave(zoneId)   { document.getElementById(zoneId).classList.remove('drag-over'); }
 function onDrop(e, type) {
   e.preventDefault();
-  const zoneId = `zone-${type}`;
-  document.getElementById(zoneId).classList.remove('drag-over');
+  document.getElementById(`zone-${type}`).classList.remove('drag-over');
   const f = e.dataTransfer.files[0];
   if (!f || !f.name.endsWith('.xml')) return;
   files[type] = f;
   document.getElementById(`name-${type}`).textContent = f.name;
   document.getElementById(`zone-${type}`).classList.add('has-file');
-  const btnMap = { active: 'btn-active', archive: 'btn-archive', price: 'btn-price' };
-  document.getElementById(btnMap[type]).disabled = false;
+  document.getElementById(`btn-${type}`).disabled = false;
 }
 
 function showResult(id, state, text) {
@@ -141,23 +159,6 @@ function showResult(id, state, text) {
   el.style.display = 'block';
   el.className = `result result-${state}`;
   el.innerHTML = text;
-}
-
-async function loadStats() {
-  showResult('stats', 'loading', '⏳ Загружаю...');
-  const r = await fetch('/api/products/stats');
-  const d = await r.json();
-  let html = Object.entries(d.by_category).map(([cat, cnt]) => `<b>${cat}</b>: ${cnt}`).join(' · ');
-  html += ` · <b>Всего</b>: ${d.total}`;
-  showResult('stats', 'ok', html);
-}
-
-async function resetNakladnye() {
-  if (!confirm('Удалить все товары из накладных (категория "Накладные")? Это нельзя отменить.')) return;
-  showResult('reset-nakl', 'loading', '⏳ Удаляю...');
-  const r = await fetch('/api/reset-nakladnye', { method: 'DELETE' });
-  const d = await r.json();
-  showResult('reset-nakl', r.ok ? 'ok' : 'err', r.ok ? `✅ Удалено: ${d.deleted} товаров` : '❌ ' + d.detail);
 }
 
 async function importKaspi() {
@@ -176,6 +177,23 @@ async function importKaspi() {
   btn.disabled = false; btn.textContent = '📥 Импортировать';
 }
 
+async function resetAll() {
+  const val = document.getElementById('reset-confirm').value.trim();
+  const res = document.getElementById('result-reset');
+  res.style.display = 'block';
+  if (val !== 'DELETE ALL PRODUCTS') {
+    res.className = 'result result-err'; res.textContent = '❌ Введите точный текст подтверждения'; return;
+  }
+  res.className = 'result result-loading'; res.textContent = '⏳ Удаляю...';
+  const r = await fetch('/api/reset-products', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({confirm: 'DELETE ALL PRODUCTS'})
+  });
+  const d = await r.json();
+  if (!r.ok) { res.className='result result-err'; res.textContent='❌ '+(d.detail||'Ошибка'); }
+  else { res.className='result result-ok'; res.textContent=`✅ Удалено: ${d.deleted_products} товаров, ${d.deleted_movements} движений`; document.getElementById('reset-confirm').value=''; }
+}
+
 async function importArchive() {
   if (!files.archive) return;
   const btn = document.getElementById('btn-archive');
@@ -187,24 +205,8 @@ async function importArchive() {
     const r = await fetch('/api/kaspi/import-archive', { method: 'POST', body: fd });
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail);
-    showResult('archive', 'ok', `✅ Добавлено: ${d.added}, пропущено (уже есть): ${d.skipped}`);
+    showResult('archive', 'ok', `✅ Добавлено: ${d.added}, пропущено: ${d.skipped}`);
   } catch(e) { showResult('archive', 'err', '❌ ' + e.message); }
-  btn.disabled = false; btn.textContent = '📥 Импортировать';
-}
-
-async function importPrice() {
-  if (!files.price) return;
-  const btn = document.getElementById('btn-price');
-  btn.disabled = true; btn.textContent = '⏳ Импортирую...';
-  showResult('price', 'loading', '⏳ Загружаю...');
-  const fd = new FormData();
-  fd.append('file', files.price);
-  try {
-    const r = await fetch('/api/import-price-list', { method: 'POST', body: fd });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail);
-    showResult('price', 'ok', `✅ Создано новых: ${d.created}`);
-  } catch(e) { showResult('price', 'err', '❌ ' + e.message); }
   btn.disabled = false; btn.textContent = '📥 Импортировать';
 }
 </script>

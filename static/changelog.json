@@ -1,5 +1,10 @@
 [
   {
+    "hash": "ba07079",
+    "date": "13.04.2026",
+    "message": "Settings: переработка дизайна, убрать лишние карточки (Kaspi import/export, автокартинки)"
+  },
+  {
     "hash": "892d16e",
     "date": "13.04.2026",
     "message": "Файлы: таблица uploaded_files, папка uploads/, страница /uploads с историей загрузок"

@@ -2883,29 +2883,53 @@ def merge_preview(db: Session = Depends(get_db)):
     # Предвычислим слова для Kaspi
     kaspi_words = {kp.id: words(kp.name) for kp in kaspi_products}
 
-    pairs = []
-    unmatched_ref = []
-    matched_ref_ids = set()
+    # Извлекает числовое количество из названия (напр. "25 кг", "5л", "1000мл" → число в граммах/мл для сравнения)
+    def extract_qty(text):
+        """Возвращает (число, единица) или None"""
+        m = re.search(r'(\d+(?:[.,]\d+)?)\s*(кг|г|гр|kg|g|л|л\.|мл|ml|l|м|mm|см|cm|шт|pcs|pc)', (text or "").lower())
+        if not m:
+            return None
+        val = float(m.group(1).replace(",", "."))
+        unit = m.group(2)
+        # Нормализуем к базовой единице
+        if unit in ("кг", "kg"):
+            return (val * 1000, "g")
+        if unit in ("г", "гр", "g"):
+            return (val, "g")
+        if unit in ("л", "л.", "l"):
+            return (val * 1000, "ml")
+        if unit in ("мл", "ml"):
+            return (val, "ml")
+        return (val, unit)
+
+    def qty_penalty(name_a, name_b):
+        """1.0 если количество совпадает или не указано, 0.05 если явно разное"""
+        qa = extract_qty(name_a)
+        qb = extract_qty(name_b)
+        if qa is None or qb is None:
+            return 1.0
+        if qa[1] != qb[1]:
+            return 1.0  # разные единицы — не сравниваем
+        return 1.0 if abs(qa[0] - qb[0]) < 0.01 else 0.05
 
     # Индексы для Kaspi товаров
     kaspi_by_sku = {kp.kaspi_sku.upper(): kp for kp in kaspi_products if kp.kaspi_sku}
     kaspi_by_barcode = {kp.barcode.upper(): kp for kp in kaspi_products if kp.barcode}
     kaspi_by_article = {kp.kaspi_article.upper(): kp for kp in kaspi_products if kp.kaspi_article}
 
+    # Собираем ВСЕ кандидатные пары с оценкой, потом жадно 1-к-1
+    candidates = []  # (score, match_type, kp, ri)
+
     for ri in ref_items:
         ri_article = (ri.article or "").upper()
 
+        # Точное совпадение по артикулу/sku/barcode
         matched_kp = None
-        # 1. Артикул справочника == kaspi_article
-        if not matched_kp and ri_article:
-            matched_kp = kaspi_by_article.get(ri_article)
-        # 2. Артикул справочника == sku Kaspi товара
-        if not matched_kp and ri_article:
-            matched_kp = kaspi_by_sku.get(ri_article)
-        # 3. Артикул справочника == barcode Kaspi
-        if not matched_kp and ri_article:
-            matched_kp = kaspi_by_barcode.get(ri_article)
-        # 4. Артикул встречается в названии Kaspi
+        if ri_article:
+            matched_kp = (kaspi_by_article.get(ri_article)
+                          or kaspi_by_sku.get(ri_article)
+                          or kaspi_by_barcode.get(ri_article))
+        # Артикул встречается в названии Kaspi
         if not matched_kp and ri_article and len(ri_article) >= 5:
             for kp in kaspi_products:
                 if ri_article in kp.name.upper():
@@ -2913,56 +2937,51 @@ def merge_preview(db: Session = Depends(get_db)):
                     break
 
         if matched_kp:
-            kp = matched_kp
-            pairs.append({
-                "kaspi_id": kp.id,
-                "kaspi_name": kp.name,
-                "kaspi_sku": kp.kaspi_sku,
-                "kaspi_price": kp.price,
-                "other_id": ri.id,
-                "other_name": ri.name,
-                "other_sku": ri.article or "",
-                "other_supplier": ri.supplier or "",
-                "other_cost_price": ri.cost_price,
-                "match_type": "sku",
-                "score": 1.0,
-            })
-            matched_ref_ids.add(ri.id)
+            penalty = qty_penalty(ri.name, matched_kp.name)
+            candidates.append((1.0 * penalty, "sku", matched_kp, ri))
 
-    # Нечёткий поиск по словам для всех остальных
+    # Нечёткий для ВСЕХ справочник-элементов (жадный сортировщик сам выберет лучшее)
     for ri in ref_items:
-        if ri.id in matched_ref_ids:
-            continue
         ri_words = words(ri.name)
-        best_score = 0
-        best_kp = None
         for kp in kaspi_products:
             score = match_score(ri_words, kaspi_words[kp.id])
-            if score > best_score:
-                best_score = score
-                best_kp = kp
-        if best_kp and best_score >= 0.4:
-            already = any(p["kaspi_id"] == best_kp.id and p["other_id"] == ri.id for p in pairs)
-            if not already:
-                pairs.append({
-                    "kaspi_id": best_kp.id,
-                    "kaspi_name": best_kp.name,
-                    "kaspi_sku": best_kp.kaspi_sku,
-                    "kaspi_price": best_kp.price,
-                    "other_id": ri.id,
-                    "other_name": ri.name,
-                    "other_sku": ri.article or "",
-                    "other_supplier": ri.supplier or "",
-                    "other_cost_price": ri.cost_price,
-                    "match_type": "fuzzy",
-                    "score": round(best_score, 2),
-                })
-                matched_ref_ids.add(ri.id)
-        else:
-            unmatched_ref.append({
-                "id": ri.id, "name": ri.name, "sku": ri.article or "",
-                "cost_price": ri.cost_price, "supplier": ri.supplier or "",
-            })
+            if score >= 0.4:
+                penalty = qty_penalty(ri.name, kp.name)
+                candidates.append((round(score * penalty, 3), "fuzzy", kp, ri))
+
+    # Сортируем по убыванию оценки
+    candidates.sort(key=lambda c: -c[0])
+
+    # Жадное 1-к-1 присвоение
+    used_kaspi = set()
+    used_ref = set()
+    pairs = []
+    for score, match_type, kp, ri in candidates:
+        if kp.id in used_kaspi or ri.id in used_ref:
+            continue
+        used_kaspi.add(kp.id)
+        used_ref.add(ri.id)
+        pairs.append({
+            "kaspi_id": kp.id,
+            "kaspi_name": kp.name,
+            "kaspi_sku": kp.kaspi_sku,
+            "kaspi_price": kp.price,
+            "other_id": ri.id,
+            "other_name": ri.name,
+            "other_sku": ri.article or "",
+            "other_supplier": ri.supplier or "",
+            "other_cost_price": ri.cost_price,
+            "match_type": match_type,
+            "score": score,
+        })
+
+    # Без пары — справочник items которые не попали ни в одну пару
+    matched_ref_ids = used_ref
+    unmatched_ref = [
+        {"id": ri.id, "name": ri.name, "sku": ri.article or "",
+         "cost_price": ri.cost_price, "supplier": ri.supplier or ""}
+        for ri in ref_items if ri.id not in matched_ref_ids
+    ]
 
     # Сортируем: сначала точные, потом fuzzy по убыванию score
     pairs.sort(key=lambda p: (-int(p["match_type"] == "sku"), -p["score"]))

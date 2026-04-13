@@ -3135,14 +3135,12 @@ async def import_price_list(
     if товары is None:
         raise HTTPException(status_code=400, detail="Нет тега <Товары> в XML")
 
-    STOPWORDS = {"и","в","на","с","для","из","по","шт","мл","л","кг","г","см","мм","м","гр","х","x","the","of","for","pcs"}
-    def words(text):
-        return {w for w in re.split(r'[\s\-_/,.()\[\]"«»\']+', (text or "").lower()) if len(w) > 2 and w not in STOPWORDS}
-
-    all_products = db.query(_P).all()
-
+    import uuid
     created = 0
-    updated = 0
+
+    # Индекс существующих артикулов чтобы не дублировать
+    existing_articles = {p.supplier_article for p in db.query(_P).filter(_P.supplier_article != None).all()}
+    existing_skus = {p.sku for p in db.query(_P).all()}
 
     for товар in товары.findall("Товар"):
         name_el = товар.find("Наименование")
@@ -3159,62 +3157,39 @@ async def import_price_list(
 
         if not name:
             continue
+
         try:
             cost_price = int(float(cost_price_raw))
         except Exception:
             cost_price = None
 
-        # Ищем совпадение: сначала по артикулу, потом по нечёткому имени
-        found = None
+        # Не создаём дубль если артикул уже есть в базе
+        if article and article in existing_articles:
+            continue
+
+        # Уникальный SKU
+        sku = article.upper() if article else f"PL-{uuid.uuid4().hex[:8].upper()}"
+        while sku in existing_skus:
+            sku = f"PL-{uuid.uuid4().hex[:8].upper()}"
+
+        new_p = _P(
+            name=name,
+            sku=sku,
+            supplier_article=article if article else None,
+            barcode=article if article else None,
+            category="Накладные",
+            unit=unit,
+            cost_price=cost_price,
+            supplier=supplier,
+        )
+        db.add(new_p)
+        existing_skus.add(sku)
         if article:
-            found = next((p for p in all_products if p.barcode == article or p.sku == article.upper()), None)
-
-        if not found:
-            name_words = words(name)
-            best_score = 0.0
-            for p in all_products:
-                pw = words(p.name)
-                if not pw or not name_words:
-                    continue
-                common = name_words & pw
-                score = len(common) / max(len(name_words), len(pw))
-                if score > best_score:
-                    best_score = score
-                    if score >= 0.5:
-                        found = p
-
-        if found:
-            if cost_price is not None:
-                found.cost_price = cost_price
-            if supplier:
-                found.supplier = supplier
-            if article and not found.barcode:
-                found.barcode = article
-            if article and not found.supplier_article:
-                found.supplier_article = article
-            updated += 1
-        else:
-            # Создаём новую карточку
-            import uuid
-            sku = article.upper() if article else f"PL-{uuid.uuid4().hex[:8].upper()}"
-            # Проверяем уникальность SKU
-            while db.query(_P).filter(_P.sku == sku).first():
-                sku = f"PL-{uuid.uuid4().hex[:8].upper()}"
-            new_p = _P(
-                name=name,
-                sku=sku,
-                barcode=article if article else None,
-                category="Накладные",
-                unit=unit,
-                cost_price=cost_price,
-                supplier=supplier,
-            )
-            db.add(new_p)
-            all_products.append(new_p)
-            created += 1
+            existing_articles.add(article)
+        created += 1
 
     db.commit()
-    return {"updated": updated, "created": created, "total": updated + created}
+    return {"created": created}
 
 
 @app.post("/api/products/{product_id}/verify")

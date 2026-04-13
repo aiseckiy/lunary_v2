@@ -1,5 +1,10 @@
 [
   {
+    "hash": "73900aa",
+    "date": "13.04.2026",
+    "message": "Add: endpoint и кнопка для заполнения артикулов по прайс-листу у уже слитых товаров"
+  },
+  {
     "hash": "b061055",
     "date": "13.04.2026",
     "message": "Fix: merge-confirm переносит barcode и kaspi_article из накладной в Kaspi карточку"

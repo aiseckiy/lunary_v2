@@ -3048,7 +3048,7 @@ def fill_articles_from_pricelist(db: Session = Depends(get_db)):
                 best_score = score
                 best_item = item
 
-        if best_item and best_score >= 0.75:
+        if best_item and best_score >= 0.5:
             changed = False
             if best_item["article"] and not p.barcode:
                 p.barcode = best_item["article"]
@@ -3135,7 +3135,7 @@ def import_price_list(db: Session = Depends(get_db)):
                 score = len(common) / max(len(name_words), len(pw))
                 if score > best_score:
                     best_score = score
-                    if score >= 0.75:
+                    if score >= 0.5:
                         found = p
 
         if found:

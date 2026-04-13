@@ -1927,6 +1927,7 @@ def kaspi_export_xml(db: Session = Depends(get_db)):
     from datetime import datetime, timezone, timedelta
     import xml.etree.ElementTree as ET
 
+    from database import SiteSetting, Product
     # Kaspi-параметры (берём из настроек БД или defaults)
     settings = {s.key: s.value for s in db.query(SiteSetting).all()}
     merchant_id = settings.get("kaspi_merchant_id", "30409502")

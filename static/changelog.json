@@ -1,5 +1,10 @@
 [
   {
+    "hash": "c3a31c1",
+    "date": "13.04.2026",
+    "message": "Kaspi: импорт товаров из XML, экспорт остатков в ACTIVE.xml"
+  },
+  {
     "hash": "cbce5c5",
     "date": "13.04.2026",
     "message": "Fix: sleep(8) перед ботом для rolling deploy Railway"

@@ -1920,6 +1920,51 @@ def get_kaspi_order_entries(order_id: str, db: Session = Depends(get_db)):
     return {"entries": entries}
 
 
+@app.get("/api/kaspi/export-xml")
+def kaspi_export_xml(db: Session = Depends(get_db)):
+    """Экспорт остатков и цен в формате Kaspi XML для загрузки в кабинете"""
+    from fastapi.responses import Response
+    from datetime import datetime, timezone, timedelta
+    import xml.etree.ElementTree as ET
+
+    # Kaspi-параметры (берём из настроек БД или defaults)
+    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
+    merchant_id = settings.get("kaspi_merchant_id", "30409502")
+    store_id = settings.get("kaspi_store_id", "30409502_PP1")
+    city_id = settings.get("kaspi_city_id", "750000000")
+
+    tz_kz = timezone(timedelta(hours=5))
+    now_str = datetime.now(tz_kz).strftime("%Y-%m-%d %H:%M")
+
+    root = ET.Element("kaspi_catalog", xmlns="kaspiShopping",
+                      attrib={"xmlns": "kaspiShopping", "date": now_str})
+    ET.SubElement(root, "company").text = merchant_id
+    ET.SubElement(root, "merchantid").text = merchant_id
+    offers_el = ET.SubElement(root, "offers")
+
+    products = db.query(Product).filter(Product.kaspi_sku.isnot(None)).all()
+    for p in products:
+        skus = [s.strip() for s in p.kaspi_sku.split(",") if s.strip()]
+        stock = max(crud.get_stock(p.id, db), 0)
+        for sku in skus:
+            offer = ET.SubElement(offers_el, "offer", sku=sku)
+            ET.SubElement(offer, "model").text = p.name or ""
+            ET.SubElement(offer, "brand").text = p.brand or ""
+            avails = ET.SubElement(offer, "availabilities")
+            ET.SubElement(avails, "availability",
+                          available="yes" if stock > 0 else "no",
+                          storeId=store_id,
+                          preOrder="0",
+                          stockCount=str(float(stock)))
+            if p.price:
+                cityprices = ET.SubElement(offer, "cityprices")
+                ET.SubElement(cityprices, "cityprice", cityId=city_id).text = str(p.price)
+
+    xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
+    return Response(content=xml_str, media_type="application/xml",
+                    headers={"Content-Disposition": "attachment; filename=ACTIVE.xml"})
+
+
 @app.get("/api/kaspi/orders/export")
 def kaspi_orders_export(state: Optional[str] = None, db: Session = Depends(get_db)):
     """Экспорт заказов в CSV"""
@@ -2564,6 +2609,133 @@ def import_products(db: Session = Depends(get_db)):
             crud.set_initial_stock(new_p.id, p['stock'], db)
         added += 1
     return {"added": added, "skipped": skipped}
+
+
+@app.post("/api/kaspi/import-xml-products")
+def kaspi_import_xml_products(db: Session = Depends(get_db)):
+    """Импорт товаров из ACTIVE.xml (Kaspi каталог) — создаёт товары которых нет по kaspi_sku"""
+    import xml.etree.ElementTree as ET
+    from database import Product as _P
+    import re
+
+    path = os.path.join(os.path.dirname(__file__), 'ACTIVE.xml')
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="ACTIVE.xml не найден рядом с api.py")
+
+    tree = ET.parse(path)
+    root = tree.getroot()
+    # убираем namespace из тегов
+    ns = "kaspiShopping"
+
+    def tag(el):
+        return re.sub(r'\{[^}]+\}', '', el.tag)
+
+    def find_text(el, name):
+        for child in el:
+            if tag(child) == name:
+                return (child.text or "").strip()
+        return ""
+
+    # Удаляем все старые товары категории Kaspi и их движения
+    old_products = db.query(_P).filter(_P.category == "Kaspi").all()
+    old_ids = [p.id for p in old_products]
+    if old_ids:
+        from database import Movement
+        db.query(Movement).filter(Movement.product_id.in_(old_ids)).delete(synchronize_session=False)
+        db.query(_P).filter(_P.id.in_(old_ids)).delete(synchronize_session=False)
+        db.commit()
+
+    added = skipped = 0
+
+    offers_el = None
+    for child in root:
+        if tag(child) == "offers":
+            offers_el = child
+            break
+
+    if offers_el is None:
+        raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
+
+    for offer in offers_el:
+        if tag(offer) != "offer":
+            continue
+        kaspi_sku = offer.attrib.get("sku", "").strip()
+        if not kaspi_sku:
+            continue
+
+        model = find_text(offer, "model")
+        brand = find_text(offer, "brand")
+
+        price = None
+        for child in offer:
+            if tag(child) == "cityprices":
+                for cp in child:
+                    if tag(cp) == "cityprice":
+                        try:
+                            price = int(cp.text.strip())
+                        except Exception:
+                            pass
+                        break
+                break
+
+        stock_count = 0
+        for child in offer:
+            if tag(child) == "availabilities":
+                for av in child:
+                    if tag(av) == "availability":
+                        try:
+                            stock_count = int(float(av.attrib.get("stockCount", 0)))
+                        except Exception:
+                            pass
+                        break
+                break
+
+        # Проверяем: есть ли уже товар с таким kaspi_sku
+        existing = db.query(_P).filter(_P.kaspi_sku == kaspi_sku).first()
+        if existing:
+            # обновляем только если цена/бренд изменились
+            changed = False
+            if price and existing.price != price:
+                existing.price = price
+                changed = True
+            if brand and existing.brand != brand:
+                existing.brand = brand
+                changed = True
+            if changed:
+                db.commit()
+                updated += 1
+            else:
+                skipped += 1
+            continue
+
+        # Генерируем уникальный SKU для нашей БД
+        base_sku = f"KSP_{kaspi_sku}"
+        sku = base_sku
+        counter = 1
+        while db.query(_P).filter(_P.sku == sku).first():
+            sku = f"{base_sku}_{counter}"
+            counter += 1
+
+        new_p = _P(
+            name=model or kaspi_sku,
+            sku=sku,
+            kaspi_sku=kaspi_sku,
+            brand=brand or None,
+            price=price,
+            category="Kaspi",
+            unit="шт",
+            min_stock=1,
+        )
+        db.add(new_p)
+        db.flush()
+
+        if stock_count > 0:
+            crud.set_initial_stock(new_p.id, stock_count, db)
+
+        added += 1
+
+    db.commit()
+    return {"deleted": len(old_ids), "added": added, "skipped": skipped}
 
 
 # ── Дизайн-токены (тема) ─────────────────────────────────────────────────────

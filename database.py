@@ -220,6 +220,9 @@ def init_db():
         ("tg_chat_id",       "",                                           "Telegram Chat ID",        "integrations"),
         ("kaspi_api_key",    "",                                           "Kaspi API Key (Token)",   "integrations"),
         ("kaspi_shop_id",    "",                                           "Kaspi Shop ID",           "integrations"),
+        ("kaspi_merchant_id","30409502",                                   "Kaspi Merchant ID",       "integrations"),
+        ("kaspi_store_id",   "30409502_PP1",                               "Kaspi Store ID",          "integrations"),
+        ("kaspi_city_id",    "750000000",                                  "Kaspi City ID (Алматы)",  "integrations"),
     ]
     db2 = SessionLocal()
     try:

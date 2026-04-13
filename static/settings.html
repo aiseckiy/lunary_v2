@@ -113,6 +113,21 @@
   </div>
 
   <div class="section-card">
+    <div class="section-title">📥 Импорт товаров из Kaspi XML</div>
+    <div class="section-sub">Загрузить все товары из ACTIVE.xml в каталог с категорией "Kaspi". Файл должен лежать в корне сервера.</div>
+    <div id="kaspi-import-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px"></div>
+    <button class="btn-save" onclick="importKaspiXml()">📥 Импортировать товары из ACTIVE.xml</button>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">📦 Экспорт остатков для Kaspi</div>
+    <div class="section-sub">Скачать XML-файл с остатками и ценами для загрузки в кабинет Kaspi</div>
+    <a href="/api/kaspi/export-xml" download="ACTIVE.xml">
+      <button class="btn-save">⬇ Скачать ACTIVE.xml</button>
+    </a>
+  </div>
+
+  <div class="section-card">
     <div class="section-title">🖼 Автозаполнение картинок</div>
     <div class="section-sub">Найти и заполнить картинки для всех товаров без фото через Google Images</div>
     <div id="fill-images-result" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px"></div>
@@ -295,6 +310,22 @@ async function saveSettings() {
   if (res.ok) { msg.className = 'msg ok'; msg.textContent = '✓ Настройки сохранены'; }
   else { msg.className = 'msg err'; msg.textContent = 'Ошибка сохранения'; }
   setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+async function importKaspiXml() {
+  const result = document.getElementById('kaspi-import-result');
+  result.style.display = 'block';
+  result.style.background = '#f0f4ff';
+  result.textContent = 'Импортируем...';
+  try {
+    const r = await fetch('/api/kaspi/import-xml-products', { method: 'POST' });
+    const d = await r.json();
+    result.style.background = '#ecfdf5';
+    result.textContent = `✅ Удалено старых: ${d.deleted}, добавлено: ${d.added}, пропущено: ${d.skipped}`;
+  } catch(e) {
+    result.style.background = '#fef2f2';
+    result.textContent = '❌ Ошибка: ' + e.message;
+  }
 }
 
 async function fillImages() {

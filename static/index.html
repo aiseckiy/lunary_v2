@@ -672,16 +672,33 @@ function render() {
   const page = list.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
 
   let html = '';
-  // При сортировке по остаткам — без группировки по категориям
+  // При сортировке по остаткам или фильтре по категории — без группировки
   if (sort !== 'default' || activeCats.size) {
     page.forEach(p => { html += productCard(p); });
   } else {
-    const cats = {};
-    page.forEach(p => { const c = p.category||'Общее'; (cats[c]=cats[c]||[]).push(p); });
-    for (const [cat, items] of Object.entries(cats)) {
-      html += `<div class="cat-header">${cat} — ${items.length} шт</div>`;
-      items.forEach(p => { html += productCard(p); });
-    }
+    // Сортируем весь список по категории чтобы категории шли подряд
+    list.sort((a, b) => (a.category||'Общее').localeCompare(b.category||'Общее', 'ru'));
+
+    // Считаем общее кол-во по каждой категории
+    const catTotals = {};
+    list.forEach(p => { const c = p.category||'Общее'; catTotals[c] = (catTotals[c]||0) + 1; });
+
+    // Срезаем текущую страницу из уже отсортированного списка
+    const pageItems = list.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+    // Индекс первого элемента страницы в глобальном списке
+    const pageStart = (currentPage-1)*PAGE_SIZE;
+
+    pageItems.forEach((p, i) => {
+      const globalIdx = pageStart + i;
+      const cat = p.category || 'Общее';
+      // Показываем заголовок категории если это первый элемент этой категории глобально
+      const isFirstOfCat = globalIdx === 0 || (list[globalIdx-1].category||'Общее') !== cat;
+      if (isFirstOfCat) {
+        html += `<div class="cat-header">${cat} — ${catTotals[cat]} шт</div>`;
+      }
+      html += productCard(p);
+    });
   }
   grid.innerHTML = html;
 }

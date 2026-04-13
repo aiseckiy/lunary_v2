@@ -30,17 +30,17 @@ def find_product(query: str, db: Session):
     q = query.strip()
 
     # Точное совпадение по штрихкоду
-    by_barcode = db.query(Product).filter(Product.barcode == q).all()
+    by_barcode = db.query(Product).filter(Product.barcode == q, Product.category != "Накладные").all()
     if by_barcode:
         return by_barcode
 
     # Точное совпадение по артикулу (ASCII — SQLite lower() работает)
-    by_sku = db.query(Product).filter(Product.sku == q.upper()).all()
+    by_sku = db.query(Product).filter(Product.sku == q.upper(), Product.category != "Накладные").all()
     if by_sku:
         return by_sku
 
     # Поиск по названию в Python (кириллица — SQLite lower() не работает)
-    all_products = db.query(Product).all()
+    all_products = db.query(Product).filter(Product.category != "Накладные").all()
     q_lower = q.lower()
     words = [w for w in q_lower.split() if len(w) >= 2]
 
@@ -144,6 +144,7 @@ def get_all_stocks(db: Session):
     rows = (
         db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
         .outerjoin(Movement, Movement.product_id == Product.id)
+        .filter(Product.category != "Накладные")
         .group_by(Product.id)
         .all()
     )

@@ -113,8 +113,8 @@ let stats = { total: 0, verified: 0 };
 
 async function loadStats() {
   const [all, ver] = await Promise.all([
-    fetch('/api/products/review?limit=1').then(r => r.json()),
-    fetch('/api/products/review?verified=yes&limit=1').then(r => r.json())
+    fetch('/api/review-products?limit=1').then(r => r.json()),
+    fetch('/api/review-products?verified=yes&limit=1').then(r => r.json())
   ]);
   stats.total = all.total;
   stats.verified = ver.total;
@@ -147,7 +147,7 @@ async function load() {
   if (filters.supplier) params.set('supplier', filters.supplier);
   if (filters.search) params.set('search', filters.search);
 
-  const r = await fetch('/api/products/review?' + params);
+  const r = await fetch('/api/review-products?' + params);
   const data = await r.json();
   totalItems = data.total;
 

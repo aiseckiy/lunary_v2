@@ -2969,7 +2969,7 @@ def toggle_verify(product_id: int, body: dict, db: Session = Depends(get_db)):
     return {"id": p.id, "verified": p.verified}
 
 
-@app.get("/api/products/review")
+@app.get("/api/review-products")
 def products_review(
     verified: Optional[str] = None,  # "yes" | "no" | None = все
     search: Optional[str] = None,

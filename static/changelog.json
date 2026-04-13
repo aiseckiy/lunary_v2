@@ -1,5 +1,10 @@
 [
   {
+    "hash": "832cb10",
+    "date": "13.04.2026",
+    "message": "Google Images: поиск картинок для товаров через Custom Search API"
+  },
+  {
     "hash": "30faf9f",
     "date": "13.04.2026",
     "message": "Fix: вернуть from datetime import datetime в начало api.py"

@@ -1281,6 +1281,29 @@ def search_product_images(product_id: int, request: Request, db: Session = Depen
     return {"images": images, "query": query}
 
 
+@app.get("/api/admin/test-google-images")
+def test_google_images(request: Request):
+    """Тест Google Custom Search API"""
+    import requests as req_lib
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+    api_key = os.getenv("GOOGLE_API_KEY", "")
+    cx = os.getenv("GOOGLE_CX", "")
+    if not api_key or not cx:
+        return {"error": "GOOGLE_API_KEY или GOOGLE_CX не заданы в Railway"}
+    try:
+        r = req_lib.get("https://www.googleapis.com/customsearch/v1", params={
+            "key": api_key, "cx": cx, "q": "герметик", "searchType": "image", "num": 2
+        }, timeout=10)
+        data = r.json()
+        if "error" in data:
+            return {"error": data["error"].get("message"), "code": data["error"].get("code"), "raw": data}
+        return {"ok": True, "found": len(data.get("items", [])), "first_image": data.get("items", [{}])[0].get("link")}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.post("/api/admin/fill-images")
 def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
     """Автоматически ищет и заполняет картинки для товаров без фото через Google"""
@@ -1343,8 +1366,9 @@ def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
             time.sleep(0.2)  # небольшая пауза чтобы не перегружать API
 
         except Exception as e:
-            print(f"[fill-images] ошибка для {p.name}: {e}")
+            print(f"[fill-images] ошибка для {p.name}: {e}", flush=True)
             errors += 1
+            break  # останавливаемся чтобы не тратить запросы
 
     return {
         "filled": filled,

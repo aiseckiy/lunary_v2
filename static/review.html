@@ -81,6 +81,7 @@ select.filter:focus { border-color: #6c63ff; }
   <span>📂 Загрузить закупочные цены из XML:</span>
   <button class="btn btn-outline btn-sm" onclick="importPriceList()" id="btn-import">Импортировать прайс-лист</button>
   <button class="btn btn-outline btn-sm" onclick="fillArticles()" id="btn-fill" style="margin-left:4px">🔖 Заполнить артикулы</button>
+  <button class="btn btn-outline btn-sm" onclick="cleanArticles()" id="btn-clean" style="margin-left:4px;color:#991b1b">🧹 Очистить KSP_ мусор</button>
   <span id="import-result"></span>
 </div>
 
@@ -317,6 +318,19 @@ async function importPriceList() {
   }
   btn.disabled = false;
   btn.textContent = 'Импортировать прайс-лист';
+}
+
+async function cleanArticles() {
+  const btn = document.getElementById('btn-clean');
+  const result = document.getElementById('import-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Чищу...';
+  const r = await fetch('/api/clean-bad-articles', { method: 'POST' });
+  const data = await r.json();
+  result.textContent = `🧹 Очищено артикулов с мусором: ${data.cleaned}`;
+  result.style.color = '#065f46';
+  btn.disabled = false;
+  btn.textContent = '🧹 Очистить KSP_ мусор';
 }
 
 async function fillArticles() {

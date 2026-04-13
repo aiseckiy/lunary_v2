@@ -2959,12 +2959,20 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
             kaspi_p.cost_price = other_p.cost_price
         if other_p.supplier:
             kaspi_p.supplier = other_p.supplier
-        if other_p.sku:
-            kaspi_p.kaspi_article = other_p.sku
-        if other_p.barcode and not kaspi_p.barcode:
-            kaspi_p.barcode = other_p.barcode
-        if other_p.kaspi_article and not kaspi_p.kaspi_article:
-            kaspi_p.kaspi_article = other_p.kaspi_article
+        # Артикул поставщика — берём barcode или sku без служебных префиксов
+        def clean_article(val):
+            if not val:
+                return None
+            for prefix in ("KSP_", "PL-"):
+                if val.upper().startswith(prefix):
+                    return None
+            return val
+
+        article_val = clean_article(other_p.barcode) or clean_article(other_p.kaspi_article) or clean_article(other_p.sku)
+        if article_val and not kaspi_p.kaspi_article:
+            kaspi_p.kaspi_article = article_val
+        if article_val and not kaspi_p.barcode:
+            kaspi_p.barcode = article_val
         # переносим движения
         db.query(Movement).filter(Movement.product_id == other_p.id).update(
             {"product_id": kaspi_p.id}, synchronize_session=False
@@ -3219,6 +3227,24 @@ def products_review(
             "kaspi_sku": p.kaspi_sku or "",
         } for p in products]
     }
+
+
+@app.post("/api/clean-bad-articles")
+def clean_bad_articles(db: Session = Depends(get_db)):
+    """Удаляет служебные префиксы KSP_ и PL- из полей kaspi_article и barcode"""
+    from database import Product as _P
+    cleaned = 0
+    for p in db.query(_P).all():
+        changed = False
+        for field in ("kaspi_article", "barcode"):
+            val = getattr(p, field)
+            if val and (val.upper().startswith("KSP_") or val.upper().startswith("PL-")):
+                setattr(p, field, None)
+                changed = True
+        if changed:
+            cleaned += 1
+    db.commit()
+    return {"cleaned": cleaned}
 
 
 @app.get("/review")

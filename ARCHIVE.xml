@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="UTF-8"?><kaspi_catalog xmlns="kaspiShopping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://kaspi.kz/kaspishopping.xsd" date="2026-04-13 11:40">
+    <company>30409502</company>
+    <merchantid>30409502</merchantid>
+    <offers>
+        <offer sku="266780169">
+            <model>, 40x47x35 см, серый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP3" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">6000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="882933719">
+            <model>Распашной шкаф , 120x240х47 см, белый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP3" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">80000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="2805">
+            <model>Табурет , ЛДСП, 30x30x45 см, белый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP3" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3100</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="645175248">
+            <model>Чехол до 14" коричневый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP2" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="519005992">
+            <model>Картхолдер натуральная замша черный</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP2" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="035335446">
+            <model>Парта, 120x60x75 см, серый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">40000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="467684804">
+            <model>Шкаф-трансформер , 100x160х40 см, белый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">45000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="0802">
+            <model>Кухонный гарнитур , 200x32x88 см, белый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">120000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="635622755">
+            <model>Кварцевые Dedima 656 нержавеющая сталь</model>
+            <brand>dedima</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP2" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">6000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="574922714">
+            <model>Табурет 522, 45x30x30 см, серый 1 шт.</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="107534235_933871698">
+            <model>HAUSER малярная лента 30 мм х 40 м, 1 шт</model>
+            <brand>hauser</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">560</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="583177631">
+            <model>Табурет 522, 45x30x30 см, черный 1 шт.</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="320015463">
+            <model>Сумка тоут экокожа черный</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="100359296_777535607">
+            <model>TYTAN краска Art of the colour тон коричневый, 400 мл</model>
+            <brand>tytan</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1385</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="108884465_406424481">
+            <model>Клей TYTAN цианоакрилатный QUICK Fix 200 мл</model>
+            <brand>tytan</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1280</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="139123867_519455078">
+            <model>Конфирмат Boyard 50 шт, металл, Длина 50 мм</model>
+            <brand>Boyard</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3500</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101264738_255424395">
+            <model>TYTAN пена Professional 65 O2 зимняя, 750 мл 1 шт</model>
+            <brand>tytan</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3480</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101438171_587663575">
+            <model>TYTAN клей-пена Styro 753 для наружной теплоизоляции голубой, 750 мл 1 шт</model>
+            <brand>tytan</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3340</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="147957371">
+            <model>Horse лента HM-30 1 шт</model>
+            <brand/>
+            <availabilities/>
+            <price>0</price>
+        </offer>
+        <offer sku="962907801">
+            <model>Сумка кросс-боди канвас черный</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="107534576_322449075">
+            <model>HAUSER малярная лента 38 мм х 40 м, 1 шт</model>
+            <brand>hauser</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">670</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="104046384_522104274">
+            <model>Профиль Knauf удлинитель профиля стоечный ПП 60/27, для потолков 10 шт</model>
+            <brand>Knauf</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1950</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="116672160_827339622">
+            <model>Мышь VXE R1 PRO MAX белый</model>
+            <brand>vxe</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">21000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="132774310_942971189">
+            <model>AlinEX клей Set 300, 25 кг, 10 мешков</model>
+            <brand>AlinEX</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">37600</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="143037098_970317792">
+            <model>Tulex набор бит 5132226-S2 2 шт</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2100</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="138042659_844508226">
+            <model>Эксперт бур 630-160-12 (SDS-plus, 12х110х160 мм) 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1300</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="106275287_989872210">
+            <model>Шпатель фасадный Tulex 100 мм, нержавеющая сталь арт. 3001110</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">940</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="337625425">
+            <model>Кисть плоская (КП) Tulex 25 мм, 12 шт. арт.121025</model>
+            <brand>tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">750</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="268103405">
+            <model>Tulex кордщетка Щётка коническая витая для УШМ 100мм 100x22.23 мм 1 шт</model>
+            <brand/>
+            <availabilities/>
+            <price>0</price>
+        </offer>
+        <offer sku="105216839_509421321">
+            <model>Эксперт бур 610-210-06 SDS-plus 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">595</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="105395461_976783704">
+            <model>Валик малярный Эксперт DecoPRO 2124 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1600</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101274618_840802676">
+            <model>Эксперт молоток слесарный тупоносая ЭКСПЕРТ 59002-05</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3200</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="023482894">
+            <model>Шпатель фасадный Tulex 100 мм, нержавеющая сталь арт. Шпатель фасадный Tulex 3001210</model>
+            <brand>tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2900</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="105590277_859157131">
+            <model>Шпатель фасадный Эксперт 350 мм, нержавеющая сталь арт. 3135</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101274755_401049888">
+            <model>ЭКСПЕРТ 51403-160</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="102527532_380754314">
+            <model>Пистолет для пены Эксперт 4302 бытовой</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1850</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="109100752_739700778">
+            <model>Коронка Эксперт 1425-65 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">4000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="109488060_859528563">
+            <model>Tulex молоток слесарный тупоносая 5050003 0.3 кг</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2700</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="106186206_188899105">
+            <model>Эксперт киянка 542-900</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3200</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="102055624_276127913">
+            <model>Кисть макловица (КМА) Эксперт 120 мм, 1 шт. арт.Универсал 1330-120</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1190</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="102035843_179535276">
+            <model>Краска NORMA водоэмульсионная Stronga 15 кг, белый цвет</model>
+            <brand>norma-strojka</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">6400</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="103965193_924392963">
+            <model>Валик малярный Эксперт PaintPro EXPRO 2324 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1200</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="102527514_518027008">
+            <model>Пистолет Эксперт полузакрытый 4231 310 мл</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1450</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="115721158_921757585">
+            <model>Плиткорез электрический Tulex TS-110-1.4</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">22400</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="898093705">
+            <model>Валик малярный Tulex 2123824 1 шт</model>
+            <brand>tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2400</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="106193234_012230504">
+            <model>Стержень-удлинитель Эксперт 2502 1 шт</model>
+            <brand>ekspert</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1790</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="104630803_752212402">
+            <model>Эксперт ведро строительное 12 л</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="116139957_664322692">
+            <model>Сверло Tulex по металлу 60121-12 12 мм, 1 шт.</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3700</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="116139935_917983260">
+            <model>Сверло Tulex по металлу 60121-11 11 мм, 1 шт.</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2740</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="120913765_919204251">
+            <model>Набор инструментов слесарно-монтажный 9 в 1 Эксперт 14802-03-09</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2920</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="120186940_527406833">
+            <model>Tulex клещи переставные 5005025 250 мм</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3400</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="117704741_163084060">
+            <model>Валик малярный Эксперт Velur 2410-15 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="133126178_549774973">
+            <model>Минеральный утеплитель ТЕХНОНИКОЛЬ каменная вата 1200x600x100 мм</model>
+            <brand>tehnonikol-</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">11500</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="100394932_719249521">
+            <model>Эксперт 172-125 125х22.2 мм</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2100</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="152830205_937704577">
+            <model>Tulex набор бит 5032225-S2 2 шт</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1300</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101842652_685753782">
+            <model>Профиль Ломир ГКЛ ПН 50x50 3м</model>
+            <brand>Ломир</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1835</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="106450875_875886721">
+            <model>Профиль Направляющий ПН 50/40, 0.6 мм</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1500</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101843088_583534722">
+            <model>Профиль Knauf направляющий ПН 50/40, 0.6 мм</model>
+            <brand>knauf</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2100</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101778999_683599910">
+            <model>Профиль Knauf потолочный ПП 60/27, 0.6 мм</model>
+            <brand>knauf</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2700</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="106275282_392772596">
+            <model>Шпатель фасадный Tulex 350 мм, нержавеющая сталь арт. 3001135</model>
+            <brand>tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3740</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="153877438_626783676">
+            <model>Шпатель фасадный Tulex 400 мм, нержавеющая сталь арт. 3001240</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1060</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="116470075_537202357">
+            <model>Пильный диск по пластику Эксперт 176-255-100Т-30, 255x30 мм, 100Т</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">8500</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="116139933_898978885">
+            <model>Сверло Tulex по металлу 60121-10 10 мм, 1 шт.</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2350</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="446689786">
+            <model>Мини-сумка Новый водонепроницаемый оксфорд светло-серый</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2500</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="110649594_402204242">
+            <model>Дорожный органайзер, текстиль</model>
+            <brand/>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1395</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="100843149_549152366">
+            <model>Минеральный утеплитель Knauf каменная вата 1230x610x50 мм</model>
+            <brand>knauf</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">13900</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="105870688_992531535">
+            <model>Сверло Эксперт 143-060-03 3x61 мм</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">190</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="133984162_822683639">
+            <model>Валик малярный Эксперт 2611 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1290</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="133984172_415657178">
+            <model>Валик малярный Эксперт 2024 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1250</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="104361165_724254109">
+            <model>Валик малярный Эксперт PaintPRO 2316 1 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="114446272_077426070">
+            <model>Профиль ЦСК направляющий, потолочный ПН 28/27</model>
+            <brand>ЦСК</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">680</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="105318285_027155467">
+            <model>Профиль Кармет потолочный, стоечный ПП 60/27, 0.6 мм</model>
+            <brand>Кармет</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="109573085_591770383">
+            <model>Эксперт набор бит 147150-02 2 шт</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">600</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101600790_155168251">
+            <model>Герметик Akfix P635 полиуретановый строительный, цвет серый 600 мл</model>
+            <brand>Akfix</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3490</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="102938112_883464133">
+            <model>Краска Gaudi Paint водно-дисперсионная Белоснежка 15 кг, белый цвет</model>
+            <brand>gaudipaint</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">7950</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="122643887_564475989">
+            <model>Штангенциркуль Эксперт нониусный 771-015</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1490</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="104958269_371567412">
+            <model>Лом-гвоздодер Эксперт 51318-40</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2890</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="104004509_683971522">
+            <model>Валик малярный Эксперт Velur 2410 1 шт</model>
+            <brand>ekspert</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1490</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="151612003_017276043">
+            <model>Краска NORMA водоэмульсионная Stronga для стен и потолков 25 кг, белый цвет</model>
+            <brand>norma-strojka</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">10900</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="100070992_845931289">
+            <model>Краска Alina Paint водоэмульсионная Optima 25 кг, белый цвет</model>
+            <brand>alina-paint</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">18990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="068975393">
+            <model>Валик малярный Эксперт 2607 1 шт</model>
+            <brand>ekspert</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1200</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="102035905_286748210">
+            <model>Краска NORMA водоэмульсионная Stronga 25 кг, белый цвет</model>
+            <brand>norma-strojka</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">9900</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="14600025_764262380">
+            <model>Штукатурка Наши Дождик цементная 25 кг Ф 3.0</model>
+            <brand>nasi</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">7000</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101903372_791015350">
+            <model>Кисть плоская (КП) Эксперт 38 мм, 1 шт. арт.Аква 15038</model>
+            <brand>ekspert</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">699</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="143669606_393770544">
+            <model>Штукатурка AlinEX Grender WP 25 кг, гипсовая</model>
+            <brand>alinex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3500</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="103965285_960614804">
+            <model>Эксперт кювета для валиков 111-33-35 350x330 мм</model>
+            <brand>ekspert</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">340</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="116604969_125932246">
+            <model>TYTAN клей-пена Универсальный, 750 мл 1 шт</model>
+            <brand>tytan</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3850</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="103965317_228127578">
+            <model>Эксперт малярная сетка 45 м х 50 мм, 131-5-45</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="124332185_830797164">
+            <model>Tulex шлифовальная лента в рулоне P180 (5000х100 мм), 1 шт</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">990</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="100215869_614296109">
+            <model>Краска Gaudi Paint водно-дисперсионная Белоснежка 4 кг, белый</model>
+            <brand>gaudipaint</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2850</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="154516131_477704438">
+            <model>Akfix клей-пена 967C КОМБО экспресс, 750 мл 1 шт</model>
+            <brand>akfix</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0" stockCount="0.0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">3397</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="101602236_586174698">
+            <model>Сверло Эксперт 142-065-6</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">700</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="119873078_779694021">
+            <model>Шпатель малярный Tulex 80 мм, нержавеющая сталь арт. 3001208</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">800</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="339156589">
+            <model>Валик фасадный Tulex 2153825 1 шт</model>
+            <brand>tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">2400</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="124332172_203300240">
+            <model>Tulex шлифовальная лента в рулоне P150 (5000х100 мм), 1 шт</model>
+            <brand>Tulex</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1190</cityprice>
+            </cityprices>
+        </offer>
+        <offer sku="147769504_392134014">
+            <model>Эксперт рулетка строительная 7505, 5 м х 19 мм</model>
+            <brand>Эксперт</brand>
+            <availabilities>
+                <availability available="no" storeId="30409502_PP1" preOrder="0"/>
+            </availabilities>
+            <cityprices>
+                <cityprice cityId="750000000">1500</cityprice>
+            </cityprices>
+        </offer>
+    </offers>
+</kaspi_catalog>

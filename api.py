@@ -2968,9 +2968,9 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
                     return None
             return val
 
-        article_val = clean_article(other_p.barcode) or clean_article(other_p.kaspi_article) or clean_article(other_p.sku)
-        if article_val and not kaspi_p.kaspi_article:
-            kaspi_p.kaspi_article = article_val
+        article_val = clean_article(other_p.barcode) or clean_article(other_p.supplier_article) or clean_article(other_p.sku)
+        if article_val and not kaspi_p.supplier_article:
+            kaspi_p.supplier_article = article_val
         if article_val and not kaspi_p.barcode:
             kaspi_p.barcode = article_val
         # переносим движения
@@ -3038,7 +3038,7 @@ def fill_articles_from_pricelist(db: Session = Depends(get_db)):
     updated = 0
 
     for p in all_products:
-        if p.barcode and p.kaspi_article:
+        if p.barcode and p.supplier_article:
             continue  # артикулы уже есть
 
         p_words = words(p.name)
@@ -3061,8 +3061,8 @@ def fill_articles_from_pricelist(db: Session = Depends(get_db)):
             if best_item["article"] and not p.barcode:
                 p.barcode = best_item["article"]
                 changed = True
-            if best_item["article"] and not p.kaspi_article:
-                p.kaspi_article = best_item["article"]
+            if best_item["article"] and not p.supplier_article:
+                p.supplier_article = best_item["article"]
                 changed = True
             if best_item["cost_price"] is not None and not p.cost_price:
                 p.cost_price = best_item["cost_price"]
@@ -3153,8 +3153,8 @@ def import_price_list(db: Session = Depends(get_db)):
                 found.supplier = supplier
             if article and not found.barcode:
                 found.barcode = article
-            if article and not found.kaspi_article:
-                found.kaspi_article = article
+            if article and not found.supplier_article:
+                found.supplier_article = article
             updated += 1
         else:
             # Создаём новую карточку
@@ -3236,7 +3236,7 @@ def clean_bad_articles(db: Session = Depends(get_db)):
     cleaned = 0
     for p in db.query(_P).all():
         changed = False
-        for field in ("kaspi_article", "barcode"):
+        for field in ("supplier_article", "barcode"):
             val = getattr(p, field)
             if val and (val.upper().startswith("KSP_") or val.upper().startswith("PL-")):
                 setattr(p, field, None)

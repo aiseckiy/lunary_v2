@@ -606,9 +606,26 @@ async function mergeOneRef(e) {
     const d = await r.json();
     if (!r.ok) { showToast(`❌ ${d.detail || r.status}`, '#991b1b'); return; }
     showToast('✅ Слито!');
+    // Мгновенно обновляем локальное состояние — пара появляется сразу
+    const kaspiItem = data.kaspi_list.find(k => k.id === selectedKaspiId);
+    const refItem = data.other_list.find(r => r.id === selectedRefId);
+    if (kaspiItem && refItem) {
+      const newPair = {
+        kaspi_id: selectedKaspiId, kaspi_name: kaspiItem.name,
+        kaspi_sku: kaspiItem.kaspi_sku, kaspi_price: kaspiItem.price,
+        other_id: selectedRefId, other_name: refItem.name,
+        other_sku: refItem.sku, other_supplier: refItem.supplier,
+        other_cost_price: refItem.cost_price,
+        match_type: 'manual', score: 1.0, _synced: true,
+      };
+      data.pairs.push(newPair);
+      kaspiInPairs.add(selectedKaspiId);
+      otherInPairs.add(selectedRefId);
+    }
     selectedRefId = null;
-    try { sessionStorage.removeItem(CACHE_KEY); } catch(e2) {}
-    await load(true);
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch(e2) {}
+    renderKaspi();
+    renderAllOther(document.getElementById('other-list'));
   } catch(err) {
     showToast(`❌ ${err.message}`, '#991b1b');
   } finally {

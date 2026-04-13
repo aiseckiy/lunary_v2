@@ -25,6 +25,9 @@
     { href: '/admin/theme',      icon: '🎨', label: 'Тема' },
     { href: '/admin/changelog',  icon: '🚀', label: 'Обновления' },
     { href: '/shop',             icon: '🏪', label: 'Магазин' },
+    { href: '/import',           icon: '📥', label: 'Импорт XML' },
+    { href: '/merge',            icon: '🔀', label: 'Слияние' },
+    { href: '/review',           icon: '✅', label: 'Проверка' },
   ];
 
   // Определяем активную ссылку: точное совпадение или начало пути

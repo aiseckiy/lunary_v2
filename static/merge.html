@@ -394,8 +394,10 @@ function selectKaspi(id) {
 
   // Обычный режим — фильтр по Kaspi-товару
   selectedKaspiId = selectedKaspiId === id ? null : id;
+  selectedRefId = null; // сбросить выбранный справочник при смене Kaspi
   renderKaspi();
-  if (selectedKaspiId !== null && otherTab !== 'pairs') {
+  // Переключаем на "Совпадения" только если не на "Все товары"
+  if (selectedKaspiId !== null && otherTab === 'unmatched') {
     otherTab = 'pairs';
     document.querySelectorAll('.panel:last-child .ptab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel:last-child .ptab')[0]?.classList.add('active');
@@ -547,6 +549,8 @@ async function mergeOne(kaspiId, otherId, e) {
   }
 }
 
+let selectedRefId = null; // выбранный справочник-товар для ручного слияния
+
 function renderAllOther(el) {
   let items = data.other_list;
   if (otherSearch) items = items.filter(p =>
@@ -554,9 +558,16 @@ function renderAllOther(el) {
     (p.sku || '').toLowerCase().includes(otherSearch)
   );
   if (!items.length) { el.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
-  el.innerHTML = items.map(p => {
+
+  const kaspiSelected = selectedKaspiId !== null;
+  const hint = kaspiSelected
+    ? `<div class="link-hint" style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af">⬅ Выбран Kaspi-товар. Кликни справочник-товар ниже чтобы слить их.</div>`
+    : `<div style="padding:8px 16px;font-size:12px;color:#9ca3af">Сначала выбери Kaspi-товар слева, потом кликни здесь нужный товар из справочника</div>`;
+
+  el.innerHTML = hint + items.map(p => {
     const hasPair = otherInPairs.has(p.id);
-    return `<div class="product-item ${hasPair ? 'matched' : ''}">
+    const isSelected = selectedRefId === p.id;
+    return `<div class="product-item ${hasPair ? 'matched' : ''} ${isSelected ? 'selected' : ''}" onclick="selectRef(${p.id}, event)">
       <div style="flex:1;min-width:0">
         <div class="p-name">${hl(p.name, otherSearch)}</div>
         <div class="p-meta">
@@ -565,9 +576,44 @@ function renderAllOther(el) {
           ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
         </div>
       </div>
-      ${hasPair ? '<span class="match-badge badge-sku">✓ пара</span>' : ''}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${hasPair ? '<span class="match-badge badge-sku">✓ пара</span>' : ''}
+        ${kaspiSelected && isSelected ? `<button class="btn btn-sm btn-merge-pair" onclick="mergeOneRef(event)">Слить →</button>` : ''}
+      </div>
     </div>`;
   }).join('');
+}
+
+function selectRef(refId, e) {
+  if (!selectedKaspiId) return; // без Kaspi не делаем ничего
+  selectedRefId = selectedRefId === refId ? null : refId;
+  renderAllOther(document.getElementById('other-list'));
+}
+
+async function mergeOneRef(e) {
+  e.stopPropagation();
+  if (!selectedKaspiId || !selectedRefId) return;
+  const btn = e.target;
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const fields = getSelectedFields();
+    if (!fields.length) { showToast('⚙️ Выбери поля (кнопка Поля внизу)', '#92400e'); return; }
+    const r = await fetch('/api/merge-confirm', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ pairs: [{ kaspi_id: selectedKaspiId, other_id: selectedRefId }], fields, force: document.getElementById('field-force').checked }),
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(`❌ ${d.detail || r.status}`, '#991b1b'); return; }
+    showToast('✅ Слито!');
+    selectedRefId = null;
+    try { sessionStorage.removeItem(CACHE_KEY); } catch(e2) {}
+    await load(true);
+  } catch(err) {
+    showToast(`❌ ${err.message}`, '#991b1b');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Слить →';
+  }
 }
 
 function startLink(refId) {

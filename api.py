@@ -3804,6 +3804,16 @@ def get_processes(db: Session = Depends(get_db)):
     }
 
 
+@app.get("/admin/bizmap", response_class=HTMLResponse)
+def bizmap_page(request: Request):
+    user = _get_user_from_session(request)
+    if not user:
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse("/login")
+    with open("static/bizmap.html", encoding="utf-8") as f:
+        return f.read()
+
+
 @app.get("/admin/sitemap", response_class=HTMLResponse)
 def sitemap_page(request: Request):
     user = _get_user_from_session(request)

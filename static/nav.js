@@ -45,6 +45,7 @@
         { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
         { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
         { href: '/admin/sitemap',   icon: '🗺️', label: 'Карта сайта' },
+        { href: '/admin/bizmap',    icon: '🧭', label: 'Бизнес-процессы' },
       ]
     },
   ];

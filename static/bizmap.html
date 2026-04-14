@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бизнес-процессы — Lunary OS</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #f0f0f5; overflow: hidden; }
+
+.header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(15,15,19,.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.08); padding: 12px 20px; display: flex; align-items: center; gap: 14px; }
+.header h1 { font-size: 16px; font-weight: 700; color: #f0f0f5; }
+.header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.hint { font-size: 12px; color: rgba(255,255,255,.35); }
+.btn-hdr { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.07); font-size: 12px; font-weight: 600; cursor: pointer; color: #f0f0f5; transition: all .15s; }
+.btn-hdr:hover { background: rgba(255,255,255,.14); }
+
+/* Канвас */
+#canvas { position: fixed; top: 48px; left: 0; right: 0; bottom: 0; cursor: grab; user-select: none; }
+#canvas:active { cursor: grabbing; }
+#world { position: absolute; transform-origin: 0 0; }
+
+/* SVG стрелки */
+svg.arrows { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; }
+
+/* Узлы */
+.node { position: absolute; border-radius: 16px; padding: 14px 18px; cursor: pointer; transition: box-shadow .2s, transform .15s; min-width: 160px; text-align: center; border: 1.5px solid transparent; }
+.node:hover { transform: translateY(-3px); }
+.node-icon { font-size: 26px; line-height: 1; margin-bottom: 6px; }
+.node-name { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.node-sub  { font-size: 11px; opacity: .65; margin-top: 3px; line-height: 1.3; }
+.node-link { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 8px; background: rgba(255,255,255,.12); color: inherit; text-decoration: none; transition: background .15s; }
+.node-link:hover { background: rgba(255,255,255,.22); }
+
+/* Цвета узлов */
+.c-supplier { background: #1e1b4b; border-color: #4f46e5; color: #c7d2fe; box-shadow: 0 0 0 0 #4f46e5; }
+.c-supplier:hover { box-shadow: 0 8px 30px rgba(79,70,229,.4); }
+.c-import   { background: #1c1917; border-color: #d97706; color: #fde68a; }
+.c-import:hover { box-shadow: 0 8px 30px rgba(217,119,6,.4); }
+.c-ref      { background: #1c1917; border-color: #f59e0b; color: #fef3c7; }
+.c-ref:hover { box-shadow: 0 8px 30px rgba(245,158,11,.4); }
+.c-merge    { background: #0f172a; border-color: #6c63ff; color: #c4b5fd; }
+.c-merge:hover { box-shadow: 0 8px 30px rgba(108,99,255,.5); }
+.c-kaspi    { background: #082f49; border-color: #0ea5e9; color: #bae6fd; }
+.c-kaspi:hover { box-shadow: 0 8px 30px rgba(14,165,233,.4); }
+.c-product  { background: #052e16; border-color: #10b981; color: #a7f3d0; }
+.c-product:hover { box-shadow: 0 8px 30px rgba(16,185,129,.4); }
+.c-order    { background: #1a0527; border-color: #a855f7; color: #e9d5ff; }
+.c-order:hover { box-shadow: 0 8px 30px rgba(168,85,247,.4); }
+.c-warehouse{ background: #042f2e; border-color: #14b8a6; color: #99f6e4; }
+.c-warehouse:hover { box-shadow: 0 8px 30px rgba(20,184,166,.4); }
+.c-analytics{ background: #1e1b4b; border-color: #818cf8; color: #e0e7ff; }
+.c-analytics:hover { box-shadow: 0 8px 30px rgba(129,140,248,.4); }
+.c-shop     { background: #14130f; border-color: #f97316; color: #fed7aa; }
+.c-shop:hover { box-shadow: 0 8px 30px rgba(249,115,22,.4); }
+
+/* Лейблы секций */
+.lane-label { position: absolute; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; opacity: .3; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+/* Легенда */
+.legend { position: fixed; bottom: 20px; left: 20px; background: rgba(15,15,19,.85); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 12px 16px; font-size: 11px; color: rgba(255,255,255,.5); backdrop-filter: blur(8px); }
+.legend div { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <h1>🗺️ Бизнес-процессы</h1>
+  <div class="header-right">
+    <span class="hint">Скролл — масштаб · Тащи — перемещение</span>
+    <button class="btn-hdr" onclick="resetView()">⊙ По центру</button>
+  </div>
+</div>
+
+<div id="canvas">
+  <div id="world">
+    <svg class="arrows" id="svg-arrows"></svg>
+    <!-- Узлы рендерятся из JS -->
+  </div>
+</div>
+
+<div class="legend">
+  <div><div class="leg-dot" style="background:#4f46e5"></div>Поставщики</div>
+  <div><div class="leg-dot" style="background:#f59e0b"></div>Импорт данных</div>
+  <div><div class="leg-dot" style="background:#10b981"></div>Склад и товары</div>
+  <div><div class="leg-dot" style="background:#a855f7"></div>Продажи</div>
+  <div><div class="leg-dot" style="background:#818cf8"></div>Аналитика</div>
+</div>
+
+<script>
+// ── Данные узлов ──────────────────────────────────────────────────────────────
+const NODES = [
+  // ROW 1: Поставщики
+  { id: 'supplier',  x: 80,   y: 80,  icon: '🏭', name: 'Поставщик',        sub: 'Выдаёт накладную\nна товары',        color: 'c-supplier' },
+  { id: 'kaspi_src', x: 80,   y: 260, icon: '🏪', name: 'Kaspi.kz',          sub: 'Маркетплейс\nпродаж',               color: 'c-kaspi' },
+
+  // ROW 2: Импорт
+  { id: 'xml_ref',   x: 340,  y: 80,  icon: '📄', name: 'XML накладная',     sub: 'Файл от поставщика\nс ценами',       color: 'c-import',  link: '/pricelist' },
+  { id: 'xml_kaspi', x: 340,  y: 260, icon: '📥', name: 'Импорт XML Kaspi',  sub: 'Активные товары\nи архив заказов',   color: 'c-import',  link: '/import' },
+
+  // ROW 3: Базы данных
+  { id: 'pricelist', x: 600,  y: 80,  icon: '🗂️', name: 'Справочник\nнакладных', sub: 'Закупочные цены\nартикулы поставщика', color: 'c-ref',  link: '/pricelist' },
+  { id: 'kaspi_db',  x: 600,  y: 260, icon: '📦', name: 'Kaspi карточки',    sub: 'Товары в системе\nс артикулами',     color: 'c-kaspi', link: '/review' },
+
+  // ROW 4: Слияние
+  { id: 'merge',     x: 860,  y: 170, icon: '🔀', name: 'Слияние товаров',   sub: 'Связывает карточку\nсо справочником', color: 'c-merge', link: '/merge' },
+
+  // ROW 5: Готовый товар
+  { id: 'product',   x: 1100, y: 170, icon: '✅', name: 'Товар с ценой\nзакупа', sub: 'Артикул, поставщик,\nцена, остаток',   color: 'c-product', link: '/admin' },
+
+  // ROW 6: Разветвление
+  { id: 'warehouse', x: 1340, y: 60,  icon: '🏗️', name: 'Склад',            sub: 'Остатки, приход,\nрасход',           color: 'c-warehouse', link: '/admin' },
+  { id: 'kaspi_ord', x: 1340, y: 220, icon: '🛒', name: 'Kaspi заказы',      sub: 'Входящие заказы\nот покупателей',    color: 'c-order',     link: '/admin/kaspi' },
+  { id: 'shop',      x: 1340, y: 380, icon: '🏪', name: 'Магазин',           sub: 'Прямые продажи\nчерез сайт',         color: 'c-shop',      link: '/shop' },
+
+  // ROW 7: Финал
+  { id: 'scanner',   x: 1580, y: 60,  icon: '📷', name: 'Сканер',            sub: 'Быстрый ввод\nпо штрихкоду',        color: 'c-warehouse', link: '/admin/scanner' },
+  { id: 'analytics', x: 1580, y: 220, icon: '📊', name: 'Аналитика',         sub: 'Выручка, ABC,\nпрогноз',            color: 'c-analytics', link: '/admin/analytics' },
+  { id: 'history',   x: 1580, y: 380, icon: '📋', name: 'История',           sub: 'Все движения\nи операции',          color: 'c-warehouse', link: '/admin/history' },
+];
+
+// ── Стрелки (from → to, label) ────────────────────────────────────────────────
+const EDGES = [
+  { from: 'supplier',  to: 'xml_ref',   label: 'отгружает' },
+  { from: 'kaspi_src', to: 'xml_kaspi', label: 'экспорт XML' },
+  { from: 'xml_ref',   to: 'pricelist', label: 'парсинг' },
+  { from: 'xml_kaspi', to: 'kaspi_db',  label: 'импорт' },
+  { from: 'pricelist', to: 'merge',     label: 'справочник' },
+  { from: 'kaspi_db',  to: 'merge',     label: 'карточки' },
+  { from: 'merge',     to: 'product',   label: 'данные\nперенесены' },
+  { from: 'product',   to: 'warehouse', label: 'остатки' },
+  { from: 'product',   to: 'kaspi_ord', label: 'продажи' },
+  { from: 'product',   to: 'shop',      label: 'магазин' },
+  { from: 'warehouse', to: 'scanner',   label: 'движения' },
+  { from: 'kaspi_ord', to: 'analytics', label: 'выручка' },
+  { from: 'shop',      to: 'history',   label: 'история' },
+  { from: 'warehouse', to: 'analytics', label: '', style: 'dashed' },
+];
+
+// ── Рендер узлов ──────────────────────────────────────────────────────────────
+const world = document.getElementById('world');
+const nodeEls = {};
+const NODE_W = 170;
+
+NODES.forEach(n => {
+  const el = document.createElement('div');
+  el.className = `node ${n.color}`;
+  el.id = `node-${n.id}`;
+  el.style.left = n.x + 'px';
+  el.style.top  = n.y + 'px';
+  el.style.width = NODE_W + 'px';
+  el.innerHTML = `
+    <div class="node-icon">${n.icon}</div>
+    <div class="node-name">${n.name.replace('\n','<br>')}</div>
+    ${n.sub ? `<div class="node-sub">${n.sub.replace(/\n/g,'<br>')}</div>` : ''}
+    ${n.link ? `<a class="node-link" href="${n.link}" onclick="event.stopPropagation()">Открыть ↗</a>` : ''}
+  `;
+  world.appendChild(el);
+  nodeEls[n.id] = el;
+});
+
+// ── Рендер стрелок (SVG) ──────────────────────────────────────────────────────
+const svg = document.getElementById('svg-arrows');
+
+function getCenter(id) {
+  const n = NODES.find(n => n.id === id);
+  const el = nodeEls[id];
+  const h = el.offsetHeight || 120;
+  return { x: n.x + NODE_W / 2, y: n.y + h / 2 };
+}
+
+function renderEdges() {
+  svg.innerHTML = `<defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="rgba(255,255,255,.3)"/>
+    </marker>
+    <marker id="arrow-dashed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="rgba(255,255,255,.15)"/>
+    </marker>
+  </defs>`;
+
+  EDGES.forEach(e => {
+    const a = getCenter(e.from);
+    const b = getCenter(e.to);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    // Кривая Безье
+    const cx1 = a.x + dx * 0.5;
+    const cy1 = a.y;
+    const cx2 = b.x - dx * 0.5;
+    const cy2 = b.y;
+    const d = `M${a.x},${a.y} C${cx1},${cy1} ${cx2},${cy2} ${b.x},${b.y}`;
+
+    const isDashed = e.style === 'dashed';
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', isDashed ? 'rgba(255,255,255,.15)' : 'rgba(255,255,255,.25)');
+    path.setAttribute('stroke-width', isDashed ? '1.5' : '2');
+    path.setAttribute('marker-end', isDashed ? 'url(#arrow-dashed)' : 'url(#arrow)');
+    if (isDashed) path.setAttribute('stroke-dasharray', '5,4');
+    svg.appendChild(path);
+
+    // Лейбл
+    if (e.label) {
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2 - 8;
+      const lines = e.label.split('\n');
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x', mx);
+      txt.setAttribute('y', my);
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('font-size', '10');
+      txt.setAttribute('fill', 'rgba(255,255,255,.4)');
+      txt.setAttribute('font-family', '-apple-system,sans-serif');
+      lines.forEach((line, i) => {
+        const ts = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+        ts.setAttribute('x', mx);
+        ts.setAttribute('dy', i === 0 ? '0' : '13');
+        ts.textContent = line;
+        txt.appendChild(ts);
+      });
+      svg.appendChild(txt);
+    }
+  });
+}
+
+// Рендерим после того как узлы отрисовались
+setTimeout(renderEdges, 50);
+
+// ── Панорама и зум ────────────────────────────────────────────────────────────
+let tx = 40, ty = 80, scale = 0.75;
+const canvas = document.getElementById('canvas');
+
+function applyTransform() {
+  world.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+}
+applyTransform();
+
+// Зум
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  tx = mx - (mx - tx) * delta;
+  ty = my - (my - ty) * delta;
+  scale *= delta;
+  scale = Math.max(0.2, Math.min(2.5, scale));
+  applyTransform();
+}, { passive: false });
+
+// Перетаскивание
+let drag = false, lx = 0, ly = 0;
+canvas.addEventListener('mousedown', e => { if (e.button !== 0) return; drag = true; lx = e.clientX; ly = e.clientY; });
+window.addEventListener('mousemove', e => {
+  if (!drag) return;
+  tx += e.clientX - lx; ty += e.clientY - ly;
+  lx = e.clientX; ly = e.clientY;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => drag = false);
+
+// Touch
+let lastTouchDist = null;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) { drag = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; }
+  if (e.touches.length === 2) { lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && drag) {
+    tx += e.touches[0].clientX - lx; ty += e.touches[0].clientY - ly;
+    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+    applyTransform();
+  }
+  if (e.touches.length === 2 && lastTouchDist) {
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    scale *= d / lastTouchDist; scale = Math.max(0.2, Math.min(2.5, scale));
+    lastTouchDist = d; applyTransform();
+  }
+}, { passive: true });
+canvas.addEventListener('touchend', () => { drag = false; lastTouchDist = null; });
+
+function resetView() {
+  const rect = canvas.getBoundingClientRect();
+  scale = 0.75;
+  tx = (rect.width - 1800 * scale) / 2;
+  ty = (rect.height - 600 * scale) / 2;
+  applyTransform();
+}
+
+window.addEventListener('resize', resetView);
+</script>
+</body>
+</html>

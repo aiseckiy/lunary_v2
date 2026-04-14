@@ -3158,11 +3158,12 @@ async def pricelist_import(
         seen_keys.add(key)
 
         if key in existing:
-            # Обновляем существующую запись
+            # Обновляем существующую запись — снимаем метку "новый"
             item = existing[key]
             item.name = name
             item.cost_price = cost_price
             item.unit = unit
+            item.is_new = False
             updated += 1
         else:
             db.add(PriceListItem(
@@ -3172,6 +3173,7 @@ async def pricelist_import(
                 cost_price=cost_price,
                 unit=unit,
                 source_file=filename,
+                is_new=True,
             ))
             created += 1
 
@@ -3216,6 +3218,7 @@ def pricelist_search(q: str = "", supplier: str = "", limit: int = 50, offset: i
                 "cost_price": i.cost_price,
                 "unit": i.unit,
                 "source_file": i.source_file or "",
+                "is_new": bool(i.is_new),
             }
             for i in items
         ],

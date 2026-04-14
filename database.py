@@ -147,6 +147,7 @@ class PriceListItem(Base):
     cost_price = Column(Integer, nullable=True)           # закупочная цена
     unit = Column(String, default="шт")
     source_file = Column(String, nullable=True)           # имя файла откуда импортировали
+    is_new = Column(Boolean, default=True)                # True = новый, не был в предыдущем импорте
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -219,6 +220,7 @@ def init_db():
         ("products", "verified", "INTEGER DEFAULT 0"),
         ("products", "supplier_article", "TEXT"),
         ("products", "linked_ref_id", "INTEGER"),
+        ("price_list_items", "is_new", "BOOLEAN DEFAULT TRUE"),
     ]
     with engine.connect() as conn:
         for table, col, col_type in new_columns:

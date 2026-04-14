@@ -86,6 +86,7 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 .btn-assign-row { background:none; border:1px solid #e5e7eb; border-radius:6px; padding:3px 8px; font-size:11px; color:#6c63ff; cursor:pointer; white-space:nowrap; }
 .btn-assign-row:hover { background:#f5f3ff; border-color:#ede9fe; }
 
+.badge-new { display:inline-block; background:#dcfce7; color:#166534; font-size:10px; font-weight:700; padding:1px 6px; border-radius:8px; margin-left:4px; }
 .highlight { background: #fef08a; border-radius: 2px; padding: 0 1px; }
 .pagination { display: flex; gap: 8px; align-items: center; padding: 14px 0 4px; flex-wrap: wrap; }
 .page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; font-family: inherit; }
@@ -120,6 +121,7 @@ tbody td { padding: 10px 12px; vertical-align: top; }
   <h1>🗂️ Справочник накладных</h1>
   <div class="header-right">
     <span class="chip" id="stat-total">—</span>
+    <button class="btn btn-outline" style="padding:6px 14px;font-size:12px;color:#ef4444;border-color:#fca5a5" onclick="clearAll()">🗑 Очистить всё</button>
   </div>
 </div>
 
@@ -307,6 +309,15 @@ async function loadStats() {
   }
 }
 
+async function clearAll() {
+  if (!confirm('Удалить ВСЕ записи справочника накладных? Это действие необратимо.')) return;
+  const r = await fetch('/api/pricelist/clear', { method: 'DELETE' });
+  const d = await r.json();
+  await loadStats();
+  await loadSuppliers();
+  doSearch();
+}
+
 async function deleteFile(fname) {
   if (!confirm(`Удалить все записи из файла «${fname}»?`)) return;
   const r = await fetch(`/api/pricelist/clear?source_file=${encodeURIComponent(fname)}`, { method: 'DELETE' });
@@ -366,7 +377,7 @@ async function doSearch() {
   }
 
   tbody.innerHTML = d.items.map(i => `<tr>
-    <td class="td-name">${hl(i.name, q)}</td>
+    <td class="td-name">${hl(i.name, q)}${i.is_new ? '<span class="badge-new">🆕 новый</span>' : ''}</td>
     <td class="td-article">${hl(i.article, q)}</td>
     <td class="td-supplier">${i.supplier}</td>
     <td class="td-price">${i.cost_price != null ? i.cost_price.toLocaleString() + ' ₸' : '—'}</td>

@@ -44,6 +44,7 @@
         { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },
         { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
         { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
+        { href: '/admin/sitemap',   icon: '🗺️', label: 'Карта сайта' },
       ]
     },
   ];

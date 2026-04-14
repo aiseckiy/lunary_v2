@@ -3728,6 +3728,16 @@ def theme_page(request: Request):
     with open("static/theme.html", encoding="utf-8") as f:
         return f.read()
 
+@app.get("/admin/sitemap", response_class=HTMLResponse)
+def sitemap_page(request: Request):
+    user = _get_user_from_session(request)
+    if not user:
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse("/login")
+    with open("static/sitemap.html", encoding="utf-8") as f:
+        return f.read()
+
+
 @app.get("/admin/changelog", response_class=HTMLResponse)
 def changelog_page(request: Request):
     user = _get_user_from_session(request)

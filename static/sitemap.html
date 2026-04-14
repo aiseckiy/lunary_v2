@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Карта сайта — Lunary OS</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
+.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 17px; font-weight: 700; }
+.header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.btn { padding: 7px 16px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #374151; }
+.btn:hover { background: #f9fafb; }
+.last-updated { font-size: 12px; color: #9ca3af; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 32px; }
+
+.group { display: flex; flex-direction: column; gap: 12px; }
+.group-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #6b7280; padding: 0 4px; display: flex; align-items: center; gap: 8px; }
+.group-title::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+
+.card { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 16px; padding: 18px 20px; text-decoration: none; color: inherit; transition: all .15s; display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
+.card:hover { border-color: #6c63ff; box-shadow: 0 4px 20px rgba(108,99,255,.1); transform: translateY(-2px); }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.card-icon { font-size: 26px; line-height: 1; }
+.card-stat { background: #f3f4f6; border-radius: 10px; padding: 3px 10px; font-size: 12px; font-weight: 700; color: #374151; white-space: nowrap; }
+.card-stat.loading { color: #9ca3af; }
+.card-stat.green { background: #d1fae5; color: #065f46; }
+.card-stat.blue  { background: #dbeafe; color: #1e40af; }
+.card-stat.yellow{ background: #fef9c3; color: #92400e; }
+.card-stat.purple{ background: #ede9fe; color: #5b21b6; }
+.card-name { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.card-desc { font-size: 12px; color: #6b7280; line-height: 1.4; }
+.card-arrow { position: absolute; bottom: 16px; right: 18px; font-size: 16px; color: #d1d5db; transition: color .15s; }
+.card:hover .card-arrow { color: #6c63ff; }
+
+/* Цвета групп */
+.card.склад   { border-top: 3px solid #6c63ff; }
+.card.продажи { border-top: 3px solid #10b981; }
+.card.данные  { border-top: 3px solid #f59e0b; }
+.card.система { border-top: 3px solid #6b7280; }
+
+/* Секция API */
+.api-section { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px 24px; }
+.api-title { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: #374151; }
+.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.api-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: #f9fafb; font-size: 12px; }
+.method { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; flex-shrink: 0; }
+.get  { background: #dbeafe; color: #1e40af; }
+.post { background: #d1fae5; color: #065f46; }
+.del  { background: #fee2e2; color: #991b1b; }
+.api-path { font-family: monospace; color: #374151; flex: 1; }
+.api-desc { color: #9ca3af; font-size: 11px; }
+
+.refresh-spin { animation: spin .8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <h1>🗺️ Карта сайта</h1>
+  <div class="header-right">
+    <span class="last-updated" id="last-updated"></span>
+    <button class="btn" onclick="loadStats()"><span id="refresh-icon">🔄</span> Обновить</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- СКЛАД -->
+  <div class="group">
+    <div class="group-title">📦 Склад</div>
+    <div class="cards">
+      <a class="card склад" href="/admin">
+        <div class="card-top"><span class="card-icon">📦</span><span class="card-stat blue" id="stat-products">—</span></div>
+        <div class="card-name">Товары</div>
+        <div class="card-desc">Весь каталог товаров на складе. Остатки, цены, артикулы, штрихкоды.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card склад" href="/admin/scanner">
+        <div class="card-top"><span class="card-icon">📷</span><span class="card-stat" id="stat-scanner">Сканер</span></div>
+        <div class="card-name">Сканер штрихкодов</div>
+        <div class="card-desc">Быстрый ввод движений по штрихкоду. Приход и расход.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card склад" href="/admin/history">
+        <div class="card-top"><span class="card-icon">📋</span><span class="card-stat purple" id="stat-movements">—</span></div>
+        <div class="card-name">История движений</div>
+        <div class="card-desc">Все приходы и расходы товаров. Полный лог операций.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card склад" href="/admin/analytics">
+        <div class="card-top"><span class="card-icon">📊</span><span class="card-stat green" id="stat-revenue">—</span></div>
+        <div class="card-name">Аналитика</div>
+        <div class="card-desc">Выручка, ABC-анализ, прогноз продаж, топ товаров.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ПРОДАЖИ -->
+  <div class="group">
+    <div class="group-title">🛒 Продажи</div>
+    <div class="cards">
+      <a class="card продажи" href="/admin/kaspi">
+        <div class="card-top"><span class="card-icon">🛒</span><span class="card-stat green" id="stat-kaspi-orders">—</span></div>
+        <div class="card-name">Kaspi заказы</div>
+        <div class="card-desc">Синхронизация заказов с Kaspi.kz. Статусы, состав, история.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card продажи" href="/admin/shop-orders">
+        <div class="card-top"><span class="card-icon">🛍️</span><span class="card-stat" id="stat-shop-orders">—</span></div>
+        <div class="card-name">Заказы магазина</div>
+        <div class="card-desc">Заказы из встроенного интернет-магазина.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card продажи" href="/shop">
+        <div class="card-top"><span class="card-icon">🏪</span><span class="card-stat" id="stat-shop">Публичный</span></div>
+        <div class="card-name">Магазин</div>
+        <div class="card-desc">Публичная страница магазина для покупателей.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ИМПОРТ И ДАННЫЕ -->
+  <div class="group">
+    <div class="group-title">📥 Импорт и данные</div>
+    <div class="cards">
+      <a class="card данные" href="/import">
+        <div class="card-top"><span class="card-icon">📥</span><span class="card-stat yellow" id="stat-kaspi-products">—</span></div>
+        <div class="card-name">Импорт XML</div>
+        <div class="card-desc">Загрузка активных товаров и архива заказов Kaspi в XML формате.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card данные" href="/pricelist">
+        <div class="card-top"><span class="card-icon">🗂️</span><span class="card-stat yellow" id="stat-pricelist">—</span></div>
+        <div class="card-name">Справочник накладных</div>
+        <div class="card-desc">База товаров из накладных поставщиков. Закупочные цены, артикулы.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card данные" href="/merge">
+        <div class="card-top"><span class="card-icon">🔀</span><span class="card-stat blue" id="stat-merge">—</span></div>
+        <div class="card-name">Слияние товаров</div>
+        <div class="card-desc">Связывает Kaspi-карточки со справочником. Переносит закупочные цены.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card данные" href="/review">
+        <div class="card-top"><span class="card-icon">✅</span><span class="card-stat" id="stat-review">—</span></div>
+        <div class="card-name">Проверка товаров</div>
+        <div class="card-desc">Верификация карточек Kaspi. Заполнение недостающих полей.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card данные" href="/uploads">
+        <div class="card-top"><span class="card-icon">📁</span><span class="card-stat" id="stat-uploads">—</span></div>
+        <div class="card-name">Файлы</div>
+        <div class="card-desc">История всех загруженных файлов. Скачать оригиналы.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- СИСТЕМА -->
+  <div class="group">
+    <div class="group-title">⚙️ Система</div>
+    <div class="cards">
+      <a class="card система" href="/admin/settings">
+        <div class="card-top"><span class="card-icon">⚙️</span><span class="card-stat">Настройки</span></div>
+        <div class="card-name">Настройки</div>
+        <div class="card-desc">Kaspi API ключи, данные магазина, параметры синхронизации.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card система" href="/admin/theme">
+        <div class="card-top"><span class="card-icon">🎨</span><span class="card-stat">Тема</span></div>
+        <div class="card-name">Тема оформления</div>
+        <div class="card-desc">Цвета интерфейса, светлая / тёмная тема.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card система" href="/admin/changelog">
+        <div class="card-top"><span class="card-icon">🚀</span><span class="card-stat" id="stat-changelog">—</span></div>
+        <div class="card-name">Обновления</div>
+        <div class="card-desc">История изменений системы. Последние коммиты и фичи.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+      <a class="card система" href="/admin/sitemap">
+        <div class="card-top"><span class="card-icon">🗺️</span><span class="card-stat blue">Эта страница</span></div>
+        <div class="card-name">Карта сайта</div>
+        <div class="card-desc">Обзор всей структуры системы с живыми счётчиками.</div>
+        <span class="card-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- API -->
+  <div class="api-section">
+    <div class="api-title">🔌 API эндпоинты</div>
+    <div class="api-grid">
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/products</span><span class="api-desc">Список всех товаров</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/products/search</span><span class="api-desc">Поиск товаров</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path">/api/products</span><span class="api-desc">Создать товар</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path">/api/movements</span><span class="api-desc">Добавить движение</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/analytics/overview</span><span class="api-desc">Сводка аналитики</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/analytics/abc</span><span class="api-desc">ABC-анализ</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/kaspi/orders</span><span class="api-desc">Заказы Kaspi</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path">/api/kaspi/import</span><span class="api-desc">Импорт XML Kaspi</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/pricelist/search</span><span class="api-desc">Поиск в справочнике</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path">/api/pricelist/import</span><span class="api-desc">Импорт накладной</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/merge-preview</span><span class="api-desc">Предпросмотр слияния</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path">/api/merge-confirm</span><span class="api-desc">Подтвердить слияние</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/pricelist/price-check</span><span class="api-desc">Проверка цен закупа</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path">/api/fill-brands</span><span class="api-desc">Авто-заполнение брендов</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path">/api/uploads</span><span class="api-desc">История файлов</span></div>
+      <div class="api-row"><span class="method del">DEL</span><span class="api-path">/api/pricelist/clear</span><span class="api-desc">Очистить справочник</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let autoRefreshTimer = null;
+
+async function loadStats() {
+  const icon = document.getElementById('refresh-icon');
+  icon.className = 'refresh-spin';
+  icon.textContent = '⏳';
+
+  try {
+    const [statsR, kaspiR, plR, ulR, movR, analR, clR] = await Promise.all([
+      fetch('/api/products?limit=1').catch(() => null),
+      fetch('/api/kaspi/orders?limit=1&offset=0').catch(() => null),
+      fetch('/api/pricelist/stats').catch(() => null),
+      fetch('/api/uploads?limit=1').catch(() => null),
+      fetch('/api/movements?limit=1').catch(() => null),
+      fetch('/api/analytics/overview').catch(() => null),
+      fetch('/api/admin/changelog').catch(() => null),
+    ]);
+
+    // Товары
+    if (statsR?.ok) {
+      const d = await statsR.json();
+      const total = d.total ?? (Array.isArray(d) ? d.length : '—');
+      setStat('stat-products', total + ' товаров', 'blue');
+      // Kaspi товары
+      const kaspiCount = Array.isArray(d.products)
+        ? d.products.filter(p => p.category === 'Kaspi').length
+        : '—';
+      setStat('stat-kaspi-products', typeof kaspiCount === 'number' ? kaspiCount + ' Kaspi' : '—', 'yellow');
+    }
+
+    // Kaspi заказы
+    if (kaspiR?.ok) {
+      const d = await kaspiR.json();
+      const total = d.total ?? '—';
+      const newCount = d.new_count ?? '';
+      setStat('stat-kaspi-orders', (total !== '—' ? total + ' заказов' : '—') + (newCount ? ` · ${newCount} новых` : ''), 'green');
+    }
+
+    // Справочник
+    if (plR?.ok) {
+      const d = await plR.json();
+      setStat('stat-pricelist', d.total + ' позиций', 'yellow');
+    }
+
+    // Файлы
+    if (ulR?.ok) {
+      const d = await ulR.json();
+      setStat('stat-uploads', (d.total ?? '—') + ' файлов');
+    }
+
+    // Движения
+    if (movR?.ok) {
+      const d = await movR.json();
+      setStat('stat-movements', (d.total ?? '—') + ' движений', 'purple');
+    }
+
+    // Аналитика
+    if (analR?.ok) {
+      const d = await analR.json();
+      const rev = d.revenue_period ?? d.total_revenue ?? null;
+      setStat('stat-revenue', rev != null ? formatMoney(rev) : 'Аналитика', 'green');
+    }
+
+    // Changelog
+    if (clR?.ok) {
+      const d = await clR.json();
+      const count = Array.isArray(d) ? d.length : (d.commits?.length ?? '—');
+      setStat('stat-changelog', count + ' версий');
+    }
+
+    // Слияние — берём из pricelist stats
+    if (plR?.ok) {
+      const d = await fetch('/api/merge-preview').then(r => r.json()).catch(() => null);
+      if (d) {
+        setStat('stat-merge', `${d.total_synced ?? 0}/${d.total_kaspi ?? 0} слито`, 'blue');
+        setStat('stat-review', `${d.total_kaspi ?? 0} карточек`);
+      }
+    }
+
+  } catch(e) {}
+
+  icon.className = '';
+  icon.textContent = '🔄';
+  document.getElementById('last-updated').textContent = 'Обновлено: ' + new Date().toLocaleTimeString('ru');
+}
+
+function setStat(id, text, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'card-stat' + (color ? ' ' + color : '');
+}
+
+function formatMoney(v) {
+  if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + 'M ₸';
+  if (v >= 1_000) return Math.round(v / 1000) + 'K ₸';
+  return v + ' ₸';
+}
+
+// Авто-обновление каждые 60 секунд
+function startAutoRefresh() {
+  clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(loadStats, 60_000);
+}
+
+loadStats();
+startAutoRefresh();
+</script>
+</body>
+</html>

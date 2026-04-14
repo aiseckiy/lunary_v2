@@ -1258,6 +1258,51 @@ def store_products(db: Session = Depends(get_db)):
     ]
 
 
+@app.get("/api/store/products/{product_id}/similar")
+def store_product_similar(product_id: int, db: Session = Depends(get_db)):
+    """Похожие товары — тот же бренд или категория, случайные 8 штук"""
+    from database import Product as _P, Movement as _M
+    from sqlalchemy import func
+    import random
+
+    src = db.query(_P).filter(_P.id == product_id).first()
+    if not src:
+        return []
+
+    q = db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock")) \
+        .outerjoin(_M, _M.product_id == _P.id) \
+        .filter(_P.id != product_id, _P.category == "Kaspi", _P.price.isnot(None)) \
+        .group_by(_P.id)
+
+    if src.brand:
+        same_brand = q.filter(_P.brand == src.brand).all()
+    else:
+        same_brand = []
+
+    same_cat = q.filter(_P.category == src.category, _P.brand != (src.brand or "")).all() if src.category else []
+
+    pool = same_brand[:4] + same_cat[:4]
+    if len(pool) < 8:
+        extra = q.filter(_P.id.notin_([p.id for p, _ in pool])).limit(8 - len(pool)).all()
+        pool += extra
+
+    random.shuffle(pool)
+    result = []
+    for p, stock in pool[:8]:
+        img = None
+        try:
+            imgs = json.loads(p.images or "[]")
+            img = imgs[0] if imgs else p.image_url
+        except:
+            img = p.image_url
+        result.append({
+            "id": p.id, "name": p.name, "brand": p.brand or "",
+            "price": p.price, "stock": int(stock),
+            "image_url": img or "", "category": p.category or "",
+        })
+    return result
+
+
 @app.get("/api/store/products/{product_id}")
 def store_product_detail(product_id: int, db: Session = Depends(get_db)):
     from database import Product as _P, Movement as _M
@@ -2197,6 +2242,135 @@ def kaspi_export_xml(db: Session = Depends(get_db)):
     xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
     return Response(content=xml_str, media_type="application/xml",
                     headers={"Content-Disposition": "attachment; filename=ACTIVE.xml"})
+
+
+@app.post("/api/kaspi/import-history")
+def kaspi_import_history(request: Request, db: Session = Depends(get_db)):
+    """Исторический импорт заказов Kaspi чанками по 14 дней за последний год"""
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+
+    from database import KaspiOrder
+    import time as _time
+
+    STATES = ["NEW", "ACCEPTED", "COMPLETED", "CANCELLED", "RETURN", "PICKUP"]
+    CHUNK_DAYS = 14
+    TOTAL_DAYS = 365
+
+    now_ms = int(_time.time() * 1000)
+    day_ms = 24 * 60 * 60 * 1000
+
+    created = 0
+    skipped = 0
+    errors = 0
+
+    # Идём назад чанками по 14 дней
+    for chunk in range(0, TOTAL_DAYS, CHUNK_DAYS):
+        date_le = now_ms - chunk * day_ms
+        date_ge = now_ms - (chunk + CHUNK_DAYS) * day_ms
+
+        for state in STATES:
+            page = 0
+            while True:
+                try:
+                    data = kaspi_module._proxy("get_orders", {
+                        "state": state, "page": page, "size": 100,
+                        "creationDateGe": str(date_ge),
+                        "creationDateLe": str(date_le),
+                    })
+                except Exception as e:
+                    errors += 1
+                    break
+
+                if not data:
+                    break
+
+                items = data.get("data", [])
+                if not items:
+                    break
+
+                for item in items:
+                    attr = item.get("attributes", {})
+                    oid = item.get("id", "")
+                    if not oid:
+                        continue
+                    exists = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
+                    if exists:
+                        skipped += 1
+                        continue
+                    customer = attr.get("customer", {})
+                    o = KaspiOrder(
+                        order_id=oid,
+                        state=attr.get("state", state),
+                        customer_name=customer.get("name", ""),
+                        customer_phone=customer.get("cellPhone", ""),
+                        total=attr.get("totalPrice", 0),
+                        created_at=attr.get("creationDate", ""),
+                    )
+                    db.add(o)
+                    created += 1
+
+                db.commit()
+
+                if len(items) < 100:
+                    break
+                page += 1
+
+    return {"created": created, "skipped": skipped, "errors": errors}
+
+
+@app.get("/api/admin/forecast")
+def stock_forecast(db: Session = Depends(get_db)):
+    """Прогноз: когда закончится товар на основе движений за последние 30 дней"""
+    from database import Product as _P, Movement as _M
+    from sqlalchemy import func
+    from datetime import datetime, timedelta
+
+    cutoff = datetime.utcnow() - timedelta(days=30)
+
+    # Продажи за 30 дней по товарам
+    sales = db.query(_M.product_id, func.sum(-_M.quantity).label("sold")) \
+        .filter(_M.move_type.in_(["sale", "kaspi_sale"]), _M.created_at >= cutoff) \
+        .group_by(_M.product_id).all()
+
+    sales_map = {s.product_id: float(s.sold) for s in sales}
+
+    # Текущие остатки
+    stocks = db.query(_M.product_id, func.sum(_M.quantity).label("stock")) \
+        .group_by(_M.product_id).all()
+    stock_map = {s.product_id: max(float(s.stock), 0) for s in stocks}
+
+    products = db.query(_P).filter(_P.category == "Kaspi").all()
+
+    result = []
+    for p in products:
+        stock = stock_map.get(p.id, 0)
+        sold_30d = sales_map.get(p.id, 0)
+        daily_rate = sold_30d / 30 if sold_30d > 0 else 0
+
+        if daily_rate > 0:
+            days_left = stock / daily_rate
+            status = "critical" if days_left < 7 else ("warning" if days_left < 14 else "ok")
+        else:
+            days_left = None
+            status = "no_sales"
+
+        result.append({
+            "id": p.id,
+            "name": p.name,
+            "brand": p.brand or "",
+            "stock": stock,
+            "sold_30d": sold_30d,
+            "daily_rate": round(daily_rate, 2),
+            "days_left": round(days_left, 1) if days_left is not None else None,
+            "status": status,
+        })
+
+    # Сортировка: сначала критичные
+    order = {"critical": 0, "warning": 1, "ok": 2, "no_sales": 3}
+    result.sort(key=lambda x: (order[x["status"]], x["days_left"] if x["days_left"] is not None else 9999))
+    return result
 
 
 @app.get("/api/kaspi/orders/export")

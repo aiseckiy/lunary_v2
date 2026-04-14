@@ -138,7 +138,10 @@
       <div class="page-title">Kaspi заказы</div>
       <div class="page-sub">Синхронизация с Kaspi.kz</div>
     </div>
-    <a class="btn btn-secondary" id="export-btn" href="/api/kaspi/orders/export" download>⬇ Экспорт CSV</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn btn-secondary" id="export-btn" href="/api/kaspi/orders/export" download>⬇ Экспорт CSV</a>
+      <button class="btn btn-secondary" id="btn-import-history" onclick="importHistory()">📥 Импорт истории (год)</button>
+    </div>
   </div>
 
   <div id="stats-row" class="stats-row"></div>
@@ -504,6 +507,27 @@ async function loadSyncLog() {
 
 
 loadSyncLog();
+
+async function importHistory() {
+  const btn = document.getElementById('btn-import-history');
+  if (!confirm('Загрузить все заказы Kaspi за последний год? Это займёт 1–3 минуты.')) return;
+  btn.textContent = '⏳ Загружаю...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/kaspi/import-history', { method: 'POST' });
+    const d = await res.json();
+    if (res.ok) {
+      alert(`✅ Готово!\nДобавлено: ${d.created}\nПропущено (уже были): ${d.skipped}\nОшибок: ${d.errors}`);
+      loadOrders();
+    } else {
+      alert('Ошибка импорта: ' + (d.detail || JSON.stringify(d)));
+    }
+  } catch (e) {
+    alert('Ошибка сети: ' + e.message);
+  }
+  btn.textContent = '📥 Импорт истории (год)';
+  btn.disabled = false;
+}
 </script>
 
 <script src="/static/nav.js"></script>

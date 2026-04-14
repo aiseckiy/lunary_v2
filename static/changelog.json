@@ -1,5 +1,10 @@
 [
   {
+    "hash": "4cc34c3",
+    "date": "14.04.2026",
+    "message": "Add OG default image for social sharing"
+  },
+  {
     "hash": "a22c0a8",
     "date": "14.04.2026",
     "message": "SEO: robots.txt, sitemap.xml, SSR мета-теги для товаров, Google verification, export preview endpoint"

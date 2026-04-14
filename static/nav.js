@@ -31,7 +31,8 @@
     {
       label: 'Импорт и данные',
       links: [
-        { href: '/import',    icon: '📥', label: 'Импорт XML' },
+        { href: '/import',           icon: '📥', label: 'Импорт XML' },
+        { href: '/admin/import-xlsx', icon: '📊', label: 'Импорт Excel' },
         { href: '/pricelist', icon: '🗂️', label: 'Накладные' },
         { href: '/merge',     icon: '🔀', label: 'Слияние товаров' },
         { href: '/review',    icon: '✅', label: 'Проверка' },

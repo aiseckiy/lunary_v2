@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Импорт товаров из Excel — Lunary</title>
+<link rel="stylesheet" href="/static/layout.css">
+<style>
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: #fafafa;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: #0082EC; background: #f0f7ff; }
+.upload-zone .icon { font-size: 48px; margin-bottom: 12px; }
+.upload-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.upload-zone p { font-size: 13px; color: #6b7280; }
+
+.result-box {
+  display: none;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+  margin-top: 20px;
+}
+.result-box.show { display: block; }
+.result-stat { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.stat-pill {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.pill-green  { background: #dcfce7; color: #166534; }
+.pill-blue   { background: #dbeafe; color: #1e40af; }
+.pill-yellow { background: #fef3c7; color: #92400e; }
+.pill-red    { background: #fee2e2; color: #991b1b; }
+
+.columns-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.columns-table th { background: #f9fafb; padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+.columns-table td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; }
+.col-required { color: #dc2626; font-weight: 700; }
+.col-optional { color: #6b7280; }
+
+.btn-download {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #0082EC; color: #fff; border: none; border-radius: 10px;
+  padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  text-decoration: none; font-family: inherit; transition: background .15s;
+}
+.btn-download:hover { background: #006DC5; }
+
+.progress-bar {
+  height: 6px; background: #e5e7eb; border-radius: 4px; overflow: hidden;
+  margin: 16px 0; display: none;
+}
+.progress-bar.show { display: block; }
+.progress-fill {
+  height: 100%; background: #0082EC; border-radius: 4px;
+  transition: width .3s; width: 0%;
+  animation: pulse-bar 1.5s infinite;
+}
+@keyframes pulse-bar { 0%,100% { opacity:1; } 50% { opacity:.6; } }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="sidebar"></div>
+  <div class="main-content">
+    <div class="page-container">
+      <div class="page-header-row">
+        <div>
+          <div class="page-title">Импорт товаров из Excel</div>
+          <div class="page-sub">Загрузите .xlsx файл — новые товары добавятся, существующие обновятся</div>
+        </div>
+        <a class="btn-download" href="/api/products/export/xlsx" download>⬇ Скачать шаблон</a>
+      </div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <div class="icon">📊</div>
+        <h3>Перетащите Excel файл сюда</h3>
+        <p>или нажмите чтобы выбрать файл<br><small>Поддерживается .xlsx</small></p>
+        <input type="file" id="file-input" accept=".xlsx" style="display:none" onchange="handleFile(this.files[0])">
+      </div>
+
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box" id="result-box">
+        <div class="result-stat" id="result-stat"></div>
+        <div id="result-errors"></div>
+        <div style="margin-top:12px">
+          <a href="/admin" class="btn-download" style="background:#111827">Перейти к товарам →</a>
+        </div>
+      </div>
+
+      <!-- Инструкция по колонкам -->
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px;margin-top:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">Поддерживаемые колонки</div>
+        <p style="font-size:13px;color:#6b7280;margin-bottom:12px">
+          Порядок колонок не важен — система определяет их по названию. Используйте кнопку "Скачать шаблон" чтобы получить готовый файл с правильными заголовками.
+        </p>
+        <table class="columns-table">
+          <thead><tr><th>Название колонки</th><th>Обязательна</th><th>Описание</th></tr></thead>
+          <tbody>
+            <tr><td><b>Название</b></td><td class="col-required">✓ Да</td><td>Полное название товара</td></tr>
+            <tr><td>Бренд</td><td class="col-optional">Нет</td><td>Производитель / бренд</td></tr>
+            <tr><td>Категория</td><td class="col-optional">Нет</td><td>Категория товара</td></tr>
+            <tr><td>Цена (₸)</td><td class="col-optional">Нет</td><td>Розничная цена</td></tr>
+            <tr><td>Закуп (₸)</td><td class="col-optional">Нет</td><td>Закупочная цена</td></tr>
+            <tr><td>SKU (Kaspi)</td><td class="col-optional">Нет</td><td>SKU из Kaspi магазина</td></tr>
+            <tr><td>Ед. изм.</td><td class="col-optional">Нет</td><td>шт, кг, л и т.д.</td></tr>
+            <tr><td>Мин. остаток</td><td class="col-optional">Нет</td><td>Минимальный остаток для алерта</td></tr>
+            <tr><td>Поставщик</td><td class="col-optional">Нет</td><td>Название поставщика</td></tr>
+            <tr><td>Описание</td><td class="col-optional">Нет</td><td>Описание товара для магазина</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('drop-zone');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+async function handleFile(file) {
+  if (!file || !file.name.endsWith('.xlsx')) {
+    alert('Выберите файл в формате .xlsx');
+    return;
+  }
+
+  document.getElementById('result-box').classList.remove('show');
+  const bar = document.getElementById('progress-bar');
+  bar.classList.add('show');
+  document.getElementById('progress-fill').style.width = '30%';
+  dropZone.style.opacity = '.5';
+  dropZone.style.pointerEvents = 'none';
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    document.getElementById('progress-fill').style.width = '60%';
+    const res = await fetch('/api/products/import/xlsx', { method: 'POST', body: form });
+    document.getElementById('progress-fill').style.width = '100%';
+    const d = await res.json();
+
+    setTimeout(() => {
+      bar.classList.remove('show');
+      document.getElementById('progress-fill').style.width = '0%';
+    }, 400);
+
+    if (!res.ok) {
+      alert('Ошибка: ' + (d.detail || JSON.stringify(d)));
+      return;
+    }
+
+    const statEl = document.getElementById('result-stat');
+    statEl.innerHTML = `
+      <span class="stat-pill pill-green">✅ Добавлено: ${d.created}</span>
+      <span class="stat-pill pill-blue">✏️ Обновлено: ${d.updated}</span>
+      ${d.skipped ? `<span class="stat-pill pill-yellow">⏭ Пропущено: ${d.skipped}</span>` : ''}
+      ${d.errors?.length ? `<span class="stat-pill pill-red">❌ Ошибок: ${d.errors.length}</span>` : ''}
+    `;
+
+    const errEl = document.getElementById('result-errors');
+    if (d.errors && d.errors.length) {
+      errEl.innerHTML = `<div style="margin-top:12px;font-size:13px;color:#dc2626">${d.errors.map(e => `<div>• ${e}</div>`).join('')}</div>`;
+    } else {
+      errEl.innerHTML = '';
+    }
+
+    document.getElementById('result-box').classList.add('show');
+  } catch (e) {
+    alert('Ошибка сети: ' + e.message);
+  } finally {
+    dropZone.style.opacity = '';
+    dropZone.style.pointerEvents = '';
+  }
+}
+</script>
+
+<script src="/static/nav.js"></script>
+</body>
+</html>

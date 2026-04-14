@@ -904,6 +904,130 @@ def list_products(db: Session = Depends(get_db)):
     ]
 
 
+@app.post("/api/products/import/xlsx")
+async def products_import_xlsx(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Импорт товаров из Excel. Колонки: Название, Бренд, Категория, Цена, Закуп, SKU (Kaspi), Артикул, Ед. изм., Мин. остаток, Поставщик, Описание"""
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+
+    import openpyxl, io
+    from database import Product as _P
+
+    content = await file.read()
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Не удалось открыть файл: {e}")
+
+    ws = wb.active
+    headers_row = [str(c.value or "").strip().lower() for c in ws[1]]
+
+    # Маппинг колонок по возможным названиям
+    COL_MAP = {
+        "name":        ["название", "наименование", "товар", "name"],
+        "brand":       ["бренд", "brand", "марка", "производитель"],
+        "category":    ["категория", "category"],
+        "price":       ["цена", "price", "цена (₸)", "розница"],
+        "cost_price":  ["закуп", "себестоимость", "закупочная", "cost", "закуп (₸)"],
+        "kaspi_sku":   ["sku", "kaspi sku", "sku (kaspi)", "артикул kaspi", "kaspi_sku"],
+        "unit":        ["ед. изм.", "единица", "unit", "ед.изм", "ед изм"],
+        "min_stock":   ["мин. остаток", "минимум", "min_stock", "мин остаток"],
+        "supplier":    ["поставщик", "supplier"],
+        "description": ["описание", "description"],
+    }
+
+    def find_col(field):
+        for alias in COL_MAP[field]:
+            for i, h in enumerate(headers_row):
+                if alias in h or h in alias:
+                    return i
+        return None
+
+    cols = {f: find_col(f) for f in COL_MAP}
+
+    def val(row, field):
+        idx = cols.get(field)
+        if idx is None or idx >= len(row):
+            return None
+        v = row[idx].value
+        return v
+
+    created = 0
+    updated = 0
+    skipped = 0
+    errors = []
+
+    for ri, row in enumerate(ws.iter_rows(min_row=2), 2):
+        name = val(row, "name")
+        if not name or str(name).strip() == "":
+            continue
+        name = str(name).strip()
+
+        try:
+            price_raw = val(row, "price")
+            price = float(str(price_raw).replace(" ", "").replace(",", ".")) if price_raw else None
+            cost_raw = val(row, "cost_price")
+            cost = float(str(cost_raw).replace(" ", "").replace(",", ".")) if cost_raw else None
+            min_stock_raw = val(row, "min_stock")
+            min_stock = int(float(str(min_stock_raw))) if min_stock_raw else 0
+        except Exception:
+            price = cost = None
+            min_stock = 0
+
+        kaspi_sku = str(val(row, "kaspi_sku") or "").strip() or None
+        brand = str(val(row, "brand") or "").strip() or None
+        category = str(val(row, "category") or "").strip() or None
+        unit = str(val(row, "unit") or "").strip() or "шт"
+        supplier = str(val(row, "supplier") or "").strip() or None
+        description = str(val(row, "description") or "").strip() or None
+
+        # Ищем существующий товар по kaspi_sku или по имени
+        existing = None
+        if kaspi_sku:
+            existing = db.query(_P).filter(_P.kaspi_sku == kaspi_sku).first()
+        if not existing:
+            existing = db.query(_P).filter(_P.name == name).first()
+
+        if existing:
+            if brand: existing.brand = brand
+            if category: existing.category = category
+            if price: existing.price = price
+            if cost: existing.cost_price = cost
+            if kaspi_sku: existing.kaspi_sku = kaspi_sku
+            if unit: existing.unit = unit
+            if min_stock: existing.min_stock = min_stock
+            if supplier: existing.supplier = supplier
+            if description: existing.description = description
+            updated += 1
+        else:
+            p = _P(
+                name=name, brand=brand, category=category or "Другое",
+                price=price, cost_price=cost, kaspi_sku=kaspi_sku,
+                unit=unit, min_stock=min_stock, supplier=supplier,
+                description=description,
+            )
+            db.add(p)
+            created += 1
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"created": created, "updated": updated, "skipped": skipped, "errors": errors}
+
+
+@app.get("/admin/import-xlsx", response_class=HTMLResponse)
+def import_xlsx_page(request: Request):
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        return RedirectResponse("/login")
+    with open("static/import_xlsx.html", encoding="utf-8") as f:
+        return f.read()
+
+
 @app.post("/api/products")
 def create_product(data: ProductCreate, db: Session = Depends(get_db)):
     p = crud.create_product(

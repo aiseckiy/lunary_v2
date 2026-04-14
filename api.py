@@ -1449,9 +1449,132 @@ def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
 
 
 @app.get("/shop/product/{product_id}", response_class=HTMLResponse)
-def shop_product_page(product_id: int):
+def shop_product_page(product_id: int, db: Session = Depends(get_db)):
+    from database import Product as _P, Movement as _M
+    from sqlalchemy import func
+    import html as _html
+
+    BASE_URL = "https://www.lunary.kz"
+    row = (
+        db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
+        .outerjoin(_M, _M.product_id == _P.id)
+        .filter(_P.id == product_id, _P.category == "Kaspi")
+        .group_by(_P.id)
+        .first()
+    )
+
     with open("static/product.html", encoding="utf-8") as f:
-        return f.read()
+        tmpl = f.read()
+
+    if not row:
+        return tmpl
+
+    p, stock = row
+    name = _html.escape(p.name or "Товар")
+    brand = _html.escape(p.brand or "")
+    desc_raw = (p.description or "").strip()
+    if not desc_raw:
+        desc_raw = f"{brand} {name}".strip()
+    description = _html.escape(desc_raw[:160])
+    price_str = str(int(p.price)) if p.price else ""
+    image = p.image_url or f"{BASE_URL}/static/og-default.jpg"
+    canon = f"{BASE_URL}/shop/product/{product_id}"
+    title = f"{name} — купить в Казахстане | LUNARY"
+    avail = "https://schema.org/InStock" if stock > 0 else "https://schema.org/OutOfStock"
+
+    schema = ""
+    if p.price:
+        schema = f"""<script type="application/ld+json">
+{{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{name}",
+  "brand": {{"@type": "Brand", "name": "{brand}"}},
+  "description": "{description}",
+  "image": "{_html.escape(image)}",
+  "url": "{canon}",
+  "offers": {{
+    "@type": "Offer",
+    "priceCurrency": "KZT",
+    "price": "{price_str}",
+    "availability": "{avail}",
+    "seller": {{"@type": "Organization", "name": "LUNARY"}}
+  }}
+}}
+</script>"""
+
+    seo_head = f"""<title>{title}</title>
+<meta name="description" content="{description}">
+<link rel="canonical" href="{canon}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:type" content="product">
+<meta property="og:url" content="{canon}">
+<meta property="og:image" content="{_html.escape(image)}">
+<meta property="og:site_name" content="LUNARY">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{description}">
+<meta name="twitter:image" content="{_html.escape(image)}">
+{schema}"""
+
+    # Заменяем старый <title> + вставляем SEO блок
+    tmpl = tmpl.replace("<title>Товар — LUNARY</title>", seo_head, 1)
+    return tmpl
+
+
+@app.get("/robots.txt")
+def robots_txt():
+    from fastapi.responses import PlainTextResponse
+    content = """User-agent: *
+Allow: /shop
+Allow: /shop/product/
+Disallow: /admin
+Disallow: /api/
+Disallow: /import
+Disallow: /pricelist
+Disallow: /merge
+Disallow: /review
+Disallow: /uploads
+Disallow: /login
+
+Sitemap: https://www.lunary.kz/sitemap.xml
+"""
+    return PlainTextResponse(content)
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml(db: Session = Depends(get_db)):
+    from fastapi.responses import Response
+    from database import Product as _P
+    from datetime import datetime
+
+    BASE_URL = "https://www.lunary.kz"
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+    products = db.query(_P).filter(_P.category == "Kaspi", _P.price.isnot(None)).all()
+
+    urls = [f"""  <url>
+    <loc>{BASE_URL}/shop</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <lastmod>{today}</lastmod>
+  </url>"""]
+
+    for p in products:
+        urls.append(f"""  <url>
+    <loc>{BASE_URL}/shop/product/{p.id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>{today}</lastmod>
+  </url>""")
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += '\n'.join(urls)
+    xml += '\n</urlset>'
+
+    return Response(content=xml, media_type="application/xml")
 
 
 @app.get("/api/shop/my-orders")
@@ -1986,6 +2109,48 @@ def get_kaspi_order_entries(order_id: str, db: Session = Depends(get_db)):
             order.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
         db.commit()
     return {"entries": entries}
+
+
+@app.get("/api/kaspi/export-preview")
+def kaspi_export_preview(db: Session = Depends(get_db)):
+    """Предпросмотр данных перед экспортом Kaspi XML"""
+    from database import SiteSetting, Product
+    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
+    store_id = settings.get("kaspi_store_id", "30409502_PP1")
+
+    products = db.query(Product).filter(Product.kaspi_sku.isnot(None)).all()
+    rows = []
+    for p in products:
+        skus = [s.strip() for s in p.kaspi_sku.split(",") if s.strip()]
+        stock = max(crud.get_stock(p.id, db), 0)
+        multi_sku = len(skus) > 1
+        for sku in skus:
+            problems = []
+            if not p.price:
+                problems.append("нет цены")
+            if not p.brand:
+                problems.append("нет бренда")
+            if not p.name:
+                problems.append("нет названия")
+            rows.append({
+                "id": p.id,
+                "sku": sku,
+                "name": p.name or "",
+                "brand": p.brand or "",
+                "stock": stock,
+                "price": p.price,
+                "available": stock > 0,
+                "multi_sku": multi_sku,
+                "store_id": store_id,
+                "problems": problems,
+            })
+    return {"rows": rows}
+
+
+@app.get("/admin/export-preview")
+def export_preview_page():
+    from fastapi.responses import FileResponse
+    return FileResponse("static/export_preview.html")
 
 
 @app.get("/api/kaspi/export-xml")

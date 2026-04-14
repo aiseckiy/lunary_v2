@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Предпросмотр экспорта Kaspi XML</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
+.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+.header h1 { font-size: 17px; font-weight: 700; }
+.header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { padding: 8px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.btn-primary { background: #6c63ff; color: #fff; }
+.btn-primary:hover { background: #5b52e0; }
+.btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+.btn-outline:hover { background: #f9fafb; }
+.btn-danger { background: #fff; color: #ef4444; border: 1px solid #fca5a5; }
+.btn-danger:hover { background: #fee2e2; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.chip-blue   { background: #dbeafe; color: #1e40af; }
+.chip-green  { background: #d1fae5; color: #065f46; }
+.chip-red    { background: #fee2e2; color: #991b1b; }
+.chip-yellow { background: #fef9c3; color: #92400e; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.warning-banner { background: #fef9c3; border: 1.5px solid #fde047; border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #92400e; display: flex; gap: 10px; align-items: flex-start; }
+.warning-banner b { display: block; margin-bottom: 4px; font-size: 14px; }
+
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; }
+.card-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+
+.stats-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-box { flex: 1; min-width: 120px; background: #f9fafb; border-radius: 12px; padding: 12px 16px; text-align: center; }
+.stat-num { font-size: 22px; font-weight: 800; }
+.stat-num.green  { color: #10b981; }
+.stat-num.red    { color: #ef4444; }
+.stat-num.yellow { color: #f59e0b; }
+.stat-num.blue   { color: #6c63ff; }
+.stat-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; outline: none; }
+.search-input:focus { border-color: #6c63ff; }
+.filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .1s; color: #374151; }
+.filter-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+.filter-btn.red.active { background: #ef4444; border-color: #ef4444; }
+.filter-btn.yellow.active { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none; }
+thead th:hover { background: #f3f4f6; }
+thead th.sorted { color: #6c63ff; }
+tbody tr { border-bottom: 1px solid #f3f4f6; }
+tbody tr:hover { background: #f9fafb; }
+tbody td { padding: 10px 12px; vertical-align: middle; }
+.td-name { font-weight: 500; max-width: 280px; }
+.td-sku { font-family: monospace; font-size: 11px; color: #6c63ff; }
+.avail-yes { color: #10b981; font-weight: 700; }
+.avail-no  { color: #ef4444; font-weight: 700; }
+.stock-zero { color: #ef4444; }
+.stock-ok   { color: #10b981; font-weight: 600; }
+.stock-low  { color: #f59e0b; font-weight: 600; }
+.no-price   { color: #9ca3af; font-style: italic; font-size: 12px; }
+.multi-sku  { display: inline-block; background: #fef9c3; color: #92400e; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+.problem-row { background: #fff7f7 !important; }
+.loading { text-align: center; padding: 60px; color: #9ca3af; }
+.empty   { text-align: center; padding: 40px; color: #9ca3af; font-size: 13px; }
+.count-info { font-size: 13px; color: #6b7280; }
+
+.pagination { display: flex; gap: 8px; align-items: center; padding-top: 14px; flex-wrap: wrap; }
+.page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; }
+.page-btn:hover:not(:disabled) { background: #f9fafb; }
+.page-btn:disabled { opacity: .4; cursor: not-allowed; }
+.page-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <h1>🔍 Предпросмотр экспорта Kaspi XML</h1>
+  <div class="header-right">
+    <span class="chip chip-blue" id="chip-total">— товаров</span>
+    <button class="btn btn-outline" onclick="load()">🔄 Обновить</button>
+    <button class="btn btn-primary" id="btn-download" onclick="downloadXml()" disabled>📥 Скачать XML</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="warning-banner">
+    ⚠️ <div>
+      <b>Проверь перед загрузкой в Kaspi</b>
+      Это предпросмотр — именно так будет выглядеть XML файл. Убедись что остатки и цены корректны. Kaspi обновит ВСЕ товары из файла — пропущенные получат остаток 0.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stats-row" id="stats-row">
+      <div class="stat-box"><div class="stat-num blue" id="s-total">—</div><div class="stat-label">Всего SKU в XML</div></div>
+      <div class="stat-box"><div class="stat-num green" id="s-instock">—</div><div class="stat-label">В наличии</div></div>
+      <div class="stat-box"><div class="stat-num red" id="s-zero">—</div><div class="stat-label">Нет в наличии</div></div>
+      <div class="stat-box"><div class="stat-num yellow" id="s-noprice">—</div><div class="stat-label">Без цены</div></div>
+      <div class="stat-box"><div class="stat-num yellow" id="s-multi">—</div><div class="stat-label">Несколько SKU</div></div>
+      <div class="stat-box"><div class="stat-num red" id="s-problems">—</div><div class="stat-label">Проблемы</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filters">
+      <input class="search-input" type="text" placeholder="🔍 Поиск по названию или SKU..." id="search" oninput="onSearch()">
+      <button class="filter-btn active" onclick="setFilter('all', this)">Все</button>
+      <button class="filter-btn" onclick="setFilter('instock', this)">✅ В наличии</button>
+      <button class="filter-btn red" onclick="setFilter('zero', this)">❌ Нет остатка</button>
+      <button class="filter-btn yellow" onclick="setFilter('noprice', this)">⚠️ Без цены</button>
+      <button class="filter-btn yellow" onclick="setFilter('multi', this)">2+ SKU</button>
+      <span class="count-info" id="count-info"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('name')">Название <span id="sort-name"></span></th>
+            <th onclick="sortBy('sku')">SKU <span id="sort-sku"></span></th>
+            <th onclick="sortBy('brand')">Бренд</th>
+            <th onclick="sortBy('stock')">Остаток ↕ <span id="sort-stock"></span></th>
+            <th onclick="sortBy('available')">В наличии</th>
+            <th onclick="sortBy('price')">Цена ↕ <span id="sort-price"></span></th>
+            <th>Проблема</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" class="loading">⏳ Загрузка...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</div>
+
+<script>
+let allRows = [];
+let filtered = [];
+let currentFilter = 'all';
+let searchQ = '';
+let sortCol = 'stock';
+let sortDir = -1; // -1 = desc
+let page = 1;
+const PAGE = 50;
+
+async function load() {
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">⏳ Загружаю данные...</td></tr>';
+  document.getElementById('btn-download').disabled = true;
+
+  try {
+    const r = await fetch('/api/kaspi/export-preview');
+    if (!r.ok) throw new Error(await r.text());
+    const d = await r.json();
+    allRows = d.rows;
+    document.getElementById('chip-total').textContent = `${allRows.length} SKU`;
+    document.getElementById('btn-download').disabled = false;
+    updateStats();
+    applyFilter();
+  } catch(e) {
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="7" class="empty">❌ Ошибка: ${e.message}</td></tr>`;
+  }
+}
+
+function updateStats() {
+  const instock = allRows.filter(r => r.stock > 0).length;
+  const zero    = allRows.filter(r => r.stock <= 0).length;
+  const noprice = allRows.filter(r => !r.price).length;
+  const multi   = allRows.filter(r => r.multi_sku).length;
+  const problems= allRows.filter(r => r.problems.length).length;
+
+  document.getElementById('s-total').textContent   = allRows.length;
+  document.getElementById('s-instock').textContent = instock;
+  document.getElementById('s-zero').textContent    = zero;
+  document.getElementById('s-noprice').textContent = noprice;
+  document.getElementById('s-multi').textContent   = multi;
+  document.getElementById('s-problems').textContent= problems;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  page = 1;
+  applyFilter();
+}
+
+function onSearch() {
+  searchQ = document.getElementById('search').value.toLowerCase();
+  page = 1;
+  applyFilter();
+}
+
+function matchW(text, q) {
+  if (!q) return true;
+  const t = (text || '').toLowerCase();
+  return q.split(/\s+/).filter(Boolean).every(w => t.includes(w));
+}
+
+function applyFilter() {
+  filtered = allRows.filter(r => {
+    if (currentFilter === 'instock' && r.stock <= 0) return false;
+    if (currentFilter === 'zero'    && r.stock > 0)  return false;
+    if (currentFilter === 'noprice' && r.price)       return false;
+    if (currentFilter === 'multi'   && !r.multi_sku)  return false;
+    if (searchQ && !matchW(r.name, searchQ) && !matchW(r.sku, searchQ)) return false;
+    return true;
+  });
+  // Сортировка
+  filtered.sort((a, b) => {
+    let va = a[sortCol] ?? '', vb = b[sortCol] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return va < vb ? sortDir : va > vb ? -sortDir : 0;
+  });
+  document.getElementById('count-info').textContent = `${filtered.length} из ${allRows.length}`;
+  render();
+}
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  document.querySelectorAll('thead th span').forEach(s => s.textContent = '');
+  const el = document.getElementById(`sort-${col}`);
+  if (el) el.textContent = sortDir === -1 ? ' ↓' : ' ↑';
+  applyFilter();
+}
+
+function render() {
+  const tbody = document.getElementById('tbody');
+  const start = (page - 1) * PAGE;
+  const rows  = filtered.slice(start, start + PAGE);
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Ничего не найдено</td></tr>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const hasProblem = r.problems.length > 0;
+    const stockClass = r.stock <= 0 ? 'stock-zero' : r.stock <= 3 ? 'stock-low' : 'stock-ok';
+    const problemsHtml = r.problems.map(p => `<span style="font-size:11px;color:#ef4444">⚠ ${p}</span>`).join('<br>');
+    return `<tr class="${hasProblem ? 'problem-row' : ''}">
+      <td class="td-name">${r.name}${r.multi_sku ? '<span class="multi-sku">2+ SKU</span>' : ''}</td>
+      <td class="td-sku">${r.sku}</td>
+      <td style="font-size:12px;color:#6b7280">${r.brand || '—'}</td>
+      <td><span class="${stockClass}">${r.stock}</span></td>
+      <td>${r.stock > 0 ? '<span class="avail-yes">✅ да</span>' : '<span class="avail-no">❌ нет</span>'}</td>
+      <td>${r.price ? r.price.toLocaleString() + ' ₸' : '<span class="no-price">нет цены</span>'}</td>
+      <td>${problemsHtml || '<span style="color:#9ca3af;font-size:12px">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  // Пагинация
+  const pages = Math.ceil(filtered.length / PAGE);
+  if (pages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+  let pag = `<button class="page-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>← Назад</button>`;
+  const delta = 3;
+  const s = Math.max(1, page - delta), e = Math.min(pages, page + delta);
+  if (s > 1) pag += `<button class="page-btn" onclick="goPage(1)">1</button>${s > 2 ? '…' : ''}`;
+  for (let i = s; i <= e; i++) pag += `<button class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (e < pages) pag += `${e < pages-1 ? '…' : ''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
+  pag += `<button class="page-btn" onclick="goPage(${page+1})" ${page===pages?'disabled':''}>Вперёд →</button>`;
+  pag += `<span style="font-size:13px;color:#6b7280">Стр. ${page} из ${pages}</span>`;
+  document.getElementById('pagination').innerHTML = pag;
+}
+
+function goPage(p) { page = p; render(); window.scrollTo(0, 0); }
+
+function downloadXml() {
+  window.location.href = '/api/kaspi/export-xml';
+}
+
+// Инициализация
+sortBy('stock');
+load();
+</script>
+</body>
+</html>

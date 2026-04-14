@@ -36,6 +36,7 @@
         { href: '/merge',     icon: '🔀', label: 'Слияние товаров' },
         { href: '/review',    icon: '✅', label: 'Проверка' },
         { href: '/uploads',   icon: '📁', label: 'Файлы' },
+        { href: '/admin/export-preview', icon: '🔍', label: 'Проверка XML' },
       ]
     },
     {

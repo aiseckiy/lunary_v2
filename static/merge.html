@@ -372,6 +372,13 @@ function selectKaspi(id) {
     const ri = data.other_list.find(r => r.id === pendingLinkId);
     const kp = data.kaspi_list.find(p => p.id === id);
     if (ri && kp) {
+      // Предупреждение если Kaspi-товар уже имеет пару
+      if (kaspiInPairs.has(id)) {
+        const existing = [...data.pairs, ...manualPairs].find(p => p.kaspi_id === id);
+        const existingName = existing ? existing.other_name : '(другой товар)';
+        const ok = confirm(`⚠️ У «${kp.name}» уже есть пара:\n«${existingName}»\n\nПривязать новую пару вместо неё?`);
+        if (!ok) { pendingLinkId = null; renderKaspi(); renderOther(); return; }
+      }
       // Проверяем что такой пары ещё нет
       const key = `${id}:${pendingLinkId}`;
       const alreadyAuto = data.pairs.some(p => p.kaspi_id === id && p.other_id === pendingLinkId);

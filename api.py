@@ -18,6 +18,20 @@ from database import get_db, init_db
 UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
+# ── Глобальный трекер процессов ──────────────────────────────────────────────
+_PROCESS_STATUS = {
+    "kaspi_sync": {
+        "status": "starting",   # starting | running | idle | error
+        "last_run": None,
+        "next_run": None,
+        "last_result": None,
+        "last_error": None,
+        "cycle_count": 0,
+    },
+    "server_start": datetime.utcnow().isoformat(),
+}
+APP_START = time.monotonic()
+
 def _save_upload(content: bytes, original_name: str, file_type: str, records: int, db):
     """Сохраняет файл на диск и пишет запись в uploaded_files."""
     from database import UploadedFile
@@ -287,6 +301,9 @@ def _start_kaspi_sync_loop():
     def sync():
         while True:
             cycle_start = time.monotonic()
+            _PROCESS_STATUS["kaspi_sync"]["status"] = "running"
+            _PROCESS_STATUS["kaspi_sync"]["last_run"] = datetime.utcnow().isoformat()
+            _PROCESS_STATUS["kaspi_sync"]["cycle_count"] += 1
             db = SL()
             try:
                 from database import SyncLog
@@ -421,10 +438,14 @@ def _start_kaspi_sync_loop():
                     if o.get("state") in notify_states:
                         _send_tg_notification(_format_order_notification(o))
 
+                _PROCESS_STATUS["kaspi_sync"]["last_result"] = f"+{added} новых, обновлено {updated_count}"
+                _PROCESS_STATUS["kaspi_sync"]["last_error"] = None
                 if added or returns_count:
                     print(f"✅ Kaspi sync: +{added} новых, обновлено {updated_count}, возвратов {returns_count}")
             except Exception as e:
                 print(f"⚠️ Kaspi sync error: {e}")
+                _PROCESS_STATUS["kaspi_sync"]["status"] = "error"
+                _PROCESS_STATUS["kaspi_sync"]["last_error"] = str(e)[:300]
                 try:
                     from database import SyncLog
                     db.add(SyncLog(synced_at=datetime.utcnow(), error=str(e)[:500]))
@@ -435,7 +456,10 @@ def _start_kaspi_sync_loop():
                 db.close()
             # Ждём ровно 5 минут от начала цикла (не от конца)
             elapsed = time.monotonic() - cycle_start
-            time.sleep(max(0, 300 - elapsed))
+            sleep_sec = max(0, 300 - elapsed)
+            _PROCESS_STATUS["kaspi_sync"]["status"] = "idle"
+            _PROCESS_STATUS["kaspi_sync"]["next_run"] = (datetime.utcnow().timestamp() + sleep_sec)
+            time.sleep(sleep_sec)
 
     t = threading.Thread(target=sync, daemon=True)
     t.start()
@@ -3727,6 +3751,58 @@ def theme_page(request: Request):
         return RedirectResponse("/login")
     with open("static/theme.html", encoding="utf-8") as f:
         return f.read()
+
+@app.get("/api/admin/processes")
+def get_processes(db: Session = Depends(get_db)):
+    """Статус фоновых процессов и БД."""
+    from database import Product, KaspiOrder, Movement, PriceListItem, UploadedFile
+    from sqlalchemy import func as sqlfunc
+
+    uptime_sec = int(time.monotonic() - APP_START)
+    h, rem = divmod(uptime_sec, 3600)
+    m, s = divmod(rem, 60)
+    uptime_str = f"{h}ч {m}м {s}с" if h else f"{m}м {s}с"
+
+    # Счётчики БД
+    db_counts = {}
+    try:
+        db_counts = {
+            "products":   db.query(sqlfunc.count(Product.id)).scalar(),
+            "kaspi":      db.query(sqlfunc.count(Product.id)).filter(Product.category == "Kaspi").scalar(),
+            "orders":     db.query(sqlfunc.count(KaspiOrder.id)).scalar(),
+            "movements":  db.query(sqlfunc.count(Movement.id)).scalar(),
+            "pricelist":  db.query(sqlfunc.count(PriceListItem.id)).scalar(),
+            "uploads":    db.query(sqlfunc.count(UploadedFile.id)).scalar(),
+        }
+        db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {e}"
+
+    # Kaspi sync — секунд до следующего запуска
+    ks = _PROCESS_STATUS["kaspi_sync"]
+    next_run_in = None
+    if ks.get("next_run"):
+        next_run_in = max(0, int(ks["next_run"] - datetime.utcnow().timestamp()))
+
+    return {
+        "uptime": uptime_str,
+        "server_start": _PROCESS_STATUS["server_start"],
+        "db": {"status": db_status, **db_counts},
+        "processes": [
+            {
+                "name": "Kaspi синхронизация",
+                "key": "kaspi_sync",
+                "status": ks["status"],
+                "last_run": ks["last_run"],
+                "next_run_in": next_run_in,
+                "last_result": ks["last_result"],
+                "last_error": ks["last_error"],
+                "cycle_count": ks["cycle_count"],
+                "interval": "5 мин",
+            },
+        ],
+    }
+
 
 @app.get("/admin/sitemap", response_class=HTMLResponse)
 def sitemap_page(request: Request):

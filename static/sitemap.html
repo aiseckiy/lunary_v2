@@ -57,6 +57,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 .refresh-spin { animation: spin .8s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.sys-pill { display:inline-flex;align-items:center;gap:6px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#374151; }
+.sys-pill.green  { background:#d1fae5;border-color:#6ee7b7;color:#065f46; }
+.sys-pill.red    { background:#fee2e2;border-color:#fca5a5;color:#991b1b; }
+.sys-pill.blue   { background:#dbeafe;border-color:#93c5fd;color:#1e40af; }
+.sys-pill.purple { background:#ede9fe;border-color:#c4b5fd;color:#5b21b6; }
+.sys-pill.yellow { background:#fef9c3;border-color:#fde047;color:#92400e; }
+
+.process-card { background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
+.process-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+.dot-running { background:#10b981;box-shadow:0 0 0 3px #d1fae5; }
+.dot-idle    { background:#6b7280; }
+.dot-error   { background:#ef4444;box-shadow:0 0 0 3px #fee2e2; }
+.dot-starting{ background:#f59e0b;box-shadow:0 0 0 3px #fef9c3; }
+.process-name { font-size:14px;font-weight:700;min-width:180px; }
+.process-meta { font-size:12px;color:#6b7280;display:flex;gap:14px;flex-wrap:wrap;flex:1; }
+.process-meta span { display:flex;align-items:center;gap:4px; }
+.process-err  { font-size:12px;color:#ef4444;background:#fee2e2;border-radius:8px;padding:3px 10px;margin-top:4px;width:100%; }
+.countdown { font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
@@ -66,7 +85,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <h1>🗺️ Карта сайта</h1>
   <div class="header-right">
     <span class="last-updated" id="last-updated"></span>
-    <button class="btn" onclick="loadStats()"><span id="refresh-icon">🔄</span> Обновить</button>
+    <button class="btn" onclick="loadAll()"><span id="refresh-icon">🔄</span> Обновить</button>
   </div>
 </div>
 
@@ -196,6 +215,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
   </div>
 
+  <!-- ПРОЦЕССЫ -->
+  <div class="group">
+    <div class="group-title">⚙️ Процессы и состояние системы</div>
+
+    <div class="api-section" style="display:flex;flex-direction:column;gap:16px">
+      <!-- Аптайм + БД -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap" id="sys-overview">
+        <div class="sys-pill" id="pill-uptime">⏱ Аптайм: …</div>
+        <div class="sys-pill green" id="pill-db">🗄 БД: …</div>
+        <div class="sys-pill blue" id="pill-db-products">📦 …</div>
+        <div class="sys-pill blue" id="pill-db-orders">🛒 …</div>
+        <div class="sys-pill purple" id="pill-db-pricelist">🗂 …</div>
+      </div>
+
+      <!-- Процессы -->
+      <div id="processes-list" style="display:flex;flex-direction:column;gap:10px">
+        <div style="color:#9ca3af;font-size:13px">⏳ Загрузка процессов…</div>
+      </div>
+    </div>
+  </div>
+
   <!-- API -->
   <div class="api-section">
     <div class="api-title">🔌 API эндпоинты</div>
@@ -321,13 +361,89 @@ function formatMoney(v) {
   return v + ' ₸';
 }
 
+// ── Процессы ──────────────────────────────────────────────────
+let processData = null;
+let countdownTimer = null;
+
+async function loadProcesses() {
+  try {
+    const r = await fetch('/api/admin/processes');
+    if (!r.ok) return;
+    processData = await r.json();
+    renderProcesses();
+  } catch(e) {}
+}
+
+function renderProcesses() {
+  if (!processData) return;
+  const d = processData;
+
+  // Аптайм + БД
+  document.getElementById('pill-uptime').textContent = `⏱ Аптайм: ${d.uptime}`;
+  const dbOk = d.db.status === 'ok';
+  const pillDb = document.getElementById('pill-db');
+  pillDb.textContent = `🗄 БД: ${dbOk ? 'подключена' : d.db.status}`;
+  pillDb.className = 'sys-pill ' + (dbOk ? 'green' : 'red');
+  document.getElementById('pill-db-products').textContent = `📦 ${d.db.products ?? '—'} товаров`;
+  document.getElementById('pill-db-orders').textContent = `🛒 ${d.db.orders ?? '—'} заказов`;
+  document.getElementById('pill-db-pricelist').textContent = `🗂 ${d.db.pricelist ?? '—'} накладных`;
+
+  // Процессы
+  const list = document.getElementById('processes-list');
+  list.innerHTML = d.processes.map(p => {
+    const dotClass = `dot-${p.status}`;
+    const statusLabel = { running: '🔄 Работает', idle: '💤 Ожидание', error: '❌ Ошибка', starting: '🟡 Запуск' }[p.status] || p.status;
+    const lastRun = p.last_run ? new Date(p.last_run + 'Z').toLocaleTimeString('ru') : '—';
+    const nextIn = p.next_run_in != null
+      ? `<span class="countdown" data-key="${p.key}" data-sec="${p.next_run_in}">через ${fmt(p.next_run_in)}</span>`
+      : '—';
+    return `<div class="process-card">
+      <div class="process-dot ${dotClass}"></div>
+      <div class="process-name">${p.name}</div>
+      <div class="process-meta">
+        <span>Статус: <b>${statusLabel}</b></span>
+        <span>Интервал: ${p.interval}</span>
+        <span>Циклов: ${p.cycle_count}</span>
+        <span>Последний запуск: ${lastRun}</span>
+        <span>Следующий: ${nextIn}</span>
+        ${p.last_result ? `<span>Результат: ${p.last_result}</span>` : ''}
+      </div>
+      ${p.last_error ? `<div class="process-err">⚠️ ${p.last_error}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Запускаем обратный отсчёт
+  startCountdown();
+}
+
+function fmt(sec) {
+  if (sec >= 60) return `${Math.floor(sec/60)}м ${sec%60}с`;
+  return `${sec}с`;
+}
+
+function startCountdown() {
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    document.querySelectorAll('.countdown').forEach(el => {
+      let s = parseInt(el.dataset.sec) - 1;
+      if (s < 0) s = 0;
+      el.dataset.sec = s;
+      el.textContent = s > 0 ? `через ${fmt(s)}` : 'сейчас…';
+    });
+  }, 1000);
+}
+
 // Авто-обновление каждые 60 секунд
 function startAutoRefresh() {
   clearInterval(autoRefreshTimer);
-  autoRefreshTimer = setInterval(loadStats, 60_000);
+  autoRefreshTimer = setInterval(() => { loadStats(); loadProcesses(); }, 60_000);
 }
 
-loadStats();
+async function loadAll() {
+  await Promise.all([loadStats(), loadProcesses()]);
+}
+
+loadAll();
 startAutoRefresh();
 </script>
 </body>

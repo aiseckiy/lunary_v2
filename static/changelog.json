@@ -1,5 +1,10 @@
 [
   {
+    "hash": "a22c0a8",
+    "date": "14.04.2026",
+    "message": "SEO: robots.txt, sitemap.xml, SSR мета-теги для товаров, Google verification, export preview endpoint"
+  },
+  {
     "hash": "0b3436b",
     "date": "14.04.2026",
     "message": "Feat: страница бизнес-процессов /admin/bizmap — интерактивная майндмап"

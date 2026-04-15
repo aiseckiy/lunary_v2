@@ -1545,28 +1545,27 @@ def test_google_images(request: Request):
 
 @app.post("/api/products/{product_id}/ai-describe")
 def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
-    """Генерирует описание и характеристики товара через Claude Haiku"""
+    """Генерирует описание и характеристики товара через OpenAI"""
     from database import Product as _P, SiteSetting
-    import os
+    import os, json
 
     p = db.query(_P).filter(_P.id == product_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = os.environ.get("OPENAI_API_KEY", "")
     if not api_key:
         settings = {s.key: s.value for s in db.query(SiteSetting).all()}
-        api_key = settings.get("anthropic_api_key", "")
+        api_key = settings.get("openai_api_key", "")
     if not api_key:
-        raise HTTPException(status_code=400, detail="ANTHROPIC_API_KEY не настроен")
+        raise HTTPException(status_code=400, detail="OPENAI_API_KEY не настроен")
 
     try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
 
         existing_specs = ""
         try:
-            import json
             specs = json.loads(p.specs or "[]")
             if specs:
                 existing_specs = "\nУже известные характеристики:\n" + "\n".join(f"- {s['key']}: {s['value']}" for s in specs)
@@ -1595,15 +1594,13 @@ def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
   ]
 }}"""
 
-        message = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}]
         )
 
-        import json
-        text = message.content[0].text.strip()
-        # убираем markdown если вдруг появился
+        text = response.choices[0].message.content.strip()
         if text.startswith("```"):
             text = text.split("```")[1]
             if text.startswith("json"):

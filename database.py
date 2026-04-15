@@ -262,7 +262,7 @@ def init_db():
         ("kaspi_feed_token",      "",    "Kaspi Feed Token (защита URL)", "integrations"),
         ("kaspi_commission_pct",  "8",   "Комиссия Kaspi (%)",            "integrations"),
         ("tax_pct",               "4",   "Налог (%)",                     "integrations"),
-        ("anthropic_api_key",     "",    "Anthropic API Key (AI описания)","integrations"),
+        ("openai_api_key",        "",    "OpenAI API Key (AI описания)",  "integrations"),
     ]
     db2 = SessionLocal()
     try:

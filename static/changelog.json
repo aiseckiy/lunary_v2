@@ -1,5 +1,10 @@
 [
   {
+    "hash": "71e67a7",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести Kaspi read-only endpoints + Kaspi helpers в helpers.py"
+  },
+  {
     "hash": "3b5362b",
     "date": "16.04.2026",
     "message": "Refactor: вынести products router + auth helpers в helpers.py"

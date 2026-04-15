@@ -73,6 +73,9 @@ from routers.merge import router as merge_router  # noqa: E402
 from routers.store import router as store_router  # noqa: E402
 from routers.products import router as products_router  # noqa: E402
 from routers.kaspi import router as kaspi_router  # noqa: E402
+from routers.settings import router as settings_router  # noqa: E402
+from routers.shop_orders import router as shop_orders_router  # noqa: E402
+from routers.system import router as system_router  # noqa: E402
 app.include_router(analytics_router)
 app.include_router(uploads_router)
 app.include_router(pricelist_router)
@@ -80,6 +83,9 @@ app.include_router(merge_router)
 app.include_router(store_router)
 app.include_router(products_router)
 app.include_router(kaspi_router)
+app.include_router(settings_router)
+app.include_router(shop_orders_router)
+app.include_router(system_router)
 
 
 if _slowapi_ok:
@@ -1348,91 +1354,8 @@ def sitemap_xml(db: Session = Depends(get_db)):
     return Response(content=xml, media_type="application/xml")
 
 
-@app.get("/api/shop/my-orders")
-def my_orders(request: Request, db: Session = Depends(get_db)):
-    user = _get_user_from_session(request)
-    if not user or not user.get("id"):
-        raise HTTPException(status_code=401, detail="Не авторизован")
-    from database import ShopOrder
-    orders = db.query(ShopOrder).filter(ShopOrder.user_id == user["id"]).order_by(ShopOrder.created_at.desc()).all()
-    return [
-        {"id": o.id, "status": o.status, "total": o.total,
-         "items": o.items, "created_at": str(o.created_at)}
-        for o in orders
-    ]
 
 
-@app.get("/shop/my-orders", response_class=HTMLResponse)
-def my_orders_page():
-    with open("static/my_orders.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@app.get("/about", response_class=HTMLResponse)
-def about_page():
-    with open("static/about.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@app.get("/api/admin/shop-orders/new-count")
-def shop_orders_new_count(request: Request, db: Session = Depends(get_db)):
-    from database import ShopOrder
-    count = db.query(ShopOrder).filter(ShopOrder.status == "new").count()
-    return {"count": count}
-
-
-# ─── Site Settings ───────────────────────────────────────────
-@app.get("/api/settings")
-def get_settings(db: Session = Depends(get_db)):
-    """Публичные настройки для магазина (без integrations)"""
-    from database import SiteSetting
-    rows = db.query(SiteSetting).filter(SiteSetting.group != "integrations").all()
-    return {r.key: r.value for r in rows}
-
-
-@app.get("/api/admin/settings")
-def get_admin_settings(request: Request, db: Session = Depends(get_db)):
-    from database import SiteSetting
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    rows = db.query(SiteSetting).order_by(SiteSetting.group, SiteSetting.key).all()
-    return [{"key": r.key, "value": r.value or "", "label": r.label, "group": r.group} for r in rows]
-
-
-@app.post("/api/admin/settings")
-def save_admin_settings(data: dict, request: Request, db: Session = Depends(get_db)):
-    from database import SiteSetting
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    for key, value in data.items():
-        row = db.query(SiteSetting).filter(SiteSetting.key == key).first()
-        if row:
-            row.value = str(value)
-        else:
-            db.add(SiteSetting(key=key, value=str(value)))
-    db.commit()
-    return {"ok": True}
-
-
-# ─── Панель управления (только для авторизованных) ───────────
-@app.get("/admin", response_class=HTMLResponse)
-def dashboard():
-    with open("static/index.html") as f:
-        return f.read()
-
-
-@app.get("/admin/scanner", response_class=HTMLResponse)
-def scanner():
-    with open("static/scanner.html") as f:
-        return f.read()
-
-
-@app.get("/admin/history", response_class=HTMLResponse)
-def history_page():
-    with open("static/history.html") as f:
-        return f.read()
 
 
 # ─── AI автозаполнение ───────────────────────────────────────
@@ -1881,158 +1804,6 @@ def orders_debug(request: Request, db: Session = Depends(get_db)):
 
 
 
-
-@app.get("/admin/analytics", response_class=HTMLResponse)
-def analytics_page():
-    with open("static/analytics.html") as f:
-        return f.read()
-
-
-@app.get("/admin/settings", response_class=HTMLResponse)
-def settings_page():
-    with open("static/settings.html") as f:
-        return f.read()
-
-
-# Редиректы со старых путей
-
-@app.get("/analytics", response_class=HTMLResponse)
-def analytics_redirect():
-    return RedirectResponse("/admin/analytics", status_code=301)
-
-@app.get("/history", response_class=HTMLResponse)
-def history_redirect():
-    return RedirectResponse("/admin/history", status_code=301)
-
-@app.get("/scanner", response_class=HTMLResponse)
-def scanner_redirect():
-    return RedirectResponse("/admin/scanner", status_code=301)
-
-
-# ─── Shop Orders ─────────────────────────────────────────────
-class ShopOrderCreate(BaseModel):
-    name: str
-    phone: str
-    address: Optional[str] = None
-    comment: Optional[str] = None
-    items: list  # [{product_id, qty}]
-
-
-@app.post("/api/shop/orders")
-def create_shop_order(data: ShopOrderCreate, request: Request, db: Session = Depends(get_db)):
-    from database import ShopOrder, Product as _P
-
-    if not data.items:
-        raise HTTPException(status_code=400, detail="Корзина пуста")
-
-    # Собрать позиции с ценами
-    order_items = []
-    total = 0
-    for item in data.items:
-        pid = item.get("product_id")
-        qty = int(item.get("qty", 1))
-        p = db.query(_P).filter(_P.id == pid).first()
-        if not p:
-            continue
-        price = p.price or 0
-        order_items.append({"product_id": p.id, "name": p.name, "qty": qty, "price": price, "sku": p.kaspi_sku or ""})
-        total += price * qty
-
-    if not order_items:
-        raise HTTPException(status_code=400, detail="Товары не найдены")
-
-    user = _get_user_from_session(request)
-    user_id = user.get("id") if user else None
-
-    order = ShopOrder(
-        user_id=user_id,
-        name=data.name,
-        phone=data.phone,
-        address=data.address,
-        comment=data.comment,
-        items=json.dumps(order_items, ensure_ascii=False),
-        total=total,
-        status="new"
-    )
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-
-    # Уведомление в Telegram
-    try:
-        _notify_new_shop_order(order, order_items)
-    except Exception:
-        pass
-
-    return {"ok": True, "order_id": order.id, "total": total}
-
-
-def _notify_new_shop_order(order, items):
-    import requests as req_lib
-    bot_token = _get_integration("tg_bot_token", "TELEGRAM_BOT_TOKEN")
-    chat_id = _get_integration("tg_chat_id", "TELEGRAM_CHAT_ID")
-    if not bot_token or not chat_id:
-        return
-    lines = "\n".join([f"• {i['name']} × {i['qty']} = {i['price']*i['qty']:,} ₸" for i in items])
-    text = (
-        f"🛒 *Новый заказ #{order.id}*\n\n"
-        f"👤 {order.name}\n"
-        f"📞 {order.phone}\n"
-        f"📍 {order.address or '—'}\n"
-        f"💬 {order.comment or '—'}\n\n"
-        f"{lines}\n\n"
-        f"💰 *Итого: {order.total:,} ₸*"
-    )
-    def _send():
-        try:
-            req_lib.post(
-                f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
-                timeout=3
-            )
-        except Exception as e:
-            print(f"⚠️ TG shop order уведомление ошибка: {e}")
-    threading.Thread(target=_send, daemon=True).start()
-
-
-@app.get("/api/admin/shop-orders")
-def list_shop_orders(request: Request, status: Optional[str] = None, db: Session = Depends(get_db)):
-    from database import ShopOrder
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    q = db.query(ShopOrder).order_by(ShopOrder.created_at.desc())
-    if status:
-        q = q.filter(ShopOrder.status == status)
-    orders = q.limit(200).all()
-    return [{
-        "id": o.id, "name": o.name, "phone": o.phone,
-        "address": o.address, "comment": o.comment,
-        "items": json.loads(o.items or "[]"),
-        "total": o.total, "status": o.status,
-        "created_at": str(o.created_at)
-    } for o in orders]
-
-
-@app.patch("/api/admin/shop-orders/{order_id}")
-def update_shop_order(order_id: int, data: dict, request: Request, db: Session = Depends(get_db)):
-    from database import ShopOrder
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    o = db.query(ShopOrder).filter(ShopOrder.id == order_id).first()
-    if not o:
-        raise HTTPException(status_code=404)
-    if "status" in data:
-        o.status = data["status"]
-    db.commit()
-    return {"ok": True, "status": o.status}
-
-
-@app.get("/admin/shop-orders", response_class=HTMLResponse)
-def shop_orders_page():
-    with open("static/shop_orders.html", encoding="utf-8") as f:
-        return f.read()
 
 
 @app.get("/api/purchases/list")
@@ -2599,83 +2370,6 @@ def review_page():
 
 # ── Дизайн-токены (тема) ─────────────────────────────────────────────────────
 
-DEFAULT_TOKENS = {
-    "--bg":         {"value": "#f4f4f6",  "label": "Фон страницы",        "group": "Фоны"},
-    "--surface":    {"value": "#ffffff",  "label": "Поверхность (карточки)","group": "Фоны"},
-    "--sidebar-bg": {"value": "#f0f0f5",  "label": "Фон сайдбара",        "group": "Фоны"},
-    "--border":     {"value": "#e5e7eb",  "label": "Граница основная",     "group": "Границы"},
-    "--border2":    {"value": "#f0f0f2",  "label": "Граница второстепенная","group": "Границы"},
-    "--text":       {"value": "#111827",  "label": "Текст основной",       "group": "Текст"},
-    "--text2":      {"value": "#6b7280",  "label": "Текст второстепенный", "group": "Текст"},
-    "--text3":      {"value": "#9ca3af",  "label": "Текст подсказки",      "group": "Текст"},
-    "--accent":     {"value": "#6366f1",  "label": "Акцент (кнопки, ссылки)","group": "Акценты"},
-    "--green":      {"value": "#16a34a",  "label": "Зелёный (наличие, успех)","group": "Акценты"},
-    "--red":        {"value": "#ef4444",  "label": "Красный (ошибка, отмена)","group": "Акценты"},
-    "--orange":     {"value": "#f97316",  "label": "Оранжевый (предупреждение)","group": "Акценты"},
-    "--yellow":     {"value": "#eab308",  "label": "Жёлтый (статус)",     "group": "Акценты"},
-}
-
-@app.get("/api/admin/theme")
-def get_theme(request: Request, db: Session = Depends(get_db)):
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    from database import SiteSetting
-    row = db.query(SiteSetting).filter(SiteSetting.key == "theme_tokens").first()
-    if row and row.value:
-        try:
-            saved = json.loads(row.value)
-            # Мержим с дефолтами (на случай новых токенов)
-            tokens = {k: {**v, "value": saved.get(k, v["value"])} for k, v in DEFAULT_TOKENS.items()}
-            return tokens
-        except Exception:
-            pass
-    return DEFAULT_TOKENS
-
-@app.post("/api/admin/theme")
-def save_theme(data: dict, request: Request, db: Session = Depends(get_db)):
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    from database import SiteSetting
-    # Сохраняем только значения {varName: colorValue}
-    values = {k: v for k, v in data.items() if k.startswith("--")}
-    row = db.query(SiteSetting).filter(SiteSetting.key == "theme_tokens").first()
-    if row:
-        row.value = json.dumps(values)
-    else:
-        db.add(SiteSetting(key="theme_tokens", value=json.dumps(values), label="Дизайн-токены", group="theme"))
-    db.commit()
-    return {"ok": True}
-
-@app.get("/api/admin/theme/css")
-def get_theme_css(db: Session = Depends(get_db)):
-    """Возвращает :root { ... } с текущими токенами — подключается на всех страницах"""
-    from database import SiteSetting
-    row = db.query(SiteSetting).filter(SiteSetting.key == "theme_tokens").first()
-    overrides = {}
-    if row and row.value:
-        try:
-            overrides = json.loads(row.value)
-        except Exception:
-            pass
-    lines = []
-    for var, meta in DEFAULT_TOKENS.items():
-        val = overrides.get(var, meta["value"])
-        lines.append(f"  {var}: {val};")
-    css = ":root {\n" + "\n".join(lines) + "\n}"
-    from fastapi.responses import Response
-    return Response(content=css, media_type="text/css")
-
-@app.get("/admin/theme", response_class=HTMLResponse)
-def theme_page(request: Request):
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        from fastapi.responses import RedirectResponse
-        return RedirectResponse("/login")
-    with open("static/theme.html", encoding="utf-8") as f:
-        return f.read()
-
 @app.get("/api/admin/processes")
 def get_processes(db: Session = Depends(get_db)):
     """Статус фоновых процессов и БД."""
@@ -2728,44 +2422,3 @@ def get_processes(db: Session = Depends(get_db)):
     }
 
 
-@app.get("/admin/bizmap", response_class=HTMLResponse)
-def bizmap_page(request: Request):
-    user = _get_user_from_session(request)
-    if not user:
-        from fastapi.responses import RedirectResponse
-        return RedirectResponse("/login")
-    with open("static/bizmap.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@app.get("/admin/sitemap", response_class=HTMLResponse)
-def sitemap_page(request: Request):
-    user = _get_user_from_session(request)
-    if not user:
-        from fastapi.responses import RedirectResponse
-        return RedirectResponse("/login")
-    with open("static/sitemap.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@app.get("/admin/changelog", response_class=HTMLResponse)
-def changelog_page(request: Request):
-    user = _get_user_from_session(request)
-    if not user:
-        from fastapi.responses import RedirectResponse
-        return RedirectResponse("/login")
-    with open("static/changelog.html", encoding="utf-8") as f:
-        return f.read()
-
-@app.get("/api/admin/changelog")
-def get_changelog(request: Request):
-    """Возвращает список коммитов из changelog.json"""
-    user = _get_user_from_session(request)
-    if not user:
-        raise HTTPException(status_code=403)
-    try:
-        path = os.path.join(os.path.dirname(__file__), "static", "changelog.json")
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return []

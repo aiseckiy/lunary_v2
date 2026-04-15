@@ -1,5 +1,10 @@
 [
   {
+    "hash": "1c4a5be",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести AI и Images блок в routers/ai.py"
+  },
+  {
     "hash": "6c5b2e7",
     "date": "16.04.2026",
     "message": "Refactor: вынести review и admin утилиты"

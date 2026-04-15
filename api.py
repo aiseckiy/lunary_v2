@@ -79,6 +79,7 @@ from routers.system import router as system_router  # noqa: E402
 from routers.review import router as review_router  # noqa: E402
 from routers.admin import router as admin_router  # noqa: E402
 from routers.ai import router as ai_router  # noqa: E402
+from routers.seo import router as seo_router  # noqa: E402
 app.include_router(analytics_router)
 app.include_router(uploads_router)
 app.include_router(pricelist_router)
@@ -92,6 +93,7 @@ app.include_router(system_router)
 app.include_router(review_router)
 app.include_router(admin_router)
 app.include_router(ai_router)
+app.include_router(seo_router)
 
 
 if _slowapi_ok:
@@ -673,175 +675,6 @@ from helpers import parse_images as _parse_images  # noqa: E402
 
 
 
-@app.get("/shop/product/{product_id}", response_class=HTMLResponse)
-def shop_product_page(product_id: int, db: Session = Depends(get_db)):
-    from database import Product as _P, Movement as _M
-    from sqlalchemy import func
-    import html as _html
-
-    BASE_URL = "https://www.lunary.kz"
-    row = (
-        db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
-        .outerjoin(_M, _M.product_id == _P.id)
-        .filter(_P.id == product_id, _P.category == "Kaspi")
-        .group_by(_P.id)
-        .first()
-    )
-
-    with open("static/product.html", encoding="utf-8") as f:
-        tmpl = f.read()
-
-    if not row:
-        return tmpl
-
-    p, stock = row
-    name = _html.escape(p.name or "Товар")
-    brand = _html.escape(p.brand or "")
-    canon = f"{BASE_URL}/shop/product/{product_id}"
-    avail = "https://schema.org/InStock" if stock > 0 else "https://schema.org/OutOfStock"
-    price_str = str(int(p.price)) if p.price else ""
-
-    # SEO поля — используем заполненные AI или генерируем автоматически
-    title = _html.escape(p.meta_title.strip()) if p.meta_title and p.meta_title.strip() \
-        else f"{name} купить в Алматы | LUNARY"
-
-    desc_raw = (p.meta_description or "").strip()
-    if not desc_raw:
-        # Авто-генерация из описания товара
-        base = (p.description or f"{brand} {name}").strip()
-        price_part = f" Цена {int(p.price):,} ₸.".replace(",", " ") if p.price else ""
-        desc_raw = base[:130] + price_part if price_part else base[:155]
-    description = _html.escape(desc_raw[:165])
-
-    keywords_raw = (p.meta_keywords or "").strip()
-    if not keywords_raw:
-        parts = [p.name or ""]
-        if p.brand: parts.append(p.brand)
-        if p.category: parts.append(p.category)
-        parts += ["купить", "цена", "Алматы", "Казахстан", "LUNARY"]
-        keywords_raw = ", ".join(parts)
-    keywords = _html.escape(keywords_raw[:300])
-
-    image = p.image_url or f"{BASE_URL}/static/og-default.jpg"
-
-    schema = ""
-    if p.price:
-        schema = f"""<script type="application/ld+json">
-{{
-  "@context": "https://schema.org/",
-  "@type": "Product",
-  "name": "{name}",
-  "brand": {{"@type": "Brand", "name": "{brand}"}},
-  "description": "{description}",
-  "image": "{_html.escape(image)}",
-  "url": "{canon}",
-  "offers": {{
-    "@type": "Offer",
-    "priceCurrency": "KZT",
-    "price": "{price_str}",
-    "availability": "{avail}",
-    "seller": {{"@type": "Organization", "name": "LUNARY"}}
-  }}
-}}
-</script>"""
-
-    seo_head = f"""<title>{title}</title>
-<meta name="description" content="{description}">
-<meta name="keywords" content="{keywords}">
-<link rel="canonical" href="{canon}">
-<meta property="og:title" content="{title}">
-<meta property="og:description" content="{description}">
-<meta property="og:type" content="product">
-<meta property="og:url" content="{canon}">
-<meta property="og:image" content="{_html.escape(image)}">
-<meta property="og:site_name" content="LUNARY">
-<meta property="product:price:amount" content="{price_str}">
-<meta property="product:price:currency" content="KZT">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{title}">
-<meta name="twitter:description" content="{description}">
-<meta name="twitter:image" content="{_html.escape(image)}">
-{schema}"""
-
-    # Заменяем старый <title> + вставляем SEO блок
-    tmpl = tmpl.replace("<title>Товар — LUNARY</title>", seo_head, 1)
-    return tmpl
-
-
-@app.get("/robots.txt")
-def robots_txt():
-    from fastapi.responses import PlainTextResponse
-    content = """User-agent: *
-Allow: /shop
-Allow: /shop/product/
-Disallow: /admin
-Disallow: /api/
-Disallow: /import
-Disallow: /pricelist
-Disallow: /merge
-Disallow: /review
-Disallow: /uploads
-Disallow: /login
-
-Sitemap: https://www.lunary.kz/sitemap.xml
-"""
-    return PlainTextResponse(content)
-
-
-@app.get("/sitemap.xml")
-def sitemap_xml(db: Session = Depends(get_db)):
-    from fastapi.responses import Response
-    from database import Product as _P
-    import json as _json
-    from datetime import datetime
-
-    BASE_URL = "https://www.lunary.kz"
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-
-    products = db.query(_P).filter(_P.show_in_shop == True, _P.price.isnot(None)).all()
-
-    urls = [f"""  <url>
-    <loc>{BASE_URL}/shop</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-    <lastmod>{today}</lastmod>
-  </url>"""]
-
-    for p in products:
-        # Собираем картинки товара
-        images = []
-        try:
-            imgs = _json.loads(p.images or "[]")
-            if isinstance(imgs, list):
-                images = [i for i in imgs if isinstance(i, str) and i.startswith("http")]
-        except Exception:
-            pass
-        if not images and p.image_url and p.image_url.startswith("http"):
-            images = [p.image_url]
-
-        image_tags = ""
-        for img_url in images[:5]:  # максимум 5 картинок на товар
-            name_escaped = (p.name or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            image_tags += f"""
-    <image:image>
-      <image:loc>{img_url}</image:loc>
-      <image:title>{name_escaped}</image:title>
-    </image:image>"""
-
-        urls.append(f"""  <url>
-    <loc>{BASE_URL}/shop/product/{p.id}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>{today}</lastmod>{image_tags}
-  </url>""")
-
-    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
-    xml += '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
-    xml += '\n'.join(urls)
-    xml += '\n</urlset>'
-
-    return Response(content=xml, media_type="application/xml")
 
 
 

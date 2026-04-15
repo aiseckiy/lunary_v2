@@ -76,6 +76,8 @@ from routers.kaspi import router as kaspi_router  # noqa: E402
 from routers.settings import router as settings_router  # noqa: E402
 from routers.shop_orders import router as shop_orders_router  # noqa: E402
 from routers.system import router as system_router  # noqa: E402
+from routers.review import router as review_router  # noqa: E402
+from routers.admin import router as admin_router  # noqa: E402
 app.include_router(analytics_router)
 app.include_router(uploads_router)
 app.include_router(pricelist_router)
@@ -86,6 +88,8 @@ app.include_router(kaspi_router)
 app.include_router(settings_router)
 app.include_router(shop_orders_router)
 app.include_router(system_router)
+app.include_router(review_router)
+app.include_router(admin_router)
 
 
 if _slowapi_ok:
@@ -656,150 +660,6 @@ def update_profile(data: dict, request: Request, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-# ─── Users management ────────────────────────────────────────
-@app.get("/api/admin/users")
-def list_users(request: Request, db: Session = Depends(get_db)):
-    from database import User as UserModel
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    users = db.query(UserModel).order_by(UserModel.created_at.desc()).all()
-    return [{"id": u.id, "email": u.email, "name": u.name, "role": u.role,
-             "avatar": u.avatar, "created_at": str(u.created_at)} for u in users]
-
-
-@app.patch("/api/admin/users/{user_id}")
-def update_user_role(user_id: int, data: dict, request: Request, db: Session = Depends(get_db)):
-    from database import User as UserModel
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    u = db.query(UserModel).filter(UserModel.id == user_id).first()
-    if not u:
-        raise HTTPException(status_code=404)
-    if "role" in data:
-        u.role = data["role"]
-    db.commit()
-    return {"ok": True, "role": u.role}
-
-
-# ─── Admin ───────────────────────────────────────────────────
-@app.post("/api/admin/run-migrations")
-def run_migrations():
-    """Принудительно применить все pending миграции БД"""
-    init_db()
-    return {"ok": True, "message": "Миграции применены"}
-
-
-@app.post("/api/admin/kaspi/backfill-entries")
-def backfill_kaspi_entries(request: Request, db: Session = Depends(get_db)):
-    """Загружает состав заказов у которых entries пустые"""
-    from database import KaspiOrder
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-
-    # Все заказы без состава (entries null, пустые или "[]")
-    orders = db.query(KaspiOrder).filter(
-        (KaspiOrder.entries == None) |
-        (KaspiOrder.entries == "[]") |
-        (KaspiOrder.entries == "")
-    ).all()
-
-    filled = 0
-    failed = 0
-    for o in orders:
-        try:
-            entries = kaspi_module.get_order_entries(o.order_id)
-            if entries:
-                o.entries = json.dumps(entries, ensure_ascii=False)
-                # Также обновляем product_name / sku / quantity если были пустые
-                if not o.product_name and entries:
-                    o.product_name = entries[0].get("name")
-                    o.sku = entries[0].get("merchantSku", "")
-                    o.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
-                filled += 1
-            else:
-                failed += 1
-        except Exception:
-            failed += 1
-
-    db.commit()
-    return {"ok": True, "filled": filled, "failed": failed, "total": len(orders)}
-
-
-@app.get("/api/admin/kaspi/debug-entries/{order_id}")
-def debug_kaspi_entries(order_id: str, request: Request):
-    """Временный: посмотреть сырой ответ Kaspi для entries"""
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    raw = kaspi_module._proxy("get_order_entries", {"orderId": order_id})
-    return {"raw": raw}
-
-
-@app.post("/api/admin/dedupe-kaspi-orders")
-def dedupe_kaspi_orders(request: Request, db: Session = Depends(get_db)):
-    """Удаляет base64 дубли заказов Kaspi, оставляя числовые ID"""
-    import base64
-    from database import KaspiOrder
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-
-    all_orders = db.query(KaspiOrder).all()
-    deleted = 0
-    migrated = 0
-
-    for o in all_orders:
-        oid = o.order_id
-        # Если ID не числовой — это base64
-        if not oid.isdigit():
-            try:
-                decoded = base64.b64decode(oid + "==").decode("utf-8").strip()
-                if decoded.isdigit():
-                    # Есть ли уже числовая версия?
-                    numeric = db.query(KaspiOrder).filter(KaspiOrder.order_id == decoded).first()
-                    if numeric:
-                        # Числовая версия есть — удаляем base64 дубль
-                        db.delete(o)
-                        deleted += 1
-                    else:
-                        # Числовой нет — переименовываем
-                        o.order_id = decoded
-                        migrated += 1
-            except Exception:
-                pass
-
-    db.commit()
-    return {"ok": True, "deleted": deleted, "migrated": migrated}
-
-
-@app.get("/api/admin/kaspi/sync-log")
-def get_sync_log(request: Request, db: Session = Depends(get_db)):
-    """Последние 50 запусков синхронизации Kaspi"""
-    from database import SyncLog
-    user = _get_user_from_session(request)
-    if not user or user["role"] != "admin":
-        raise HTTPException(status_code=403)
-    rows = db.query(SyncLog).order_by(SyncLog.id.desc()).limit(50).all()
-    from datetime import timezone, timedelta
-    tz_kz = timezone(timedelta(hours=5))
-    result = []
-    for r in rows:
-        # конвертируем utc → UTC+5
-        dt_kz = r.synced_at.replace(tzinfo=timezone.utc).astimezone(tz_kz) if r.synced_at else None
-        result.append({
-            "id": r.id,
-            "synced_at": dt_kz.strftime("%d.%m.%Y %H:%M:%S") if dt_kz else None,
-            "total_found": r.total_found,
-            "added": r.added,
-            "updated": r.updated,
-            "returns": r.returns,
-            "deducted": r.deducted,
-            "error": r.error,
-        })
-    return result
 
 
 # ─── Товары ──────────────────────────────────────────────────
@@ -2273,99 +2133,6 @@ async def import_price_list(
     _save_upload(content, original_name, "price_list", created, db)
     return {"created": created}
 
-
-@app.post("/api/products/{product_id}/verify")
-def toggle_verify(product_id: int, body: dict, db: Session = Depends(get_db)):
-    from database import Product as _P
-    p = db.query(_P).filter(_P.id == product_id).first()
-    if not p:
-        raise HTTPException(status_code=404, detail="Товар не найден")
-    p.verified = 1 if body.get("verified") else 0
-    db.commit()
-    return {"id": p.id, "verified": p.verified}
-
-
-@app.get("/api/review-products")
-def products_review(
-    verified: Optional[str] = None,  # "yes" | "no" | None = все
-    search: Optional[str] = None,
-    supplier: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db)
-):
-    from database import Product as _P
-    q = db.query(_P).filter(_P.category != "Накладные")
-    if verified == "yes":
-        q = q.filter(_P.verified == 1)
-    elif verified == "no":
-        q = q.filter((_P.verified == None) | (_P.verified == 0))
-    if supplier:
-        q = q.filter(_P.supplier == supplier)
-    if search:
-        q = q.filter(_P.name.ilike(f"%{search}%"))
-    total = q.count()
-    products = q.order_by(_P.supplier, _P.name).offset(skip).limit(limit).all()
-    return {
-        "total": total,
-        "items": [{
-            "id": p.id,
-            "name": p.name,
-            "sku": p.kaspi_sku or "",
-            "category": p.category,
-            "supplier": p.supplier or "",
-            "cost_price": p.cost_price,
-            "price": p.price,
-            "unit": p.unit or "шт",
-            "verified": bool(p.verified),
-            "kaspi_sku": p.kaspi_sku or "",
-            "supplier_article": p.supplier_article or "",
-            "stock": crud.get_stock(p.id, db),
-        } for p in products]
-    }
-
-
-@app.post("/api/reset-products")
-def reset_products(body: dict, db: Session = Depends(get_db)):
-    """Удаляет все товары и движения. Требует подтверждения."""
-    from database import Product as _P, Movement
-    if body.get("confirm") != "DELETE ALL PRODUCTS":
-        raise HTTPException(status_code=400, detail="Неверное подтверждение")
-    movements = db.query(Movement).delete()
-    products = db.query(_P).delete()
-    db.commit()
-    return {"deleted_products": products, "deleted_movements": movements}
-
-
-@app.post("/api/clean-bad-articles")
-def clean_bad_articles(db: Session = Depends(get_db)):
-    """Очищает мусор:
-    1. Обнуляет KSP_... в поле sku (технический мусор, kaspi_sku хранится отдельно)
-    2. Удаляет KSP_ и PL- из supplier_article и barcode
-    3. Если barcode == supplier_article — обнуляет barcode
-    """
-    from database import Product as _P
-    cleaned = 0
-    for p in db.query(_P).all():
-        changed = False
-        for field in ("supplier_article", "barcode"):
-            val = getattr(p, field)
-            if val and (val.upper().startswith("KSP_") or val.upper().startswith("PL-")):
-                setattr(p, field, None)
-                changed = True
-        if p.barcode and p.supplier_article and p.barcode == p.supplier_article:
-            p.barcode = None
-            changed = True
-        if changed:
-            cleaned += 1
-    db.commit()
-    return {"cleaned": cleaned}
-
-
-@app.get("/review")
-def review_page():
-    from fastapi.responses import FileResponse
-    return FileResponse("static/review.html")
 
 
 # ── Дизайн-токены (тема) ─────────────────────────────────────────────────────

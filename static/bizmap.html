@@ -39,11 +39,11 @@ svg.arrows { position: absolute; top: 0; left: 0; overflow: visible; pointer-eve
 .c-import:hover { box-shadow: 0 8px 30px rgba(217,119,6,.4); }
 .c-ref      { background: #1c1917; border-color: #f59e0b; color: #fef3c7; }
 .c-ref:hover { box-shadow: 0 8px 30px rgba(245,158,11,.4); }
-.c-merge    { background: #0f172a; border-color: #6c63ff; color: #c4b5fd; }
+.c-merge    { background: #0f172a; border-color: var(--accent); color: #c4b5fd; }
 .c-merge:hover { box-shadow: 0 8px 30px rgba(108,99,255,.5); }
 .c-kaspi    { background: #082f49; border-color: #0ea5e9; color: #bae6fd; }
 .c-kaspi:hover { box-shadow: 0 8px 30px rgba(14,165,233,.4); }
-.c-product  { background: #052e16; border-color: #10b981; color: #a7f3d0; }
+.c-product  { background: #052e16; border-color: var(--green); color: #a7f3d0; }
 .c-product:hover { box-shadow: 0 8px 30px rgba(16,185,129,.4); }
 .c-order    { background: #1a0527; border-color: #a855f7; color: #e9d5ff; }
 .c-order:hover { box-shadow: 0 8px 30px rgba(168,85,247,.4); }
@@ -66,7 +66,7 @@ svg.arrows { position: absolute; top: 0; left: 0; overflow: visible; pointer-eve
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🗺️ Бизнес-процессы</h1>
   <div class="header-right">
     <span class="hint">Скролл — масштаб · Тащи — перемещение</span>
@@ -84,7 +84,7 @@ svg.arrows { position: absolute; top: 0; left: 0; overflow: visible; pointer-eve
 <div class="legend">
   <div><div class="leg-dot" style="background:#4f46e5"></div>Поставщики</div>
   <div><div class="leg-dot" style="background:#f59e0b"></div>Импорт данных</div>
-  <div><div class="leg-dot" style="background:#10b981"></div>Склад и товары</div>
+  <div><div class="leg-dot" style="background:var(--green)"></div>Склад и товары</div>
   <div><div class="leg-dot" style="background:#a855f7"></div>Продажи</div>
   <div><div class="leg-dot" style="background:#818cf8"></div>Аналитика</div>
 </div>

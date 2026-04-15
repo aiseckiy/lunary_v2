@@ -45,7 +45,7 @@
 .abc-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:700; }
 .abc-A { background:#6366f11a; color:#6366f1; border:1px solid #6366f130; }
 .abc-B { background:#f9731620; color:#f97316; border:1px solid #f9731630; }
-.abc-C { background:#52525b30; color:#9ca3af; border:1px solid #52525b40; }
+.abc-C { background:#52525b30; color: var(--text3); border:1px solid #52525b40; }
 
 .bar-bg { background:var(--bg); border-radius:8px; height:6px; overflow:hidden; }
 .bar-fill { height:100%; border-radius:8px; background:var(--accent); transition:width .3s; }
@@ -54,37 +54,37 @@
 
 /* Forecast */
 .forecast-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
-.forecast-card { background:transparent; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
+.forecast-card { background:transparent; border:1px solid var(--border); border-radius:12px; padding:16px; }
 .forecast-card.rec-urgent { border-color:#ef4444; background:#fff5f5; }
 .forecast-card.rec-order  { border-color:#f59e0b; background:#fffbeb; }
 .forecast-card.rec-watch  { border-color:#6366f1; background:#f5f3ff; }
 .fc-name { font-size:13px; font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fc-meta { font-size:11px; color:#9ca3af; margin-bottom:10px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.fc-meta { font-size:11px; color: var(--text3); margin-bottom:10px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
 .fc-trend { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; }
 .trend-up { background:#22c55e1a; color:#22c55e; }
 .trend-down { background:#ef44441a; color:#ef4444; }
-.trend-flat { background:#f3f4f6; color:#9ca3af; }
+.trend-flat { background:#f3f4f6; color: var(--text3); }
 .fc-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
 .fc-badge-urgent { background:#ef4444; color:#fff; }
 .fc-badge-order  { background:#f59e0b; color:#fff; }
 .fc-badge-watch  { background:#6366f1; color:#fff; }
-.fc-badge-ok     { background:#f3f4f6; color:#9ca3af; }
+.fc-badge-ok     { background:#f3f4f6; color: var(--text3); }
 .fc-weeks { display:flex; gap:4px; align-items:flex-end; height:50px; margin-bottom:8px; }
 .fc-bar { flex:1; border-radius:3px 3px 0 0; min-height:3px; }
 .fc-bar.hist { background:#6366f1; }
 .fc-bar.pred { background:#6366f150; border:1px dashed #6366f1; }
 .fc-row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
-.fc-label { font-size:11px; color:#9ca3af; }
-.fc-val { font-size:13px; font-weight:700; color:#111827; }
+.fc-label { font-size:11px; color: var(--text3); }
+.fc-val { font-size:13px; font-weight:700; color: var(--text); }
 
 /* Correlation */
 .corr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
-.corr-card { background:transparent; border:1px solid #e5e7eb; border-radius:10px; padding:14px; }
-.corr-name { font-size:12px; color:#6b7280; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.corr-card { background:transparent; border:1px solid var(--border); border-radius:10px; padding:14px; }
+.corr-name { font-size:12px; color: var(--text2); margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .corr-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; }
 .corr-high { background:#22c55e1a; color:#22c55e; }
 .corr-mid { background:#f9731620; color:#f97316; }
-.corr-low { background:#f3f4f6; color:#9ca3af; }
+.corr-low { background:#f3f4f6; color: var(--text3); }
 @media (max-width: 768px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
   .stat-card { padding: 12px !important; }
@@ -137,7 +137,7 @@
         <div class="section-title">🏷️ ABC-анализ товаров</div>
         <div class="section-sub">A — 80% выручки &nbsp;·&nbsp; B — 15% &nbsp;·&nbsp; C — 5%</div>
       </div>
-      <div id="abc-summary" style="font-size:12px;color:#9ca3af;text-align:right"></div>
+      <div id="abc-summary" style="font-size:12px;color: var(--text3);text-align:right"></div>
     </div>
     <div class="abc-legend">
       <div class="abc-pill"><div class="abc-dot dot-a"></div><span>Группа A — ключевые товары</span></div>
@@ -154,9 +154,9 @@
         <div class="section-title">🔮 Прогноз спроса</div>
         <div class="section-sub">Тренд + сезонность · топ-20 товаров</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color: var(--text2)">
         <label style="white-space:nowrap">⏱ Срок поставки:</label>
-        <select id="lead-time-select" onchange="loadForecast()" style="border:1px solid #e5e7eb;border-radius:7px;padding:4px 8px;font-size:13px;background:#fff;cursor:pointer">
+        <select id="lead-time-select" onchange="loadForecast()" style="border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:13px;background:#fff;cursor:pointer">
           <option value="7">7 дней</option>
           <option value="14" selected>14 дней</option>
           <option value="21">21 день</option>
@@ -453,7 +453,7 @@ async function loadForecast() {
     const d = await fetch('/api/analytics/forecast' + dateParams() + `&lead_time=${leadTime}`).then(r => r.json());
     const products = d.products || [];
     if (!products.length) {
-      document.getElementById('forecast-grid').innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:20px">Нет данных для прогноза (нужно минимум 3 недели продаж)</div>';
+      document.getElementById('forecast-grid').innerHTML = '<div style="color: var(--text3);font-size:13px;padding:20px">Нет данных для прогноза (нужно минимум 3 недели продаж)</div>';
       return;
     }
 
@@ -504,7 +504,7 @@ async function loadForecast() {
             <span title="Волатильность спроса" style="color:${volColor};font-size:10px">⚡ ${p.volatility_label}</span>
           </div>
           <div class="fc-weeks">${histBars}${predBars}</div>
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color: var(--text3);margin-bottom:8px">
             <span>← история (${p.weeks.length} нед)</span>
             <span>прогноз с сезонностью →</span>
           </div>
@@ -518,9 +518,9 @@ async function loadForecast() {
           </div>
           ${daysLeftHtml}
           ${p.order_qty ? `
-          <div class="fc-row" style="margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb">
+          <div class="fc-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
             <span class="fc-label" style="font-weight:600">📦 Заказать</span>
-            <span class="fc-val" style="font-weight:700;color:#7c3aed">${p.order_qty} ${p.unit || 'шт'}</span>
+            <span class="fc-val" style="font-weight:700;color:var(--purple)">${p.order_qty} ${p.unit || 'шт'}</span>
           </div>` : ''}
         </div>`;
     }).join('');

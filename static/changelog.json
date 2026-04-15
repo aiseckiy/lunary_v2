@@ -1,5 +1,10 @@
 [
   {
+    "hash": "ef54ede",
+    "date": "16.04.2026",
+    "message": "Дизайн-система: расширение layout.css"
+  },
+  {
     "hash": "f7ff56d",
     "date": "15.04.2026",
     "message": "Аналитика: order_qty и lead_time в прогнозе спроса"

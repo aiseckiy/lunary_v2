@@ -6,20 +6,20 @@
 <title>Предпросмотр экспорта Kaspi XML</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
-.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+.header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
 .header h1 { font-size: 17px; font-weight: 700; }
 .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .btn { padding: 8px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
-.btn-primary { background: #6c63ff; color: #fff; }
-.btn-primary:hover { background: #5b52e0; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
 .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
 .btn-outline:hover { background: #f9fafb; }
 .btn-danger { background: #fff; color: #ef4444; border: 1px solid #fca5a5; }
 .btn-danger:hover { background: #fee2e2; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.chip-blue   { background: #dbeafe; color: #1e40af; }
+.chip-blue   { background: #dbeafe; color: var(--blue-text, #1e40af); }
 .chip-green  { background: #d1fae5; color: #065f46; }
 .chip-red    { background: #fee2e2; color: #991b1b; }
 .chip-yellow { background: #fef9c3; color: #92400e; }
@@ -29,59 +29,59 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .warning-banner { background: #fef9c3; border: 1.5px solid #fde047; border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #92400e; display: flex; gap: 10px; align-items: flex-start; }
 .warning-banner b { display: block; margin-bottom: 4px; font-size: 14px; }
 
-.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
 .card-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
 
 .stats-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .stat-box { flex: 1; min-width: 120px; background: #f9fafb; border-radius: 12px; padding: 12px 16px; text-align: center; }
 .stat-num { font-size: 22px; font-weight: 800; }
-.stat-num.green  { color: #10b981; }
+.stat-num.green  { color: var(--green); }
 .stat-num.red    { color: #ef4444; }
 .stat-num.yellow { color: #f59e0b; }
-.stat-num.blue   { color: #6c63ff; }
-.stat-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.stat-num.blue   { color: var(--accent); }
+.stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
 .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; outline: none; }
-.search-input:focus { border-color: #6c63ff; }
-.filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .1s; color: #374151; }
-.filter-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+.search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; outline: none; }
+.search-input:focus { border-color: var(--accent); }
+.filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .1s; color: #374151; }
+.filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .filter-btn.red.active { background: #ef4444; border-color: #ef4444; }
 .filter-btn.yellow.active { background: #f59e0b; border-color: #f59e0b; color: #fff; }
 
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none; }
+thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); background: #f9fafb; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
 thead th:hover { background: #f3f4f6; }
-thead th.sorted { color: #6c63ff; }
+thead th.sorted { color: var(--accent); }
 tbody tr { border-bottom: 1px solid #f3f4f6; }
 tbody tr:hover { background: #f9fafb; }
 tbody td { padding: 10px 12px; vertical-align: middle; }
 .td-name { font-weight: 500; max-width: 280px; }
-.td-sku { font-family: monospace; font-size: 11px; color: #6c63ff; }
-.avail-yes { color: #10b981; font-weight: 700; }
+.td-sku { font-family: monospace; font-size: 11px; color: var(--accent); }
+.avail-yes { color: var(--green); font-weight: 700; }
 .avail-no  { color: #ef4444; font-weight: 700; }
 .stock-zero { color: #ef4444; }
-.stock-ok   { color: #10b981; font-weight: 600; }
+.stock-ok   { color: var(--green); font-weight: 600; }
 .stock-low  { color: #f59e0b; font-weight: 600; }
-.no-price   { color: #9ca3af; font-style: italic; font-size: 12px; }
+.no-price   { color: var(--text3); font-style: italic; font-size: 12px; }
 .multi-sku  { display: inline-block; background: #fef9c3; color: #92400e; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
 .problem-row { background: #fff7f7 !important; }
-.loading { text-align: center; padding: 60px; color: #9ca3af; }
-.empty   { text-align: center; padding: 40px; color: #9ca3af; font-size: 13px; }
-.count-info { font-size: 13px; color: #6b7280; }
+.loading { text-align: center; padding: 60px; color: var(--text3); }
+.empty   { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+.count-info { font-size: 13px; color: var(--text2); }
 
 .pagination { display: flex; gap: 8px; align-items: center; padding-top: 14px; flex-wrap: wrap; }
 .page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; }
 .page-btn:hover:not(:disabled) { background: #f9fafb; }
 .page-btn:disabled { opacity: .4; cursor: not-allowed; }
-.page-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+.page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🔍 Предпросмотр экспорта Kaspi XML</h1>
   <div class="header-right">
     <span class="chip chip-blue" id="chip-total">— товаров</span>
@@ -256,11 +256,11 @@ function render() {
     return `<tr class="${hasProblem ? 'problem-row' : ''}">
       <td class="td-name">${r.name}${r.multi_sku ? '<span class="multi-sku">2+ SKU</span>' : ''}</td>
       <td class="td-sku">${r.sku}</td>
-      <td style="font-size:12px;color:#6b7280">${r.brand || '—'}</td>
+      <td style="font-size:12px;color: var(--text2)">${r.brand || '—'}</td>
       <td><span class="${stockClass}">${r.stock}</span></td>
       <td>${r.stock > 0 ? '<span class="avail-yes">✅ да</span>' : '<span class="avail-no">❌ нет</span>'}</td>
       <td>${r.price ? r.price.toLocaleString() + ' ₸' : '<span class="no-price">нет цены</span>'}</td>
-      <td>${problemsHtml || '<span style="color:#9ca3af;font-size:12px">—</span>'}</td>
+      <td>${problemsHtml || '<span style="color: var(--text3);font-size:12px">—</span>'}</td>
     </tr>`;
   }).join('');
 
@@ -274,7 +274,7 @@ function render() {
   for (let i = s; i <= e; i++) pag += `<button class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`;
   if (e < pages) pag += `${e < pages-1 ? '…' : ''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
   pag += `<button class="page-btn" onclick="goPage(${page+1})" ${page===pages?'disabled':''}>Вперёд →</button>`;
-  pag += `<span style="font-size:13px;color:#6b7280">Стр. ${page} из ${pages}</span>`;
+  pag += `<span style="font-size:13px;color: var(--text2)">Стр. ${page} из ${pages}</span>`;
   document.getElementById('pagination').innerHTML = pag;
 }
 

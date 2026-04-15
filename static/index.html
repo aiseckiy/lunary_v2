@@ -186,7 +186,7 @@
     <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight:600">📦 Приёмка</button>
     <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight:600">🛒 Закупки</button>
     <a class="sort-btn" id="btn-xlsx" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
-    <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;font-weight:600">✨ AI описания</button>
+    <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:var(--purple);font-weight:600">✨ AI описания</button>
   </div>
 
   <!-- Строка 2: фильтры -->
@@ -216,27 +216,27 @@
         <span id="missing-label">Не заполнено</span> <span style="font-size:10px">▼</span>
       </button>
       <div class="fdrop-menu" id="missing-menu" style="min-width:210px">
-        <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
+        <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color: var(--text3);text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-price"   onchange="toggleMissing()" style="accent-color:#6c63ff"> Цены продажи
+          <input type="checkbox" id="miss-price"   onchange="toggleMissing()" style="accent-color:var(--accent)"> Цены продажи
         </label>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-cost"    onchange="toggleMissing()" style="accent-color:#6c63ff"> Закупочной цены
+          <input type="checkbox" id="miss-cost"    onchange="toggleMissing()" style="accent-color:var(--accent)"> Закупочной цены
         </label>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-article" onchange="toggleMissing()" style="accent-color:#6c63ff"> Артикула производителя
+          <input type="checkbox" id="miss-article" onchange="toggleMissing()" style="accent-color:var(--accent)"> Артикула производителя
         </label>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-supplier" onchange="toggleMissing()" style="accent-color:#6c63ff"> Поставщика
+          <input type="checkbox" id="miss-supplier" onchange="toggleMissing()" style="accent-color:var(--accent)"> Поставщика
         </label>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-barcode" onchange="toggleMissing()" style="accent-color:#6c63ff"> Штрихкода
+          <input type="checkbox" id="miss-barcode" onchange="toggleMissing()" style="accent-color:var(--accent)"> Штрихкода
         </label>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-stock"   onchange="toggleMissing()" style="accent-color:#6c63ff"> Остатка (= 0)
+          <input type="checkbox" id="miss-stock"   onchange="toggleMissing()" style="accent-color:var(--accent)"> Остатка (= 0)
         </label>
         <div style="padding:8px 12px 4px">
-          <button onclick="clearMissing()" style="font-size:12px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:0">Сбросить всё</button>
+          <button onclick="clearMissing()" style="font-size:12px;color: var(--text3);background:none;border:none;cursor:pointer;padding:0">Сбросить всё</button>
         </div>
       </div>
     </div>
@@ -494,7 +494,7 @@
           <label class="form-label">Бренд</label>
           <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX..." autocomplete="off"
             oninput="filterBrandList(this.value)" onfocus="showBrandList()" onblur="setTimeout(hideBrandList,150)">
-          <div id="brand-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.1);z-index:400;max-height:200px;overflow-y:auto;margin-top:2px"></div>
+          <div id="brand-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.1);z-index:400;max-height:200px;overflow-y:auto;margin-top:2px"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Цена (₸)</label>
@@ -511,7 +511,7 @@
         <datalist id="suppliers-list"></datalist>
       </div>
       <div class="form-group">
-        <label class="form-label">Kaspi SKU <span style="font-size:11px;color:#9ca3af;font-weight:400">(для заказов)</span></label>
+        <label class="form-label">Kaspi SKU <span style="font-size:11px;color: var(--text3);font-weight:400">(для заказов)</span></label>
         <div id="em-kaspi-sku-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
         <button type="button" onclick="addKaspiSkuField()" style="background:none;border:1px dashed var(--border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--accent);cursor:pointer;width:100%">+ Добавить SKU</button>
       </div>
@@ -903,8 +903,8 @@ function productCard(p) {
       ${p.kaspi_sku ? `<div class="card-kaspi-sku">${p.kaspi_sku}</div>` : ''}
       <div class="card-bottom">
         <div>
-          <div class="card-stock ${p.low?'low':'ok'}" data-tip="${statusTip}">${p.stock} <span style="font-size:14px;font-weight:500;color:#9ca3af">${p.unit}</span></div>
-          ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${margin !== null ? ` <span style="color:#10b981;font-size:11px;font-weight:500" data-tip="${marginTip}">+${margin}%</span>` : (p.price && !p.cost_price ? ` <span style="color:#d1d5db;font-size:11px" data-tip="Закупочная цена не указана">—%</span>` : '')}</div>` : ''}
+          <div class="card-stock ${p.low?'low':'ok'}" data-tip="${statusTip}">${p.stock} <span style="font-size:14px;font-weight:500;color: var(--text3)">${p.unit}</span></div>
+          ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${margin !== null ? ` <span style="color:var(--green);font-size:11px;font-weight:500" data-tip="${marginTip}">+${margin}%</span>` : (p.price && !p.cost_price ? ` <span style="color:#d1d5db;font-size:11px" data-tip="Закупочная цена не указана">—%</span>` : '')}</div>` : ''}
         </div>
         <button class="card-btn" onclick="event.stopPropagation();openMoveModal(${p.id})" title="Движение склада">⇅</button>
       </div>
@@ -1331,7 +1331,7 @@ function renderKaspiSkuList(skus) {
   container.innerHTML = skus.map((sku, i) => `
     <div style="display:flex;gap:6px;align-items:center">
       <input class="form-input em-kaspi-sku-input" value="${sku}" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0">
-      <button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color:#9ca3af;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>
+      <button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color: var(--text3);cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>
     </div>`).join('');
 }
 
@@ -1339,7 +1339,7 @@ function addKaspiSkuField() {
   const container = document.getElementById('em-kaspi-sku-list');
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:6px;align-items:center';
-  div.innerHTML = `<input class="form-input em-kaspi-sku-input" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0"><button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color:#9ca3af;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>`;
+  div.innerHTML = `<input class="form-input em-kaspi-sku-input" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0"><button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color: var(--text3);cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>`;
   container.appendChild(div);
   div.querySelector('input').focus();
 }

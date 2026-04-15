@@ -6,24 +6,24 @@
 <title>Загруженные файлы</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
-.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+.header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 17px; font-weight: 700; }
 
 .container { max-width: 900px; margin: 32px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
 
-.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; padding: 4px 0; }
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); padding: 4px 0; }
 
-.file-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
+.file-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
 .file-card.missing { opacity: .6; }
 .file-icon { font-size: 28px; flex-shrink: 0; }
 .file-info { flex: 1; min-width: 0; }
 .file-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.file-meta { font-size: 12px; color: #9ca3af; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+.file-meta { font-size: 12px; color: var(--text3); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
 .file-meta span { display: flex; align-items: center; gap: 3px; }
 .type-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 5px; }
-.badge-kaspi-active  { background: #dbeafe; color: #1e40af; }
-.badge-kaspi-archive { background: #ede9fe; color: #5b21b6; }
+.badge-kaspi-active  { background: #dbeafe; color: var(--blue-text, #1e40af); }
+.badge-kaspi-archive { background: #ede9fe; color: var(--purple-text, #5b21b6); }
 .badge-price-list    { background: #fef9c3; color: #92400e; }
 .badge-pricelist-ref { background: #d1fae5; color: #065f46; }
 
@@ -35,11 +35,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-danger:hover  { background: #fee2e2; }
 .btn-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
 
-.empty { text-align: center; padding: 60px 20px; color: #9ca3af; font-size: 14px; }
-.loading { text-align: center; padding: 60px; color: #9ca3af; }
+.empty { text-align: center; padding: 60px 20px; color: var(--text3); font-size: 14px; }
+.loading { text-align: center; padding: 60px; color: var(--text3); }
 
 .group-header { display: flex; align-items: center; justify-content: space-between; }
-.count-chip { font-size: 12px; color: #9ca3af; }
+.count-chip { font-size: 12px; color: var(--text3); }
 
 .disk-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #92400e; }
 </style>
@@ -47,9 +47,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>📁 Загруженные файлы</h1>
-  <span style="font-size:13px;color:#9ca3af;margin-left:8px" id="total-count"></span>
+  <span style="font-size:13px;color: var(--text3);margin-left:8px" id="total-count"></span>
 </div>
 
 <div class="container" id="container">

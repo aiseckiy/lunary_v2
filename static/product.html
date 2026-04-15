@@ -168,8 +168,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .auth-logo span { color:var(--accent); }
 .auth-sub { font-size:13px; color:var(--text3); text-align:center; margin-bottom:20px; }
 .auth-tabs { display:flex; background:#f3f4f6; border-radius:10px; padding:4px; margin-bottom:18px; }
-.auth-tab { flex:1; text-align:center; padding:7px; font-size:14px; font-weight:500; color:#6b7280; cursor:pointer; border-radius:8px; transition:all .15s; }
-.auth-tab.active { background:#fff; color:#111827; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+.auth-tab { flex:1; text-align:center; padding:7px; font-size:14px; font-weight:500; color: var(--text2); cursor:pointer; border-radius:8px; transition:all .15s; }
+.auth-tab.active { background:#fff; color: var(--text); box-shadow:0 1px 4px rgba(0,0,0,.08); }
 .auth-err { background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:8px 12px; font-size:13px; color:#dc2626; display:none; margin-bottom:10px; }
 .auth-err.show { display:block; }
 .auth-label { font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; display:block; }
@@ -193,7 +193,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 /* Gallery */
 .gallery-wrap { position:relative; width:380px; flex-shrink:0; }
-.gallery-main { width:380px; height:380px; background:#fff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:80px; }
+.gallery-main { width:380px; height:380px; background:#fff; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:80px; }
 .gallery-main img { width:100%; height:100%; object-fit:contain; padding:12px; }
 .gallery-thumbs { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
 .gallery-thumb { width:44px; height:44px; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid transparent; background:#f3f4f6; display:flex; align-items:center; justify-content:center; font-size:18px; }
@@ -214,7 +214,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .stock-modal { background:#fff; border-radius:20px; width:100%; max-width:400px; padding:24px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
 .stock-modal h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
 .move-tabs { display:flex; gap:0; border:1px solid var(--border,#e5e7eb); border-radius:10px; overflow:hidden; margin-bottom:16px; }
-.move-tab { flex:1; padding:9px; text-align:center; font-size:13px; font-weight:600; cursor:pointer; background:#f9fafb; color:#6b7280; transition:all .15s; }
+.move-tab { flex:1; padding:9px; text-align:center; font-size:13px; font-weight:600; cursor:pointer; background:#f9fafb; color: var(--text2); transition:all .15s; }
 .move-tab.active { background:#0082EC; color:#fff; }
 .move-input { width:100%; border:1px solid var(--border,#e5e7eb); border-radius:10px; padding:10px 12px; font-size:16px; font-family:inherit; outline:none; text-align:center; font-weight:700; margin-bottom:10px; }
 .move-input:focus { border-color:#0082EC; }
@@ -231,24 +231,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .edit-modal h3 { font-size:16px; font-weight:700; margin-bottom:18px; }
 .edit-field { margin-bottom:14px; }
 .edit-label { display:block; font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; }
-.edit-input { width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; }
+.edit-input { width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; }
 .edit-input:focus { border-color:#0082EC; }
 
 /* Image section */
 .img-section-title { font-size:13px; font-weight:600; color:#374151; margin-bottom:10px; }
-.img-add-tabs { display:flex; gap:0; margin-bottom:12px; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
-.img-add-tab { flex:1; padding:8px; text-align:center; font-size:13px; font-weight:500; cursor:pointer; color:#6b7280; background:#f9fafb; transition:all .15s; }
+.img-add-tabs { display:flex; gap:0; margin-bottom:12px; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.img-add-tab { flex:1; padding:8px; text-align:center; font-size:13px; font-weight:500; cursor:pointer; color: var(--text2); background:#f9fafb; transition:all .15s; }
 .img-add-tab.active { background:#0082EC; color:#fff; }
-.img-drop { border:2px dashed #e5e7eb; border-radius:10px; padding:22px; text-align:center; cursor:pointer; color:#9ca3af; font-size:13px; transition:border-color .15s; }
+.img-drop { border:2px dashed #e5e7eb; border-radius:10px; padding:22px; text-align:center; cursor:pointer; color: var(--text3); font-size:13px; transition:border-color .15s; }
 .img-drop:hover, .img-drop.drag { border-color:#0082EC; color:#0082EC; }
 .img-url-row { display:flex; gap:8px; }
-.img-url-input { flex:1; border:1px solid #e5e7eb; border-radius:10px; padding:9px 12px; font-size:14px; font-family:inherit; outline:none; }
+.img-url-input { flex:1; border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:14px; font-family:inherit; outline:none; }
 .img-url-input:focus { border-color:#0082EC; }
 .btn-add-url { background:#0082EC; color:#fff; border:none; border-radius:10px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
 
 /* Images list */
 .imgs-list { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; min-height:0; }
-.img-item { position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; }
+.img-item { position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:#f3f4f6; }
 .img-item img { width:100%; height:100%; object-fit:cover; }
 .img-item-del { position:absolute; top:2px; right:2px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
 .img-item-main { position:absolute; bottom:2px; left:2px; background:rgba(99,102,241,.85); color:#fff; border-radius:4px; font-size:9px; font-weight:700; padding:1px 4px; }
@@ -257,7 +257,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-save { flex:1; background:#0082EC; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
 .btn-save:hover { background:#006DC5; }
 .btn-cancel-edit { flex:1; background:#f3f4f6; color:#374151; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
-.btn-edit-product { display:none; margin-top:12px; width:100%; padding:10px; background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-edit-product { display:none; margin-top:12px; width:100%; padding:10px; background:#f3f4f6; color:#374151; border:1px solid var(--border); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
 .btn-edit-product:hover { background:#e5e7eb; }
 </style>
 </head>
@@ -316,15 +316,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 <div class="container" id="container">
-  <div style="text-align:center;padding:60px 0;color:#9ca3af">Загрузка...</div>
+  <div style="text-align:center;padding:60px 0;color: var(--text3)">Загрузка...</div>
 </div>
 
 <!-- Stock modal -->
 <div class="stock-overlay" id="stock-overlay" onclick="if(event.target===this)closeStockModal()">
   <div class="stock-modal">
     <h3>📦 Движение склада</h3>
-    <div id="sm-product-name" style="font-size:14px;font-weight:600;margin-bottom:4px;color:#111827"></div>
-    <div id="sm-stock-info" style="font-size:13px;color:#9ca3af;margin-bottom:14px"></div>
+    <div id="sm-product-name" style="font-size:14px;font-weight:600;margin-bottom:4px;color: var(--text)"></div>
+    <div id="sm-stock-info" style="font-size:13px;color: var(--text3);margin-bottom:14px"></div>
     <div class="move-tabs">
       <div class="move-tab active" id="sm-tab-income" onclick="smSetTab('income')">➕ Приход</div>
       <div class="move-tab" id="sm-tab-sale" onclick="smSetTab('sale')">➖ Продажа</div>
@@ -362,7 +362,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="edit-field">
       <label class="edit-label" style="display:flex;align-items:center;justify-content:space-between">
         Описание
-        <button id="btn-ai-describe" onclick="aiDescribe()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+        <button id="btn-ai-describe" onclick="aiDescribe()" style="background:var(--purple);color:#fff;border:none;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
           ✨ AI заполнить
         </button>
       </label>
@@ -382,7 +382,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       🔍 Найти картинки на Kaspi
     </button>
     <div id="image-search-results" style="display:none;margin-bottom:12px">
-      <div style="font-size:12px;color:#9ca3af;margin-bottom:8px" id="img-search-hint">Нажмите на картинку чтобы добавить</div>
+      <div style="font-size:12px;color: var(--text3);margin-bottom:8px" id="img-search-hint">Нажмите на картинку чтобы добавить</div>
       <div id="img-search-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"></div>
     </div>
 
@@ -401,7 +401,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <input class="img-url-input" id="e-img-url" type="url" placeholder="https://example.com/photo.jpg" oninput="previewUrl(this.value)" onkeydown="if(event.key==='Enter')addImageUrl()">
         <button class="btn-add-url" onclick="addImageUrl()">Добавить</button>
       </div>
-      <div id="url-preview" style="display:none;margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#f9fafb;padding:8px;text-align:center">
+      <div id="url-preview" style="display:none;margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#f9fafb;padding:8px;text-align:center">
         <img id="url-preview-img" src="" style="max-height:160px;max-width:100%;object-fit:contain;border-radius:6px" onerror="urlPreviewError()" onload="urlPreviewOk()">
         <div id="url-preview-err" style="display:none;font-size:12px;color:#ef4444;padding:8px">⚠️ Картинка не загружается — возможно сайт блокирует прямые ссылки</div>
       </div>
@@ -410,19 +410,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <!-- SEO секция -->
     <div class="img-section-title" style="margin-top:16px;display:flex;align-items:center;gap:8px">
       🔍 SEO для поиска Google
-      <span style="font-size:11px;font-weight:400;color:#9ca3af">заполняется AI автоматически</span>
+      <span style="font-size:11px;font-weight:400;color: var(--text3)">заполняется AI автоматически</span>
     </div>
     <div class="edit-field">
       <label class="edit-label" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Заголовок страницы <span id="seo-title-len" style="color:#9ca3af;font-weight:400"></span></span>
-        <span style="font-size:11px;color:#9ca3af">50–60 символов</span>
+        <span>Заголовок страницы <span id="seo-title-len" style="color: var(--text3);font-weight:400"></span></span>
+        <span style="font-size:11px;color: var(--text3)">50–60 символов</span>
       </label>
       <input class="edit-input" id="e-meta-title" type="text" maxlength="70" placeholder="Цемент М500 50кг купить в Алматы | LUNARY" oninput="updateSeoLen()">
     </div>
     <div class="edit-field">
       <label class="edit-label" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Мета-описание <span id="seo-desc-len" style="color:#9ca3af;font-weight:400"></span></span>
-        <span style="font-size:11px;color:#9ca3af">150–160 символов</span>
+        <span>Мета-описание <span id="seo-desc-len" style="color: var(--text3);font-weight:400"></span></span>
+        <span style="font-size:11px;color: var(--text3)">150–160 символов</span>
       </label>
       <textarea class="edit-input" id="e-meta-description" rows="2" maxlength="200" style="resize:vertical" placeholder="Купите Цемент М500 50кг в Алматы. Цена 3 500 ₸. В наличии. Доставка по Казахстану." oninput="updateSeoLen()"></textarea>
     </div>
@@ -432,7 +432,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <!-- Превью как это выглядит в Google -->
     <div id="seo-preview" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-top:4px;font-family:Arial,sans-serif">
-      <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;font-weight:600;letter-spacing:.3px">ПРЕВЬЮ В GOOGLE</div>
+      <div style="font-size:11px;color: var(--text3);margin-bottom:8px;font-weight:600;letter-spacing:.3px">ПРЕВЬЮ В GOOGLE</div>
       <div id="seo-prev-url" style="font-size:12px;color:#188038">www.lunary.kz › shop › product › ...</div>
       <div id="seo-prev-title" style="font-size:18px;color:#1a0dab;font-weight:400;line-height:1.3;margin:2px 0;cursor:pointer">—</div>
       <div id="seo-prev-desc" style="font-size:13px;color:#4d5156;line-height:1.5">—</div>
@@ -496,7 +496,7 @@ function categoryEmoji(cat) {
 async function loadProduct() {
   try {
     const res = await fetch(`/api/store/products/${productId}`);
-    if (!res.ok) { document.getElementById('container').innerHTML = '<div style="text-align:center;padding:60px 0;color:#9ca3af"><div style="font-size:48px;margin-bottom:12px">😕</div><div>Товар не найден</div><a href="/shop" style="color:#0082EC;text-decoration:none;margin-top:12px;display:block">← В каталог</a></div>'; return; }
+    if (!res.ok) { document.getElementById('container').innerHTML = '<div style="text-align:center;padding:60px 0;color: var(--text3)"><div style="font-size:48px;margin-bottom:12px">😕</div><div>Товар не найден</div><a href="/shop" style="color:#0082EC;text-decoration:none;margin-top:12px;display:block">← В каталог</a></div>'; return; }
     product = await res.json();
     document.title = `${product.name} — LUNARY`;
     renderProduct();
@@ -662,7 +662,7 @@ function switchImgTab(tab) {
 
 function renderImgsList() {
   const list = document.getElementById('imgs-list');
-  if (!editImages.length) { list.innerHTML = '<span style="font-size:12px;color:#9ca3af">Нет фотографий</span>'; return; }
+  if (!editImages.length) { list.innerHTML = '<span style="font-size:12px;color: var(--text3)">Нет фотографий</span>'; return; }
   list.innerHTML = editImages.map((src, i) => `
     <div class="img-item">
       <img src="${src}" onerror="this.style.display='none'">

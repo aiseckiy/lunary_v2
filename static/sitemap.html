@@ -6,73 +6,73 @@
 <title>Карта сайта — Lunary OS</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
-.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+.header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 17px; font-weight: 700; }
 .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-.btn { padding: 7px 16px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #374151; }
+.btn { padding: 7px 16px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #374151; }
 .btn:hover { background: #f9fafb; }
-.last-updated { font-size: 12px; color: #9ca3af; }
+.last-updated { font-size: 12px; color: var(--text3); }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 32px; }
 
 .group { display: flex; flex-direction: column; gap: 12px; }
-.group-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #6b7280; padding: 0 4px; display: flex; align-items: center; gap: 8px; }
+.group-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text2); padding: 0 4px; display: flex; align-items: center; gap: 8px; }
 .group-title::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
 
 .card { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 16px; padding: 18px 20px; text-decoration: none; color: inherit; transition: all .15s; display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
-.card:hover { border-color: #6c63ff; box-shadow: 0 4px 20px rgba(108,99,255,.1); transform: translateY(-2px); }
+.card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(108,99,255,.1); transform: translateY(-2px); }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .card-icon { font-size: 26px; line-height: 1; }
 .card-stat { background: #f3f4f6; border-radius: 10px; padding: 3px 10px; font-size: 12px; font-weight: 700; color: #374151; white-space: nowrap; }
-.card-stat.loading { color: #9ca3af; }
+.card-stat.loading { color: var(--text3); }
 .card-stat.green { background: #d1fae5; color: #065f46; }
-.card-stat.blue  { background: #dbeafe; color: #1e40af; }
+.card-stat.blue  { background: #dbeafe; color: var(--blue-text, #1e40af); }
 .card-stat.yellow{ background: #fef9c3; color: #92400e; }
-.card-stat.purple{ background: #ede9fe; color: #5b21b6; }
+.card-stat.purple{ background: #ede9fe; color: var(--purple-text, #5b21b6); }
 .card-name { font-size: 15px; font-weight: 700; line-height: 1.2; }
-.card-desc { font-size: 12px; color: #6b7280; line-height: 1.4; }
+.card-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
 .card-arrow { position: absolute; bottom: 16px; right: 18px; font-size: 16px; color: #d1d5db; transition: color .15s; }
-.card:hover .card-arrow { color: #6c63ff; }
+.card:hover .card-arrow { color: var(--accent); }
 
 /* Цвета групп */
-.card.склад   { border-top: 3px solid #6c63ff; }
-.card.продажи { border-top: 3px solid #10b981; }
+.card.склад   { border-top: 3px solid var(--accent); }
+.card.продажи { border-top: 3px solid var(--green); }
 .card.данные  { border-top: 3px solid #f59e0b; }
 .card.система { border-top: 3px solid #6b7280; }
 
 /* Секция API */
-.api-section { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px 24px; }
+.api-section { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; }
 .api-title { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: #374151; }
 .api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
 .api-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: #f9fafb; font-size: 12px; }
 .method { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; flex-shrink: 0; }
-.get  { background: #dbeafe; color: #1e40af; }
+.get  { background: #dbeafe; color: var(--blue-text, #1e40af); }
 .post { background: #d1fae5; color: #065f46; }
 .del  { background: #fee2e2; color: #991b1b; }
 .api-path { font-family: monospace; color: #374151; flex: 1; }
-.api-desc { color: #9ca3af; font-size: 11px; }
+.api-desc { color: var(--text3); font-size: 11px; }
 
 .refresh-spin { animation: spin .8s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.sys-pill { display:inline-flex;align-items:center;gap:6px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#374151; }
+.sys-pill { display:inline-flex;align-items:center;gap:6px;background:#f3f4f6;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#374151; }
 .sys-pill.green  { background:#d1fae5;border-color:#6ee7b7;color:#065f46; }
 .sys-pill.red    { background:#fee2e2;border-color:#fca5a5;color:#991b1b; }
-.sys-pill.blue   { background:#dbeafe;border-color:#93c5fd;color:#1e40af; }
-.sys-pill.purple { background:#ede9fe;border-color:#c4b5fd;color:#5b21b6; }
+.sys-pill.blue   { background:#dbeafe;border-color:#93c5fd;color:var(--blue-text, #1e40af); }
+.sys-pill.purple { background:#ede9fe;border-color:#c4b5fd;color:var(--purple-text, #5b21b6); }
 .sys-pill.yellow { background:#fef9c3;border-color:#fde047;color:#92400e; }
 
 .process-card { background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
 .process-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
-.dot-running { background:#10b981;box-shadow:0 0 0 3px #d1fae5; }
+.dot-running { background:var(--green);box-shadow:0 0 0 3px #d1fae5; }
 .dot-idle    { background:#6b7280; }
 .dot-error   { background:#ef4444;box-shadow:0 0 0 3px #fee2e2; }
 .dot-starting{ background:#f59e0b;box-shadow:0 0 0 3px #fef9c3; }
 .process-name { font-size:14px;font-weight:700;min-width:180px; }
-.process-meta { font-size:12px;color:#6b7280;display:flex;gap:14px;flex-wrap:wrap;flex:1; }
+.process-meta { font-size:12px;color: var(--text2);display:flex;gap:14px;flex-wrap:wrap;flex:1; }
 .process-meta span { display:flex;align-items:center;gap:4px; }
 .process-err  { font-size:12px;color:#ef4444;background:#fee2e2;border-radius:8px;padding:3px 10px;margin-top:4px;width:100%; }
 .countdown { font-variant-numeric:tabular-nums; }
@@ -81,7 +81,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🗺️ Карта сайта</h1>
   <div class="header-right">
     <span class="last-updated" id="last-updated"></span>
@@ -231,7 +231,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
       <!-- Процессы -->
       <div id="processes-list" style="display:flex;flex-direction:column;gap:10px">
-        <div style="color:#9ca3af;font-size:13px">⏳ Загрузка процессов…</div>
+        <div style="color: var(--text3);font-size:13px">⏳ Загрузка процессов…</div>
       </div>
     </div>
   </div>

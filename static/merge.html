@@ -6,29 +6,29 @@
 <title>Слияние товаров</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 
-.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+.header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 17px; font-weight: 700; }
 .stats-chips { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
 .chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.chip-blue { background: #ede9fe; color: #5b21b6; }
+.chip-blue { background: #ede9fe; color: var(--purple-text, #5b21b6); }
 .chip-green { background: #d1fae5; color: #065f46; }
 .chip-yellow { background: #fef9c3; color: #92400e; }
 .chip-red { background: #fee2e2; color: #991b1b; }
 
 .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; height: calc(100vh - 55px); }
-.panel { display: flex; flex-direction: column; border-right: 1px solid #e5e7eb; overflow: hidden; }
+.panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
 .panel:last-child { border-right: none; }
-.panel-header { padding: 14px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.panel-header { padding: 14px 16px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .panel-title { font-size: 14px; font-weight: 700; }
-.panel-search { flex: 1; padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; }
-.panel-search:focus { border-color: #6c63ff; }
+.panel-search { flex: 1; padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; }
+.panel-search:focus { border-color: var(--accent); }
 .panel-body { overflow-y: auto; flex: 1; }
 
-.tabs-bar { display: flex; gap: 0; background: #f9fafb; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
-.ptab { padding: 9px 16px; font-size: 13px; font-weight: 500; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; }
-.ptab.active { color: #6c63ff; border-bottom-color: #6c63ff; background: #fff; }
+.tabs-bar { display: flex; gap: 0; background: #f9fafb; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.ptab { padding: 9px 16px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; }
+.ptab.active { color: var(--accent); border-bottom-color: var(--accent); background: #fff; }
 
 .product-item { padding: 10px 16px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .1s; display: flex; align-items: flex-start; gap: 10px; }
 .product-item:hover { background: #f9fafb; }
@@ -36,16 +36,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .product-item.matched:hover { background: #dcfce7; }
 .product-item.selected { background: #ede9fe; }
 .p-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
-.p-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
-.p-sku { font-family: monospace; font-size: 11px; color: #6c63ff; }
-.p-price { font-size: 12px; font-weight: 600; color: #10b981; }
+.p-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.p-sku { font-family: monospace; font-size: 11px; color: var(--accent); }
+.p-price { font-size: 12px; font-weight: 600; color: var(--green); }
 .p-cost { font-size: 12px; font-weight: 600; color: #f59e0b; }
 .tag { display: inline-block; background: #e5e7eb; color: #374151; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-right: 3px; }
-.tag-kaspi { background: #dbeafe; color: #1e40af; }
+.tag-kaspi { background: #dbeafe; color: var(--blue-text, #1e40af); }
 .match-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; flex-shrink: 0; margin-top: 2px; }
 .badge-sku { background: #d1fae5; color: #065f46; }
 .badge-fuzzy { background: #fef9c3; color: #92400e; }
-.score { font-size: 10px; color: #9ca3af; }
+.score { font-size: 10px; color: var(--text3); }
 
 .pair-item { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 8px; }
 .pair-item:hover { background: #fafafa; }
@@ -53,59 +53,59 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pair-side { flex: 1; background: #f9fafb; border-radius: 8px; padding: 8px 10px; min-width: 0; }
 .pair-side.kaspi { background: #eff6ff; }
 .pair-side.other { background: #fefce8; }
-.pair-arrow { font-size: 18px; color: #6c63ff; align-self: center; flex-shrink: 0; }
+.pair-arrow { font-size: 18px; color: var(--accent); align-self: center; flex-shrink: 0; }
 .pair-actions { display: flex; gap: 8px; align-items: center; }
-.pair-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #9ca3af; margin-bottom: 3px; }
+.pair-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); margin-bottom: 3px; }
 .highlight { background: #fef08a; border-radius: 3px; padding: 0 1px; }
 
-.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e5e7eb; padding: 12px 24px; display: flex; align-items: center; gap: 12px; z-index: 100; }
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 12px; z-index: 100; }
 .btn { padding: 8px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
-.btn-primary { background: #6c63ff; color: #fff; }
-.btn-primary:hover { background: #5b52e0; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
 .btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
 .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
 .btn-outline:hover { background: #f9fafb; }
 .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 8px; }
-.btn-merge-pair { background: #6c63ff; color: #fff; }
-.btn-merge-pair:hover { background: #5b52e0; }
+.btn-merge-pair { background: var(--accent); color: #fff; }
+.btn-merge-pair:hover { background: var(--accent-dark); }
 .pair-item.synced { opacity: .5; pointer-events: none; }
-.btn-skip { background: #f3f4f6; color: #6b7280; }
-.selected-count { font-size: 13px; color: #6b7280; margin-right: auto; }
+.btn-skip { background: #f3f4f6; color: var(--text2); }
+.selected-count { font-size: 13px; color: var(--text2); margin-right: auto; }
 
 .result-bar { background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #065f46; display: none; }
-.empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 13px; }
-.loading { text-align: center; padding: 60px; color: #9ca3af; }
+.empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
+.loading { text-align: center; padding: 60px; color: var(--text3); }
 
-input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #6c63ff; flex-shrink: 0; margin-top: 2px; }
+input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; margin-top: 2px; }
 
-.section-divider { padding: 6px 16px; background: #f3f4f6; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e5e7eb; }
-.card-link { font-size: 12px; color: #6c63ff; text-decoration: none; padding: 3px 6px; border-radius: 6px; border: 1px solid #ede9fe; flex-shrink: 0; transition: all .15s; }
+.section-divider { padding: 6px 16px; background: #f3f4f6; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+.card-link { font-size: 12px; color: var(--accent); text-decoration: none; padding: 3px 6px; border-radius: 6px; border: 1px solid #ede9fe; flex-shrink: 0; transition: all .15s; }
 .card-link:hover { background: #ede9fe; }
-.filter-hint { padding: 6px 16px; background: #eff6ff; font-size: 12px; color: #1e40af; border-bottom: 1px solid #bfdbfe; display: flex; align-items: center; gap: 8px; }
-.filter-hint button { background: none; border: none; cursor: pointer; color: #1e40af; font-size: 12px; font-weight: 600; padding: 0; text-decoration: underline; }
+.filter-hint { padding: 6px 16px; background: #eff6ff; font-size: 12px; color: var(--blue-text, #1e40af); border-bottom: 1px solid #bfdbfe; display: flex; align-items: center; gap: 8px; }
+.filter-hint button { background: none; border: none; cursor: pointer; color: var(--blue-text, #1e40af); font-size: 12px; font-weight: 600; padding: 0; text-decoration: underline; }
 .link-hint { padding: 8px 16px; background: #fef9c3; font-size: 12px; color: #92400e; border-bottom: 1px solid #fde68a; display: flex; align-items: center; gap: 8px; }
 .link-hint button { background: none; border: none; cursor: pointer; color: #92400e; font-weight: 600; padding: 0; text-decoration: underline; }
-.btn-link-pair { background: #f5f3ff; color: #6c63ff; border: 1px solid #ede9fe; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+.btn-link-pair { background: #f5f3ff; color: var(--accent); border: 1px solid #ede9fe; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
 .btn-link-pair:hover { background: #ede9fe; }
 .btn-link-pair.pending { background: #fef9c3; color: #92400e; border-color: #fde68a; }
 
 /* Попап полей */
-.fields-popup { position: fixed; bottom: 64px; left: 24px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.12); z-index: 200; min-width: 260px; display: none; }
+.fields-popup { position: fixed; bottom: 64px; left: 24px; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.12); z-index: 200; min-width: 260px; display: none; }
 .fields-popup.open { display: block; }
-.fields-popup-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e; }
+.fields-popup-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
 .field-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
 .field-row:last-child { border-bottom: none; }
-.field-row input[type=checkbox] { width: 16px; height: 16px; accent-color: #6c63ff; flex-shrink: 0; }
+.field-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
 .field-info { flex: 1; }
 .field-name { font-size: 13px; font-weight: 600; }
-.field-desc { font-size: 11px; color: #9ca3af; }
+.field-desc { font-size: 11px; color: var(--text3); }
 .field-row.has-name { background: #fef9c3; border-radius: 8px; padding: 7px 8px; margin: 0 -8px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🔀 Слияние товаров</h1>
   <button class="btn btn-outline btn-sm" onclick="reload()" id="btn-reload" style="margin-left:8px" title="Обновить данные">🔄 Обновить</button>
   <div class="stats-chips">
@@ -180,7 +180,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
     </div>
   </label>
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f3f4f6">
-    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#6b7280">
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color: var(--text2)">
       <input type="checkbox" id="field-force" style="accent-color:#ef4444;width:14px;height:14px">
       Перезаписать уже заполненные поля
     </label>
@@ -190,11 +190,11 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color:
 <div class="bottom-bar">
   <div id="result-bar" class="result-bar"></div>
   <button class="btn btn-outline btn-sm" onclick="toggleFieldsPopup()" id="btn-fields" style="position:relative">
-    ⚙️ Поля <span id="fields-count-badge" style="background:#6c63ff;color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;margin-left:4px">3</span>
+    ⚙️ Поля <span id="fields-count-badge" style="background:var(--accent);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;margin-left:4px">3</span>
   </button>
   <span class="selected-count" id="selected-count">Выберите пары для объединения</span>
   <button class="btn btn-outline btn-sm" onclick="selectAllPairs()">Выбрать все совпадения</button>
-  <button class="btn btn-sm" style="background:#10b981;color:#fff" onclick="mergeSkuOnly()">🎯 Объединить все по артикулу</button>
+  <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="mergeSkuOnly()">🎯 Объединить все по артикулу</button>
   <button class="btn btn-primary" id="btn-merge" onclick="doMerge()" disabled>Объединить выбранные</button>
 </div>
 
@@ -325,7 +325,7 @@ function renderKaspi() {
             <span class="p-sku">${p.kaspi_sku || ''}</span>
             ${p.supplier ? `<span class="tag">${p.supplier}</span>` : ''}
             ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
-            ${p.supplier_article ? `<span style="font-size:11px;color:#6c63ff;margin-left:4px">арт: ${p.supplier_article}</span>` : ''}
+            ${p.supplier_article ? `<span style="font-size:11px;color:var(--accent);margin-left:4px">арт: ${p.supplier_article}</span>` : ''}
           </div>
         </div>
         <a href="/admin?open=${p.id}" target="_blank" class="card-link" title="Открыть карточку" onclick="event.stopPropagation()">↗</a>
@@ -508,7 +508,7 @@ function pairHtml(p) {
         <div class="p-meta">
           <span class="p-sku">${p.other_sku || ''}</span>
           ${p.other_cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.other_cost_price.toLocaleString()} ₸</span>` : ''}
-          ${p.other_supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.other_supplier}</span>` : ''}
+          ${p.other_supplier ? `<span style="font-size:11px;color: var(--text2);margin-left:4px">${p.other_supplier}</span>` : ''}
         </div>
       </div>
     </div>
@@ -578,8 +578,8 @@ function renderAllOther(el) {
 
   const kaspiSelected = selectedKaspiId !== null;
   const hint = kaspiSelected
-    ? `<div class="link-hint" style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af">⬅ Выбран Kaspi-товар. Кликни справочник-товар ниже чтобы слить их.</div>`
-    : `<div style="padding:8px 16px;font-size:12px;color:#9ca3af">Сначала выбери Kaspi-товар слева, потом кликни здесь нужный товар из справочника</div>`;
+    ? `<div class="link-hint" style="background:#eff6ff;border-color:#bfdbfe;color:var(--blue-text, #1e40af)">⬅ Выбран Kaspi-товар. Кликни справочник-товар ниже чтобы слить их.</div>`
+    : `<div style="padding:8px 16px;font-size:12px;color: var(--text3)">Сначала выбери Kaspi-товар слева, потом кликни здесь нужный товар из справочника</div>`;
 
   el.innerHTML = hint + items.map(p => {
     const hasPair = otherInPairs.has(p.id);
@@ -590,7 +590,7 @@ function renderAllOther(el) {
         <div class="p-meta">
           <span class="p-sku">${p.sku || ''}</span>
           ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
-          ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
+          ${p.supplier ? `<span style="font-size:11px;color: var(--text2);margin-left:4px">${p.supplier}</span>` : ''}
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
@@ -695,7 +695,7 @@ function renderUnmatched(el) {
         <div class="p-meta">
           <span class="p-sku">${p.sku || '—'}</span>
           ${p.cost_price ? `<span class="p-cost" style="margin-left:4px">⬇ ${p.cost_price.toLocaleString()} ₸</span>` : ''}
-          ${p.supplier ? `<span style="font-size:11px;color:#6b7280;margin-left:4px">${p.supplier}</span>` : ''}
+          ${p.supplier ? `<span style="font-size:11px;color: var(--text2);margin-left:4px">${p.supplier}</span>` : ''}
         </div>
       </div>
       <button class="btn-link-pair ${isPending ? 'pending' : ''}"

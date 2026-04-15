@@ -6,25 +6,25 @@
 <title>Справочник накладных</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #1a1a2e; }
-.header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+.header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
 .header h1 { font-size: 17px; font-weight: 700; }
 .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #ede9fe; color: #5b21b6; }
+.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #ede9fe; color: var(--purple-text, #5b21b6); }
 
 .container { max-width: 960px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
 
 /* Загрузка файла */
-.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
 .card-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
 .upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 14px 20px; cursor: pointer; transition: all .15s; color: #9ca3af; font-size: 13px; flex: 1; min-width: 200px; text-align: center; }
-.drop-zone:hover, .drop-zone.drag-over { border-color: #6c63ff; background: #f5f3ff; color: #6c63ff; }
-.drop-zone.has-file { border-color: #10b981; background: #f0fdf4; color: #065f46; }
+.drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 14px 20px; cursor: pointer; transition: all .15s; color: var(--text3); font-size: 13px; flex: 1; min-width: 200px; text-align: center; }
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: #f5f3ff; color: var(--accent); }
+.drop-zone.has-file { border-color: var(--green); background: #f0fdf4; color: #065f46; }
 .drop-zone input[type=file] { display: none; }
 .btn { padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
-.btn-primary { background: #6c63ff; color: #fff; }
-.btn-primary:hover { background: #5b52e0; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
 .btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
 .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
 .btn-outline:hover { background: #f9fafb; }
@@ -34,56 +34,56 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 /* Файлы в базе */
 .files-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.file-tag { display: flex; align-items: center; gap: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 5px 10px; font-size: 12px; }
+.file-tag { display: flex; align-items: center; gap: 6px; background: #f3f4f6; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 12px; }
 .file-tag-name { font-weight: 600; }
-.file-tag-count { color: #9ca3af; }
-.file-tag-date { color: #9ca3af; font-size: 11px; }
+.file-tag-count { color: var(--text3); }
+.file-tag-date { color: var(--text3); font-size: 11px; }
 .file-tag-del { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 14px; line-height: 1; padding: 0 2px; }
 .file-tag-del:hover { color: #b91c1c; }
 
 /* Поиск */
 .search-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; outline: none; }
-.search-input:focus { border-color: #6c63ff; }
-.filter-select { padding: 9px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 13px; outline: none; background: #fff; }
+.search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; outline: none; }
+.search-input:focus { border-color: var(--accent); }
+.filter-select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; outline: none; background: #fff; }
 
 /* Таблица */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); background: #f9fafb; border-bottom: 1px solid var(--border); white-space: nowrap; }
 tbody tr { border-bottom: 1px solid #f3f4f6; }
 tbody tr:hover { background: #f9fafb; }
 tbody td { padding: 10px 12px; vertical-align: top; }
 .td-name { font-weight: 500; line-height: 1.4; }
-.td-article { font-family: monospace; font-size: 12px; color: #6c63ff; }
-.td-price { font-weight: 700; color: #10b981; white-space: nowrap; }
-.td-supplier { font-size: 12px; color: #6b7280; }
-.td-file { font-size: 11px; color: #9ca3af; }
-.empty { text-align: center; padding: 60px 20px; color: #9ca3af; }
-.loading { text-align: center; padding: 60px; color: #9ca3af; }
-.count-badge { font-size: 12px; color: #6b7280; margin-left: 4px; }
+.td-article { font-family: monospace; font-size: 12px; color: var(--accent); }
+.td-price { font-weight: 700; color: var(--green); white-space: nowrap; }
+.td-supplier { font-size: 12px; color: var(--text2); }
+.td-file { font-size: 11px; color: var(--text3); }
+.empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+.loading { text-align: center; padding: 60px; color: var(--text3); }
+.count-badge { font-size: 12px; color: var(--text2); margin-left: 4px; }
 
 /* Привязка к карточке */
 .assign-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; }
 .assign-modal.open { display:flex; }
 .assign-box { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
 .assign-title { font-size:15px; font-weight:700; margin-bottom:4px; }
-.assign-ref { font-size:12px; color:#6b7280; margin-bottom:16px; padding:8px 12px; background:#f9fafb; border-radius:8px; line-height:1.5; }
-.assign-search { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
-.assign-search:focus { border-color:#6c63ff; }
+.assign-ref { font-size:12px; color: var(--text2); margin-bottom:16px; padding:8px 12px; background:#f9fafb; border-radius:8px; line-height:1.5; }
+.assign-search { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
+.assign-search:focus { border-color:var(--accent); }
 .assign-results { margin-top:10px; max-height:280px; overflow-y:auto; border:1px solid #f3f4f6; border-radius:10px; }
 .assign-item { padding:10px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer; transition:background .1s; }
 .assign-item:last-child { border-bottom:none; }
 .assign-item:hover { background:#f5f3ff; }
 .assign-item-name { font-size:13px; font-weight:500; }
-.assign-item-meta { font-size:11px; color:#9ca3af; margin-top:2px; display:flex; gap:8px; }
+.assign-item-meta { font-size:11px; color: var(--text3); margin-top:2px; display:flex; gap:8px; }
 .assign-item.linked { background:#f0fdf4; }
 .assign-item.linked:hover { background:#dcfce7; }
-.assign-empty { padding:24px; text-align:center; color:#9ca3af; font-size:13px; }
+.assign-empty { padding:24px; text-align:center; color: var(--text3); font-size:13px; }
 .assign-fields { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 4px; }
 .assign-field-chk { display:flex; align-items:center; gap:5px; font-size:12px; cursor:pointer; background:#f3f4f6; border-radius:8px; padding:4px 10px; }
-.assign-field-chk input { accent-color:#6c63ff; }
-.btn-assign-row { background:none; border:1px solid #e5e7eb; border-radius:6px; padding:3px 8px; font-size:11px; color:#6c63ff; cursor:pointer; white-space:nowrap; }
+.assign-field-chk input { accent-color:var(--accent); }
+.btn-assign-row { background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-size:11px; color:var(--accent); cursor:pointer; white-space:nowrap; }
 .btn-assign-row:hover { background:#f5f3ff; border-color:#ede9fe; }
 
 .badge-new { display:inline-block; background:#dcfce7; color:#166534; font-size:10px; font-weight:700; padding:1px 6px; border-radius:8px; margin-left:4px; }
@@ -92,32 +92,32 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 .page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; font-family: inherit; }
 .page-btn:hover:not(:disabled) { background: #f9fafb; }
 .page-btn:disabled { opacity: .4; cursor: not-allowed; }
-.page-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
-.page-info { font-size: 13px; color: #6b7280; }
+.page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.page-info { font-size: 13px; color: var(--text2); }
 
 /* Вкладки */
 .tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; }
-.tab { padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-.tab.active { color: #6c63ff; border-bottom-color: #6c63ff; }
+.tab { padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* Таблица проверки цен */
 .diff-up   { color: #dc2626; font-weight: 700; }
 .diff-down { color: #16a34a; font-weight: 700; }
-.diff-same { color: #9ca3af; }
-.no-match  { color: #9ca3af; font-style: italic; }
+.diff-same { color: var(--text3); }
+.no-match  { color: var(--text3); font-style: italic; }
 .pct-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
 .pct-up   { background: #fee2e2; color: #991b1b; }
 .pct-down { background: #d1fae5; color: #065f46; }
 .pc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
-.pc-filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
-.pc-filter-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
-.pc-stat { font-size: 13px; color: #6b7280; margin-left: auto; }
+.pc-filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+.pc-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pc-stat { font-size: 13px; color: var(--text2); margin-left: auto; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="/admin" style="color:#6c63ff;text-decoration:none;font-size:20px;line-height:1">←</a>
+  <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:20px;line-height:1">←</a>
   <h1>🗂️ Справочник накладных</h1>
   <div class="header-right">
     <span class="chip" id="stat-total">—</span>
@@ -305,7 +305,7 @@ async function loadStats() {
         <button class="file-tag-del" onclick="deleteFile('${f.name}')" title="Удалить этот файл">✕</button>
       </div>`).join('');
   } else {
-    filesList.innerHTML = '<span style="color:#9ca3af;font-size:13px">Нет загруженных файлов</span>';
+    filesList.innerHTML = '<span style="color: var(--text3);font-size:13px">Нет загруженных файлов</span>';
   }
 }
 
@@ -472,7 +472,7 @@ function renderPriceCheck() {
     }
 
     const kaspiLink = r.kaspi_id
-      ? `<a href="/admin?open=${r.kaspi_id}" target="_blank" style="font-size:12px;color:#6c63ff;text-decoration:none">${r.kaspi_name || '↗'} ↗</a>`
+      ? `<a href="/admin?open=${r.kaspi_id}" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">${r.kaspi_name || '↗'} ↗</a>`
       : '<span class="no-match">—</span>';
 
     return `<tr>
@@ -530,7 +530,7 @@ async function doAssignSearch() {
       <div class="assign-item-name">${p.name}</div>
       <div class="assign-item-meta">
         <span>${p.kaspi_sku || p.sku || ''}</span>
-        ${p.cost_price ? `<span style="color:#10b981">⬇ ${p.cost_price.toLocaleString()} ₸ уже есть</span>` : ''}
+        ${p.cost_price ? `<span style="color:var(--green)">⬇ ${p.cost_price.toLocaleString()} ₸ уже есть</span>` : ''}
         ${p.supplier ? `<span>${p.supplier}</span>` : ''}
       </div>
     </div>`).join('');
@@ -580,13 +580,13 @@ async function doAssign(kaspiId, kaspiName) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
       <div>
         <div class="assign-title">↔ Привязать к Kaspi-карточке</div>
-        <div style="font-size:12px;color:#9ca3af;margin-top:2px">Из справочника:</div>
+        <div style="font-size:12px;color: var(--text3);margin-top:2px">Из справочника:</div>
       </div>
-      <button onclick="closeAssign()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;line-height:1;padding:0">×</button>
+      <button onclick="closeAssign()" style="background:none;border:none;font-size:20px;cursor:pointer;color: var(--text3);line-height:1;padding:0">×</button>
     </div>
     <div class="assign-ref">
       <div style="font-weight:600;font-size:13px" id="assign-ref-name"></div>
-      <div style="font-size:11px;color:#9ca3af;margin-top:3px" id="assign-ref-meta"></div>
+      <div style="font-size:11px;color: var(--text3);margin-top:3px" id="assign-ref-meta"></div>
     </div>
 
     <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Что перенести:</div>

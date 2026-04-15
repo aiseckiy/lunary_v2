@@ -360,11 +360,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <input class="edit-input" id="e-price" type="number" min="0">
     </div>
     <div class="edit-field">
-      <label class="edit-label">Описание</label>
+      <label class="edit-label" style="display:flex;align-items:center;justify-content:space-between">
+        Описание
+        <button id="btn-ai-describe" onclick="aiDescribe()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+          ✨ AI заполнить
+        </button>
+      </label>
       <textarea class="edit-input" id="e-description" rows="3" style="resize:vertical;min-height:70px"></textarea>
     </div>
 
-    <div class="img-section-title" style="margin-bottom:8px">📋 Характеристики</div>
+    <div class="img-section-title" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+      📋 Характеристики
+    </div>
     <div class="specs-editor" id="specs-editor"></div>
     <button class="btn-add-spec" onclick="addSpecRow()">+ Добавить характеристику</button>
 
@@ -566,6 +573,37 @@ function renderSpecsEditor() {
       <input type="text" placeholder="Значение (напр. 310 мл)" value="${s.value}" oninput="editSpecs[${i}].value=this.value">
       <button class="spec-del" onclick="removeSpec(${i})">×</button>
     </div>`).join('');
+}
+
+async function aiDescribe() {
+  const btn = document.getElementById('btn-ai-describe');
+  btn.textContent = '⏳ Генерирую...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/api/products/${productId}/ai-describe`, {method: 'POST'});
+    const d = await res.json();
+    if (!res.ok) {
+      alert('Ошибка AI: ' + (d.detail || JSON.stringify(d)));
+      return;
+    }
+    // Обновляем описание
+    document.getElementById('e-description').value = d.description || '';
+    // Обновляем характеристики (мёрджим)
+    const newSpecs = d.specs || [];
+    const existingKeys = new Set(editSpecs.map(s => s.key.toLowerCase()));
+    newSpecs.forEach(s => {
+      if (!existingKeys.has(s.key.toLowerCase())) {
+        editSpecs.push(s);
+      }
+    });
+    renderSpecsEditor();
+    btn.textContent = '✅ Готово!';
+    setTimeout(() => { btn.textContent = '✨ AI заполнить'; btn.disabled = false; }, 2000);
+  } catch(e) {
+    alert('Ошибка сети: ' + e.message);
+    btn.textContent = '✨ AI заполнить';
+    btn.disabled = false;
+  }
 }
 
 function addSpecRow() {

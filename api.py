@@ -1475,7 +1475,7 @@ def save_product_images(product_id: int, data: ProductImagesBody, request: Reque
 
 @app.get("/api/products/{product_id}/search-images")
 def search_product_images(product_id: int, request: Request, db: Session = Depends(get_db)):
-    """Ищет картинки через Google Custom Search API"""
+    """Ищет картинки через SerpApi (Google Images)"""
     import requests as req_lib
     from database import Product as _P
 
@@ -1487,29 +1487,25 @@ def search_product_images(product_id: int, request: Request, db: Session = Depen
     if not p:
         raise HTTPException(status_code=404)
 
-    api_key = os.getenv("GOOGLE_API_KEY", "")
-    cx = os.getenv("GOOGLE_CX", "")
-    if not api_key or not cx:
-        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY или GOOGLE_CX не заданы")
+    api_key = os.getenv("SERPAPI_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="SERPAPI_KEY не задан")
 
-    query = p.name
+    query = f"{p.brand or ''} {p.name}".strip()
     images = []
 
     try:
-        url = "https://www.googleapis.com/customsearch/v1"
-        params = {
-            "key": api_key,
-            "cx": cx,
+        r = req_lib.get("https://serpapi.com/search", params={
+            "engine": "google_images",
             "q": query,
-            "searchType": "image",
+            "api_key": api_key,
             "num": 10,
-            "imgSize": "MEDIUM",
-            "safe": "off",
-        }
-        r = req_lib.get(url, params=params, timeout=10)
+            "hl": "ru",
+            "gl": "kz",
+        }, timeout=15)
         data = r.json()
-        for item in data.get("items", []):
-            link = item.get("link")
+        for item in data.get("images_results", []):
+            link = item.get("original")
             if link:
                 images.append(link)
     except Exception as e:
@@ -1520,30 +1516,30 @@ def search_product_images(product_id: int, request: Request, db: Session = Depen
 
 @app.get("/api/admin/test-google-images")
 def test_google_images(request: Request):
-    """Тест Google Custom Search API"""
+    """Тест SerpApi image search"""
     import requests as req_lib
     user = _get_user_from_session(request)
     if not user or user.get("role") != "admin":
         raise HTTPException(status_code=403)
-    api_key = os.getenv("GOOGLE_API_KEY", "")
-    cx = os.getenv("GOOGLE_CX", "")
-    if not api_key or not cx:
-        return {"error": "GOOGLE_API_KEY или GOOGLE_CX не заданы в Railway"}
+    api_key = os.getenv("SERPAPI_KEY", "")
+    if not api_key:
+        return {"error": "SERPAPI_KEY не задан в Railway"}
     try:
-        r = req_lib.get("https://www.googleapis.com/customsearch/v1", params={
-            "key": api_key, "cx": cx, "q": "герметик", "searchType": "image", "num": 2
-        }, timeout=10)
+        r = req_lib.get("https://serpapi.com/search", params={
+            "engine": "google_images", "q": "герметик tytan", "api_key": api_key, "num": 2, "hl": "ru", "gl": "kz",
+        }, timeout=15)
         data = r.json()
         if "error" in data:
-            return {"error": data["error"].get("message"), "code": data["error"].get("code"), "raw": data}
-        return {"ok": True, "found": len(data.get("items", [])), "first_image": data.get("items", [{}])[0].get("link")}
+            return {"error": data["error"]}
+        items = data.get("images_results", [])
+        return {"ok": True, "found": len(items), "first_image": items[0].get("original") if items else None}
     except Exception as e:
         return {"error": str(e)}
 
 
 @app.post("/api/admin/fill-images")
 def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
-    """Автоматически ищет и заполняет картинки для товаров без фото через Google"""
+    """Автоматически ищет и заполняет картинки для товаров без фото через SerpApi"""
     import requests as req_lib
     from database import Product as _P
 
@@ -1551,10 +1547,9 @@ def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
     if not user or user.get("role") != "admin":
         raise HTTPException(status_code=403)
 
-    api_key = os.getenv("GOOGLE_API_KEY", "")
-    cx = os.getenv("GOOGLE_CX", "")
-    if not api_key or not cx:
-        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY или GOOGLE_CX не заданы")
+    api_key = os.getenv("SERPAPI_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="SERPAPI_KEY не задан")
 
     # Только товары без изображений
     products = db.query(_P).filter(
@@ -1569,29 +1564,24 @@ def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
 
     for p in products:
         try:
-            r = req_lib.get(
-                "https://www.googleapis.com/customsearch/v1",
-                params={
-                    "key": api_key, "cx": cx,
-                    "q": p.name, "searchType": "image",
-                    "num": 5, "imgSize": "MEDIUM", "safe": "off",
-                },
-                timeout=10
-            )
+            query = f"{p.brand or ''} {p.name}".strip()
+            r = req_lib.get("https://serpapi.com/search", params={
+                "engine": "google_images", "q": query,
+                "api_key": api_key, "num": 5, "hl": "ru", "gl": "kz",
+            }, timeout=15)
             data = r.json()
 
-            # Проверяем лимит
             if "error" in data:
-                print(f"[fill-images] Google error: {data['error'].get('message')}")
+                print(f"[fill-images] SerpApi error: {data['error']}")
                 errors += 1
                 break
 
-            items = data.get("items", [])
+            items = data.get("images_results", [])
             if not items:
                 skipped += 1
                 continue
 
-            links = [i["link"] for i in items if i.get("link")]
+            links = [i["original"] for i in items if i.get("original")]
             if not links:
                 skipped += 1
                 continue
@@ -1600,7 +1590,7 @@ def fill_images_bulk(request: Request, db: Session = Depends(get_db)):
             p.image_url = links[0]
             db.commit()
             filled += 1
-            time.sleep(0.2)  # небольшая пауза чтобы не перегружать API
+            time.sleep(0.3)  # небольшая пауза чтобы не перегружать API
 
         except Exception as e:
             print(f"[fill-images] ошибка для {p.name}: {e}", flush=True)

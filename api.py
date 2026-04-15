@@ -162,9 +162,33 @@ def _get_user_from_session(request: Request):
     return None
 
 
+def _is_staff(user) -> bool:
+    """admin или manager — доступ к складу/заказам"""
+    return user and user.get("role") in ("admin", "manager")
+
+def _is_admin(user) -> bool:
+    """только admin — настройки, удаление, сброс"""
+    return user and user.get("role") == "admin"
+
+# Пути доступные manager (не только admin)
+_MANAGER_ALLOWED_PREFIXES = (
+    "/admin", "/kaspi", "/analytics", "/history", "/scanner",
+    "/api/kaspi", "/api/analytics", "/api/products", "/api/movements",
+    "/api/history", "/api/purchases", "/api/alerts",
+    "/merge", "/review", "/import", "/pricelist", "/uploads",
+    "/api/merge", "/api/import-price-list", "/api/pricelist", "/api/uploads",
+)
+# Пути только для admin (опасные операции)
+_ADMIN_ONLY_PREFIXES = (
+    "/api/admin/settings", "/api/admin/users", "/api/reset-products",
+    "/api/fill-articles", "/api/admin/fill", "/admin/settings", "/admin/theme",
+)
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
+        method = request.method
 
         # Публичные пути — без авторизации
         if path in _PUBLIC_PATHS or any(path.startswith(p) for p in _PUBLIC_PREFIXES):
@@ -172,10 +196,23 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         user = _get_user_from_session(request)
 
-        # Админские пути — только admin
+        # Только-admin пути (настройки, сброс, пользователи)
+        is_admin_only = any(path.startswith(p) for p in _ADMIN_ONLY_PREFIXES)
+        if is_admin_only:
+            if not _is_admin(user):
+                if path.startswith("/api/"):
+                    return JSONResponse({"detail": "Forbidden"}, status_code=403)
+                return RedirectResponse("/shop/login?next=" + path)
+
+        # Удаление — только admin
+        if method == "DELETE" and any(path.startswith(p) for p in ("/api/products", "/api/kaspi", "/api/movements")):
+            if not _is_admin(user):
+                return JSONResponse({"detail": "Только администратор может удалять"}, status_code=403)
+
+        # Админские пути — admin или manager
         is_admin_path = any(path.startswith(p) for p in _ADMIN_PATHS)
         if is_admin_path:
-            if not user or user["role"] != "admin":
+            if not _is_staff(user):
                 if path.startswith("/api/"):
                     return JSONResponse({"error": "Forbidden"}, status_code=403)
                 return RedirectResponse(f"/login?next={path}", status_code=302)
@@ -690,7 +727,7 @@ def google_callback(code: str, request: Request, db: Session = Depends(get_db)):
             user.role = "admin"
         db.commit()
 
-    next_url = "/admin" if user.role == "admin" else "/shop"
+    next_url = "/admin" if user.role in ("admin", "manager") else "/shop"
     resp = RedirectResponse(next_url, status_code=302)
     resp.set_cookie("lunary_session", _make_user_session(user), httponly=True, samesite="lax", max_age=60*60*24*30)
     return resp

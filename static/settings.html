@@ -227,6 +227,7 @@ async function loadUsers() {
       <td>
         <select class="role-select" onchange="setRole(${u.id},this.value)">
           <option value="customer" ${u.role==='customer'?'selected':''}>Покупатель</option>
+          <option value="manager"  ${u.role==='manager'?'selected':''}>Менеджер (склад, без удаления)</option>
           <option value="admin"    ${u.role==='admin'?'selected':''}>Администратор</option>
         </select>
       </td>

@@ -514,8 +514,9 @@ async function loadForecast() {
           </div>
           <div class="fc-row">
             <span class="fc-label">Прогноз след. 4 нед</span>
-            <span class="fc-val">${p.forecast_4w.reduce((a,b)=>a+b,0)} шт</span>
+            <span class="fc-val" title="Модель: ${p.model || 'holt'}">${p.forecast_4w.reduce((a,b)=>a+b,0)} шт${p.forecast_low && p.forecast_high ? ` <span style="font-size:10px;color:var(--text3);font-weight:var(--fw-medium)">(${p.forecast_low.reduce((a,b)=>a+b,0)}–${p.forecast_high.reduce((a,b)=>a+b,0)})</span>` : ''}</span>
           </div>
+          ${p.model ? `<div class="fc-row" style="margin-top:-2px"><span class="fc-label" style="font-size:10px">Модель</span><span class="fc-val" style="font-size:10px;font-weight:var(--fw-medium);color:var(--text2);text-transform:uppercase;letter-spacing:.05em">${ { holt:'Holt exp·smooth', linear:'Linear·trend', ma4:'Moving·avg' }[p.model] || p.model }</span></div>` : ''}
           ${daysLeftHtml}
           ${p.order_qty ? `
           <div class="fc-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">

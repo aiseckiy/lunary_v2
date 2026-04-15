@@ -3282,6 +3282,51 @@ def analytics_revenue(
     return {"points": points, "period": period}
 
 
+def _holt_forecast(y, horizon=4, alpha=None, beta=None):
+    """Holt's linear (double-exp) smoothing. Возвращает forecast + residual std.
+    Если alpha/beta не заданы — грид-поиск по минимальному in-sample SSE."""
+    import numpy as np
+    y = np.asarray(y, dtype=float)
+    n = len(y)
+    if n < 2:
+        return np.full(horizon, y[-1] if n else 0), 0.0
+
+    def _fit(a, b):
+        L = np.zeros(n); T = np.zeros(n)
+        L[0] = y[0]; T[0] = y[1] - y[0]
+        for t in range(1, n):
+            L[t] = a * y[t] + (1 - a) * (L[t-1] + T[t-1])
+            T[t] = b * (L[t] - L[t-1]) + (1 - b) * T[t-1]
+        resid = y - (L + T)
+        return L, T, float(np.sum(resid ** 2)), float(np.std(resid))
+
+    if alpha is None or beta is None:
+        best = None
+        for a in (0.1, 0.3, 0.5, 0.7, 0.9):
+            for b in (0.05, 0.15, 0.3, 0.5):
+                _, _, sse, _ = _fit(a, b)
+                if best is None or sse < best[0]:
+                    best = (sse, a, b)
+        alpha, beta = best[1], best[2]
+
+    L, T, _, std = _fit(alpha, beta)
+    fc = np.array([max(0.0, L[-1] + (h + 1) * T[-1]) for h in range(horizon)])
+    return fc, std
+
+
+def _holdout_rmse(y, model_fn, h=4):
+    """RMSE на holdout: последние h недель. Если данных мало — None."""
+    import numpy as np
+    if len(y) < h + 3:
+        return None
+    train, test = y[:-h], y[-h:]
+    try:
+        fc = model_fn(train, h)
+        return float(np.sqrt(np.mean((np.asarray(fc) - test) ** 2)))
+    except Exception:
+        return None
+
+
 @app.get("/api/analytics/forecast")
 def analytics_forecast(
     date_from: Optional[str] = None,
@@ -3289,7 +3334,8 @@ def analytics_forecast(
     lead_time: int = 14,
     db: Session = Depends(get_db)
 ):
-    """Прогноз спроса: тренд + сезонность + волатильность + дни до нуля + объём заказа"""
+    """Прогноз спроса: Holt smoothing + линейный тренд + сезонность + выбор
+    лучшей модели по holdout RMSE + confidence interval."""
     import numpy as np
     from database import KaspiOrder, Product as _P, Movement as _M
     from collections import defaultdict
@@ -3301,11 +3347,8 @@ def analytics_forecast(
     rows = _filter_orders_by_date(
         [r for r in all_rows if r.state in COMPLETED], date_from, date_to
     )
-
-    # Все данные за всё время (для сезонности нужны прошлый год)
     all_rows_full = [r for r in all_rows if r.state in COMPLETED]
 
-    # Текущие остатки
     stocks_q = (
         db.query(_P.name, func.coalesce(func.sum(_M.quantity), 0))
         .outerjoin(_M, _M.product_id == _P.id)
@@ -3314,7 +3357,6 @@ def analytics_forecast(
     )
     current_stock = {name: int(s) for name, s in stocks_q}
 
-    # Сгруппировать по товару → по неделе
     by_product: dict = defaultdict(lambda: defaultdict(int))
     for r in rows:
         d = _parse_order_date(r.order_date)
@@ -3323,7 +3365,6 @@ def analytics_forecast(
         week = d.strftime("%Y-W%W")
         by_product[r.product_name][week] += r.quantity or 1
 
-    # Полная история по неделям (для сезонности)
     full_by_product: dict = defaultdict(lambda: defaultdict(int))
     for r in all_rows_full:
         d = _parse_order_date(r.order_date)
@@ -3332,11 +3373,24 @@ def analytics_forecast(
         week = d.strftime("%Y-W%W")
         full_by_product[r.product_name][week] += r.quantity or 1
 
-    # Топ-20 по суммарному количеству
     top_names = sorted(by_product.keys(), key=lambda n: sum(by_product[n].values()), reverse=True)[:20]
 
     now = datetime.date.today()
     cur_week_num = int(now.strftime("%W"))
+
+    # ── Модели для ensemble ──────────────────────────────────
+    def _model_linear(train, h):
+        x = np.arange(len(train))
+        c = np.polyfit(x, train, 1)
+        return [max(0.0, float(np.polyval(c, len(train) + i))) for i in range(h)]
+
+    def _model_ma4(train, h):
+        ma = float(np.mean(train[-4:])) if len(train) >= 4 else float(np.mean(train))
+        return [max(0.0, ma) for _ in range(h)]
+
+    def _model_holt(train, h):
+        fc, _ = _holt_forecast(train, h)
+        return fc.tolist()
 
     results = []
     for name in top_names:
@@ -3345,18 +3399,34 @@ def analytics_forecast(
         if len(weeks) < 3:
             continue
         y = np.array([week_data[w] for w in weeks], dtype=float)
-        x = np.arange(len(y))
 
-        # ── Линейный тренд ──────────────────────────────────────
+        # ── Выбор лучшей модели по holdout RMSE ─────────────
+        candidates = {
+            "linear": (_model_linear, _holdout_rmse(y, _model_linear)),
+            "ma4":    (_model_ma4,    _holdout_rmse(y, _model_ma4)),
+            "holt":   (_model_holt,   _holdout_rmse(y, _model_holt)),
+        }
+        # Если данных мало для holdout — по умолчанию holt (лучше linear на малых)
+        scored = [(k, v[1]) for k, v in candidates.items() if v[1] is not None]
+        if scored:
+            best_name = min(scored, key=lambda t: t[1])[0]
+        else:
+            best_name = "holt"
+        best_fn = candidates[best_name][0]
+
+        # ── Holt с confidence interval (residual std) ───────
+        holt_fc, residual_std = _holt_forecast(y, 4)
+        forecast_raw = best_fn(y, 4)
+
+        # ── Линейный тренд (для trend_dir) ───────────────────
+        x = np.arange(len(y))
         coeffs = np.polyfit(x, y, 1)
         trend = float(coeffs[0])
-        next_x = len(y) + np.arange(4)
-        forecast_linear = [max(0, float(np.polyval(coeffs, xi))) for xi in next_x]
 
-        # ── Скользящее среднее 4 нед ─────────────────────────────
+        # ── Скользящее среднее 4 нед ────────────────────────
         ma4 = float(np.mean(y[-4:])) if len(y) >= 4 else float(np.mean(y))
 
-        # ── Сезонность — сравниваем с теми же неделями год назад ──
+        # ── Сезонность ───────────────────────────────────────
         full_data = full_by_product[name]
         seasonal_factor = 1.0
         seasonal_weeks_found = 0
@@ -3371,22 +3441,26 @@ def analytics_forecast(
                 seasonal_factor += val_this / val_prev
         if seasonal_weeks_found > 0:
             seasonal_factor = seasonal_factor / seasonal_weeks_found
-            seasonal_factor = max(0.3, min(3.0, seasonal_factor))  # ограничиваем
+            seasonal_factor = max(0.3, min(3.0, seasonal_factor))
 
-        # ── Итоговый прогноз = тренд × сезонность ───────────────
-        forecast = [max(0, round(v * seasonal_factor)) for v in forecast_linear]
+        # ── Итоговый прогноз + confidence interval ──────────
+        forecast = [max(0, round(v * seasonal_factor)) for v in forecast_raw]
+        # CI через residual std (~95% = 1.96σ)
+        ci_margin = 1.96 * residual_std * seasonal_factor
+        forecast_low = [max(0, round(v - ci_margin)) for v in forecast]
+        forecast_high = [round(v + ci_margin) for v in forecast]
 
-        # ── Волатильность (CV = std/mean) ────────────────────────
+        # ── Волатильность ────────────────────────────────────
         mean_y = float(np.mean(y)) if len(y) > 0 else 1
         std_y = float(np.std(y)) if len(y) > 1 else 0
-        cv = round(std_y / mean_y, 2) if mean_y > 0 else 0  # 0=стабильно, >1=хаос
+        cv = round(std_y / mean_y, 2) if mean_y > 0 else 0
 
-        # ── Дни до нуля ─────────────────────────────────────────
+        # ── Дни до нуля ─────────────────────────────────────
         stock = current_stock.get(name, 0)
         weekly_rate = ma4 * seasonal_factor if ma4 > 0 else 0
         days_left = round((stock / weekly_rate) * 7) if weekly_rate > 0 else None
 
-        # ── Рекомендация ─────────────────────────────────────────
+        # ── Рекомендация ────────────────────────────────────
         if days_left is not None and days_left < lead_time:
             recommendation = "urgent"
         elif days_left is not None and days_left < lead_time * 2:
@@ -3396,14 +3470,10 @@ def analytics_forecast(
         else:
             recommendation = "ok"
 
-        # ── Объём заказа ─────────────────────────────────────────
-        # EOQ-like: покрыть lead_time + страховой запас (1.5× недельный спрос × CV)
+        # ── Объём заказа ────────────────────────────────────
         order_qty = None
         if weekly_rate > 0 and recommendation in ("urgent", "order"):
-            demand_during_lead = weekly_rate * (lead_time / 7)
-            safety_stock = weekly_rate * max(0.5, cv) * 1.5  # буфер под волатильность
-            reorder_point = demand_during_lead + safety_stock
-            # Заказываем на 4 недели вперёд плюс safety stock минус текущий остаток
+            safety_stock = weekly_rate * max(0.5, cv) * 1.5
             target = weekly_rate * 4 + safety_stock
             order_qty = max(0, round(target - stock))
 
@@ -3412,6 +3482,9 @@ def analytics_forecast(
             "weeks": weeks[-8:],
             "history": [int(week_data[w]) for w in weeks[-8:]],
             "forecast_4w": forecast,
+            "forecast_low": forecast_low,
+            "forecast_high": forecast_high,
+            "model": best_name,
             "trend": round(trend, 2),
             "trend_dir": "up" if trend > 0.1 else ("down" if trend < -0.1 else "flat"),
             "ma4": round(ma4, 1),

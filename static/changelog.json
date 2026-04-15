@@ -1,5 +1,10 @@
 [
   {
+    "hash": "3c78082",
+    "date": "16.04.2026",
+    "message": "Revert Inter fonts (не догружались у пользователя), оставить иерархию"
+  },
+  {
     "hash": "5dc75d7",
     "date": "16.04.2026",
     "message": "Fonts: инжект Google Fonts Inter/Inter Tight через nav.js"

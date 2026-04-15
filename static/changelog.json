@@ -1,5 +1,10 @@
 [
   {
+    "hash": "6fd1ff5",
+    "date": "15.04.2026",
+    "message": "Sitemap: image tags для Google Image Search"
+  },
+  {
     "hash": "5fe0dbc",
     "date": "15.04.2026",
     "message": "AI описания: фикс промпта + массовое заполнение"

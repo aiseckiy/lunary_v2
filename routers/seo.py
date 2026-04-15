@@ -70,15 +70,67 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
 
     schema = ""
     if p.price:
-        # JSON-LD собираем через json.dumps чтобы спецсимволы в полях не ломали структуру.
-        # В name/brand/description сырые значения (не html-экранированные) —
-        # json.dumps сам сделает корректное экранирование для JSON.
+        # description с fallback: meta_description → description → auto-gen
+        desc = (p.meta_description or p.description or "").strip()
+        if not desc:
+            parts = []
+            if p.brand:
+                parts.append(p.brand)
+            if p.name:
+                parts.append(p.name)
+            base = " ".join(parts) or "Товар"
+            desc = f"{base}. Купить в Алматы, доставка по Казахстану. Цена {int(p.price):,} ₸.".replace(",", " ")
+        desc = desc[:500]
+
+        # Доставка: бесплатно от 5000 ₸, иначе 1000 ₸ (Алматы)
+        free_threshold = 5000
+        shipping_rate = 0 if p.price >= free_threshold else 1000
+
+        shipping_details = {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": str(shipping_rate),
+                "currency": "KZT",
+            },
+            "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "KZ",
+                "addressRegion": "Алматы",
+            },
+            "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 0,
+                    "maxValue": 1,
+                    "unitCode": "DAY",
+                },
+                "transitTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 1,
+                    "maxValue": 2,
+                    "unitCode": "DAY",
+                },
+            },
+        }
+
+        # Политика возврата: 14 дней, Алматы, бесплатный возврат
+        return_policy = {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "KZ",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 14,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/FreeReturn",
+        }
+
         schema_data = {
             "@context": "https://schema.org/",
             "@type": "Product",
             "name": p.name or "",
             "brand": {"@type": "Brand", "name": p.brand or ""},
-            "description": (p.meta_description or p.description or "").strip()[:500],
+            "description": desc,
             "image": image,
             "url": canon,
             "offers": {
@@ -87,6 +139,8 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
                 "price": price_str,
                 "availability": avail,
                 "seller": {"@type": "Organization", "name": "LUNARY"},
+                "shippingDetails": shipping_details,
+                "hasMerchantReturnPolicy": return_policy,
             },
         }
         schema = f'<script type="application/ld+json">{_json.dumps(schema_data, ensure_ascii=False)}</script>'

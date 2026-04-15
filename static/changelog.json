@@ -1,5 +1,10 @@
 [
   {
+    "hash": "858c80a",
+    "date": "16.04.2026",
+    "message": "Sprint 1: 6 фиксов после senior code review"
+  },
+  {
     "hash": "6cb5313",
     "date": "16.04.2026",
     "message": "Refactor: вынести SEO server-rendered блок в routers/seo.py"

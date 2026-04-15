@@ -70,24 +70,26 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
 
     schema = ""
     if p.price:
-        schema = f"""<script type="application/ld+json">
-{{
-  "@context": "https://schema.org/",
-  "@type": "Product",
-  "name": "{name}",
-  "brand": {{"@type": "Brand", "name": "{brand}"}},
-  "description": "{description}",
-  "image": "{_html.escape(image)}",
-  "url": "{canon}",
-  "offers": {{
-    "@type": "Offer",
-    "priceCurrency": "KZT",
-    "price": "{price_str}",
-    "availability": "{avail}",
-    "seller": {{"@type": "Organization", "name": "LUNARY"}}
-  }}
-}}
-</script>"""
+        # JSON-LD собираем через json.dumps чтобы спецсимволы в полях не ломали структуру.
+        # В name/brand/description сырые значения (не html-экранированные) —
+        # json.dumps сам сделает корректное экранирование для JSON.
+        schema_data = {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": p.name or "",
+            "brand": {"@type": "Brand", "name": p.brand or ""},
+            "description": (p.meta_description or p.description or "").strip()[:500],
+            "image": image,
+            "url": canon,
+            "offers": {
+                "@type": "Offer",
+                "priceCurrency": "KZT",
+                "price": price_str,
+                "availability": avail,
+                "seller": {"@type": "Organization", "name": "LUNARY"},
+            },
+        }
+        schema = f'<script type="application/ld+json">{_json.dumps(schema_data, ensure_ascii=False)}</script>'
 
     seo_head = f"""<title>{title}</title>
 <meta name="description" content="{description}">

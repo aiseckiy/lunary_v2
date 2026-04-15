@@ -250,8 +250,44 @@ def format_order_notification(o: dict) -> str:
     return "\n".join(lines)
 
 
+def build_sku_index(db) -> dict:
+    """Строит индекс {sku: product_id} из таблицы products за один SELECT.
+    Учитывает несколько SKU через запятую в одном поле.
+
+    Возвращает dict для передачи в deduct_stock_for_order / find_product_by_sku.
+    Вызывать один раз в начале batch-операции вместо N full-scans.
+    """
+    from database import Product
+    rows = db.query(Product.id, Product.kaspi_sku).filter(Product.kaspi_sku.isnot(None)).all()
+    index: dict = {}
+    for pid, sku_field in rows:
+        if not sku_field:
+            continue
+        for sku in sku_field.split(","):
+            sku = sku.strip()
+            if sku:
+                index.setdefault(sku, pid)
+    return index
+
+
+def _lookup_sku_in_index(merchant_sku: str, index: dict):
+    """Ищет SKU в предпостроенном индексе с теми же fallback правилами что
+    find_product_by_sku (поддержка prefix-match для старого формата "ID_child")."""
+    if not merchant_sku or not index:
+        return None
+    if merchant_sku in index:
+        return index[merchant_sku]
+    # fallback: один из SKU в индексе матчится по prefix
+    for indexed_sku, pid in index.items():
+        if merchant_sku.startswith(indexed_sku + "_") or indexed_sku.startswith(merchant_sku + "_"):
+            return pid
+    return None
+
+
 def find_product_by_sku(merchant_sku: str, db):
-    """Ищет товар по kaspi_sku с поддержкой нескольких SKU через запятую."""
+    """Ищет товар по kaspi_sku. ВНИМАНИЕ: полный скан таблицы на каждый вызов.
+    Для batch-обработки используй build_sku_index() + _lookup_sku_in_index().
+    """
     from database import Product
     if not merchant_sku:
         return None
@@ -266,22 +302,49 @@ def find_product_by_sku(merchant_sku: str, db):
     return None
 
 
-def deduct_stock_for_order(order_row, db):
-    """Списывает остатки по заказу. Вызывается один раз при переходе в DEDUCT_STATES."""
+def _resolve_product(merchant_sku: str, name: str, db, sku_index):
+    """Единая логика поиска товара: сначала индекс/find_product_by_sku, потом
+    fallback по имени."""
+    from database import Product
+    product = None
+    if merchant_sku:
+        if sku_index is not None:
+            pid = _lookup_sku_in_index(merchant_sku, sku_index)
+            if pid:
+                product = db.query(Product).filter(Product.id == pid).first()
+        else:
+            product = find_product_by_sku(merchant_sku, db)
+    if not product and name:
+        product = db.query(Product).filter(
+            Product.kaspi_sku.isnot(None),
+            Product.name.ilike(f"%{name[:30]}%")
+        ).first()
+    if not product and name:
+        product = db.query(Product).filter(Product.name == name).first()
+    return product
+
+
+def deduct_stock_for_order(order_row, db, sku_index=None):
+    """Списывает остатки по заказу при переходе в DEDUCT_STATES.
+
+    sku_index (опционально) — предпостроенный {sku: product_id} из build_sku_index().
+    Если передан — избегаем full-scan таблицы products на каждый вызов.
+    """
     import json
     import crud
-    from database import Product
 
     deducted = []
 
+    # Fast path: у заказа есть sku + quantity (XML импорт)
     if order_row.sku and order_row.quantity:
-        product = find_product_by_sku(order_row.sku, db)
+        product = _resolve_product(order_row.sku, "", db, sku_index)
         if product:
             crud.add_movement(product.id, order_row.quantity, "sale", db,
                               source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
             deducted.append((product.name, order_row.quantity))
             return deducted
 
+    # Slow path: парсим entries JSON
     if order_row.entries:
         try:
             entries = json.loads(order_row.entries)
@@ -293,16 +356,7 @@ def deduct_stock_for_order(order_row, db):
             qty = int(entry.get("qty", 1))
             if qty <= 0:
                 continue
-            product = None
-            if merchant_sku:
-                product = find_product_by_sku(merchant_sku, db)
-            if not product and name:
-                product = db.query(Product).filter(
-                    Product.kaspi_sku.isnot(None),
-                    Product.name.ilike(f"%{name[:30]}%")
-                ).first()
-            if not product and name:
-                product = db.query(Product).filter(Product.name == name).first()
+            product = _resolve_product(merchant_sku, name, db, sku_index)
             if product:
                 crud.add_movement(product.id, qty, "sale", db,
                                   source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
@@ -311,10 +365,14 @@ def deduct_stock_for_order(order_row, db):
     return deducted
 
 
-def return_stock_for_order(order_row, db):
-    """Возвращает остатки при отмене заказа (если уже были списаны)."""
+def return_stock_for_order(order_row, db, sku_index=None):
+    """Возвращает остатки при отмене заказа (если уже были списаны).
+
+    sku_index (опционально) — предпостроенный {sku: product_id}.
+    """
     import json
     import crud
+
     entries = []
     if order_row.entries:
         try:
@@ -330,9 +388,7 @@ def return_stock_for_order(order_row, db):
         qty = int(entry.get("qty", 1))
         if qty <= 0:
             continue
-        product = None
-        if merchant_sku:
-            product = find_product_by_sku(merchant_sku, db)
+        product = _resolve_product(merchant_sku, "", db, sku_index)
         if product:
             crud.add_movement(product.id, qty, "return", db,
                               source="kaspi", note=f"Возврат: отмена заказа {order_row.order_id}")

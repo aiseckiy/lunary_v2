@@ -1,5 +1,10 @@
 [
   {
+    "hash": "6cb5313",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести SEO server-rendered блок в routers/seo.py"
+  },
+  {
     "hash": "1c4a5be",
     "date": "16.04.2026",
     "message": "Refactor: вынести AI и Images блок в routers/ai.py"

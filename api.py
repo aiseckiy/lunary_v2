@@ -19,6 +19,10 @@ UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 # ── Глобальный трекер процессов ──────────────────────────────────────────────
+# _state_lock защищает _PROCESS_STATUS и _history_import_state от inconsistent
+# read/write между sync loop thread, history import bg thread и HTTP-endpoint'ами.
+_state_lock = threading.Lock()
+
 _PROCESS_STATUS = {
     "kaspi_sync": {
         "status": "starting",   # starting | running | idle | error
@@ -151,7 +155,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if not _is_admin(user):
                 if path.startswith("/api/"):
                     return JSONResponse({"detail": "Forbidden"}, status_code=403)
-                return RedirectResponse("/shop/login?next=" + path)
+                return RedirectResponse(f"/login?next={path}", status_code=302)
 
         # Удаление — только admin
         if method == "DELETE" and any(path.startswith(p) for p in ("/api/products", "/api/kaspi", "/api/movements")):
@@ -163,14 +167,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if is_admin_path:
             if not _is_staff(user):
                 if path.startswith("/api/"):
-                    return JSONResponse({"error": "Forbidden"}, status_code=403)
+                    return JSONResponse({"detail": "Forbidden"}, status_code=403)
                 return RedirectResponse(f"/login?next={path}", status_code=302)
 
         # Пути требующие авторизации (оформление заказа и т.д.)
         _AUTH_REQUIRED = ("/api/orders",)
         if any(path.startswith(p) for p in _AUTH_REQUIRED):
             if not user:
-                return JSONResponse({"error": "Unauthorized"}, status_code=401)
+                return JSONResponse({"detail": "Unauthorized"}, status_code=401)
 
         return await call_next(request)
 
@@ -230,9 +234,10 @@ def _start_kaspi_sync_loop():
     def sync():
         while True:
             cycle_start = time.monotonic()
-            _PROCESS_STATUS["kaspi_sync"]["status"] = "running"
-            _PROCESS_STATUS["kaspi_sync"]["last_run"] = datetime.utcnow().isoformat()
-            _PROCESS_STATUS["kaspi_sync"]["cycle_count"] += 1
+            with _state_lock:
+                _PROCESS_STATUS["kaspi_sync"]["status"] = "running"
+                _PROCESS_STATUS["kaspi_sync"]["last_run"] = datetime.utcnow().isoformat()
+                _PROCESS_STATUS["kaspi_sync"]["cycle_count"] += 1
             db = SL()
             try:
                 from database import SyncLog
@@ -261,6 +266,12 @@ def _start_kaspi_sync_loop():
                 new_orders = []
                 _backfill_fetched_this_cycle[0] = 0  # сброс счётчика
 
+                # Один раз строим индекс SKU→product_id, передаём во все вызовы
+                # deduct/return. Избавляет от N full-scan'ов таблицы products
+                # при обработке каждого заказа.
+                from helpers import build_sku_index
+                sku_index = build_sku_index(db)
+
                 for o in all_orders:
                     raw_date = o.get("date", "")
                     try:
@@ -285,11 +296,11 @@ def _start_kaspi_sync_loop():
 
                         # Остатки: списываем / возвращаем при смене статуса
                         if new_state in DEDUCT_STATES and old_state not in DEDUCT_STATES and not existing.stock_deducted:
-                            _deduct_stock_for_order(existing, db)
+                            _deduct_stock_for_order(existing, db, sku_index)
                             existing.stock_deducted = 1
                             deducted_count += 1
                         elif new_state in CANCEL_STATES and old_state not in CANCEL_STATES and existing.stock_deducted:
-                            _return_stock_for_order(existing, db)
+                            _return_stock_for_order(existing, db, sku_index)
                             existing.stock_deducted = 0
                             returns_count += 1
 
@@ -367,14 +378,16 @@ def _start_kaspi_sync_loop():
                     if o.get("state") in notify_states:
                         _send_tg_notification(_format_order_notification(o))
 
-                _PROCESS_STATUS["kaspi_sync"]["last_result"] = f"+{added} новых, обновлено {updated_count}"
-                _PROCESS_STATUS["kaspi_sync"]["last_error"] = None
+                with _state_lock:
+                    _PROCESS_STATUS["kaspi_sync"]["last_result"] = f"+{added} новых, обновлено {updated_count}"
+                    _PROCESS_STATUS["kaspi_sync"]["last_error"] = None
                 if added or returns_count:
                     print(f"✅ Kaspi sync: +{added} новых, обновлено {updated_count}, возвратов {returns_count}")
             except Exception as e:
                 print(f"⚠️ Kaspi sync error: {e}")
-                _PROCESS_STATUS["kaspi_sync"]["status"] = "error"
-                _PROCESS_STATUS["kaspi_sync"]["last_error"] = str(e)[:300]
+                with _state_lock:
+                    _PROCESS_STATUS["kaspi_sync"]["status"] = "error"
+                    _PROCESS_STATUS["kaspi_sync"]["last_error"] = str(e)[:300]
                 try:
                     from database import SyncLog
                     db.add(SyncLog(synced_at=datetime.utcnow(), error=str(e)[:500]))
@@ -386,8 +399,9 @@ def _start_kaspi_sync_loop():
             # Ждём ровно 5 минут от начала цикла (не от конца)
             elapsed = time.monotonic() - cycle_start
             sleep_sec = max(0, 300 - elapsed)
-            _PROCESS_STATUS["kaspi_sync"]["status"] = "idle"
-            _PROCESS_STATUS["kaspi_sync"]["next_run"] = (datetime.utcnow().timestamp() + sleep_sec)
+            with _state_lock:
+                _PROCESS_STATUS["kaspi_sync"]["status"] = "idle"
+                _PROCESS_STATUS["kaspi_sync"]["next_run"] = (datetime.utcnow().timestamp() + sleep_sec)
             time.sleep(sleep_sec)
 
     t = threading.Thread(target=sync, daemon=True)
@@ -706,6 +720,7 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
     """Принимает заказы от локального sync скрипта и сохраняет в БД"""
     orders = payload.orders
     from database import KaspiOrder
+    from helpers import build_sku_index
     added = 0
     updated = 0
     deducted_total = 0
@@ -716,6 +731,9 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
         oid = _decode_kaspi_order_id(o["id"])
         seen[oid] = o
     orders = list(seen.values())
+
+    # Индекс SKU→product_id — один раз на batch
+    sku_index = build_sku_index(db)
 
     for o in orders:
         oid = _decode_kaspi_order_id(o["id"])
@@ -731,12 +749,12 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
             updated += 1
             # Списываем при переходе в доставку/архив
             if new_state in DEDUCT_STATES and old_state not in DEDUCT_STATES and not existing.stock_deducted:
-                _deduct_stock_for_order(existing, db)
+                _deduct_stock_for_order(existing, db, sku_index)
                 existing.stock_deducted = 1
                 deducted_total += 1
             # Возвращаем при отмене
             elif new_state in CANCEL_STATES and old_state not in CANCEL_STATES and existing.stock_deducted:
-                _return_stock_for_order(existing, db)
+                _return_stock_for_order(existing, db, sku_index)
                 existing.stock_deducted = 0
         else:
             ko = KaspiOrder(
@@ -754,7 +772,7 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
             new_orders.append(o)
             # Если новый заказ сразу в доставке или архиве — списываем
             if new_state in DEDUCT_STATES:
-                _deduct_stock_for_order(ko, db)
+                _deduct_stock_for_order(ko, db, sku_index)
                 ko.stock_deducted = 1
                 deducted_total += 1
     db.commit()
@@ -795,8 +813,9 @@ def _run_history_import_bg():
     now_ms = int(_time.time() * 1000)
     day_ms = 24 * 60 * 60 * 1000
     chunks = list(range(0, TOTAL_DAYS, CHUNK_DAYS))
-    s["total_chunks"] = len(chunks) * len(STATES)
-    s["chunk"] = 0
+    with _state_lock:
+        s["total_chunks"] = len(chunks) * len(STATES)
+        s["chunk"] = 0
 
     db = _SL()
     try:
@@ -904,8 +923,9 @@ def _run_history_import_bg():
 
     finally:
         db.close()
-        s["running"] = False
-        s["done"] = True
+        with _state_lock:
+            s["running"] = False
+            s["done"] = True
 
 
 @app.post("/api/kaspi/import-history")
@@ -916,15 +936,16 @@ def kaspi_import_history(request: Request):
         raise HTTPException(status_code=403)
 
     global _history_import_state
-    if _history_import_state["running"]:
-        return {"ok": False, "detail": "Импорт уже запущен"}
+    with _state_lock:
+        if _history_import_state["running"]:
+            return {"ok": False, "detail": "Импорт уже запущен"}
+        # Сбрасываем поля на месте, а не создаём новый dict — чтобы
+        # bg thread видел тот же объект (он хранит ссылку в s).
+        _history_import_state.update({
+            "running": True, "done": False, "created": 0, "skipped": 0,
+            "errors": 0, "chunk": 0, "total_chunks": 0, "log": []
+        })
 
-    _history_import_state = {
-        "running": True, "done": False, "created": 0, "skipped": 0,
-        "errors": 0, "chunk": 0, "total_chunks": 0, "log": []
-    }
-
-    import threading
     t = threading.Thread(target=_run_history_import_bg, daemon=True)
     t.start()
     return {"ok": True, "detail": "Импорт запущен в фоне"}
@@ -936,7 +957,11 @@ def kaspi_import_history_status(request: Request):
     user = _get_user_from_session(request)
     if not user or not _is_staff(user):
         raise HTTPException(status_code=403)
-    return dict(_history_import_state)
+    with _state_lock:
+        # shallow copy под lock — делает snapshot для безопасного чтения
+        snapshot = dict(_history_import_state)
+        snapshot["log"] = list(snapshot.get("log", []))
+    return snapshot
 
 
 @app.post("/api/kaspi/import-history/stop")
@@ -945,7 +970,8 @@ def kaspi_import_history_stop(request: Request):
     user = _get_user_from_session(request)
     if not user or user.get("role") != "admin":
         raise HTTPException(status_code=403)
-    _history_import_state["running"] = False
+    with _state_lock:
+        _history_import_state["running"] = False
     return {"ok": True}
 
 
@@ -1587,15 +1613,18 @@ def get_processes(db: Session = Depends(get_db)):
     except Exception as e:
         db_status = f"error: {e}"
 
-    # Kaspi sync — секунд до следующего запуска
-    ks = _PROCESS_STATUS["kaspi_sync"]
+    # Kaspi sync — снимаем snapshot под lock чтобы не читать half-updated state
+    with _state_lock:
+        ks = dict(_PROCESS_STATUS["kaspi_sync"])
+        server_start = _PROCESS_STATUS["server_start"]
+
     next_run_in = None
     if ks.get("next_run"):
         next_run_in = max(0, int(ks["next_run"] - datetime.utcnow().timestamp()))
 
     return {
         "uptime": uptime_str,
-        "server_start": _PROCESS_STATUS["server_start"],
+        "server_start": server_start,
         "db": {"status": db_status, **db_counts},
         "processes": [
             {

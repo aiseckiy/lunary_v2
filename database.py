@@ -34,7 +34,7 @@ class Product(Base):
     min_stock = Column(Integer, default=5)
     brand = Column(String, nullable=True, index=True)
     price = Column(Integer, nullable=True)  # цена в тенге
-    kaspi_sku = Column(String, nullable=True)   # ID для матчинга заказов (101602457_xxx)
+    kaspi_sku = Column(String, nullable=True, index=True)   # ID для матчинга заказов (101602457_xxx)
     kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
     cost_price = Column(Integer, nullable=True)  # закупочная цена
     supplier = Column(String, nullable=True)  # поставщик
@@ -56,7 +56,7 @@ class KaspiOrder(Base):
     __tablename__ = "kaspi_orders"
 
     id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(String, unique=True, nullable=False)
+    order_id = Column(String, unique=True, nullable=False, index=True)
     state = Column(String, nullable=False, index=True)
     total = Column(Integer, default=0)
     customer = Column(String, nullable=True)
@@ -86,7 +86,7 @@ class Movement(Base):
     __tablename__ = "movements"
 
     id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, nullable=False)
+    product_id = Column(Integer, nullable=False, index=True)
     # quantity: positive = приход/возврат, negative = продажа/списание
     quantity = Column(Integer, nullable=False)
     type = Column(String, nullable=False)  # income, sale, writeoff, return, adjustment
@@ -240,6 +240,26 @@ def init_db():
                 print(f"[init_db] OK {table}.{col}", flush=True)
             except Exception as e:
                 print(f"[init_db] ОШИБКА {table}.{col}: {str(e)[:200]}", flush=True)
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+
+    # Индексы: create_all не создаёт индексы на уже существующих таблицах,
+    # поэтому создаём вручную через CREATE INDEX IF NOT EXISTS
+    new_indexes = [
+        ("ix_products_kaspi_sku",   "products",     "kaspi_sku"),
+        ("ix_kaspi_orders_order_id","kaspi_orders", "order_id"),
+        ("ix_movements_product_id", "movements",    "product_id"),
+    ]
+    with engine.connect() as conn:
+        for idx_name, table, col in new_indexes:
+            try:
+                conn.execute(text(f"CREATE INDEX IF NOT EXISTS {idx_name} ON {table} ({col})"))
+                conn.commit()
+                print(f"[init_db] OK index {idx_name}", flush=True)
+            except Exception as e:
+                print(f"[init_db] ОШИБКА индекса {idx_name}: {str(e)[:200]}", flush=True)
                 try:
                     conn.rollback()
                 except Exception:

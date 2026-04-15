@@ -585,8 +585,8 @@ def login_page():
 def auth_login(data: LoginRequest):
     password = os.getenv("ADMIN_PASSWORD", "")
     if not password:
-        # Пароль не задан — всегда успех
-        resp = JSONResponse({"ok": True})
+        # Пароль не задан — вход ЗАПРЕЩЁН, требуется настройка
+        raise HTTPException(status_code=503, detail="ADMIN_PASSWORD не задан — настройте переменную окружения на сервере")
     elif data.password == password:
         resp = JSONResponse({"ok": True})
     else:
@@ -1254,6 +1254,8 @@ def add_movement(product_id: int, data: StockAdjust, request: Request, db: Sessi
 
         if data.type not in ("income", "sale", "writeoff", "return", "adjustment"):
             raise HTTPException(status_code=400, detail="Неверный тип движения")
+        if data.quantity <= 0:
+            raise HTTPException(status_code=400, detail="Количество должно быть больше нуля")
 
         u = _get_user_from_session(request)
         m = crud.add_movement(product_id, data.quantity, data.type, db, data.source, data.note,
@@ -1435,13 +1437,13 @@ def store_product_similar(product_id: int, db: Session = Depends(get_db)):
     from sqlalchemy import func
     import random
 
-    src = db.query(_P).filter(_P.id == product_id).first()
+    src = db.query(_P).filter(_P.id == product_id, _P.show_in_shop == True).first()
     if not src:
         return []
 
     q = db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock")) \
         .outerjoin(_M, _M.product_id == _P.id) \
-        .filter(_P.id != product_id, _P.category == "Kaspi", _P.price.isnot(None)) \
+        .filter(_P.id != product_id, _P.show_in_shop == True, _P.price.isnot(None)) \
         .group_by(_P.id)
 
     if src.brand:
@@ -1480,7 +1482,7 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
     row = (
         db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
         .outerjoin(_M, _M.product_id == _P.id)
-        .filter(_P.id == product_id, _P.category == "Kaspi")
+        .filter(_P.id == product_id, _P.show_in_shop == True)
         .group_by(_P.id)
         .first()
     )
@@ -1494,8 +1496,6 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
         "brand": p.brand or "",
         "price": p.price, "unit": p.unit or "шт",
         "stock": int(stock), "min_stock": p.min_stock or 0,
-        "supplier": p.supplier or "",
-        "cost_price": p.cost_price,
         "image_url": p.image_url or "",
         "images": _parse_images(p),
         "description": p.description or "",
@@ -2045,11 +2045,11 @@ def sitemap_xml(db: Session = Depends(get_db)):
 
 @app.get("/api/shop/my-orders")
 def my_orders(request: Request, db: Session = Depends(get_db)):
-    user = _get_user_from_session(request, db)
-    if not user:
+    user = _get_user_from_session(request)
+    if not user or not user.get("id"):
         raise HTTPException(status_code=401, detail="Не авторизован")
     from database import ShopOrder
-    orders = db.query(ShopOrder).filter(ShopOrder.user_id == user.id).order_by(ShopOrder.created_at.desc()).all()
+    orders = db.query(ShopOrder).filter(ShopOrder.user_id == user["id"]).order_by(ShopOrder.created_at.desc()).all()
     return [
         {"id": o.id, "status": o.status, "total": o.total,
          "items": o.items, "created_at": str(o.created_at)}

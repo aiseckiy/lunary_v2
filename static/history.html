@@ -155,11 +155,19 @@ document.addEventListener('DOMContentLoaded', () => {
   load();
 });
 
+let isAdmin = true;
+
 async function load() {
-  const params = new URLSearchParams({limit: 5000});
-  const res = await fetch('/api/history?' + params);
+  const [res, meRes] = await Promise.all([
+    fetch('/api/history?' + new URLSearchParams({limit: 5000})),
+    fetch('/api/auth/me').catch(() => null),
+  ]);
   const data = await res.json();
   allItems = data.items;
+  if (meRes && meRes.ok) {
+    const me = await meRes.json();
+    isAdmin = me.role === 'admin';
+  }
   applyFilters();
 }
 
@@ -267,7 +275,7 @@ function renderTable() {
         <td><span class="source-badge ${srcClass}">${srcLabel}</span></td>
         <td style="font-size:13px;color:#6b7280;white-space:nowrap">${i.user_name || '—'}</td>
         <td style="color:#9ca3af;font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.note || '—'}</td>
-        <td><button class="btn-del" onclick="deleteRow(${i.id})" title="Удалить">🗑</button></td>
+        <td>${isAdmin ? `<button class="btn-del" onclick="deleteRow(${i.id})" title="Удалить">🗑</button>` : ''}</td>
       </tr>
     `;
   });

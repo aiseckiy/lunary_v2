@@ -238,21 +238,35 @@
   // ── Сайдбар ──────────────────────────────────────────────────
   const sidebar = document.getElementById('sidebar');
   if (sidebar) {
-    let html = `<div class="sidebar-logo">Lunary <span>OS</span></div>`;
+    // Определяем роль пользователя — для скрытия admin-only пунктов
+    const _ADMIN_ONLY_LINKS = new Set(['/admin/settings', '/admin/theme', '/admin/changelog', '/admin/sitemap', '/admin/bizmap']);
+    let userRole = 'admin'; // по умолчанию показываем всё
 
-    for (const group of GROUPS) {
-      html += `<div class="sidebar-section">${group.label}</div>`;
-      for (const l of group.links) {
-        const active = isActive(l.href) ? ' active' : '';
-        const badgeHtml = l.badge
-          ? `<span id="${l.badge}" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span>`
-          : '';
-        html += `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
+    fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(me => {
+      if (me) userRole = me.role;
+      buildSidebar(userRole);
+    }).catch(() => buildSidebar('admin'));
+
+    function buildSidebar(role) {
+      const isManagerOnly = role === 'manager';
+      let html = `<div class="sidebar-logo">Lunary <span>OS</span></div>`;
+
+      for (const group of GROUPS) {
+        const visibleLinks = group.links.filter(l => !(isManagerOnly && _ADMIN_ONLY_LINKS.has(l.href)));
+        if (!visibleLinks.length) continue;
+        html += `<div class="sidebar-section">${group.label}</div>`;
+        for (const l of visibleLinks) {
+          const active = isActive(l.href) ? ' active' : '';
+          const badgeHtml = l.badge
+            ? `<span id="${l.badge}" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span>`
+            : '';
+          html += `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
+        }
       }
-    }
 
-    html += `<div class="sidebar-spacer"></div><div class="sidebar-footer">Lunary OS v2</div>`;
-    sidebar.innerHTML = html;
+      html += `<div class="sidebar-spacer"></div><div class="sidebar-footer">Lunary OS v2</div>`;
+      sidebar.innerHTML = html;
+    }
   }
 
   // ── Нижняя панель (мобильная) ─────────────────────────────────

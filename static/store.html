@@ -42,9 +42,11 @@
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
 :root {
-  --accent: #0082EC;
-  --accent-dark: #006DC5;
-  --bg: #f8f8fb;
+  --accent: #1A73E8;
+  --accent-dark: #1558b0;
+  --btn: #111827;
+  --btn-hover: #374151;
+  --bg: #f9fafb;
   --surface: #ffffff;
   --border: #e5e7eb;
   --text: #111827;
@@ -227,17 +229,17 @@ body {
 .product-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+  transition: box-shadow 0.2s, transform 0.2s;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 .product-card:hover {
-  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
   transform: translateY(-2px);
-  border-color: #99ccf5;
 }
 
 .product-image {
@@ -251,18 +253,33 @@ body {
   overflow: hidden;
   flex-shrink: 0;
 }
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.product-image img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Избранное */
+.fav-btn {
+  position: absolute; top: 8px; right: 8px;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.92);
+  border: none; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  transition: transform .15s;
+  z-index: 2;
 }
+.fav-btn:hover { transform: scale(1.15); }
+.fav-btn.active { color: #ef4444; }
 
 .product-body {
-  padding: 12px 14px 14px;
+  padding: 10px 12px 8px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 4px;
+  gap: 2px;
+}
+.product-article {
+  font-size: 11px;
+  color: var(--text3);
 }
 .product-brand {
   font-size: 11px;
@@ -270,6 +287,7 @@ body {
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-top: 2px;
 }
 .product-name {
   font-size: 13px;
@@ -281,53 +299,41 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
+  margin-top: 3px;
 }
 .product-price {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--text);
-  margin-top: 6px;
+  margin-top: 8px;
+  line-height: 1.1;
 }
-.product-price .currency {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text2);
-}
-.product-stock {
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 20px;
-  padding: 3px 9px;
-  align-self: flex-start;
-  margin-top: 4px;
-}
+.product-price .currency { font-size: 13px; font-weight: 500; color: var(--text2); }
+.product-price .unit     { font-size: 12px; font-weight: 400; color: var(--text3); }
+.stock-out-label { font-size: 11px; color: var(--text3); margin-top: 4px; }
 .stock-in  { background: #dcfce7; color: #166534; }
 .stock-out { background: #fee2e2; color: #991b1b; }
 
-.product-footer {
-  padding: 0 14px 14px;
-}
+.product-footer { padding: 8px 12px 12px; }
 .btn-add-cart {
   width: 100%;
-  background: var(--accent);
+  background: var(--btn);
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 9px;
+  border-radius: 8px;
+  padding: 10px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background .15s;
   font-family: inherit;
 }
-.btn-add-cart:hover  { background: var(--accent-dark); }
-.btn-add-cart.added  { background: var(--green); }
+.btn-add-cart:hover   { background: var(--btn-hover); }
+.btn-add-cart.added   { background: var(--green); }
+.btn-add-cart:disabled { background: #e5e7eb; color: #9ca3af; cursor: default; }
 .product-category-tag {
-  font-size: 11px;
-  color: var(--text3);
-  background: #f3f4f6;
-  border-radius: 6px;
-  padding: 2px 8px;
+  font-size: 11px; color: var(--text3);
+  background: #f3f4f6; border-radius: 6px; padding: 2px 8px;
 }
 
 /* ── EMPTY STATE ── */
@@ -1106,23 +1112,27 @@ function render() {
   grid.innerHTML = page.map(p => {
     const inStock = p.stock > 0;
     const img = (p.images && p.images[0]) || p.image_url;
-    const imgHtml = img
-      ? `<img src="${img}" alt="${p.name}">`
-      : categoryEmoji(p.category);
+    const imgHtml = img ? `<img src="${img}" alt="${p.name}">` : categoryEmoji(p.category);
+    const isFav = favSet.has(p.id);
     const priceHtml = p.price
-      ? `<div class="product-price">${p.price.toLocaleString('ru')}<span class="currency"> ₸</span></div>`
-      : `<div class="product-price" style="color:var(--text3);font-size:13px;font-weight:500">Цена по запросу</div>`;
-    const cartBtn = inStock && p.price
-      ? `<div class="product-footer" onclick="event.stopPropagation()"><button class="btn-add-cart" onclick="addToCart(event,${p.id},'${p.name.replace(/'/g,"\\'")}',${p.price})">В корзину</button></div>`
+      ? `<div class="product-price">${p.price.toLocaleString('ru')}<span class="currency"> ₸</span>${p.unit && p.unit !== 'шт' ? `<span class="unit">/${p.unit}</span>` : ''}</div>`
+      : `<div class="product-price" style="color:var(--text3);font-size:13px;font-weight:500;margin-top:8px">Цена по запросу</div>`;
+    const cartBtn = p.price
+      ? `<div class="product-footer" onclick="event.stopPropagation()">
+          <button class="btn-add-cart${!inStock ? ' disabled' : ''}" ${!inStock ? 'disabled' : `onclick="addToCart(event,${p.id},'${p.name.replace(/'/g,"\\'")}',${p.price})"`}>
+            ${inStock ? 'В корзину' : 'Нет в наличии'}
+          </button>
+        </div>`
       : '';
     return `
     <div class="product-card" onclick="saveState();location.href='/shop/product/${p.id}'">
       <div class="product-image">${imgHtml}</div>
+      <button class="fav-btn${isFav ? ' active' : ''}" onclick="event.stopPropagation();toggleFav(${p.id})">${isFav ? '♥' : '♡'}</button>
       <div class="product-body">
+        ${p.supplier_article ? `<div class="product-article">Арт. ${p.supplier_article}</div>` : ''}
         ${p.brand ? `<div class="product-brand">${p.brand}</div>` : ''}
         <div class="product-name">${p.name}</div>
         ${priceHtml}
-        <span class="product-stock ${inStock ? 'stock-in' : 'stock-out'}">${inStock ? 'В наличии' : 'Нет в наличии'}</span>
       </div>
       ${cartBtn}
     </div>`;
@@ -1274,6 +1284,24 @@ function formatPhone(val) {
   if (digits.length > 6) r += ' ' + digits.slice(6, 8);
   if (digits.length > 8) r += ' ' + digits.slice(8, 10);
   return r;
+}
+
+// ── Favourites ────────────────────────────────────────────────
+let favSet = new Set(JSON.parse(localStorage.getItem('lunary_favs') || '[]'));
+
+function toggleFav(id) {
+  if (favSet.has(id)) {
+    favSet.delete(id);
+  } else {
+    favSet.add(id);
+  }
+  localStorage.setItem('lunary_favs', JSON.stringify([...favSet]));
+  // update button in-place without full re-render
+  const btn = document.querySelector(`.fav-btn[onclick*="toggleFav(${id})"]`);
+  if (btn) {
+    btn.classList.toggle('active', favSet.has(id));
+    btn.textContent = favSet.has(id) ? '♥' : '♡';
+  }
 }
 
 // ── Cart ──────────────────────────────────────────────────────

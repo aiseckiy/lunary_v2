@@ -1377,6 +1377,7 @@ def store_products(db: Session = Depends(get_db)):
             "stock": int(s[1]),
             "image_url": s[0].image_url or "",
             "images": _parse_images(s[0]),
+            "supplier_article": s[0].supplier_article or "",
         }
         for s in stocks
     ]

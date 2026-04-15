@@ -1,5 +1,10 @@
 [
   {
+    "hash": "995205c",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести аналитику в routers/analytics.py + helpers.py"
+  },
+  {
     "hash": "c3d6981",
     "date": "16.04.2026",
     "message": "Telegram: ежедневный отчёт по остаткам + команда /notify"

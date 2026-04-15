@@ -1,5 +1,33 @@
 """Shared utility helpers — используются в api.py, routers/*, bot.py."""
+import os
 from datetime import datetime, timedelta, timezone
+
+UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+
+
+def save_upload(content: bytes, original_name: str, file_type: str, records: int, db):
+    """Сохраняет файл на диск и пишет запись в uploaded_files."""
+    from database import UploadedFile
+    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    safe_name = original_name.replace(" ", "_")
+    saved_name = f"{ts}_{file_type}_{safe_name}"
+    path = os.path.join(UPLOADS_DIR, saved_name)
+    try:
+        with open(path, "wb") as f:
+            f.write(content)
+    except Exception:
+        saved_name = None
+    db.add(UploadedFile(
+        original_name=original_name,
+        saved_name=saved_name,
+        file_type=file_type,
+        size_bytes=len(content),
+        records=records,
+    ))
+    db.commit()
+
+
+_save_upload = save_upload
 
 
 def parse_order_date(date_str):

@@ -30,6 +30,24 @@ def save_upload(content: bytes, original_name: str, file_type: str, records: int
 _save_upload = save_upload
 
 
+def parse_images(product) -> list:
+    """Возвращает список изображений товара (из поля images JSON или image_url)."""
+    import json
+    if product.images:
+        try:
+            imgs = json.loads(product.images)
+            if isinstance(imgs, list) and imgs:
+                return imgs
+        except Exception:
+            pass
+    if product.image_url:
+        return [product.image_url]
+    return []
+
+
+_parse_images = parse_images
+
+
 def parse_order_date(date_str):
     """Парсит дату заказа из dd.mm.yyyy или Unix ms timestamp (UTC+5 Казахстан).
     Возвращает datetime или None."""

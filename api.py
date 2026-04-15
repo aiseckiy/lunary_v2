@@ -39,20 +39,7 @@ import kaspi as kaspi_module
 
 
 
-def _decode_kaspi_order_id(raw_id: str) -> str:
-    """Kaspi API возвращает order_id в base64. Декодируем в числовой ID."""
-    import base64
-    s = str(raw_id).strip()
-    # Если уже числовой — оставляем как есть
-    if s.isdigit():
-        return s
-    try:
-        decoded = base64.b64decode(s + "==").decode("utf-8")
-        if decoded.isdigit():
-            return decoded
-    except Exception:
-        pass
-    return s
+from helpers import decode_kaspi_order_id as _decode_kaspi_order_id  # noqa: E402
 
 
 from helpers import parse_order_date as _parse_order_date, filter_orders_by_date as _filter_orders_by_date  # noqa: E402
@@ -85,12 +72,14 @@ from routers.pricelist import router as pricelist_router  # noqa: E402
 from routers.merge import router as merge_router  # noqa: E402
 from routers.store import router as store_router  # noqa: E402
 from routers.products import router as products_router  # noqa: E402
+from routers.kaspi import router as kaspi_router  # noqa: E402
 app.include_router(analytics_router)
 app.include_router(uploads_router)
 app.include_router(pricelist_router)
 app.include_router(merge_router)
 app.include_router(store_router)
 app.include_router(products_router)
+app.include_router(kaspi_router)
 
 
 if _slowapi_ok:
@@ -184,19 +173,7 @@ class AISuggestRequest(BaseModel):
     barcode: Optional[str] = None
 
 
-# ─── Integration settings helper ────────────────────────────
-def _get_integration(setting_key: str, env_var: str) -> str:
-    """Читает настройку интеграции: сначала из БД (SiteSetting), потом из ENV."""
-    try:
-        from database import SiteSetting, SessionLocal as _SL
-        db = _SL()
-        row = db.query(SiteSetting).filter(SiteSetting.key == setting_key).first()
-        db.close()
-        if row and row.value and row.value.strip():
-            return row.value.strip()
-    except Exception:
-        pass
-    return os.getenv(env_var, "")
+from helpers import get_integration as _get_integration  # noqa: E402
 
 
 # ─── Startup ─────────────────────────────────────────────────
@@ -1499,21 +1476,6 @@ def ai_suggest(data: AISuggestRequest):
 
 
 # ─── Kaspi заказы ────────────────────────────────────────────
-@app.get("/api/kaspi/orders")
-def get_kaspi_orders_endpoint(state: str = "ACCEPTED", page: int = 0, size: int = 20):
-    """Получить заказы из Kaspi API"""
-    token = _get_integration("kaspi_api_key", "KASPI_TOKEN")
-    shop_id = _get_integration("kaspi_shop_id", "KASPI_SHOP_ID")
-    if not token or not shop_id:
-        return {"orders": [], "total": 0, "error": "KASPI_TOKEN и KASPI_SHOP_ID не заданы в настройках"}
-    result = kaspi_module.get_kaspi_orders(state=state, page=page, size=size)
-    return result
-
-
-@app.get("/api/kaspi/states")
-def get_kaspi_states():
-    """Возможные статусы заказов Kaspi"""
-    return ["ACCEPTED", "COMPLETED", "CANCELLED", "KASPI_DELIVERY", "PICKUP"]
 
 
 
@@ -1522,196 +1484,14 @@ class KaspiOrdersPayload(BaseModel):
     orders: list
 
 
-def _send_tg_notification(text: str):
-    """Отправить сообщение в Telegram (не блокирует sync loop)."""
-    bot_token = _get_integration("tg_bot_token", "BOT_TOKEN")
-    chat_id = _get_integration("tg_chat_id", "ADMIN_CHAT_ID")
-    if not bot_token or not chat_id:
-        return
-    def _send():
-        try:
-
-            params = urllib.parse.urlencode({"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
-            url = f"https://api.telegram.org/bot{bot_token}/sendMessage?{params}"
-            urllib.request.urlopen(url, timeout=3)
-        except Exception as e:
-            print(f"⚠️ TG уведомление ошибка: {e}")
-    threading.Thread(target=_send, daemon=True).start()
-
-
-def _format_order_notification(o: dict) -> str:
-    STATE_LABELS = {
-        "NEW": "🟡 Новый заказ",
-        "KASPI_DELIVERY": "🚚 Kaspi Доставка",
-        "DELIVERY": "🚛 Ваша доставка",
-        "PICKUP": "🏪 Самовывоз",
-        "COMPLETED": "✅ Выполнен",
-        "CANCELLED": "❌ Отменён",
-        "SIGN_REQUIRED": "✍️ Нужна подпись",
-    }
-    DELIVERY_LABELS = {
-        "DELIVERY_LOCAL": "по городу",
-        "DELIVERY_PICKUP": "самовывоз",
-        "DELIVERY_REGIONAL_TODOOR": "Kaspi Доставка",
-        "DELIVERY_REGIONAL_PICKUP": "до склада",
-    }
-    PAYMENT_LABELS = {
-        "PAY_WITH_CREDIT": "Кредит",
-        "PREPAID": "Безналичная",
-    }
-
-    state = o.get("state", "")
-    label = STATE_LABELS.get(state, state)
-    customer = o.get("customer") or "Покупатель"
-    total = int(o.get("total", 0))
-    entries = o.get("entries", [])
-    raw_id = o.get("id", "")
-    code = _decode_kaspi_order_id(str(raw_id)) if raw_id else ""
-    delivery_mode = DELIVERY_LABELS.get(o.get("deliveryMode", ""), o.get("deliveryMode", ""))
-    payment = PAYMENT_LABELS.get(o.get("paymentMode", ""), "")
-    address = o.get("deliveryAddress") or {}
-    addr_str = address.get("formattedAddress", "")
-    planned = o.get("plannedDeliveryDate")
-    planned_str = ""
-    if planned:
-        try:
-            planned_str = datetime.fromtimestamp(int(planned) / 1000).strftime("%d.%m.%Y")
-        except Exception:
-            pass
-
-    lines = [
-        f"<b>{label}</b>",
-        f"🛒 Заказ <b>#{code}</b>",
-        f"👤 {customer}",
-    ]
-    if delivery_mode:
-        lines.append(f"📦 {delivery_mode}")
-    if addr_str:
-        lines.append(f"📍 {addr_str}")
-    if planned_str:
-        lines.append(f"📅 Дата доставки: {planned_str}")
-    if payment:
-        lines.append(f"💳 {payment}")
-    lines.append("")
-
-    # Если entries нет — пробуем загрузить прямо сейчас
-    if not entries:
-        try:
-            entries = kaspi_module.get_order_entries(str(code)) or []
-        except Exception:
-            entries = []
-
-    # Показываем состав
-    for e in entries:
-        qty = e.get('qty', 1)
-        price = int(e.get('basePrice', e.get('price', 0)))
-        name = e.get('name') or '—'
-        sku = e.get('sku') or e.get('merchantSku') or ''
-        sku_str = f" <code>{sku}</code>" if sku else ""
-        lines.append(f"  • {name}{sku_str} — {qty} шт × {price:,} ₸".replace(",", " "))
-
-    lines.append("")
-    lines.append(f"<b>Итого: {total:,} ₸</b>".replace(",", " "))
-    return "\n".join(lines)
-
-
-ARCHIVE_STATES = {"ARCHIVE", "Выдан"}
-# Состояния когда товар физически ушёл — списываем остаток
-DEDUCT_STATES = {"KASPI_DELIVERY", "DELIVERY", "PICKUP", "ARCHIVE", "Выдан"}
-# Состояния отмены — возвращаем остаток если уже списали
-CANCEL_STATES = {"CANCELLED", "Отменен", "RETURN", "Возврат"}
-
-def _return_stock_for_order(order_row, db: Session):
-    """Возвращает остатки при отмене заказа (если уже были списаны)."""
-    from database import Product
-    entries = []
-    if order_row.entries:
-        try:
-            entries = json.loads(order_row.entries)
-        except Exception:
-            pass
-    if not entries and order_row.sku and order_row.quantity:
-        entries = [{"merchantSku": order_row.sku, "qty": order_row.quantity}]
-    for entry in entries:
-        if not isinstance(entry, dict):
-            continue
-        merchant_sku = entry.get("merchantSku", "")
-        qty = int(entry.get("qty", 1))
-        if qty <= 0:
-            continue
-        product = None
-        if merchant_sku:
-            product = _find_product_by_sku(merchant_sku, db)
-        if product:
-            crud.add_movement(product.id, qty, "return", db,
-                              source="kaspi", note=f"Возврат: отмена заказа {order_row.order_id}")
-
-
-def _find_product_by_sku(merchant_sku: str, db: Session):
-    """Ищет товар по kaspi_sku с поддержкой нескольких SKU через запятую."""
-    from database import Product
-    if not merchant_sku:
-        return None
-    # Точное совпадение или один из нескольких SKU в поле через запятую
-    all_products = db.query(Product).filter(Product.kaspi_sku != None).all()
-    for p in all_products:
-        skus = [s.strip() for s in (p.kaspi_sku or "").split(",") if s.strip()]
-        if merchant_sku in skus:
-            return p
-        # fallback: старый формат "101438761_943240382" матчится по prefix "101438761"
-        for s in skus:
-            if s == merchant_sku or merchant_sku.startswith(s + "_") or s.startswith(merchant_sku + "_"):
-                return p
-    return None
-
-
-def _deduct_stock_for_order(order_row, db: Session):
-    """Списывает остатки по заказу. Вызывается один раз при переходе в DEDUCT_STATES."""
-    from database import Product
-
-    deducted = []
-
-    # Способ 1: у заказа есть kaspi_sku + quantity (XML-импорт или расширенные поля)
-    if order_row.sku and order_row.quantity:
-        product = _find_product_by_sku(order_row.sku, db)
-        if product:
-            crud.add_movement(product.id, order_row.quantity, "sale", db,
-                              source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
-            deducted.append((product.name, order_row.quantity))
-            return deducted
-
-    # Способ 2: entries JSON — матчим по kaspi_sku через name
-    if order_row.entries:
-        try:
-            entries = json.loads(order_row.entries)
-        except Exception:
-            entries = []
-        for entry in entries:
-            name = entry.get("name", "")
-            merchant_sku = entry.get("merchantSku", "")
-            qty = int(entry.get("qty", 1))
-            if qty <= 0:
-                continue
-            product = None
-            # Способ 2a: по merchantSku (код товара продавца из Kaspi API)
-            # kaspi_sku в БД может быть "101438761_943240382" или просто "101438761"
-            if merchant_sku:
-                product = _find_product_by_sku(merchant_sku, db)
-            # Способ 2b: по названию (ilike первые 30 символов)
-            if not product and name:
-                product = db.query(Product).filter(
-                    Product.kaspi_sku.isnot(None),
-                    Product.name.ilike(f"%{name[:30]}%")
-                ).first()
-            if not product and name:
-                # fallback: точное совпадение по name
-                product = db.query(Product).filter(Product.name == name).first()
-            if product:
-                crud.add_movement(product.id, qty, "sale", db,
-                                  source="kaspi", note=f"Kaspi заказ {order_row.order_id}")
-                deducted.append((product.name, qty))
-
-    return deducted
+from helpers import (  # noqa: E402
+    ARCHIVE_STATES, DEDUCT_STATES, CANCEL_STATES,
+    send_tg_notification as _send_tg_notification,
+    format_order_notification as _format_order_notification,
+    find_product_by_sku as _find_product_by_sku,
+    deduct_stock_for_order as _deduct_stock_for_order,
+    return_stock_for_order as _return_stock_for_order,
+)
 
 
 @app.post("/api/kaspi/orders/sync")
@@ -1781,237 +1561,8 @@ def kaspi_orders_sync(payload: KaspiOrdersPayload, db: Session = Depends(get_db)
     return {"added": added, "updated": updated, "stock_deducted": deducted_total}
 
 
-@app.get("/api/kaspi/orders/local")
-def kaspi_orders_local(
-    state: Optional[str] = None,
-    date_from: Optional[str] = None,  # YYYY-MM-DD
-    date_to: Optional[str] = None,    # YYYY-MM-DD
-    limit: int = 2000,
-    offset: int = 0,
-    db: Session = Depends(get_db)
-):
-    from database import KaspiOrder
-    from sqlalchemy import func
-
-    # Маппинг русских статусов (XML) → внутренние
-    STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
-
-    q = db.query(KaspiOrder)
-    if state:
-        if state in STATE_MAP.values():
-            russian = [k for k, v in STATE_MAP.items() if v == state]
-            q = q.filter(KaspiOrder.state.in_(russian + [state]))
-        else:
-            q = q.filter(KaspiOrder.state == state)
-
-    # Fetch all matching orders (date filter happens in Python due to mixed date formats)
-    all_orders = q.order_by(KaspiOrder.id.desc()).all()
-
-    # Date filtering in Python (единая логика с аналитикой)
-    if date_from or date_to:
-        all_orders = _filter_orders_by_date(all_orders, date_from, date_to)
-
-    total_count = len(all_orders)
-    orders = all_orders[offset: offset + limit]
-
-    # Счётчики по вкладкам
-    raw_counts = db.query(KaspiOrder.state, func.count(KaspiOrder.id)).group_by(KaspiOrder.state).all()
-    state_counts: dict = {}
-    for s, c in raw_counts:
-        key = STATE_MAP.get(s, s)
-        state_counts[key] = state_counts.get(key, 0) + c
-
-    def fmt(o):
-        from database import Product
-        normalized = STATE_MAP.get(o.state, o.state)
-        if o.entries and o.entries != "[]":
-            entries = json.loads(o.entries)
-        elif o.product_name:
-            entries = [{"name": o.product_name, "sku": o.sku or "", "qty": o.quantity or 1, "basePrice": o.total}]
-        else:
-            entries = []
-        # Добавить product_id к каждой позиции для ссылки на карточку
-        for entry in entries:
-            if entry.get("product_id"):
-                continue
-            mssku = entry.get("merchantSku", "")
-            name = entry.get("name", "")
-            product = None
-            if mssku:
-                product = db.query(Product).filter(
-                    (Product.kaspi_sku == mssku) |
-                    Product.kaspi_sku.like(f"{mssku}_%")
-                ).first()
-            if not product and name:
-                product = db.query(Product).filter(Product.name.ilike(f"%{name[:30]}%")).first()
-            if product:
-                entry["product_id"] = product.id
-        synced = None
-        sync_ts = o.last_synced_at or o.created_at
-        if sync_ts:
-            try:
-                from datetime import timezone, timedelta
-                synced = sync_ts.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=5))).strftime("%d.%m %H:%M")
-            except Exception:
-                pass
-        return {
-            "id": o.order_id,
-            "state": normalized,
-            "total": o.total or 0,
-            "customer": o.customer or "",
-            "entries": entries,
-            "date": o.order_date or "",
-            "synced_at": synced,
-            "source": o.source or "kaspi_api",
-            "delivery_method": o.delivery_method or "",
-            "address": o.address or "",
-            "payment_method": o.payment_method or "",
-            "cancel_reason": o.cancel_reason or "",
-        }
-
-    return {
-        "orders": [fmt(o) for o in orders],
-        "total": total_count,
-        "state_counts": state_counts,
-        "error": None,
-    }
 
 
-@app.get("/api/kaspi/orders/{order_id}/entries")
-def get_kaspi_order_entries(order_id: str, db: Session = Depends(get_db)):
-    """Получить и сохранить состав конкретного заказа"""
-    from database import KaspiOrder
-    order = db.query(KaspiOrder).filter(KaspiOrder.order_id == order_id).first()
-    if not order:
-        raise HTTPException(status_code=404)
-    # Если уже есть — вернуть
-    if order.entries and order.entries not in ("[]", ""):
-        return {"entries": json.loads(order.entries)}
-    # Загрузить из Kaspi API
-    print(f"[entries] загружаем состав для order_id={order_id}", flush=True)
-    try:
-        entries = kaspi_module.get_order_entries(order_id)
-        print(f"[entries] получено {len(entries) if entries else 0} позиций для {order_id}", flush=True)
-    except Exception as e:
-        print(f"[entries] ОШИБКА для {order_id}: {e}", flush=True)
-        entries = []
-    if entries:
-        order.entries = json.dumps(entries, ensure_ascii=False)
-        if not order.product_name:
-            order.product_name = entries[0].get("name")
-            order.sku = entries[0].get("merchantSku", "")
-            order.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
-        db.commit()
-    return {"entries": entries}
-
-
-@app.get("/api/kaspi/export-preview")
-def kaspi_export_preview(db: Session = Depends(get_db)):
-    """Предпросмотр данных перед экспортом Kaspi XML"""
-    from database import SiteSetting, Product
-    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
-    store_id = settings.get("kaspi_store_id", "30409502_PP1")
-
-    products = db.query(Product).filter(Product.kaspi_sku.isnot(None)).all()
-    rows = []
-    for p in products:
-        skus = [s.strip() for s in p.kaspi_sku.split(",") if s.strip()]
-        stock = max(crud.get_stock(p.id, db), 0)
-        multi_sku = len(skus) > 1
-        for sku in skus:
-            problems = []
-            if not p.price:
-                problems.append("нет цены")
-            if not p.brand:
-                problems.append("нет бренда")
-            if not p.name:
-                problems.append("нет названия")
-            rows.append({
-                "id": p.id,
-                "sku": sku,
-                "name": p.name or "",
-                "brand": p.brand or "",
-                "stock": stock,
-                "price": p.price,
-                "available": stock > 0,
-                "multi_sku": multi_sku,
-                "store_id": store_id,
-                "problems": problems,
-            })
-    return {"rows": rows}
-
-
-@app.get("/admin/export-preview")
-def export_preview_page():
-    from fastapi.responses import FileResponse
-    return FileResponse("static/export_preview.html")
-
-
-def _build_kaspi_xml(db) -> str:
-    """Внутренняя функция — строит Kaspi Shopping XML из БД"""
-    from datetime import datetime, timezone, timedelta
-    import xml.etree.ElementTree as ET
-    from database import SiteSetting, Product
-
-    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
-    merchant_id = settings.get("kaspi_merchant_id", "30409502")
-    store_id    = settings.get("kaspi_store_id",    "30409502_PP1")
-    city_id     = settings.get("kaspi_city_id",     "750000000")
-
-    tz_kz = timezone(timedelta(hours=5))
-    now_str = datetime.now(tz_kz).strftime("%Y-%m-%d %H:%M")
-
-    root = ET.Element("kaspi_catalog", attrib={"xmlns": "kaspiShopping", "date": now_str})
-    ET.SubElement(root, "company").text   = merchant_id
-    ET.SubElement(root, "merchantid").text = merchant_id
-    offers_el = ET.SubElement(root, "offers")
-
-    products = db.query(Product).filter(Product.kaspi_sku.isnot(None)).all()
-    for p in products:
-        skus = [s.strip() for s in p.kaspi_sku.split(",") if s.strip()]
-        stock = max(crud.get_stock(p.id, db), 0)
-        for sku in skus:
-            offer = ET.SubElement(offers_el, "offer", sku=sku)
-            ET.SubElement(offer, "model").text = p.name or ""
-            ET.SubElement(offer, "brand").text = p.brand or ""
-            avails = ET.SubElement(offer, "availabilities")
-            ET.SubElement(avails, "availability",
-                          available="yes" if stock > 0 else "no",
-                          storeId=store_id,
-                          preOrder="0",
-                          stockCount=str(float(stock)))
-            if p.price:
-                cityprices = ET.SubElement(offer, "cityprices")
-                ET.SubElement(cityprices, "cityprice", cityId=city_id).text = str(p.price)
-
-    return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
-
-
-@app.get("/api/kaspi/feed.xml", include_in_schema=False)
-def kaspi_feed_public(token: str = "", db: Session = Depends(get_db)):
-    """Публичный Kaspi Price Feed — Kaspi забирает автоматически по этому URL.
-    Защищён токеном: ?token=<kaspi_feed_token из настроек>.
-    Если токен не задан в настройках — открыт для всех (для первоначальной настройки).
-    """
-    from fastapi.responses import Response
-    from database import SiteSetting
-    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
-    feed_token = settings.get("kaspi_feed_token", "")
-    if feed_token and token != feed_token:
-        raise HTTPException(status_code=403, detail="Invalid token")
-
-    xml_str = _build_kaspi_xml(db)
-    return Response(content=xml_str, media_type="application/xml",
-                    headers={"Cache-Control": "no-cache"})
-
-
-@app.get("/api/kaspi/export-xml")
-def kaspi_export_xml(db: Session = Depends(get_db)):
-    """Скачать Kaspi XML (attachment) — для ручной загрузки в Merchant Portal"""
-    from fastapi.responses import Response
-    xml_str = _build_kaspi_xml(db)
-    return Response(content=xml_str, media_type="application/xml",
-                    headers={"Content-Disposition": "attachment; filename=ACTIVE.xml"})
 
 
 
@@ -2191,45 +1742,6 @@ def kaspi_import_history_stop(request: Request):
     return {"ok": True}
 
 
-@app.get("/api/kaspi/orders/export")
-def kaspi_orders_export(state: Optional[str] = None, db: Session = Depends(get_db)):
-    """Экспорт заказов в CSV"""
-    from database import KaspiOrder
-    from fastapi.responses import StreamingResponse
-    import csv, io
-
-    STATE_MAP = {"Выдан": "ARCHIVE", "Отменен": "CANCELLED", "Возврат": "RETURN"}
-    q = db.query(KaspiOrder)
-    if state:
-        if state in STATE_MAP.values():
-            russian = [k for k, v in STATE_MAP.items() if v == state]
-            q = q.filter(KaspiOrder.state.in_(russian + [state]))
-        else:
-            q = q.filter(KaspiOrder.state == state)
-
-    orders = q.order_by(KaspiOrder.id.desc()).all()
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["Номер заказа", "Дата", "Статус", "Товар", "Артикул", "Кол-во", "Сумма ₸",
-                     "Категория", "Способ доставки", "Адрес", "Способ оплаты", "Причина отмены",
-                     "Стоимость доставки (продавец)", "Компенсация доставки", "Источник"])
-    for o in orders:
-        writer.writerow([
-            o.order_id, o.order_date, STATE_MAP.get(o.state, o.state),
-            o.product_name or "", o.sku or "", o.quantity or "",
-            o.total or 0, o.category or "",
-            o.delivery_method or "", o.address or "", o.payment_method or "",
-            o.cancel_reason or "", o.delivery_cost_seller or 0,
-            o.delivery_compensation or 0, o.source or "",
-        ])
-
-    output.seek(0)
-    return StreamingResponse(
-        iter([output.getvalue().encode("utf-8-sig")]),
-        media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=kaspi_orders.csv"}
-    )
 
 
 @app.get("/api/products/export/xlsx")
@@ -2368,22 +1880,6 @@ def orders_debug(request: Request, db: Session = Depends(get_db)):
 
 
 
-@app.post("/api/kaspi/sync-products")
-def sync_kaspi_products_endpoint():
-
-    """Синхронизировать товары из Kaspi в склад"""
-    token = _get_integration("kaspi_api_key", "KASPI_TOKEN")
-    shop_id = _get_integration("kaspi_shop_id", "KASPI_SHOP_ID")
-    if not token or not shop_id:
-        raise HTTPException(status_code=400, detail="KASPI_TOKEN и KASPI_SHOP_ID не заданы")
-    result = kaspi_module.sync_kaspi_products()
-    return {"message": result}
-
-
-@app.get("/admin/kaspi", response_class=HTMLResponse)
-def kaspi_page():
-    with open("static/kaspi.html") as f:
-        return f.read()
 
 
 @app.get("/admin/analytics", response_class=HTMLResponse)
@@ -2399,9 +1895,6 @@ def settings_page():
 
 
 # Редиректы со старых путей
-@app.get("/kaspi", response_class=HTMLResponse)
-def kaspi_redirect():
-    return RedirectResponse("/admin/kaspi", status_code=301)
 
 @app.get("/analytics", response_class=HTMLResponse)
 def analytics_redirect():

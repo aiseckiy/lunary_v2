@@ -1,5 +1,10 @@
 [
   {
+    "hash": "3b5362b",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести products router + auth helpers в helpers.py"
+  },
+  {
     "hash": "42e7e6d",
     "date": "16.04.2026",
     "message": "Refactor: вынести merge и store роутеры"

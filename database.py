@@ -277,4 +277,18 @@ def init_db():
         db2.rollback()
     finally:
         db2.close()
+
+    # Миграция: проставить show_in_shop=True для существующих Kaspi-товаров
+    db3 = SessionLocal()
+    try:
+        updated = db3.execute(
+            text("UPDATE products SET show_in_shop = TRUE WHERE (category = 'Kaspi' OR kaspi_sku IS NOT NULL) AND (show_in_shop IS NULL OR show_in_shop = FALSE)")
+        )
+        db3.commit()
+        print(f"[init_db] show_in_shop миграция: {updated.rowcount} товаров", flush=True)
+    except Exception as e:
+        print(f"[init_db] show_in_shop миграция ошибка: {e}", flush=True)
+        db3.rollback()
+    finally:
+        db3.close()
     print("[init_db] Готово", flush=True)

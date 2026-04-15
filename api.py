@@ -1884,12 +1884,13 @@ Sitemap: https://www.lunary.kz/sitemap.xml
 def sitemap_xml(db: Session = Depends(get_db)):
     from fastapi.responses import Response
     from database import Product as _P
+    import json as _json
     from datetime import datetime
 
     BASE_URL = "https://www.lunary.kz"
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
-    products = db.query(_P).filter(_P.category == "Kaspi", _P.price.isnot(None)).all()
+    products = db.query(_P).filter(_P.show_in_shop == True, _P.price.isnot(None)).all()
 
     urls = [f"""  <url>
     <loc>{BASE_URL}/shop</loc>
@@ -1899,15 +1900,36 @@ def sitemap_xml(db: Session = Depends(get_db)):
   </url>"""]
 
     for p in products:
+        # Собираем картинки товара
+        images = []
+        try:
+            imgs = _json.loads(p.images or "[]")
+            if isinstance(imgs, list):
+                images = [i for i in imgs if isinstance(i, str) and i.startswith("http")]
+        except Exception:
+            pass
+        if not images and p.image_url and p.image_url.startswith("http"):
+            images = [p.image_url]
+
+        image_tags = ""
+        for img_url in images[:5]:  # максимум 5 картинок на товар
+            name_escaped = (p.name or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            image_tags += f"""
+    <image:image>
+      <image:loc>{img_url}</image:loc>
+      <image:title>{name_escaped}</image:title>
+    </image:image>"""
+
         urls.append(f"""  <url>
     <loc>{BASE_URL}/shop/product/{p.id}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <lastmod>{today}</lastmod>
+    <lastmod>{today}</lastmod>{image_tags}
   </url>""")
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+    xml += '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
     xml += '\n'.join(urls)
     xml += '\n</urlset>'
 

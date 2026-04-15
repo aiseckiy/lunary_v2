@@ -257,6 +257,7 @@ def init_db():
         ("kaspi_merchant_id","30409502",                                   "Kaspi Merchant ID",       "integrations"),
         ("kaspi_store_id",   "30409502_PP1",                               "Kaspi Store ID",          "integrations"),
         ("kaspi_city_id",    "750000000",                                  "Kaspi City ID (Алматы)",  "integrations"),
+        ("kaspi_feed_token", "",                                           "Kaspi Feed Token (защита URL)", "integrations"),
     ]
     db2 = SessionLocal()
     try:

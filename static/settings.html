@@ -134,6 +134,17 @@
         </table>
       </div>
 
+      <!-- Kaspi Price Feed -->
+      <div class="s-card">
+        <div class="s-title">🛒 Kaspi Price Feed</div>
+        <div class="s-sub">Kaspi может автоматически забирать остатки и цены по этому URL каждые несколько часов. Настройте его в Kaspi Merchant Portal → Прайс-лист → Автоматическое обновление.</div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;font-family:monospace;color:#111;word-break:break-all;margin-bottom:14px" id="feed-url-box">—</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="/api/kaspi/export-xml" download="ACTIVE.xml" class="btn-save" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">⬇ Скачать XML</a>
+          <button class="btn-save" style="background:#111827" onclick="copyFeedUrl()">📋 Копировать URL</button>
+        </div>
+      </div>
+
       <!-- Ссылка на опасную зону -->
       <div class="s-card s-card-danger">
         <div class="s-title" style="color:#991b1b">⚠️ Опасная зона</div>
@@ -273,10 +284,30 @@ async function saveSettings() {
   setTimeout(()=>msg.style.display='none',3000);
 }
 
+// ── Kaspi Feed URL ─────────────────────────────────────────────────────────
+function updateFeedUrl() {
+  const tokenEl = document.getElementById('s-kaspi_feed_token');
+  const token = tokenEl ? tokenEl.value.trim() : '';
+  const base = window.location.origin + '/api/kaspi/feed.xml';
+  const url = token ? base + '?token=' + encodeURIComponent(token) : base;
+  const box = document.getElementById('feed-url-box');
+  if (box) box.textContent = url;
+}
+function copyFeedUrl() {
+  const box = document.getElementById('feed-url-box');
+  if (!box) return;
+  navigator.clipboard.writeText(box.textContent).then(() => alert('URL скопирован!'));
+}
+// Обновляем URL когда меняется токен (делегирование)
+document.addEventListener('input', e => {
+  if (e.target && e.target.id === 's-kaspi_feed_token') updateFeedUrl();
+});
+
 // Init
 initPhone('p-phone');
 loadProfile();
 loadSiteSettings();
+setTimeout(updateFeedUrl, 500); // после рендера полей
 loadUsers();
 </script>
 </body>

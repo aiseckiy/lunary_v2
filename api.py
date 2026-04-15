@@ -2316,26 +2316,22 @@ def export_preview_page():
     return FileResponse("static/export_preview.html")
 
 
-@app.get("/api/kaspi/export-xml")
-def kaspi_export_xml(db: Session = Depends(get_db)):
-    """Экспорт остатков и цен в формате Kaspi XML для загрузки в кабинете"""
-    from fastapi.responses import Response
+def _build_kaspi_xml(db) -> str:
+    """Внутренняя функция — строит Kaspi Shopping XML из БД"""
     from datetime import datetime, timezone, timedelta
     import xml.etree.ElementTree as ET
-
     from database import SiteSetting, Product
-    # Kaspi-параметры (берём из настроек БД или defaults)
+
     settings = {s.key: s.value for s in db.query(SiteSetting).all()}
     merchant_id = settings.get("kaspi_merchant_id", "30409502")
-    store_id = settings.get("kaspi_store_id", "30409502_PP1")
-    city_id = settings.get("kaspi_city_id", "750000000")
+    store_id    = settings.get("kaspi_store_id",    "30409502_PP1")
+    city_id     = settings.get("kaspi_city_id",     "750000000")
 
     tz_kz = timezone(timedelta(hours=5))
     now_str = datetime.now(tz_kz).strftime("%Y-%m-%d %H:%M")
 
-    root = ET.Element("kaspi_catalog", xmlns="kaspiShopping",
-                      attrib={"xmlns": "kaspiShopping", "date": now_str})
-    ET.SubElement(root, "company").text = merchant_id
+    root = ET.Element("kaspi_catalog", attrib={"xmlns": "kaspiShopping", "date": now_str})
+    ET.SubElement(root, "company").text   = merchant_id
     ET.SubElement(root, "merchantid").text = merchant_id
     offers_el = ET.SubElement(root, "offers")
 
@@ -2357,7 +2353,32 @@ def kaspi_export_xml(db: Session = Depends(get_db)):
                 cityprices = ET.SubElement(offer, "cityprices")
                 ET.SubElement(cityprices, "cityprice", cityId=city_id).text = str(p.price)
 
-    xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
+
+
+@app.get("/api/kaspi/feed.xml", include_in_schema=False)
+def kaspi_feed_public(token: str = "", db: Session = Depends(get_db)):
+    """Публичный Kaspi Price Feed — Kaspi забирает автоматически по этому URL.
+    Защищён токеном: ?token=<kaspi_feed_token из настроек>.
+    Если токен не задан в настройках — открыт для всех (для первоначальной настройки).
+    """
+    from fastapi.responses import Response
+    from database import SiteSetting
+    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
+    feed_token = settings.get("kaspi_feed_token", "")
+    if feed_token and token != feed_token:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+    xml_str = _build_kaspi_xml(db)
+    return Response(content=xml_str, media_type="application/xml",
+                    headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/api/kaspi/export-xml")
+def kaspi_export_xml(db: Session = Depends(get_db)):
+    """Скачать Kaspi XML (attachment) — для ручной загрузки в Merchant Portal"""
+    from fastapi.responses import Response
+    xml_str = _build_kaspi_xml(db)
     return Response(content=xml_str, media_type="application/xml",
                     headers={"Content-Disposition": "attachment; filename=ACTIVE.xml"})
 

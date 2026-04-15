@@ -1,5 +1,10 @@
 [
   {
+    "hash": "6c5b2e7",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести review и admin утилиты"
+  },
+  {
     "hash": "90618b6",
     "date": "16.04.2026",
     "message": "Refactor: вынести settings, shop_orders, system роутеры (3 сразу)"

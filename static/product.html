@@ -375,6 +375,40 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="specs-editor" id="specs-editor"></div>
     <button class="btn-add-spec" onclick="addSpecRow()">+ Добавить характеристику</button>
 
+    <!-- Внутренние настройки (сворачиваемые) -->
+    <div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <button onclick="toggleInternalFields()" style="width:100%;background:var(--bg);border:none;padding:10px 14px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit">
+        <span>✏️ Внутренние поля (склад, закупка, Kaspi)</span>
+        <span id="internal-arrow">▼</span>
+      </button>
+      <div id="internal-fields" style="display:none;padding:12px;border-top:1px solid var(--border);flex-direction:column;gap:10px">
+        <div class="edit-field" style="margin:0">
+          <label class="edit-label">Артикул производителя</label>
+          <input class="edit-input" id="e-supplier-article" type="text" placeholder="040100060234">
+        </div>
+        <div class="edit-field" style="margin:0">
+          <label class="edit-label">Поставщик</label>
+          <input class="edit-input" id="e-supplier" type="text" placeholder="ТОО SMASH LTD">
+        </div>
+        <div class="edit-field" style="margin:0">
+          <label class="edit-label">Закупочная цена (₸)</label>
+          <input class="edit-input" id="e-cost-price" type="number" min="0" placeholder="900">
+        </div>
+        <div class="edit-field" style="margin:0">
+          <label class="edit-label">Мин. остаток</label>
+          <input class="edit-input" id="e-min-stock" type="number" min="0" placeholder="5">
+        </div>
+        <div class="edit-field" style="margin:0">
+          <label class="edit-label">Kaspi SKU</label>
+          <input class="edit-input" id="e-kaspi-sku" type="text" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
+        </div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0">
+          <input type="checkbox" id="e-show-in-shop" style="width:17px;height:17px;accent-color:var(--accent)">
+          <span style="font-size:14px;font-weight:500">Показывать в магазине (lunary.kz/shop)</span>
+        </label>
+      </div>
+    </div>
+
     <div class="img-section-title" style="margin-top:16px">🖼 Фотографии</div>
     <div class="imgs-list" id="imgs-list"></div>
 
@@ -731,6 +765,14 @@ function toggleSearchImage(url, idx) {
   renderImgsList();
 }
 
+function toggleInternalFields() {
+  const el = document.getElementById('internal-fields');
+  const arrow = document.getElementById('internal-arrow');
+  const open = el.style.display === 'flex';
+  el.style.display = open ? 'none' : 'flex';
+  arrow.textContent = open ? '▼' : '▲';
+}
+
 function openEdit() {
   const p = product;
   document.getElementById('e-name').value = p.name || '';
@@ -738,6 +780,13 @@ function openEdit() {
   document.getElementById('e-category').value = p.category || '';
   document.getElementById('e-price').value = p.price || '';
   document.getElementById('e-description').value = p.description || '';
+  // Внутренние поля
+  document.getElementById('e-supplier-article').value = p.supplier_article || '';
+  document.getElementById('e-supplier').value = p.supplier || '';
+  document.getElementById('e-cost-price').value = p.cost_price || '';
+  document.getElementById('e-min-stock').value = p.min_stock || '';
+  document.getElementById('e-kaspi-sku').value = p.kaspi_sku || '';
+  document.getElementById('e-show-in-shop').checked = !!p.show_in_shop;
   try { editSpecs = JSON.parse(p.specs || '[]'); } catch { editSpecs = []; }
   renderSpecsEditor();
   editImages = p.images && p.images.length ? [...p.images] : (p.image_url ? [p.image_url] : []);
@@ -773,6 +822,12 @@ async function saveEdit() {
       price: parseInt(document.getElementById('e-price').value) || null,
       description: document.getElementById('e-description').value.trim() || null,
       specs: JSON.stringify(filteredSpecs),
+      supplier_article: document.getElementById('e-supplier-article').value.trim() || null,
+      supplier: document.getElementById('e-supplier').value.trim() || null,
+      cost_price: parseInt(document.getElementById('e-cost-price').value) || null,
+      min_stock: parseInt(document.getElementById('e-min-stock').value) || 0,
+      kaspi_sku: document.getElementById('e-kaspi-sku').value.trim() || null,
+      show_in_shop: document.getElementById('e-show-in-shop').checked,
     };
     await fetch(`/api/products/${product.id}`, {
       method: 'PUT',

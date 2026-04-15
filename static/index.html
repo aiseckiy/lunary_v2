@@ -169,7 +169,7 @@
     <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
     <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight:600">📦 Приёмка</button>
     <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight:600">🛒 Закупки</button>
-    <a class="sort-btn" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
+    <a class="sort-btn" id="btn-xlsx" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
     <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;font-weight:600">✨ AI описания</button>
   </div>
 
@@ -224,6 +224,13 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Баннер активного фильтра -->
+  <div id="filter-banner" style="display:none;align-items:center;gap:12px;padding:8px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;margin-bottom:10px;font-size:13px;color:#1d4ed8">
+    <span style="font-size:15px">🔍</span>
+    <span id="filter-banner-text" style="flex:1;font-weight:500"></span>
+    <button onclick="resetAllFilters()" style="background:#dbeafe;border:1px solid #93c5fd;border-radius:6px;padding:3px 10px;font-size:12px;color:#1d4ed8;cursor:pointer;white-space:nowrap">✕ Сбросить фильтры</button>
   </div>
 
   <div id="pagination-top"></div>
@@ -392,6 +399,25 @@
           <input class="form-input" id="f-price" type="number" placeholder="1500" min="0">
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Поставщик</label>
+          <input class="form-input" id="f-supplier" placeholder="ТОО SMASH LTD" list="f-suppliers-list" autocomplete="off">
+          <datalist id="f-suppliers-list"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Закупочная цена (₸)</label>
+          <input class="form-input" id="f-cost-price" type="number" placeholder="900" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kaspi SKU</label>
+        <input class="form-input" id="f-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer">
+        <input type="checkbox" id="f-show-in-shop" style="width:17px;height:17px;accent-color:var(--accent)">
+        <span style="font-size:14px;font-weight:500">Показывать в магазине</span>
+      </label>
       <button class="btn-submit" onclick="submitAdd()">✅ Добавить товар</button>
     </div>
   </div>
@@ -499,6 +525,45 @@ let missingFields = new Set(); // 'price','cost','article','supplier','barcode',
 let selectedId = null;
 const PAGE_SIZE = 80;
 let currentPage = 1;
+
+// ── Текущий отфильтрованный список ───────────────────────
+function getFilteredList() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const matchW = (text) => !q || q.split(/\s+/).filter(Boolean).every(w => (text||'').toLowerCase().includes(w));
+  return allProducts.filter(p => {
+    if (q && !matchW(p.name) && !matchW(p.sku) && !matchW(p.kaspi_sku) && !matchW(p.supplier_article) && !matchW(p.barcode)) return false;
+    if (showLow && !p.low) return false;
+    if (activeCats.size && !activeCats.has(p.category || 'Общее')) return false;
+    if (activeBrands.size && !activeBrands.has(getBrand(p))) return false;
+    if (!matchMissing(p)) return false;
+    return true;
+  });
+}
+
+function isFiltered() {
+  const q = document.getElementById('search')?.value.trim();
+  return !!(q || showLow || activeCats.size || activeBrands.size || missingFields.size);
+}
+
+function updateFilterBanner(shown) {
+  const banner = document.getElementById('filter-banner');
+  if (!banner) return;
+  const total = allProducts.length;
+  if (isFiltered() && shown < total) {
+    banner.style.display = 'flex';
+    document.getElementById('filter-banner-text').textContent = `Показано ${shown} из ${total} товаров`;
+    // обновить кнопки действий
+    const ids = getFilteredList().map(p => p.id).join(',');
+    const xlsxBtn = document.getElementById('btn-xlsx');
+    if (xlsxBtn) xlsxBtn.href = `/api/products/export/xlsx?ids=${ids}`;
+    document.getElementById('btn-fill-desc').dataset.filteredIds = ids;
+  } else {
+    banner.style.display = 'none';
+    const xlsxBtn = document.getElementById('btn-xlsx');
+    if (xlsxBtn) xlsxBtn.href = '/api/products/export/xlsx';
+    document.getElementById('btn-fill-desc').dataset.filteredIds = '';
+  }
+}
 
 // ── Сохранение/восстановление состояния фильтров ──────────
 function saveFilters() {
@@ -695,6 +760,25 @@ function clearMissing() {
   toggleMissing();
 }
 
+function resetAllFilters() {
+  document.getElementById('search').value = '';
+  showLow = false;
+  activeCats.clear();
+  activeBrands.clear();
+  missingFields.clear();
+  document.getElementById('f-low')?.classList.remove('active');
+  document.getElementById('cat-btn')?.classList.remove('active');
+  document.getElementById('brand-btn')?.classList.remove('active');
+  document.getElementById('missing-btn')?.classList.remove('active');
+  document.getElementById('cat-label').textContent = 'Категория';
+  document.getElementById('brand-label').textContent = 'Бренд';
+  document.getElementById('missing-label').textContent = 'Не заполнено';
+  clearMissing();
+  currentPage = 1;
+  saveFilters();
+  render();
+}
+
 function toggleLow() {
   currentPage = 1;
   showLow = !showLow;
@@ -721,16 +805,7 @@ function renderPagination(total, page, id) {
 }
 
 function goPage(p) {
-  const q = document.getElementById('search').value.toLowerCase();
-  const matchW = (text) => !q || q.split(/\s+/).filter(Boolean).every(w => (text||'').toLowerCase().includes(w));
-  let list = allProducts.filter(pr => {
-    if (q && !matchW(pr.name) && !matchW(pr.sku) && !matchW(pr.barcode)) return false;
-    if (showLow && !pr.low) return false;
-    if (activeCats.size && !activeCats.has(pr.category || 'Общее')) return false;
-    if (activeBrands.size && !activeBrands.has(getBrand(pr))) return false;
-    if (!matchMissing(pr)) return false;
-    return true;
-  });
+  let list = getFilteredList();
   const pages = Math.ceil(list.length / PAGE_SIZE);
   if (p < 1 || p > pages) return;
   currentPage = p;
@@ -739,16 +814,8 @@ function goPage(p) {
 }
 
 function render() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const matchW = (text) => !q || q.split(/\s+/).filter(Boolean).every(w => (text||'').toLowerCase().includes(w));
-  let list = allProducts.filter(p => {
-    if (q && !matchW(p.name) && !matchW(p.kaspi_sku) && !matchW(p.supplier_article) && !matchW(p.barcode)) return false;
-    if (showLow && !p.low) return false;
-    if (activeCats.size && !activeCats.has(p.category || 'Общее')) return false;
-    if (activeBrands.size && !activeBrands.has(getBrand(p))) return false;
-    if (!matchMissing(p)) return false;
-    return true;
-  });
+  let list = getFilteredList();
+  updateFilterBanner(list.length);
 
   const grid = document.getElementById('grid');
   if (!list.length) {
@@ -1114,10 +1181,15 @@ async function sendPurchasesToTg() {
 let barcodeScanner = null;
 
 function openAddModal(barcode = '') {
-  ['f-name','f-sku','f-stock','f-min','f-brand','f-price'].forEach(id => document.getElementById(id).value='');
+  ['f-name','f-sku','f-stock','f-min','f-brand','f-price','f-supplier','f-cost-price','f-kaspi-sku'].forEach(id => document.getElementById(id).value='');
   document.getElementById('f-barcode').value = barcode;
+  document.getElementById('f-show-in-shop').checked = false;
   document.getElementById('barcode-reader-wrap').style.display = 'none';
   document.getElementById('add-modal').classList.add('open');
+  fetch('/api/products/suppliers').then(r=>r.json()).then(data=>{
+    const dl = document.getElementById('f-suppliers-list');
+    dl.innerHTML = (data.suppliers||[]).map(s=>`<option value="${s}">`).join('');
+  }).catch(()=>{});
 }
 
 function startBarcodeScanner() {
@@ -1164,6 +1236,10 @@ async function submitAdd() {
 
   const brand = document.getElementById('f-brand').value.trim() || null;
   const price = parseInt(document.getElementById('f-price').value) || null;
+  const supplier = document.getElementById('f-supplier').value.trim() || null;
+  const cost_price = parseInt(document.getElementById('f-cost-price').value) || null;
+  const kaspi_sku = document.getElementById('f-kaspi-sku').value.trim() || null;
+  const show_in_shop = document.getElementById('f-show-in-shop').checked;
 
   if (!name || !sku) { toast('Заполни название и артикул', 'error'); return; }
 
@@ -1180,6 +1256,14 @@ async function submitAdd() {
     await fetch(`/api/products/${p.id}/movement`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({quantity:stock, type:'income', source:'web', note:'initial'})
+    });
+  }
+
+  // Сохранить дополнительные поля
+  if (supplier || cost_price || kaspi_sku || show_in_shop) {
+    await fetch(`/api/products/${p.id}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({supplier, cost_price, kaspi_sku, show_in_shop})
     });
   }
 
@@ -1352,11 +1436,19 @@ function startEditBarcodeScanner() {
 // ── AI массовые описания ──────────────────────────────────
 async function fillDescriptions() {
   const btn = document.getElementById('btn-fill-desc');
-  if (!confirm('AI заполнит описания и характеристики для всех товаров без описания. Продолжить?')) return;
+  const filteredIds = btn.dataset.filteredIds;
+  const idList = filteredIds ? filteredIds.split(',').map(Number).filter(Boolean) : null;
+  const scopeText = idList ? `${idList.length} отфильтрованных товаров` : 'всех товаров без описания';
+  if (!confirm(`AI заполнит описания и характеристики для ${scopeText}. Продолжить?`)) return;
   btn.textContent = '⏳ Генерирую...';
   btn.disabled = true;
   try {
-    const res = await fetch('/api/admin/fill-descriptions', {method: 'POST'});
+    const body = idList ? JSON.stringify({ids: idList}) : '{}';
+    const res = await fetch('/api/admin/fill-descriptions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body
+    });
     const d = await res.json();
     if (!res.ok) { alert('Ошибка: ' + (d.detail || JSON.stringify(d))); return; }
     toast(`✅ Готово: ${d.done} товаров заполнено${d.errors?.length ? `, ${d.errors.length} ошибок` : ''}`, 'success');

@@ -46,6 +46,9 @@ class Product(Base):
     verified = Column(Integer, default=0)  # 1 = проверен, 0 = не проверен
     linked_ref_id = Column(Integer, nullable=True)  # ID привязанного PriceListItem
     show_in_shop = Column(Boolean, default=False)   # показывать в публичном магазине
+    meta_title = Column(String, nullable=True)       # SEO: заголовок страницы (50-60 символов)
+    meta_description = Column(Text, nullable=True)   # SEO: описание для поиска (150-160 символов)
+    meta_keywords = Column(Text, nullable=True)      # SEO: ключевые слова через запятую
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -222,6 +225,9 @@ def init_db():
         ("products", "supplier_article", "TEXT"),
         ("products", "linked_ref_id", "INTEGER"),
         ("products", "show_in_shop", "BOOLEAN DEFAULT FALSE"),
+        ("products", "meta_title", "TEXT"),
+        ("products", "meta_description", "TEXT"),
+        ("products", "meta_keywords", "TEXT"),
         ("price_list_items", "is_new", "BOOLEAN DEFAULT TRUE"),
     ]
     with engine.connect() as conn:

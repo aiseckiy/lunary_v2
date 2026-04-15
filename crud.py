@@ -146,9 +146,12 @@ def update_product(product_id: int, db: Session, **kwargs):
     p = db.query(Product).filter(Product.id == product_id).first()
     if not p:
         return None
+    _nullable_ok = {"meta_title", "meta_description", "meta_keywords", "description", "specs"}
     for key, val in kwargs.items():
         if val is not None and hasattr(p, key):
             setattr(p, key, val)
+        elif val is None and key in _nullable_ok and hasattr(p, key):
+            setattr(p, key, None)
         elif val is False and hasattr(p, key):  # allow explicit False (e.g. show_in_shop)
             setattr(p, key, val)
     if "name" in kwargs and "brand" not in kwargs:

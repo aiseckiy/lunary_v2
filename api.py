@@ -258,6 +258,9 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     specs: Optional[str] = None
     show_in_shop: Optional[bool] = None
+    meta_title: Optional[str] = None
+    meta_description: Optional[str] = None
+    meta_keywords: Optional[str] = None
 
 
 class MovementCreate(BaseModel):
@@ -1183,6 +1186,9 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         "description": p.description or "",
         "specs": p.specs or "[]",
         "show_in_shop": bool(p.show_in_shop),
+        "meta_title": p.meta_title or "",
+        "meta_description": p.meta_description or "",
+        "meta_keywords": p.meta_keywords or "",
     }}
 
 
@@ -1609,26 +1615,36 @@ def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
         except Exception:
             pass
 
-        prompt = f"""Ты помощник для интернет-магазина строительных материалов в Казахстане.
+        price_hint = f"- Цена: {p.price} тенге" if p.price else ""
+        prompt = f"""Ты SEO-специалист и копирайтер для интернет-магазина строительных материалов в Казахстане (lunary.kz).
 
 Товар:
 - Название: {p.name}
 - Бренд: {p.brand or 'не указан'}
 - Категория: {p.category or 'не указана'}
 - Единица: {p.unit or 'шт'}
+{price_hint}
 {existing_specs}
 
-Задача:
-1. Напиши продающее описание (2-4 предложения). Конкретно: что это, для чего применяется, главные преимущества. Это НОВЫЙ товар в магазине стройматериалов — НЕ пиши "состояние", "б/у", "новое". Только технические свойства и применение.
-2. Составь технические характеристики (5-10 строк). Только реальные параметры: объём, состав, цвет, температура применения, время высыхания, нагрузка и т.п. ЗАПРЕЩЕНО включать: "Состояние", "Тип объявления", "Наличие", "Страна" — это не доска объявлений.
+Задача — заполни 5 полей:
+
+1. **description** — продающее описание (2-4 предложения). Что это, для чего применяется, главные преимущества. Это НОВЫЙ товар — НЕ пиши "состояние", "б/у", "новое". Только технические свойства и применение.
+
+2. **specs** — технические характеристики (5-10 строк). Только реальные параметры: объём, состав, цвет, температура применения, нагрузка и т.п. ЗАПРЕЩЕНО: "Состояние", "Тип объявления", "Наличие", "Страна".
+
+3. **meta_title** — SEO-заголовок страницы (50-60 символов). Формат: "[Название товара] купить в Алматы | LUNARY". Включи главный поисковый запрос по которому люди ищут этот товар.
+
+4. **meta_description** — SEO-описание (150-160 символов). Включи: название, главное применение, призыв к действию ("купить", "заказать"), упомяни Казахстан или Алматы для локального SEO.
+
+5. **meta_keywords** — 8-12 ключевых слов через запятую. Включи: название товара, бренд, синонимы, применение, "купить", "цена", "Алматы", "Казахстан". Разные варианты написания и сочетания запросов.
 
 Верни ТОЛЬКО JSON без markdown-обёртки:
 {{
   "description": "текст описания",
-  "specs": [
-    {{"key": "Характеристика", "value": "значение"}},
-    ...
-  ]
+  "specs": [{{"key": "Характеристика", "value": "значение"}}],
+  "meta_title": "SEO заголовок",
+  "meta_description": "SEO описание",
+  "meta_keywords": "ключ1, ключ2, ключ3"
 }}"""
 
         response = client.chat.completions.create(
@@ -1658,9 +1674,22 @@ def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
                 if s["key"].lower() not in existing_keys:
                     existing.append(s)
             p.specs = json.dumps(existing, ensure_ascii=False)
+        if result.get("meta_title"):
+            p.meta_title = result["meta_title"][:70]
+        if result.get("meta_description"):
+            p.meta_description = result["meta_description"][:200]
+        if result.get("meta_keywords"):
+            p.meta_keywords = result["meta_keywords"]
         db.commit()
 
-        return {"ok": True, "description": p.description, "specs": json.loads(p.specs or "[]")}
+        return {
+            "ok": True,
+            "description": p.description,
+            "specs": json.loads(p.specs or "[]"),
+            "meta_title": p.meta_title,
+            "meta_description": p.meta_description,
+            "meta_keywords": p.meta_keywords,
+        }
 
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="AI вернул некорректный JSON — попробуйте ещё раз")
@@ -1669,7 +1698,7 @@ def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/admin/fill-descriptions")
-def fill_descriptions_bulk(request: Request, db: Session = Depends(get_db)):
+async def fill_descriptions_bulk(request: Request, db: Session = Depends(get_db)):
     """Массовая генерация описаний и характеристик для товаров без описания через OpenAI"""
     import os, json, time
     from database import Product as _P, SiteSetting
@@ -1688,10 +1717,20 @@ def fill_descriptions_bulk(request: Request, db: Session = Depends(get_db)):
     from openai import OpenAI
     client = OpenAI(api_key=api_key)
 
-    # Только товары без описания
-    products = db.query(_P).filter(
-        (_P.description == None) | (_P.description == "")
-    ).all()
+    # Только товары без описания (или из переданного списка)
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+    id_list = body.get("ids") if isinstance(body, dict) else None
+
+    base_q = db.query(_P)
+    if id_list:
+        base_q = base_q.filter(_P.id.in_(id_list))
+    else:
+        base_q = base_q.filter((_P.description == None) | (_P.description == ""))
+    products = base_q.all()
 
     done = 0
     errors = []
@@ -1705,21 +1744,26 @@ def fill_descriptions_bulk(request: Request, db: Session = Depends(get_db)):
             except Exception:
                 pass
 
-            prompt = f"""Ты помощник для интернет-магазина строительных материалов в Казахстане.
+            price_hint = f"- Цена: {p.price} тенге" if p.price else ""
+            prompt = f"""Ты SEO-специалист и копирайтер для интернет-магазина строительных материалов в Казахстане (lunary.kz).
 
 Товар:
 - Название: {p.name}
 - Бренд: {p.brand or 'не указан'}
 - Категория: {p.category or 'не указана'}
 - Единица: {p.unit or 'шт'}
+{price_hint}
 {existing_specs}
 
-Задача:
-1. Напиши продающее описание (2-4 предложения). Конкретно: что это, для чего применяется, главные преимущества. Это НОВЫЙ товар в магазине стройматериалов — НЕ пиши "состояние", "б/у", "новое". Только технические свойства и применение.
-2. Составь технические характеристики (5-10 строк). Только реальные параметры: объём, состав, цвет, температура применения, время высыхания, нагрузка и т.п. ЗАПРЕЩЕНО включать: "Состояние", "Тип объявления", "Наличие", "Страна".
+Заполни 5 полей:
+1. **description** — продающее описание (2-4 предложения). НЕ пиши "состояние", "б/у", "новое". Только свойства и применение.
+2. **specs** — 5-10 технических характеристик. ЗАПРЕЩЕНО: "Состояние", "Наличие", "Страна".
+3. **meta_title** — SEO-заголовок (50-60 символов): "[Название] купить в Алматы | LUNARY"
+4. **meta_description** — SEO-описание (150-160 символов) с призывом купить/заказать, упомяни Казахстан.
+5. **meta_keywords** — 8-12 ключевых слов через запятую: название, бренд, синонимы, "купить", "цена", "Алматы".
 
 Верни ТОЛЬКО JSON без markdown-обёртки:
-{{"description": "текст", "specs": [{{"key": "Характеристика", "value": "значение"}}]}}"""
+{{"description": "текст", "specs": [{{"key": "К", "value": "В"}}], "meta_title": "...", "meta_description": "...", "meta_keywords": "..."}}"""
 
             response = client.chat.completions.create(
                 model="gpt-4o-mini", max_tokens=1024,
@@ -1741,6 +1785,12 @@ def fill_descriptions_bulk(request: Request, db: Session = Depends(get_db)):
                     if s["key"].lower() not in existing_keys:
                         existing.append(s)
                 p.specs = json.dumps(existing, ensure_ascii=False)
+            if result.get("meta_title"):
+                p.meta_title = result["meta_title"][:70]
+            if result.get("meta_description"):
+                p.meta_description = result["meta_description"][:200]
+            if result.get("meta_keywords"):
+                p.meta_keywords = result["meta_keywords"]
 
             db.commit()
             done += 1
@@ -1846,15 +1896,32 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
     p, stock = row
     name = _html.escape(p.name or "Товар")
     brand = _html.escape(p.brand or "")
-    desc_raw = (p.description or "").strip()
-    if not desc_raw:
-        desc_raw = f"{brand} {name}".strip()
-    description = _html.escape(desc_raw[:160])
-    price_str = str(int(p.price)) if p.price else ""
-    image = p.image_url or f"{BASE_URL}/static/og-default.jpg"
     canon = f"{BASE_URL}/shop/product/{product_id}"
-    title = f"{name} — купить в Казахстане | LUNARY"
     avail = "https://schema.org/InStock" if stock > 0 else "https://schema.org/OutOfStock"
+    price_str = str(int(p.price)) if p.price else ""
+
+    # SEO поля — используем заполненные AI или генерируем автоматически
+    title = _html.escape(p.meta_title.strip()) if p.meta_title and p.meta_title.strip() \
+        else f"{name} купить в Алматы | LUNARY"
+
+    desc_raw = (p.meta_description or "").strip()
+    if not desc_raw:
+        # Авто-генерация из описания товара
+        base = (p.description or f"{brand} {name}").strip()
+        price_part = f" Цена {int(p.price):,} ₸.".replace(",", " ") if p.price else ""
+        desc_raw = base[:130] + price_part if price_part else base[:155]
+    description = _html.escape(desc_raw[:165])
+
+    keywords_raw = (p.meta_keywords or "").strip()
+    if not keywords_raw:
+        parts = [p.name or ""]
+        if p.brand: parts.append(p.brand)
+        if p.category: parts.append(p.category)
+        parts += ["купить", "цена", "Алматы", "Казахстан", "LUNARY"]
+        keywords_raw = ", ".join(parts)
+    keywords = _html.escape(keywords_raw[:300])
+
+    image = p.image_url or f"{BASE_URL}/static/og-default.jpg"
 
     schema = ""
     if p.price:
@@ -1879,6 +1946,7 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
 
     seo_head = f"""<title>{title}</title>
 <meta name="description" content="{description}">
+<meta name="keywords" content="{keywords}">
 <link rel="canonical" href="{canon}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
@@ -1886,6 +1954,8 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
 <meta property="og:url" content="{canon}">
 <meta property="og:image" content="{_html.escape(image)}">
 <meta property="og:site_name" content="LUNARY">
+<meta property="product:price:amount" content="{price_str}">
+<meta property="product:price:currency" content="KZT">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{description}">
@@ -2787,7 +2857,7 @@ def kaspi_orders_export(state: Optional[str] = None, db: Session = Depends(get_d
 
 
 @app.get("/api/products/export/xlsx")
-def products_export_xlsx(db: Session = Depends(get_db)):
+def products_export_xlsx(db: Session = Depends(get_db), ids: str = None):
     """Экспорт остатков в Excel (формат загрузки Kaspi)"""
     from fastapi.responses import StreamingResponse
     from sqlalchemy import func
@@ -2795,13 +2865,17 @@ def products_export_xlsx(db: Session = Depends(get_db)):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from database import Product, Movement
 
-    rows = (
+    q = (
         db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
         .outerjoin(Movement, Movement.product_id == Product.id)
         .group_by(Product.id)
         .order_by(Product.name)
-        .all()
     )
+    if ids:
+        id_list = [int(x) for x in ids.split(",") if x.strip().isdigit()]
+        if id_list:
+            q = q.filter(Product.id.in_(id_list))
+    rows = q.all()
 
     wb = openpyxl.Workbook()
     ws = wb.active

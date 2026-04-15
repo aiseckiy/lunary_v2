@@ -579,7 +579,8 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "`/log sale` — только продажи\n"
         "`/log income` — только приходы\n"
         "`/log ai` — только изменения через AI\n"
-        "`/log <товар>` — история по товару\n\n"
+        "`/log <товар>` — история по товару\n"
+        "`/notify` — отчёт по остаткам (что заказывать)\n\n"
         "*Примеры:*\n"
         "`остаток герметик белый`\n"
         "`минус 3 TYT_SIL_009`\n"
@@ -877,6 +878,157 @@ async def cmd_myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ══════════════════════════════════════════════════════
+# Уведомления по остаткам: ежедневный отчёт + /notify
+# ══════════════════════════════════════════════════════
+def _get_urgent_products(db, lead_time_days: int = 14):
+    """Сканирует товары, считает недельный расход по Kaspi-заказам за 28 дней
+    и возвращает список тех, по которым пора заказывать (days_left < lead_time*2).
+    Отсортирован по возрастанию days_left."""
+    from database import KaspiOrder, Product
+    from collections import defaultdict
+    from datetime import datetime as dt, timedelta
+    import re
+
+    COMPLETED = {"Выдан", "ARCHIVE"}
+    cutoff = dt.now() - timedelta(days=28)
+
+    def _parse_d(s):
+        if not s:
+            return None
+        s = str(s)[:10]
+        try:
+            return dt.strptime(s, "%Y-%m-%d")
+        except Exception:
+            try:
+                return dt.strptime(s, "%d.%m.%Y")
+            except Exception:
+                return None
+
+    orders = db.query(KaspiOrder).filter(
+        KaspiOrder.state.in_(COMPLETED),
+        KaspiOrder.product_name.isnot(None),
+    ).all()
+
+    sold_last_28 = defaultdict(int)
+    for o in orders:
+        d = _parse_d(o.order_date)
+        if d and d >= cutoff:
+            sold_last_28[o.product_name] += o.quantity or 1
+
+    stocks = crud.get_all_stocks(db)
+    results = []
+    for s in stocks:
+        p = s["product"]
+        stock = s["stock"]
+        if stock <= 0:
+            continue
+        sold = sold_last_28.get(p.name, 0)
+        if sold <= 0:
+            continue  # нет продаж — пропуск, незачем заказывать
+        weekly_rate = sold / 4.0
+        daily_rate = weekly_rate / 7.0
+        days_left = int(stock / daily_rate) if daily_rate > 0 else None
+        if days_left is None:
+            continue
+
+        if days_left < lead_time_days:
+            urgency = "urgent"
+        elif days_left < lead_time_days * 2:
+            urgency = "order"
+        else:
+            continue
+
+        # Рекомендуемый объём заказа: покрыть 4 недели + safety stock 1.5×недельный расход
+        order_qty = max(0, round(weekly_rate * 4 + weekly_rate * 1.5 - stock))
+
+        results.append({
+            "name": p.name,
+            "unit": p.unit or "шт",
+            "stock": stock,
+            "weekly_rate": round(weekly_rate, 1),
+            "days_left": days_left,
+            "urgency": urgency,
+            "order_qty": order_qty,
+        })
+
+    results.sort(key=lambda x: (0 if x["urgency"] == "urgent" else 1, x["days_left"]))
+    return results
+
+
+def _format_stock_report(items: list) -> str:
+    if not items:
+        return "✅ *Всё ок!*\n\nНет товаров по которым нужно срочно заказать.\nОстатки в норме на ближайшие 4 недели."
+
+    urgent = [x for x in items if x["urgency"] == "urgent"]
+    order = [x for x in items if x["urgency"] == "order"]
+
+    lines = ["📦 *Отчёт по остаткам*", ""]
+    if urgent:
+        lines.append(f"🔴 *Срочно заказать ({len(urgent)}):*")
+        for x in urgent[:15]:
+            name = x["name"][:42] + ("…" if len(x["name"]) > 42 else "")
+            lines.append(
+                f"• {name}\n"
+                f"  _{x['stock']} {x['unit']} · ~{x['days_left']} дн · заказать {x['order_qty']} {x['unit']}_"
+            )
+        if len(urgent) > 15:
+            lines.append(f"  _…и ещё {len(urgent)-15}_")
+        lines.append("")
+
+    if order:
+        lines.append(f"🟡 *Можно заказать ({len(order)}):*")
+        for x in order[:10]:
+            name = x["name"][:42] + ("…" if len(x["name"]) > 42 else "")
+            lines.append(
+                f"• {name} — _{x['stock']} {x['unit']}, ~{x['days_left']} дн_"
+            )
+        if len(order) > 10:
+            lines.append(f"  _…и ещё {len(order)-10}_")
+
+    return "\n".join(lines)
+
+
+async def daily_stock_report(context: ContextTypes.DEFAULT_TYPE):
+    """Ежедневная рассылка отчёта админу."""
+    chat_id = os.getenv("ADMIN_CHAT_ID", "")
+    if not chat_id:
+        logger.info("ADMIN_CHAT_ID не задан, ежедневный отчёт пропущен")
+        return
+    # Проверка включены ли уведомления (по настройке в БД)
+    db = get_db()
+    try:
+        from database import SiteSetting
+        row = db.query(SiteSetting).filter(SiteSetting.key == "notify_stock_enabled").first()
+        if row and str(row.value) == "0":
+            logger.info("Уведомления о остатках отключены в настройках")
+            return
+        items = _get_urgent_products(db)
+        text = _format_stock_report(items)
+    finally:
+        db.close()
+    try:
+        await context.bot.send_message(
+            chat_id=int(chat_id),
+            text=text,
+            parse_mode="Markdown",
+        )
+        logger.info(f"Отчёт по остаткам отправлен ({len(items)} товаров)")
+    except Exception as e:
+        logger.error(f"Не удалось отправить отчёт: {e}")
+
+
+async def cmd_notify(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ручной запуск отчёта по остаткам — для теста."""
+    db = get_db()
+    try:
+        items = _get_urgent_products(db)
+        text = _format_stock_report(items)
+    finally:
+        db.close()
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
 def run_bot():
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -915,9 +1067,22 @@ def run_bot():
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("history", cmd_history))
     app.add_handler(CommandHandler("find", cmd_find))
+    app.add_handler(CommandHandler("notify", cmd_notify))
     app.add_handler(CommandHandler("help", cmd_help))
     app.add_handler(CallbackQueryHandler(handle_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # ── Ежедневный отчёт по остаткам (09:00 Алматы = 04:00 UTC) ──
+    if app.job_queue:
+        from datetime import time as dt_time
+        app.job_queue.run_daily(
+            daily_stock_report,
+            time=dt_time(hour=4, minute=0),  # UTC; Алматы +5 → 09:00 местного
+            name="daily_stock_report",
+        )
+        logger.info("📅 Ежедневный отчёт по остаткам запланирован на 09:00 Алматы")
+    else:
+        logger.warning("job_queue недоступен — ежедневный отчёт не запустится")
 
     logger.info("🤖 Бот запущен v2")
     app.run_polling(drop_pending_updates=True, stop_signals=None)

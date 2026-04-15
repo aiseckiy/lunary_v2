@@ -269,6 +269,7 @@ def init_db():
         ("kaspi_commission_pct",  "8",   "Комиссия Kaspi (%)",            "integrations"),
         ("tax_pct",               "4",   "Налог (%)",                     "integrations"),
         ("openai_api_key",        "",    "OpenAI API Key (AI описания)",  "integrations"),
+        ("notify_stock_enabled",  "1",   "Telegram: ежедневный отчёт по остаткам", "notifications"),
     ]
     db2 = SessionLocal()
     try:

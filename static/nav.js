@@ -2,6 +2,15 @@
  * nav.js — единая боковая навигация + группированные вкладки для всех страниц.
  */
 (function () {
+  // Google Fonts: Inter + Inter Tight (preconnect + stylesheet link)
+  if (!document.getElementById('gf-preconnect')) {
+    const p1 = document.createElement('link'); p1.id = 'gf-preconnect'; p1.rel = 'preconnect'; p1.href = 'https://fonts.googleapis.com'; document.head.appendChild(p1);
+    const p2 = document.createElement('link'); p2.rel = 'preconnect'; p2.href = 'https://fonts.gstatic.com'; p2.crossOrigin = 'anonymous'; document.head.appendChild(p2);
+    const f = document.createElement('link'); f.rel = 'stylesheet';
+    f.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap';
+    document.head.appendChild(f);
+  }
+
   fetch('/api/admin/theme/css').then(r => r.text()).then(css => {
     const style = document.createElement('style');
     style.textContent = css;

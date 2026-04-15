@@ -1,5 +1,10 @@
 [
   {
+    "hash": "5dc75d7",
+    "date": "16.04.2026",
+    "message": "Fonts: инжект Google Fonts Inter/Inter Tight через nav.js"
+  },
+  {
     "hash": "002c0ad",
     "date": "16.04.2026",
     "message": "Inter + Inter Tight: реальная типографическая иерархия"

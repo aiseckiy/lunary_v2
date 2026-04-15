@@ -3,8 +3,6 @@
    Desktop: sidebar | Mobile: bottom nav
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap');
-
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html { overflow-x: hidden; max-width: 100vw; }
 
@@ -89,7 +87,7 @@ html { overflow-x: hidden; max-width: 100vw; }
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: var(--fw-normal);
   background: var(--bg);
   color: var(--text);
@@ -97,17 +95,14 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'cv11','ss01','ss03';
 }
 
 /* ═══════════════════════════════════════════════════════
    ТИПОГРАФИЧЕСКАЯ ИЕРАРХИЯ (единая, строгая)
    ═══════════════════════════════════════════════════════
-   Крупные дисплейные элементы — Inter Tight, сжатые буквы
-   Обычный текст — Inter
 */
 
-/* Display-шрифт для крупных заголовков и чисел */
+/* Display-элементы: крупные заголовки и числа — с сжатым letter-spacing */
 .display,
 .page-title,
 .stat-value,
@@ -115,29 +110,26 @@ body {
 .sum-value,
 .sidebar-logo,
 .mobile-logo {
-  font-family: 'Inter Tight', 'Inter', -apple-system, sans-serif;
   font-weight: var(--fw-extrabold);
   letter-spacing: -.025em;
 }
 
 /* Заголовки */
-h1 { font-family: 'Inter Tight', 'Inter', sans-serif; font-weight: var(--fw-extrabold); font-size: var(--fs-xl); letter-spacing: -.025em; line-height: 1.15; }
-h2 { font-family: 'Inter Tight', 'Inter', sans-serif; font-weight: var(--fw-bold);      font-size: var(--fs-lg); letter-spacing: -.02em;  line-height: 1.2;  }
-h3 { font-family: 'Inter', sans-serif; font-weight: var(--fw-semibold); font-size: var(--fs-md); letter-spacing: -.01em;  line-height: 1.3;  }
+h1 { font-weight: var(--fw-extrabold); font-size: var(--fs-xl); letter-spacing: -.025em; line-height: 1.15; }
+h2 { font-weight: var(--fw-bold);      font-size: var(--fs-lg); letter-spacing: -.02em;  line-height: 1.2;  }
+h3 { font-weight: var(--fw-semibold);  font-size: var(--fs-md); letter-spacing: -.01em;  line-height: 1.3;  }
 
-/* Section / card titles — часто кастомные классы на страницах */
+/* Section / card titles */
 .section-title,
 .card-title,
 .sum-label,
 .kpi-label {
-  font-family: 'Inter', sans-serif;
   font-weight: var(--fw-bold);
   letter-spacing: -.005em;
 }
 
 /* Модальные заголовки */
 .modal-title, .qs-title, .assign-title {
-  font-family: 'Inter Tight', 'Inter', sans-serif;
   font-weight: var(--fw-bold);
   letter-spacing: -.015em;
 }

@@ -48,6 +48,67 @@ def parse_images(product) -> list:
 _parse_images = parse_images
 
 
+# ══════════════════════════════════════════════════════
+# Auth / session helpers
+# ══════════════════════════════════════════════════════
+def make_session_token() -> str:
+    """Стабильный admin-токен на основе ADMIN_PASSWORD. Пустой если пароль не задан."""
+    pwd = os.getenv("ADMIN_PASSWORD", "")
+    if not pwd:
+        return ""
+    import hashlib
+    return hashlib.sha256(f"lunary-session-{pwd}".encode()).hexdigest()
+
+
+SESSION_TOKEN = make_session_token()
+
+
+def get_user_from_session(request):
+    """Возвращает user dict по session cookie, или None."""
+    session = request.cookies.get("lunary_session", "")
+    if not session:
+        return None
+    if session == SESSION_TOKEN and SESSION_TOKEN:
+        return {"role": "admin", "name": "Admin", "email": ""}
+    import hashlib
+    from database import SessionLocal, User as UserModel
+    db = SessionLocal()
+    try:
+        user = db.query(UserModel).filter(UserModel.id == int(session.split("_")[0])).first() if "_" in session else None
+        if user:
+            expected = hashlib.sha256(
+                f"user-{user.id}-{user.email}-{os.getenv('ADMIN_PASSWORD','lunary-secret')}".encode()
+            ).hexdigest()
+            if session == f"{user.id}_{expected}":
+                return {
+                    "role": user.role,
+                    "name": user.name,
+                    "email": user.email,
+                    "id": user.id,
+                    "phone": user.phone or "",
+                }
+    except Exception:
+        pass
+    finally:
+        db.close()
+    return None
+
+
+def is_staff(user) -> bool:
+    return bool(user and user.get("role") in ("admin", "manager"))
+
+
+def is_admin(user) -> bool:
+    return bool(user and user.get("role") == "admin")
+
+
+# Backwards-compat aliases
+_make_session_token = make_session_token
+_get_user_from_session = get_user_from_session
+_is_staff = is_staff
+_is_admin = is_admin
+
+
 def parse_order_date(date_str):
     """Парсит дату заказа из dd.mm.yyyy или Unix ms timestamp (UTC+5 Казахстан).
     Возвращает datetime или None."""

@@ -1,5 +1,10 @@
 [
   {
+    "hash": "42e7e6d",
+    "date": "16.04.2026",
+    "message": "Refactor: вынести merge и store роутеры"
+  },
+  {
     "hash": "cad4693",
     "date": "16.04.2026",
     "message": "Refactor: вынести uploads и pricelist роутеры"

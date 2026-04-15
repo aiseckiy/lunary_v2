@@ -46,7 +46,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   font-size:80px;
 }
 .product-info { flex:1; min-width:0; }
-.product-brand-big { font-size:13px; color:var(--text3); font-weight:500; margin-bottom:6px; }
+.product-brand-big { font-size:13px; color:var(--text3); font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
 .product-name-big { font-size:22px; font-weight:700; margin-bottom:8px; line-height:1.3; }
 .product-sku-big { font-size:13px; color:var(--text3); margin-bottom:20px; }
 .product-price-big { font-size:28px; font-weight:800; color:var(--accent); margin-bottom:6px; }
@@ -391,8 +391,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <div id="img-panel-url" style="display:none">
       <div class="img-url-row">
-        <input class="img-url-input" id="e-img-url" type="url" placeholder="https://example.com/photo.jpg">
+        <input class="img-url-input" id="e-img-url" type="url" placeholder="https://example.com/photo.jpg" oninput="previewUrl(this.value)" onkeydown="if(event.key==='Enter')addImageUrl()">
         <button class="btn-add-url" onclick="addImageUrl()">Добавить</button>
+      </div>
+      <div id="url-preview" style="display:none;margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#f9fafb;padding:8px;text-align:center">
+        <img id="url-preview-img" src="" style="max-height:160px;max-width:100%;object-fit:contain;border-radius:6px" onerror="urlPreviewError()" onload="urlPreviewOk()">
+        <div id="url-preview-err" style="display:none;font-size:12px;color:#ef4444;padding:8px">⚠️ Картинка не загружается — возможно сайт блокирует прямые ссылки</div>
       </div>
     </div>
 
@@ -596,12 +600,35 @@ function removeImage(i) {
   renderImgsList();
 }
 
+let _urlPreviewTimer = null;
+function previewUrl(val) {
+  clearTimeout(_urlPreviewTimer);
+  const box = document.getElementById('url-preview');
+  if (!val.trim()) { box.style.display = 'none'; return; }
+  _urlPreviewTimer = setTimeout(() => {
+    const img = document.getElementById('url-preview-img');
+    document.getElementById('url-preview-err').style.display = 'none';
+    img.style.display = 'block';
+    img.src = val.trim();
+    box.style.display = 'block';
+  }, 400);
+}
+function urlPreviewOk() {
+  document.getElementById('url-preview-err').style.display = 'none';
+  document.getElementById('url-preview-img').style.display = 'block';
+}
+function urlPreviewError() {
+  document.getElementById('url-preview-img').style.display = 'none';
+  document.getElementById('url-preview-err').style.display = 'block';
+}
+
 function addImageUrl() {
   const inp = document.getElementById('e-img-url');
   const url = inp.value.trim();
   if (!url) return;
   editImages.push(url);
   inp.value = '';
+  document.getElementById('url-preview').style.display = 'none';
   renderImgsList();
 }
 

@@ -149,6 +149,8 @@ def update_product(product_id: int, db: Session, **kwargs):
     for key, val in kwargs.items():
         if val is not None and hasattr(p, key):
             setattr(p, key, val)
+        elif val is False and hasattr(p, key):  # allow explicit False (e.g. show_in_shop)
+            setattr(p, key, val)
     if "name" in kwargs and "brand" not in kwargs:
         auto = detect_brand(kwargs["name"])
         if auto:

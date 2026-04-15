@@ -472,6 +472,11 @@
         <div id="em-kaspi-sku-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
         <button type="button" onclick="addKaspiSkuField()" style="background:none;border:1px dashed var(--border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--accent);cursor:pointer;width:100%">+ Добавить SKU</button>
       </div>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:4px">
+        <input type="checkbox" id="em-show-in-shop" style="width:17px;height:17px;accent-color:var(--accent);flex-shrink:0">
+        <span style="font-size:14px;font-weight:500">Показывать в магазине</span>
+        <span style="font-size:12px;color:var(--text3);margin-left:auto">lunary.kz/shop</span>
+      </label>
       <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
       <button class="btn-cancel-move" style="margin-top:8px" onclick="closeEditModal()">Отмена</button>
       <button onclick="deleteProduct()" style="width:100%;margin-top:8px;background:#ef44441a;color:#ef4444;border:1px solid #ef444440;border-radius:10px;padding:12px;font-size:14px;cursor:pointer">🗑 Удалить товар</button>
@@ -1187,6 +1192,7 @@ function openEditModal(id, fromMove = false) {
   document.getElementById('em-cost-price').value = p.cost_price || '';
   document.getElementById('em-supplier').value = p.supplier || '';
   document.getElementById('em-supplier-article').value = p.supplier_article || '';
+  document.getElementById('em-show-in-shop').checked = !!p.show_in_shop;
   // Kaspi SKU список
   const skus = (p.kaspi_sku || '').split(',').map(s => s.trim()).filter(Boolean);
   renderKaspiSkuList(skus.length ? skus : ['']);
@@ -1255,10 +1261,11 @@ async function submitEdit() {
   const supplier = document.getElementById('em-supplier').value.trim() || null;
   const supplier_article = document.getElementById('em-supplier-article').value.trim() || null;
   const kaspi_sku = Array.from(document.querySelectorAll('.em-kaspi-sku-input')).map(i => i.value.trim()).filter(Boolean).join(',') || null;
+  const show_in_shop = document.getElementById('em-show-in-shop').checked;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, barcode, category, unit, min_stock, brand, price, cost_price, supplier, supplier_article, kaspi_sku})
+    body: JSON.stringify({name, barcode, category, unit, min_stock, brand, price, cost_price, supplier, supplier_article, kaspi_sku, show_in_shop})
   });
 
   if (!res.ok) {

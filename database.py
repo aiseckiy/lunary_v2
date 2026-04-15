@@ -45,6 +45,7 @@ class Product(Base):
     supplier_article = Column(String, nullable=True)  # артикул производителя/поставщика
     verified = Column(Integer, default=0)  # 1 = проверен, 0 = не проверен
     linked_ref_id = Column(Integer, nullable=True)  # ID привязанного PriceListItem
+    show_in_shop = Column(Boolean, default=False)   # показывать в публичном магазине
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -220,6 +221,7 @@ def init_db():
         ("products", "verified", "INTEGER DEFAULT 0"),
         ("products", "supplier_article", "TEXT"),
         ("products", "linked_ref_id", "INTEGER"),
+        ("products", "show_in_shop", "BOOLEAN DEFAULT FALSE"),
         ("price_list_items", "is_new", "BOOLEAN DEFAULT TRUE"),
     ]
     with engine.connect() as conn:

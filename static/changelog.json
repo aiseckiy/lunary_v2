@@ -1,5 +1,10 @@
 [
   {
+    "hash": "1c67752",
+    "date": "15.04.2026",
+    "message": "Добавить Kaspi Price Feed: публичный URL /api/kaspi/feed.xml с токен-защитой"
+  },
+  {
     "hash": "2378d75",
     "date": "15.04.2026",
     "message": "Добавить избранное (favSet/toggleFav) и supplier_article в список товаров магазина"

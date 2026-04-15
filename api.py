@@ -220,6 +220,7 @@ class ProductUpdate(BaseModel):
     supplier_article: Optional[str] = None
     description: Optional[str] = None
     specs: Optional[str] = None
+    show_in_shop: Optional[bool] = None
 
 
 class MovementCreate(BaseModel):
@@ -1144,6 +1145,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         "images": p.images or "[]",
         "description": p.description or "",
         "specs": p.specs or "[]",
+        "show_in_shop": bool(p.show_in_shop),
     }}
 
 
@@ -1355,13 +1357,13 @@ def shop_page():
 # ─── Публичный API магазина ───────────────────────────────────
 @app.get("/api/store/products")
 def store_products(db: Session = Depends(get_db)):
-    """Публичный список товаров для магазина — только Kaspi-карточки с ценой"""
+    """Публичный список товаров для магазина — только show_in_shop=True"""
     from database import Product as _P, Movement as _M
     from sqlalchemy import func
     stocks = (
         db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
         .outerjoin(_M, _M.product_id == _P.id)
-        .filter(_P.category == "Kaspi")
+        .filter(_P.show_in_shop == True)
         .group_by(_P.id)
         .all()
     )

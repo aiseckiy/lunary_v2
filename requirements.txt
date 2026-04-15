@@ -11,3 +11,4 @@ python-multipart>=0.0.9
 psycopg2-binary>=2.9.9
 pg8000>=1.30.0
 openpyxl>=3.1.0
+anthropic>=0.25.0

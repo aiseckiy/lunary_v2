@@ -170,6 +170,7 @@
     <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight:600">📦 Приёмка</button>
     <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight:600">🛒 Закупки</button>
     <a class="sort-btn" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
+    <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;font-weight:600">✨ AI описания</button>
   </div>
 
   <!-- Строка 2: фильтры -->
@@ -1333,6 +1334,26 @@ function startEditBarcodeScanner() {
     },
     () => {}
   ).catch(() => { wrap.style.display = 'none'; wrap.innerHTML = ''; });
+}
+
+// ── AI массовые описания ──────────────────────────────────
+async function fillDescriptions() {
+  const btn = document.getElementById('btn-fill-desc');
+  if (!confirm('AI заполнит описания и характеристики для всех товаров без описания. Продолжить?')) return;
+  btn.textContent = '⏳ Генерирую...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/admin/fill-descriptions', {method: 'POST'});
+    const d = await res.json();
+    if (!res.ok) { alert('Ошибка: ' + (d.detail || JSON.stringify(d))); return; }
+    toast(`✅ Готово: ${d.done} товаров заполнено${d.errors?.length ? `, ${d.errors.length} ошибок` : ''}`, 'success');
+    load();
+  } catch(e) {
+    alert('Ошибка сети: ' + e.message);
+  } finally {
+    btn.textContent = '✨ AI описания';
+    btn.disabled = false;
+  }
 }
 
 // ── Brand suggest ────────────────────────────────────────

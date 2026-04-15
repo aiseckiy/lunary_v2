@@ -1582,14 +1582,14 @@ def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
 {existing_specs}
 
 Задача:
-1. Напиши короткое продающее описание товара (2-4 предложения). Без воды, конкретно — что это, для чего, преимущества.
-2. Составь таблицу характеристик (5-10 строк) в формате JSON.
+1. Напиши продающее описание (2-4 предложения). Конкретно: что это, для чего применяется, главные преимущества. Это НОВЫЙ товар в магазине стройматериалов — НЕ пиши "состояние", "б/у", "новое". Только технические свойства и применение.
+2. Составь технические характеристики (5-10 строк). Только реальные параметры: объём, состав, цвет, температура применения, время высыхания, нагрузка и т.п. ЗАПРЕЩЕНО включать: "Состояние", "Тип объявления", "Наличие", "Страна" — это не доска объявлений.
 
 Верни ТОЛЬКО JSON без markdown-обёртки:
 {{
   "description": "текст описания",
   "specs": [
-    {{"key": "Название характеристики", "value": "значение"}},
+    {{"key": "Характеристика", "value": "значение"}},
     ...
   ]
 }}"""
@@ -1629,6 +1629,90 @@ def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="AI вернул некорректный JSON — попробуйте ещё раз")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка AI: {str(e)[:200]}")
+
+
+@app.post("/api/admin/fill-descriptions")
+def fill_descriptions_bulk(request: Request, db: Session = Depends(get_db)):
+    """Массовая генерация описаний и характеристик для товаров без описания через OpenAI"""
+    import os, json, time
+    from database import Product as _P, SiteSetting
+
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        settings = {s.key: s.value for s in db.query(SiteSetting).all()}
+        api_key = settings.get("openai_api_key", "")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="OPENAI_API_KEY не настроен")
+
+    from openai import OpenAI
+    client = OpenAI(api_key=api_key)
+
+    # Только товары без описания
+    products = db.query(_P).filter(
+        (_P.description == None) | (_P.description == "")
+    ).all()
+
+    done = 0
+    errors = []
+    for p in products:
+        try:
+            existing_specs = ""
+            try:
+                specs = json.loads(p.specs or "[]")
+                if specs:
+                    existing_specs = "\nУже известные характеристики:\n" + "\n".join(f"- {s['key']}: {s['value']}" for s in specs)
+            except Exception:
+                pass
+
+            prompt = f"""Ты помощник для интернет-магазина строительных материалов в Казахстане.
+
+Товар:
+- Название: {p.name}
+- Бренд: {p.brand or 'не указан'}
+- Категория: {p.category or 'не указана'}
+- Единица: {p.unit or 'шт'}
+{existing_specs}
+
+Задача:
+1. Напиши продающее описание (2-4 предложения). Конкретно: что это, для чего применяется, главные преимущества. Это НОВЫЙ товар в магазине стройматериалов — НЕ пиши "состояние", "б/у", "новое". Только технические свойства и применение.
+2. Составь технические характеристики (5-10 строк). Только реальные параметры: объём, состав, цвет, температура применения, время высыхания, нагрузка и т.п. ЗАПРЕЩЕНО включать: "Состояние", "Тип объявления", "Наличие", "Страна".
+
+Верни ТОЛЬКО JSON без markdown-обёртки:
+{{"description": "текст", "specs": [{{"key": "Характеристика", "value": "значение"}}]}}"""
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini", max_tokens=1024,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            text = response.choices[0].message.content.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"): text = text[4:]
+            result = json.loads(text)
+
+            p.description = result.get("description", "")
+            specs_new = result.get("specs", [])
+            if specs_new:
+                try: existing = json.loads(p.specs or "[]")
+                except: existing = []
+                existing_keys = {s["key"].lower() for s in existing}
+                for s in specs_new:
+                    if s["key"].lower() not in existing_keys:
+                        existing.append(s)
+                p.specs = json.dumps(existing, ensure_ascii=False)
+
+            db.commit()
+            done += 1
+            time.sleep(0.3)  # небольшая пауза чтобы не превысить rate limit
+        except Exception as e:
+            errors.append(f"{p.name}: {str(e)[:100]}")
+            print(f"[fill-descriptions] ошибка {p.name}: {e}", flush=True)
+
+    return {"ok": True, "done": done, "total": len(products), "errors": errors}
 
 
 @app.post("/api/admin/fill-images")

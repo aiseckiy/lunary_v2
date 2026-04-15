@@ -1,5 +1,10 @@
 [
   {
+    "hash": "a9be54e",
+    "date": "15.04.2026",
+    "message": "Картинки товаров: object-fit contain вместо cover (не обрезает)"
+  },
+  {
     "hash": "0f39a4f",
     "date": "15.04.2026",
     "message": "Переключить AI описания с Anthropic на OpenAI gpt-4o-mini"

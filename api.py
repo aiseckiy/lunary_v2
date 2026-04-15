@@ -2686,80 +2686,181 @@ def kaspi_export_xml(db: Session = Depends(get_db)):
                     headers={"Content-Disposition": "attachment; filename=ACTIVE.xml"})
 
 
-@app.post("/api/kaspi/import-history")
-def kaspi_import_history(request: Request, db: Session = Depends(get_db)):
-    """Исторический импорт заказов Kaspi чанками по 14 дней за последний год"""
-    user = _get_user_from_session(request)
-    if not user or user.get("role") != "admin":
-        raise HTTPException(status_code=403)
 
-    from database import KaspiOrder
+# ── Состояние фонового импорта истории ───────────────────────
+_history_import_state: dict = {
+    "running": False, "done": False, "created": 0, "skipped": 0,
+    "errors": 0, "chunk": 0, "total_chunks": 0, "log": []
+}
+
+def _run_history_import_bg():
+    """Фоновый импорт заказов Kaspi за последний год с полным составом"""
     import time as _time
+    from database import KaspiOrder, SessionLocal as _SL
+    from sqlalchemy import func
 
-    STATES = ["NEW", "ACCEPTED", "COMPLETED", "CANCELLED", "RETURN", "PICKUP"]
+    global _history_import_state
+    s = _history_import_state
+
+    STATES = ["COMPLETED", "ARCHIVE", "CANCELLED", "RETURN", "ACCEPTED", "NEW"]
     CHUNK_DAYS = 14
     TOTAL_DAYS = 365
 
     now_ms = int(_time.time() * 1000)
     day_ms = 24 * 60 * 60 * 1000
+    chunks = list(range(0, TOTAL_DAYS, CHUNK_DAYS))
+    s["total_chunks"] = len(chunks) * len(STATES)
+    s["chunk"] = 0
 
-    created = 0
-    skipped = 0
-    errors = 0
+    db = _SL()
+    try:
+        for chunk_start in chunks:
+            date_le = now_ms - chunk_start * day_ms
+            date_ge = now_ms - (chunk_start + CHUNK_DAYS) * day_ms
 
-    # Идём назад чанками по 14 дней
-    for chunk in range(0, TOTAL_DAYS, CHUNK_DAYS):
-        date_le = now_ms - chunk * day_ms
-        date_ge = now_ms - (chunk + CHUNK_DAYS) * day_ms
+            for state in STATES:
+                if not s["running"]:
+                    return
+                s["chunk"] += 1
+                page = 0
+                chunk_created = 0
 
-        for state in STATES:
-            page = 0
-            while True:
-                try:
-                    data = kaspi_module._proxy("get_orders", {
-                        "state": state, "page": page, "size": 100,
-                        "creationDateGe": str(date_ge),
-                        "creationDateLe": str(date_le),
-                    })
-                except Exception as e:
-                    errors += 1
-                    break
+                while True:
+                    try:
+                        data = kaspi_module._proxy("get_orders", {
+                            "state": state, "page": page, "size": 100,
+                            "creationDateGe": str(date_ge),
+                            "creationDateLe": str(date_le),
+                        })
+                    except Exception as e:
+                        s["errors"] += 1
+                        break
 
-                if not data:
-                    break
+                    if not data:
+                        break
 
-                items = data.get("data", [])
-                if not items:
-                    break
+                    items = data.get("data", [])
+                    if not items:
+                        break
 
-                for item in items:
-                    attr = item.get("attributes", {})
-                    oid = item.get("id", "")
-                    if not oid:
-                        continue
-                    exists = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
-                    if exists:
-                        skipped += 1
-                        continue
-                    customer = attr.get("customer", {})
-                    o = KaspiOrder(
-                        order_id=oid,
-                        state=attr.get("state", state),
-                        customer_name=customer.get("name", ""),
-                        customer_phone=customer.get("cellPhone", ""),
-                        total=attr.get("totalPrice", 0),
-                        created_at=attr.get("creationDate", ""),
-                    )
-                    db.add(o)
-                    created += 1
+                    for item in items:
+                        attr = item.get("attributes", {})
+                        oid = item.get("id", "")
+                        if not oid:
+                            continue
 
-                db.commit()
+                        exists = db.query(KaspiOrder).filter(KaspiOrder.order_id == oid).first()
+                        if exists:
+                            s["skipped"] += 1
+                            continue
 
-                if len(items) < 100:
-                    break
-                page += 1
+                        # Получаем состав заказа (product_name, quantity)
+                        pname, qty, sku_val = "", 1, ""
+                        try:
+                            entries_data = kaspi_module._proxy("get_order_entries", {"orderId": oid})
+                            if entries_data and entries_data.get("data"):
+                                entry = entries_data["data"][0]
+                                ea = entry.get("attributes", {})
+                                qty = int(ea.get("quantity", 1))
+                                # Название из included
+                                included = {i["id"]: i for i in entries_data.get("included", [])}
+                                rels = entry.get("relationships", {})
+                                prod_rel = rels.get("product", {}).get("data") or rels.get("offer", {}).get("data")
+                                if prod_rel:
+                                    prod = included.get(prod_rel.get("id"), {})
+                                    pname = prod.get("attributes", {}).get("name", "")
+                                    sku_val = ea.get("merchantSku", "")
+                                if not pname:
+                                    pname = ea.get("name", "") or ea.get("merchantSku", "")
+                        except Exception:
+                            pass
 
-    return {"created": created, "skipped": skipped, "errors": errors}
+                        # Дата заказа
+                        creation_ms = attr.get("creationDate", 0)
+                        try:
+                            import datetime as _dt
+                            order_date = _dt.datetime.fromtimestamp(int(creation_ms) / 1000).strftime("%d.%m.%Y")
+                        except Exception:
+                            order_date = ""
+
+                        total = int(attr.get("totalPrice", 0) or 0)
+
+                        o = KaspiOrder(
+                            order_id=oid,
+                            state=attr.get("state", state),
+                            total=total,
+                            order_date=order_date,
+                            product_name=pname or None,
+                            sku=sku_val or None,
+                            quantity=qty,
+                            stock_deducted=0,
+                        )
+                        db.add(o)
+                        s["created"] += 1
+                        chunk_created += 1
+
+                    db.commit()
+
+                    if len(items) < 100:
+                        break
+                    page += 1
+                    _time.sleep(0.2)
+
+                if chunk_created > 0:
+                    import datetime as _dt2
+                    d_from = _dt2.datetime.fromtimestamp(date_ge / 1000).strftime("%d.%m")
+                    d_to   = _dt2.datetime.fromtimestamp(date_le / 1000).strftime("%d.%m")
+                    s["log"].append(f"{state} {d_from}–{d_to}: +{chunk_created}")
+                    if len(s["log"]) > 30:
+                        s["log"] = s["log"][-30:]
+
+                _time.sleep(0.3)
+
+    finally:
+        db.close()
+        s["running"] = False
+        s["done"] = True
+
+
+@app.post("/api/kaspi/import-history")
+def kaspi_import_history(request: Request):
+    """Запустить фоновый исторический импорт заказов Kaspi за год"""
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+
+    global _history_import_state
+    if _history_import_state["running"]:
+        return {"ok": False, "detail": "Импорт уже запущен"}
+
+    _history_import_state = {
+        "running": True, "done": False, "created": 0, "skipped": 0,
+        "errors": 0, "chunk": 0, "total_chunks": 0, "log": []
+    }
+
+    import threading
+    t = threading.Thread(target=_run_history_import_bg, daemon=True)
+    t.start()
+    return {"ok": True, "detail": "Импорт запущен в фоне"}
+
+
+@app.get("/api/kaspi/import-history/status")
+def kaspi_import_history_status(request: Request):
+    """Статус фонового импорта истории"""
+    user = _get_user_from_session(request)
+    if not user or not _is_staff(user):
+        raise HTTPException(status_code=403)
+    return dict(_history_import_state)
+
+
+@app.post("/api/kaspi/import-history/stop")
+def kaspi_import_history_stop(request: Request):
+    """Остановить импорт"""
+    user = _get_user_from_session(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403)
+    _history_import_state["running"] = False
+    return {"ok": True}
 
 
 @app.get("/api/admin/forecast")

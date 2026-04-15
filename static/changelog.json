@@ -1,5 +1,10 @@
 [
   {
+    "hash": "0f39a4f",
+    "date": "15.04.2026",
+    "message": "Переключить AI описания с Anthropic на OpenAI gpt-4o-mini"
+  },
+  {
     "hash": "afad450",
     "date": "15.04.2026",
     "message": "Миграция: show_in_shop=True для существующих Kaspi товаров"

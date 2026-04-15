@@ -167,14 +167,14 @@
   </div>
 
   <div class="status-tabs" id="status-tabs">
-    <div class="stab active" onclick="setStatus('')" data-s="">📋 Все</div>
-    <div class="stab" onclick="setStatus('NEW')" data-s="NEW">🟡 Новые</div>
-    <div class="stab" onclick="setStatus('DELIVERY')" data-s="DELIVERY">🚛 Доставка</div>
-    <div class="stab" onclick="setStatus('KASPI_DELIVERY')" data-s="KASPI_DELIVERY">🚚 Kaspi</div>
-    <div class="stab" onclick="setStatus('PICKUP')" data-s="PICKUP">🏪 Самовывоз</div>
-    <div class="stab" onclick="setStatus('ARCHIVE')" data-s="ARCHIVE">✅ Архив</div>
-    <div class="stab" onclick="setStatus('CANCELLED')" data-s="CANCELLED">❌ Отменены</div>
-    <div class="stab" onclick="setStatus('RETURN')" data-s="RETURN">↩️ Возврат</div>
+    <div class="stab active" onclick="setStatus('')" data-s="" data-tip="Все заказы за период">📋 Все</div>
+    <div class="stab" onclick="setStatus('NEW')" data-s="NEW" data-tip="Только что созданные, ещё не принятые в обработку">🟡 Новые</div>
+    <div class="stab" onclick="setStatus('DELIVERY')" data-s="DELIVERY" data-tip="В процессе доставки нашей службой">🚛 Доставка</div>
+    <div class="stab" onclick="setStatus('KASPI_DELIVERY')" data-s="KASPI_DELIVERY" data-tip="Доставляется курьерами Kaspi">🚚 Kaspi</div>
+    <div class="stab" onclick="setStatus('PICKUP')" data-s="PICKUP" data-tip="Клиент заберёт сам из магазина">🏪 Самовывоз</div>
+    <div class="stab" onclick="setStatus('ARCHIVE')" data-s="ARCHIVE" data-tip="Успешно выполненные заказы">✅ Архив</div>
+    <div class="stab" onclick="setStatus('CANCELLED')" data-s="CANCELLED" data-tip="Отменены клиентом или магазином">❌ Отменены</div>
+    <div class="stab" onclick="setStatus('RETURN')" data-s="RETURN" data-tip="Клиент вернул товар после получения">↩️ Возврат</div>
   </div>
 
   <div class="orders-meta">

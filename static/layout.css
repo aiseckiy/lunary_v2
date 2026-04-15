@@ -486,6 +486,49 @@ h3 { font-weight: var(--fw-semibold);  font-size: var(--fs-md); letter-spacing: 
 
 .empty { text-align: center; padding: 60px; color: var(--text3); font-size: 15px; }
 
+/* ── Tooltips (универсальные, через data-tip) ── */
+[data-tip] { position: relative; cursor: default; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 7px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 999;
+  max-width: 240px;
+  white-space: normal;
+  text-align: center;
+  width: max-content;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+}
+[data-tip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1f2937;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 999;
+}
+[data-tip]:hover::after,
+[data-tip]:hover::before { opacity: 1; }
+[data-tip=""]::after,
+[data-tip=""]::before { display: none; }
+
 /* ---- CUSTOM DATE RANGE PICKER (datepicker.js) ---- */
 .drp2-backdrop {
   display: none;

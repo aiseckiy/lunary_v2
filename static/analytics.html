@@ -228,22 +228,22 @@ async function loadKpi() {
     const d = await fetch('/api/analytics/overview' + dateParams()).then(r => r.json());
     const profitColor = d.gross_profit >= 0 ? 'green' : 'red';
     document.getElementById('kpi-grid').innerHTML = `
-      <div class="kpi">
+      <div class="kpi" data-tip="Все заказы за период: новые, в доставке, выданные и отменённые. Считает любой заказ, созданный в Kaspi.">
         <div class="kpi-label">Всего заказов</div>
         <div class="kpi-value purple">${d.total_orders.toLocaleString('ru')}</div>
         <div class="kpi-sub">${d.completed} выдано · ${d.cancelled} отменено</div>
       </div>
-      <div class="kpi">
+      <div class="kpi" data-tip="Сумма по ВЫДАННЫМ заказам (до вычета комиссии и налога). Отменённые не считаются.">
         <div class="kpi-label">Выручка</div>
         <div class="kpi-value green">${d.total_revenue.toLocaleString('ru')} ₸</div>
         <div class="kpi-sub">средний чек ${d.avg_order.toLocaleString('ru')} ₸</div>
       </div>
-      <div class="kpi">
+      <div class="kpi" data-tip="Доля заказов которые дошли до статуса 'Выдан'. Остальные — отменены или застряли в доставке.">
         <div class="kpi-label">Конверсия</div>
         <div class="kpi-value yellow">${d.conversion_rate}%</div>
         <div class="kpi-sub">выполненные / все заказы</div>
       </div>
-      <div class="kpi">
+      <div class="kpi" data-tip="Выручка минус комиссия Kaspi, налог и закупочная себестоимость. Это то что реально остаётся бизнесу.">
         <div class="kpi-label">Прибыль</div>
         <div class="kpi-value ${profitColor}">${d.gross_profit != null ? d.gross_profit.toLocaleString('ru') + ' ₸' : '—'}</div>
         <div class="kpi-sub" style="font-size:11px">

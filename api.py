@@ -1443,10 +1443,13 @@ def store_product_detail(product_id: int, db: Session = Depends(get_db)):
     p, stock = row
     return {
         "id": p.id, "name": p.name, "sku": p.kaspi_sku or "",
+        "supplier_article": p.supplier_article or "",
         "category": p.category or "Другое",
         "brand": p.brand or "",
         "price": p.price, "unit": p.unit or "шт",
         "stock": int(stock), "min_stock": p.min_stock or 0,
+        "supplier": p.supplier or "",
+        "cost_price": p.cost_price,
         "image_url": p.image_url or "",
         "images": _parse_images(p),
         "description": p.description or "",

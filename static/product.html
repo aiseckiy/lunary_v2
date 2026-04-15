@@ -484,7 +484,9 @@ function renderProduct() {
 
   document.getElementById('container').innerHTML = `
     <div class="breadcrumb">
-      <a href="/shop">Каталог</a> › ${p.category} › ${p.name}
+      <a href="/shop">Каталог</a> ›
+      <a href="/shop?cat=${encodeURIComponent(p.category)}">${p.category}</a> ›
+      ${p.name}
     </div>
     <div class="product-card-big">
       <div class="gallery-wrap">
@@ -497,7 +499,7 @@ function renderProduct() {
       <div class="product-info">
         ${p.brand ? `<div class="product-brand-big">${p.brand}</div>` : ''}
         <div class="product-name-big">${p.name}</div>
-        <div class="product-sku-big">Артикул: ${p.sku}</div>
+        ${p.supplier_article ? `<div class="product-sku-big">Артикул: ${p.supplier_article}</div>` : ''}
         ${priceHtml}
         <div class="stock-badge ${inStock ? 'stock-in' : 'stock-out'}" style="margin-bottom:20px">
           ${inStock ? `В наличии: ${p.stock} ${p.unit}` : 'Нет в наличии'}
@@ -513,7 +515,8 @@ function renderProduct() {
           <tr><td>Категория</td><td>${p.category}</td></tr>
           ${p.brand ? `<tr><td>Бренд</td><td>${p.brand}</td></tr>` : ''}
           <tr><td>Единица</td><td>${p.unit}</td></tr>
-          <tr><td>Артикул</td><td>${p.sku}</td></tr>
+          ${p.supplier_article ? `<tr><td>Артикул</td><td>${p.supplier_article}</td></tr>` : ''}
+          ${p.supplier ? `<tr><td>Поставщик</td><td>${p.supplier}</td></tr>` : ''}
         </table>
         ${renderSpecsBlock(p)}
       </div>

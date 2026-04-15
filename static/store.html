@@ -942,9 +942,16 @@ async function load() {
   allProducts = await res.json();
   buildFilters();
   const scrollY = restoreState();
+  // Если пришли с хлебной крошки — применяем категорию из URL
+  const urlCat = new URLSearchParams(location.search).get('cat');
+  if (urlCat && !scrollY) {
+    activeCategory = urlCat;
+    document.querySelectorAll('[data-cat]').forEach(el => {
+      el.classList.toggle('active', el.dataset.cat === urlCat);
+    });
+  }
   render();
   if (scrollY) {
-    // Восстанавливаем скролл после рендера
     setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' }), 50);
   }
 }

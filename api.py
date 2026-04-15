@@ -2751,6 +2751,27 @@ def analytics_overview(
     total_revenue = sum(r.total or 0 for r in rows if r.state in COMPLETED_STATES)
     avg_order = int(total_revenue / completed) if completed else 0
 
+    # P&L: комиссия и налог из настроек
+    from database import SiteSetting, Product as _P
+    settings = {s.key: s.value for s in db.query(SiteSetting).all()}
+    kaspi_commission_pct = float(settings.get("kaspi_commission_pct", "8"))
+    tax_pct              = float(settings.get("tax_pct", "4"))
+
+    commission  = int(total_revenue * kaspi_commission_pct / 100)
+    tax         = int(total_revenue * tax_pct / 100)
+
+    # Себестоимость: сумма (qty * cost_price) по завершённым заказам
+    cost_total = 0
+    for r in rows:
+        if r.state not in COMPLETED_STATES:
+            continue
+        if r.product_id and r.quantity:
+            p_obj = db.query(_P).filter(_P.id == r.product_id).first()
+            if p_obj and p_obj.cost_price:
+                cost_total += int(r.quantity) * int(p_obj.cost_price)
+
+    gross_profit = total_revenue - commission - tax - cost_total
+
     return {
         "total_orders": total_orders,
         "total_revenue": total_revenue,
@@ -2758,6 +2779,12 @@ def analytics_overview(
         "completed": completed,
         "cancelled": cancelled,
         "conversion_rate": round(completed / total_orders * 100, 1) if total_orders else 0,
+        "commission": commission,
+        "commission_pct": kaspi_commission_pct,
+        "tax": tax,
+        "tax_pct": tax_pct,
+        "cost_total": cost_total,
+        "gross_profit": gross_profit,
     }
 
 

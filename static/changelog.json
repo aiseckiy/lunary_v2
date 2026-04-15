@@ -1,5 +1,10 @@
 [
   {
+    "hash": "13c8d81",
+    "date": "15.04.2026",
+    "message": "show_in_shop флаг, бренд капсом на product.html, превью URL картинки"
+  },
+  {
     "hash": "1c67752",
     "date": "15.04.2026",
     "message": "Добавить Kaspi Price Feed: публичный URL /api/kaspi/feed.xml с токен-защитой"

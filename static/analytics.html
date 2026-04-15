@@ -209,26 +209,31 @@ async function init() {
 async function loadKpi() {
   try {
     const d = await fetch('/api/analytics/overview' + dateParams()).then(r => r.json());
+    const profitColor = d.gross_profit >= 0 ? 'green' : 'red';
     document.getElementById('kpi-grid').innerHTML = `
       <div class="kpi">
         <div class="kpi-label">Всего заказов</div>
         <div class="kpi-value purple">${d.total_orders.toLocaleString('ru')}</div>
-        <div class="kpi-sub">в базе данных</div>
+        <div class="kpi-sub">${d.completed} выдано · ${d.cancelled} отменено</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Выручка</div>
         <div class="kpi-value green">${d.total_revenue.toLocaleString('ru')} ₸</div>
-        <div class="kpi-sub">${d.total_revenue.toLocaleString('ru')} ₸</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Средний чек</div>
-        <div class="kpi-value">${d.avg_order.toLocaleString('ru')} ₸</div>
-        <div class="kpi-sub">выполненные заказы</div>
+        <div class="kpi-sub">средний чек ${d.avg_order.toLocaleString('ru')} ₸</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Конверсия</div>
         <div class="kpi-value yellow">${d.conversion_rate}%</div>
-        <div class="kpi-sub">${d.completed} выдано · ${d.cancelled} отменено</div>
+        <div class="kpi-sub">выполненные / все заказы</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Прибыль</div>
+        <div class="kpi-value ${profitColor}">${d.gross_profit != null ? d.gross_profit.toLocaleString('ru') + ' ₸' : '—'}</div>
+        <div class="kpi-sub" style="font-size:11px">
+          −${(d.commission||0).toLocaleString('ru')} комиссия (${d.commission_pct}%)
+          · −${(d.tax||0).toLocaleString('ru')} налог (${d.tax_pct}%)
+          ${d.cost_total ? `· −${d.cost_total.toLocaleString('ru')} закуп` : ''}
+        </div>
       </div>
     `;
   } catch(e) {

@@ -3187,16 +3187,30 @@ def analytics_forecast(
     date_to: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Прогноз спроса по топ-20 товарам (линейная регрессия по неделям)"""
+    """Прогноз спроса: тренд + сезонность + волатильность + дни до нуля"""
     import numpy as np
-    from database import KaspiOrder
+    from database import KaspiOrder, Product as _P, Movement as _M
     from collections import defaultdict
+    from sqlalchemy import func
+    import datetime
 
     COMPLETED = {"Выдан", "ARCHIVE"}
     all_rows = db.query(KaspiOrder).filter(KaspiOrder.product_name.isnot(None)).all()
     rows = _filter_orders_by_date(
         [r for r in all_rows if r.state in COMPLETED], date_from, date_to
     )
+
+    # Все данные за всё время (для сезонности нужны прошлый год)
+    all_rows_full = [r for r in all_rows if r.state in COMPLETED]
+
+    # Текущие остатки
+    stocks_q = (
+        db.query(_P.name, func.coalesce(func.sum(_M.quantity), 0))
+        .outerjoin(_M, _M.product_id == _P.id)
+        .group_by(_P.name)
+        .all()
+    )
+    current_stock = {name: int(s) for name, s in stocks_q}
 
     # Сгруппировать по товару → по неделе
     by_product: dict = defaultdict(lambda: defaultdict(int))
@@ -3207,8 +3221,20 @@ def analytics_forecast(
         week = d.strftime("%Y-W%W")
         by_product[r.product_name][week] += r.quantity or 1
 
+    # Полная история по неделям (для сезонности)
+    full_by_product: dict = defaultdict(lambda: defaultdict(int))
+    for r in all_rows_full:
+        d = _parse_order_date(r.order_date)
+        if not d:
+            continue
+        week = d.strftime("%Y-W%W")
+        full_by_product[r.product_name][week] += r.quantity or 1
+
     # Топ-20 по суммарному количеству
     top_names = sorted(by_product.keys(), key=lambda n: sum(by_product[n].values()), reverse=True)[:20]
+
+    now = datetime.date.today()
+    cur_week_num = int(now.strftime("%W"))
 
     results = []
     for name in top_names:
@@ -3218,14 +3244,56 @@ def analytics_forecast(
             continue
         y = np.array([week_data[w] for w in weeks], dtype=float)
         x = np.arange(len(y))
-        # Линейная регрессия
+
+        # ── Линейный тренд ──────────────────────────────────────
         coeffs = np.polyfit(x, y, 1)
-        trend = float(coeffs[0])  # положительный = рост
-        # Прогноз на след. 4 недели
+        trend = float(coeffs[0])
         next_x = len(y) + np.arange(4)
-        forecast = [max(0, round(float(np.polyval(coeffs, xi)))) for xi in next_x]
-        # Скользящее среднее за 4 недели
+        forecast_linear = [max(0, float(np.polyval(coeffs, xi))) for xi in next_x]
+
+        # ── Скользящее среднее 4 нед ─────────────────────────────
         ma4 = float(np.mean(y[-4:])) if len(y) >= 4 else float(np.mean(y))
+
+        # ── Сезонность — сравниваем с теми же неделями год назад ──
+        full_data = full_by_product[name]
+        seasonal_factor = 1.0
+        seasonal_weeks_found = 0
+        for offset in range(4):
+            w_num = (cur_week_num + offset) % 52
+            key_this = f"{now.year}-W{w_num:02d}"
+            key_prev = f"{now.year - 1}-W{w_num:02d}"
+            val_prev = full_data.get(key_prev, 0)
+            val_this = full_data.get(key_this, 0)
+            if val_prev > 0:
+                seasonal_weeks_found += 1
+                seasonal_factor += val_this / val_prev
+        if seasonal_weeks_found > 0:
+            seasonal_factor = seasonal_factor / seasonal_weeks_found
+            seasonal_factor = max(0.3, min(3.0, seasonal_factor))  # ограничиваем
+
+        # ── Итоговый прогноз = тренд × сезонность ───────────────
+        forecast = [max(0, round(v * seasonal_factor)) for v in forecast_linear]
+
+        # ── Волатильность (CV = std/mean) ────────────────────────
+        mean_y = float(np.mean(y)) if len(y) > 0 else 1
+        std_y = float(np.std(y)) if len(y) > 1 else 0
+        cv = round(std_y / mean_y, 2) if mean_y > 0 else 0  # 0=стабильно, >1=хаос
+
+        # ── Дни до нуля ─────────────────────────────────────────
+        stock = current_stock.get(name, 0)
+        weekly_rate = ma4 * seasonal_factor if ma4 > 0 else 0
+        days_left = round((stock / weekly_rate) * 7) if weekly_rate > 0 else None
+
+        # ── Рекомендация ─────────────────────────────────────────
+        if days_left is not None and days_left < 14:
+            recommendation = "urgent"   # срочно заказать
+        elif days_left is not None and days_left < 30:
+            recommendation = "order"    # заказать
+        elif trend < -0.2 and cv < 0.5:
+            recommendation = "watch"    # спад — следить
+        else:
+            recommendation = "ok"
+
         results.append({
             "name": name,
             "weeks": weeks[-8:],
@@ -3234,9 +3302,20 @@ def analytics_forecast(
             "trend": round(trend, 2),
             "trend_dir": "up" if trend > 0.1 else ("down" if trend < -0.1 else "flat"),
             "ma4": round(ma4, 1),
+            "seasonal_factor": round(seasonal_factor, 2),
+            "volatility": cv,
+            "volatility_label": "стабильный" if cv < 0.4 else ("умеренный" if cv < 0.8 else "непредсказуемый"),
+            "stock": stock,
+            "days_left": days_left,
+            "recommendation": recommendation,
         })
 
-    results.sort(key=lambda x: sum(x["history"]), reverse=True)
+    results.sort(key=lambda x: (
+        0 if x["recommendation"] == "urgent" else
+        1 if x["recommendation"] == "order" else
+        2 if x["recommendation"] == "watch" else 3,
+        -sum(x["history"])
+    ))
     return {"products": results}
 
 

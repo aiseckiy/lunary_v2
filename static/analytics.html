@@ -53,14 +53,22 @@
 .bar-fill.gray { background:#52525b; }
 
 /* Forecast */
-.forecast-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.forecast-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
 .forecast-card { background:transparent; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
+.forecast-card.rec-urgent { border-color:#ef4444; background:#fff5f5; }
+.forecast-card.rec-order  { border-color:#f59e0b; background:#fffbeb; }
+.forecast-card.rec-watch  { border-color:#6366f1; background:#f5f3ff; }
 .fc-name { font-size:13px; font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fc-meta { font-size:11px; color:#9ca3af; margin-bottom:12px; }
+.fc-meta { font-size:11px; color:#9ca3af; margin-bottom:10px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
 .fc-trend { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:2px 8px; border-radius:20px; }
 .trend-up { background:#22c55e1a; color:#22c55e; }
 .trend-down { background:#ef44441a; color:#ef4444; }
 .trend-flat { background:#f3f4f6; color:#9ca3af; }
+.fc-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+.fc-badge-urgent { background:#ef4444; color:#fff; }
+.fc-badge-order  { background:#f59e0b; color:#fff; }
+.fc-badge-watch  { background:#6366f1; color:#fff; }
+.fc-badge-ok     { background:#f3f4f6; color:#9ca3af; }
 .fc-weeks { display:flex; gap:4px; align-items:flex-end; height:50px; margin-bottom:8px; }
 .fc-bar { flex:1; border-radius:3px 3px 0 0; min-height:3px; }
 .fc-bar.hist { background:#6366f1; }
@@ -452,16 +460,43 @@ async function loadForecast() {
       const trendIcon = p.trend_dir === 'up' ? '↑' : (p.trend_dir === 'down' ? '↓' : '→');
       const trendLabel = p.trend_dir === 'up' ? 'Рост' : (p.trend_dir === 'down' ? 'Спад' : 'Стабильно');
 
+      const recBadge = {
+        urgent: '<span class="fc-badge fc-badge-urgent">🔴 Срочно заказать</span>',
+        order:  '<span class="fc-badge fc-badge-order">🟡 Заказать</span>',
+        watch:  '<span class="fc-badge fc-badge-watch">🔵 Следить</span>',
+        ok:     '<span class="fc-badge fc-badge-ok">✓ Норм</span>',
+      }[p.recommendation] || '';
+
+      const seasonText = p.seasonal_factor !== 1.0
+        ? `<span title="Сезонный коэффициент на следующие 4 недели (на основе прошлого года)">
+            ${p.seasonal_factor > 1.1 ? '📈' : p.seasonal_factor < 0.9 ? '📉' : '〰️'}
+            сезон ×${p.seasonal_factor}
+           </span>` : '';
+
+      const volatilityColors = {стабильный:'#22c55e', умеренный:'#f59e0b', непредсказуемый:'#ef4444'};
+      const volColor = volatilityColors[p.volatility_label] || '#9ca3af';
+
+      const daysLeftHtml = p.days_left !== null
+        ? `<div class="fc-row" style="${p.days_left < 14 ? 'color:#ef4444;font-weight:600' : ''}">
+            <span class="fc-label">Остаток на складе</span>
+            <span class="fc-val">${p.stock} шт · ${p.days_left < 1 ? '⚠️ нет' : `~${p.days_left} дн`}</span>
+           </div>` : '';
+
       return `
-        <div class="forecast-card">
-          <div class="fc-name" title="${p.name}">${p.name}</div>
+        <div class="forecast-card rec-${p.recommendation}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+            <div class="fc-name" title="${p.name}" style="flex:1">${p.name}</div>
+            ${recBadge}
+          </div>
           <div class="fc-meta">
             <span class="fc-trend ${trendClass}">${trendIcon} ${trendLabel} (${p.trend > 0 ? '+' : ''}${p.trend}/нед)</span>
+            ${seasonText}
+            <span title="Волатильность спроса" style="color:${volColor};font-size:10px">⚡ ${p.volatility_label}</span>
           </div>
           <div class="fc-weeks">${histBars}${predBars}</div>
           <div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:8px">
             <span>← история (${p.weeks.length} нед)</span>
-            <span>прогноз (4 нед) →</span>
+            <span>прогноз с сезонностью →</span>
           </div>
           <div class="fc-row">
             <span class="fc-label">Ср./нед (4 нед)</span>
@@ -471,6 +506,7 @@ async function loadForecast() {
             <span class="fc-label">Прогноз след. 4 нед</span>
             <span class="fc-val">${p.forecast_4w.reduce((a,b)=>a+b,0)} шт</span>
           </div>
+          ${daysLeftHtml}
         </div>`;
     }).join('');
   } catch(e) {

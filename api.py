@@ -3286,9 +3286,10 @@ def analytics_revenue(
 def analytics_forecast(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
+    lead_time: int = 14,
     db: Session = Depends(get_db)
 ):
-    """Прогноз спроса: тренд + сезонность + волатильность + дни до нуля"""
+    """Прогноз спроса: тренд + сезонность + волатильность + дни до нуля + объём заказа"""
     import numpy as np
     from database import KaspiOrder, Product as _P, Movement as _M
     from collections import defaultdict
@@ -3386,14 +3387,25 @@ def analytics_forecast(
         days_left = round((stock / weekly_rate) * 7) if weekly_rate > 0 else None
 
         # ── Рекомендация ─────────────────────────────────────────
-        if days_left is not None and days_left < 14:
-            recommendation = "urgent"   # срочно заказать
-        elif days_left is not None and days_left < 30:
-            recommendation = "order"    # заказать
+        if days_left is not None and days_left < lead_time:
+            recommendation = "urgent"
+        elif days_left is not None and days_left < lead_time * 2:
+            recommendation = "order"
         elif trend < -0.2 and cv < 0.5:
-            recommendation = "watch"    # спад — следить
+            recommendation = "watch"
         else:
             recommendation = "ok"
+
+        # ── Объём заказа ─────────────────────────────────────────
+        # EOQ-like: покрыть lead_time + страховой запас (1.5× недельный спрос × CV)
+        order_qty = None
+        if weekly_rate > 0 and recommendation in ("urgent", "order"):
+            demand_during_lead = weekly_rate * (lead_time / 7)
+            safety_stock = weekly_rate * max(0.5, cv) * 1.5  # буфер под волатильность
+            reorder_point = demand_during_lead + safety_stock
+            # Заказываем на 4 недели вперёд плюс safety stock минус текущий остаток
+            target = weekly_rate * 4 + safety_stock
+            order_qty = max(0, round(target - stock))
 
         results.append({
             "name": name,
@@ -3409,6 +3421,8 @@ def analytics_forecast(
             "stock": stock,
             "days_left": days_left,
             "recommendation": recommendation,
+            "order_qty": order_qty,
+            "lead_time": lead_time,
         })
 
     results.sort(key=lambda x: (

@@ -10,8 +10,8 @@
 /* ── Stats ── */
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
 .stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
-.stat-label { font-size:11px; color:var(--text3); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
-.stat-value { font-size:28px; font-weight:800; color:var(--text); }
+.stat-label { font-size:11px; color:var(--text3); margin-bottom:6px; font-weight: var(--fw-semibold); text-transform:uppercase; letter-spacing:.05em; }
+.stat-value { font-size:28px; font-weight: var(--fw-extrabold); color:var(--text); }
 .stat-value.red { color:var(--red); }
 .stat-value.green { color:var(--green); }
 .stat-value.purple { color:var(--accent); }
@@ -20,14 +20,14 @@
 .search-input { flex:1; min-width:200px; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
 .search-input:focus { border-color:var(--accent); background:var(--surface); }
 .search-input::placeholder { color:var(--text3); }
-.btn-add { background:var(--text); color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+.btn-add { background:var(--text); color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
 .btn-add:hover { opacity:.85; }
-.sort-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 14px; font-size:14px; color:var(--text2); cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
+.sort-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 14px; font-size:14px; color:var(--text2); cursor:pointer; font-weight: var(--fw-medium); display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
 .sort-btn:hover { border-color:#d1d5db; color:var(--text); }
 .sort-btn:focus { outline:none; border-color:var(--accent); }
 /* ── Filter dropdowns ── */
 .filter-rows { margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; }
-.filter-drop-btn { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; color:var(--text2); cursor:pointer; white-space:nowrap; font-weight:500; display:inline-flex; align-items:center; gap:5px; transition:all .15s; position:relative; }
+.filter-drop-btn { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; color:var(--text2); cursor:pointer; white-space:nowrap; font-weight: var(--fw-medium); display:inline-flex; align-items:center; gap:5px; transition:all .15s; position:relative; }
 .filter-drop-btn:hover { border-color:#d1d5db; color:var(--text); }
 .filter-drop-btn.active { background:var(--text); border-color:var(--text); color:#fff; }
 #f-low.active { background:#fee2e2; border-color:var(--red); color:var(--red); }
@@ -35,7 +35,7 @@
 .fdrop-menu.open { display:block; }
 .fdrop-item { padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; color:var(--text); display:flex; align-items:center; gap:6px; }
 .fdrop-item:hover { background:var(--bg); }
-.fdrop-item.active { background:var(--text); color:#fff; font-weight:600; }
+.fdrop-item.active { background:var(--text); color:#fff; font-weight: var(--fw-semibold); }
 .fdrop-check { font-size:11px; opacity:0; width:14px; flex-shrink:0; }
 .fdrop-item.active .fdrop-check { opacity:1; }
 .fdrop-cnt { font-size:11px; opacity:.5; margin-left:auto; }
@@ -45,28 +45,28 @@
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }
 .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
-.card-name { font-size:14px; font-weight:600; line-height:1.4; flex:1; color:var(--text); }
-.card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight:600; }
+.card-name { font-size:14px; font-weight: var(--fw-semibold); line-height:1.4; flex:1; color:var(--text); }
+.card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight: var(--fw-semibold); }
 .badge-ok  { background:#dcfce7; color:var(--green); }
 .badge-low { background:#fee2e2; color:var(--red); }
 .card-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card-kaspi-sku { font-size:10px; color:#6366f1; font-family:monospace; margin-bottom:10px; opacity:.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card-bottom { display:flex; align-items:flex-end; justify-content:space-between; }
-.card-stock { font-size:28px; font-weight:800; }
+.card-stock { font-size:28px; font-weight: var(--fw-extrabold); }
 .card-stock.low { color:var(--red); }
 .card-stock.ok  { color:var(--green); }
 .card-unit { font-size:12px; color:var(--text3); margin-top:2px; }
 .card-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
-.card-tag { background:var(--bg); color:var(--text2); font-size:11px; padding:2px 8px; border-radius:6px; font-weight:500; }
+.card-tag { background:var(--bg); color:var(--text2); font-size:11px; padding:2px 8px; border-radius:6px; font-weight: var(--fw-medium); }
 .card-btn { background:var(--bg); border:none; border-radius:6px; padding:6px 10px; color:var(--text2); font-size:13px; cursor:pointer; }
 .card-btn:hover { background:var(--border); }
-.cat-header { font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin:20px 0 10px; grid-column:1/-1; }
+.cat-header { font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; font-weight: var(--fw-semibold); margin:20px 0 10px; grid-column:1/-1; }
 /* ── Tooltips ── */
 [data-tip] { position:relative; cursor:default; }
 [data-tip]::after {
   content: attr(data-tip);
   position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
-  background:#1f2937; color:#fff; font-size:11px; font-weight:500; line-height:1.4;
+  background:#1f2937; color:#fff; font-size:11px; font-weight: var(--fw-medium); line-height:1.4;
   padding:5px 9px; border-radius:7px; white-space:nowrap; pointer-events:none;
   opacity:0; transition:opacity .15s; z-index:999; max-width:220px; white-space:normal; text-align:center;
 }
@@ -79,9 +79,9 @@
 
 /* ── Pagination ── */
 .pagination { display:flex; align-items:center; justify-content:center; gap:6px; padding:16px 0; flex-wrap:wrap; }
-.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight: var(--fw-medium); color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
 .page-btn:hover { color:var(--text); }
-.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight: var(--fw-semibold); }
 .page-btn:disabled { opacity:.4; cursor:default; }
 .page-info { font-size:13px; color:var(--text3); padding:0 6px; }
 /* ── Modals ── */
@@ -89,27 +89,27 @@
 .overlay.open { display:flex; }
 .modal { background:var(--surface); border:1px solid var(--border); border-radius:18px; width:520px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.12); }
 .modal-header { padding:20px 20px 0; display:flex; justify-content:space-between; align-items:center; }
-.modal-title { font-size:17px; font-weight:700; color:var(--text); }
+.modal-title { font-size:17px; font-weight: var(--fw-bold); color:var(--text); }
 .modal-close { background:var(--bg); border:none; border-radius:50%; width:32px; height:32px; min-width:32px; min-height:32px; color:var(--text2); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
 .modal-close:hover { background:var(--border); }
 .modal-body { padding:20px; }
 .form-group { margin-bottom:14px; }
-.form-label { font-size:13px; color:var(--text2); margin-bottom:6px; display:block; font-weight:500; }
+.form-label { font-size:13px; color:var(--text2); margin-bottom:6px; display:block; font-weight: var(--fw-medium); }
 .form-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px; color:var(--text); font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
 .form-input:focus { border-color:var(--accent); background:var(--surface); }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .form-select { appearance:none; }
-.btn-submit { width:100%; background:var(--text); color:#fff; border:none; border-radius:10px; padding:13px; font-size:15px; font-weight:600; cursor:pointer; margin-top:6px; }
+.btn-submit { width:100%; background:var(--text); color:#fff; border:none; border-radius:10px; padding:13px; font-size:15px; font-weight: var(--fw-semibold); cursor:pointer; margin-top:6px; }
 .btn-submit:hover { opacity:.85; }
 .move-modal .stock-display { text-align:center; padding:16px 0; }
-.move-modal .big-num { font-size:52px; font-weight:800; color:var(--text); }
+.move-modal .big-num { font-size:52px; font-weight: var(--fw-extrabold); color:var(--text); }
 .move-modal .big-num.low { color:var(--red); }
 .move-modal .big-num.ok  { color:var(--green); }
 .qty-control { display:flex; align-items:center; gap:12px; margin:16px 0; }
 .qty-control button { width:44px; height:44px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text) !important; font-size:22px; cursor:pointer; }
 .qty-control input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text); font-size:18px; text-align:center; outline:none; font-family:inherit; }
 .move-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-.move-btn { padding:13px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
+.move-btn { padding:13px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight: var(--fw-semibold); }
 .move-btn.sale     { background:#fee2e2; color:var(--red); }
 .move-btn.income   { background:#dcfce7; color:var(--green); }
 .move-btn.writeoff { background:#ffedd5; color:var(--orange); }
@@ -117,15 +117,15 @@
 .btn-cancel-move { width:100%; background:var(--bg); color:var(--text2); border:none; border-radius:10px; padding:12px; cursor:pointer; font-size:14px; }
 .edit-modal .field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .tab-btns { display:flex; border-bottom:1px solid var(--border); margin-bottom:16px; }
-.tab-btn { padding:10px 16px; background:none; border:none; color:var(--text3); font-size:14px; cursor:pointer; border-bottom:2px solid transparent; font-weight:500; }
+.tab-btn { padding:10px 16px; background:none; border:none; color:var(--text3); font-size:14px; cursor:pointer; border-bottom:2px solid transparent; font-weight: var(--fw-medium); }
 .tab-btn.active { color:var(--text); border-bottom-color:var(--text); }
 .toast-container { position:fixed; bottom:env(safe-area-inset-bottom, 24px); bottom:calc(env(safe-area-inset-bottom, 0px) + 80px); left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-.toast { background:var(--text); color:#fff; padding:11px 18px; border-radius:10px; font-size:14px; font-weight:500; opacity:0; transition:opacity .3s; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+.toast { background:var(--text); color:#fff; padding:11px 18px; border-radius:10px; font-size:14px; font-weight: var(--fw-medium); opacity:0; transition:opacity .3s; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,.15); }
 .toast.show { opacity:1; }
 .toast.success { background:var(--green); }
 .toast.error   { background:var(--red); }
 .empty { grid-column:1/-1; text-align:center; padding:60px; color:var(--text3); font-size:15px; }
-.btn-ai { background:#ede9fe; color:var(--accent); border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.btn-ai { background:#ede9fe; color:var(--accent); border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight: var(--fw-semibold); cursor:pointer; white-space:nowrap; }
 .btn-ai:hover { background:#ddd6fe; }
 .btn-ai.loading { opacity:.6; pointer-events:none; }
 @media (max-width: 768px) {
@@ -183,10 +183,10 @@
       <option value="name-asc">А-Я Название</option>
     </select>
     <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
-    <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight:600">📦 Приёмка</button>
-    <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight:600">🛒 Закупки</button>
+    <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight: var(--fw-semibold)">📦 Приёмка</button>
+    <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight: var(--fw-semibold)">🛒 Закупки</button>
     <a class="sort-btn" id="btn-xlsx" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
-    <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:var(--purple);font-weight:600">✨ AI описания</button>
+    <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:var(--purple);font-weight: var(--fw-semibold)">✨ AI описания</button>
   </div>
 
   <!-- Строка 2: фильтры -->
@@ -216,7 +216,7 @@
         <span id="missing-label">Не заполнено</span> <span style="font-size:10px">▼</span>
       </button>
       <div class="fdrop-menu" id="missing-menu" style="min-width:210px">
-        <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color: var(--text3);text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
+        <div style="padding:8px 12px 4px;font-size:11px;font-weight: var(--fw-bold);color: var(--text3);text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
         <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
           <input type="checkbox" id="miss-price"   onchange="toggleMissing()" style="accent-color:var(--accent)"> Цены продажи
         </label>
@@ -245,7 +245,7 @@
   <!-- Баннер активного фильтра -->
   <div id="filter-banner" style="display:none;align-items:center;gap:12px;padding:8px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;margin-bottom:10px;font-size:13px;color:#1d4ed8">
     <span style="font-size:15px">🔍</span>
-    <span id="filter-banner-text" style="flex:1;font-weight:500"></span>
+    <span id="filter-banner-text" style="flex:1;font-weight: var(--fw-medium)"></span>
     <button onclick="resetAllFilters()" style="background:#dbeafe;border:1px solid #93c5fd;border-radius:6px;padding:3px 10px;font-size:12px;color:#1d4ed8;cursor:pointer;white-space:nowrap">✕ Сбросить фильтры</button>
   </div>
 
@@ -301,7 +301,7 @@
         <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:12px">Введи фактическое количество на складе</div>
         <div class="qty-control">
           <button onclick="chActual(-1)">−</button>
-          <input type="number" id="mm-actual" value="0" min="0" style="font-size:22px;font-weight:700">
+          <input type="number" id="mm-actual" value="0" min="0" style="font-size:22px;font-weight: var(--fw-bold)">
           <button onclick="chActual(1)">+</button>
         </div>
         <input type="text" id="mm-set-note" placeholder="Причина коррекции (необязательно)" style="width:100%;margin-bottom:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;background:var(--bg)">
@@ -432,7 +432,7 @@
       </div>
       <label style="display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer">
         <input type="checkbox" id="f-show-in-shop" style="width:17px;height:17px;accent-color:var(--accent)">
-        <span style="font-size:14px;font-weight:500">Показывать в магазине</span>
+        <span style="font-size:14px;font-weight: var(--fw-medium)">Показывать в магазине</span>
       </label>
       <button class="btn-submit" onclick="submitAdd()">✅ Добавить товар</button>
     </div>
@@ -511,13 +511,13 @@
         <datalist id="suppliers-list"></datalist>
       </div>
       <div class="form-group">
-        <label class="form-label">Kaspi SKU <span style="font-size:11px;color: var(--text3);font-weight:400">(для заказов)</span></label>
+        <label class="form-label">Kaspi SKU <span style="font-size:11px;color: var(--text3);font-weight: var(--fw-normal)">(для заказов)</span></label>
         <div id="em-kaspi-sku-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
         <button type="button" onclick="addKaspiSkuField()" style="background:none;border:1px dashed var(--border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--accent);cursor:pointer;width:100%">+ Добавить SKU</button>
       </div>
       <label style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:4px">
         <input type="checkbox" id="em-show-in-shop" style="width:17px;height:17px;accent-color:var(--accent);flex-shrink:0">
-        <span style="font-size:14px;font-weight:500">Показывать в магазине</span>
+        <span style="font-size:14px;font-weight: var(--fw-medium)">Показывать в магазине</span>
         <span style="font-size:12px;color:var(--text3);margin-left:auto">lunary.kz/shop</span>
       </label>
       <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
@@ -903,8 +903,8 @@ function productCard(p) {
       ${p.kaspi_sku ? `<div class="card-kaspi-sku">${p.kaspi_sku}</div>` : ''}
       <div class="card-bottom">
         <div>
-          <div class="card-stock ${p.low?'low':'ok'}" data-tip="${statusTip}">${p.stock} <span style="font-size:14px;font-weight:500;color: var(--text3)">${p.unit}</span></div>
-          ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${margin !== null ? ` <span style="color:var(--green);font-size:11px;font-weight:500" data-tip="${marginTip}">+${margin}%</span>` : (p.price && !p.cost_price ? ` <span style="color:#d1d5db;font-size:11px" data-tip="Закупочная цена не указана">—%</span>` : '')}</div>` : ''}
+          <div class="card-stock ${p.low?'low':'ok'}" data-tip="${statusTip}">${p.stock} <span style="font-size:14px;font-weight: var(--fw-medium);color: var(--text3)">${p.unit}</span></div>
+          ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${margin !== null ? ` <span style="color:var(--green);font-size:11px;font-weight: var(--fw-medium)" data-tip="${marginTip}">+${margin}%</span>` : (p.price && !p.cost_price ? ` <span style="color:#d1d5db;font-size:11px" data-tip="Закупочная цена не указана">—%</span>` : '')}</div>` : ''}
         </div>
         <button class="card-btn" onclick="event.stopPropagation();openMoveModal(${p.id})" title="Движение склада">⇅</button>
       </div>
@@ -1088,12 +1088,12 @@ function renderReceiptList() {
   list.innerHTML = receiptItems.map(item => `
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
+        <div style="font-size:13px;font-weight: var(--fw-semibold);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
         <div style="font-size:11px;color:var(--text3);font-family:monospace">${item.sku ? item.sku + ' · ' : ''}было ${item.currentStock} шт</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         <button onclick="receiptChQty(${item.id},-1)" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;color:var(--text)">−</button>
-        <input type="number" value="${item.qty}" min="1" onchange="receiptSetQty(${item.id},this.value)" style="width:52px;text-align:center;padding:4px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight:700;color:var(--text);background:var(--bg)">
+        <input type="number" value="${item.qty}" min="1" onchange="receiptSetQty(${item.id},this.value)" style="width:52px;text-align:center;padding:4px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight: var(--fw-bold);color:var(--text);background:var(--bg)">
         <button onclick="receiptChQty(${item.id},1)" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;color:var(--text)">+</button>
         <button onclick="removeFromReceipt(${item.id})" style="width:28px;height:28px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:14px;color:var(--red)">✕</button>
       </div>
@@ -1170,15 +1170,15 @@ function renderPurchases(items) {
     <div style="font-size:13px;color:var(--text3);margin-bottom:12px">Товаров ниже минимума: <b style="color:var(--red)">${items.length}</b></div>
     ${Object.entries(groups).map(([supplier, list]) => `
       <div style="margin-bottom:16px">
-        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">🏭 ${supplier}</div>
+        <div style="font-size:12px;font-weight: var(--fw-bold);color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">🏭 ${supplier}</div>
         ${list.map(it => `
           <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}</div>
+              <div style="font-size:13px;font-weight: var(--fw-semibold);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}</div>
               <div style="font-size:11px;color:var(--text3);font-family:monospace">${it.supplier_article ? it.supplier_article + (it.brand ? ' · ' : '') : ''}${it.brand || ''}</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:13px;font-weight:700;color:var(--red)">${it.stock} ${it.unit}</div>
+              <div style="font-size:13px;font-weight: var(--fw-bold);color:var(--red)">${it.stock} ${it.unit}</div>
               <div style="font-size:11px;color:var(--text3)">мин: ${it.min_stock}</div>
             </div>
           </div>`).join('')}
@@ -1508,7 +1508,7 @@ function filterBrandList(q) {
   if (!filtered.length && !q) { box.style.display = 'none'; return; }
   const rows = filtered.map(b => `<div class="fdrop-item" onmousedown="pickBrand('${b.replace(/'/g,"&#39;")}')">${b}</div>`).join('');
   const addRow = q && !brands.some(b => b.toLowerCase() === q.toLowerCase())
-    ? `<div class="fdrop-item" style="color:#6366f1;font-weight:600" onmousedown="pickBrand('${q.replace(/'/g,"&#39;")}')">+ Добавить «${q}»</div>`
+    ? `<div class="fdrop-item" style="color:#6366f1;font-weight: var(--fw-semibold)" onmousedown="pickBrand('${q.replace(/'/g,"&#39;")}')">+ Добавить «${q}»</div>`
     : '';
   box.innerHTML = rows + addRow;
   box.style.display = (rows || addRow) ? 'block' : 'none';

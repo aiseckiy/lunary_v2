@@ -8,27 +8,27 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 .header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
-.header h1 { font-size: 17px; font-weight: 700; }
+.header h1 { font-size: 17px; font-weight: var(--fw-bold); }
 
 .container { max-width: 900px; margin: 32px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
 
-.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); padding: 4px 0; }
+.section-title { font-size: 12px; font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .5px; color: var(--text2); padding: 4px 0; }
 
 .file-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
 .file-card.missing { opacity: .6; }
 .file-icon { font-size: 28px; flex-shrink: 0; }
 .file-info { flex: 1; min-width: 0; }
-.file-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-name { font-size: 14px; font-weight: var(--fw-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .file-meta { font-size: 12px; color: var(--text3); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
 .file-meta span { display: flex; align-items: center; gap: 3px; }
-.type-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 5px; }
+.type-badge { display: inline-block; font-size: 11px; font-weight: var(--fw-semibold); padding: 2px 9px; border-radius: 20px; margin-top: 5px; }
 .badge-kaspi-active  { background: #dbeafe; color: var(--blue-text, #1e40af); }
 .badge-kaspi-archive { background: #ede9fe; color: var(--purple-text, #5b21b6); }
 .badge-price-list    { background: #fef9c3; color: #92400e; }
 .badge-pricelist-ref { background: #d1fae5; color: #065f46; }
 
 .file-actions { display: flex; gap: 8px; flex-shrink: 0; }
-.btn { padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.btn { padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: var(--fw-semibold); transition: all .15s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
 .btn-outline:hover { background: #f9fafb; }
 .btn-danger  { background: #fff; color: #ef4444; border: 1px solid #fca5a5; }

@@ -8,21 +8,21 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 .header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
-.header h1 { font-size: 17px; font-weight: 700; }
+.header h1 { font-size: 17px; font-weight: var(--fw-bold); }
 .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #ede9fe; color: var(--purple-text, #5b21b6); }
+.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: var(--fw-semibold); background: #ede9fe; color: var(--purple-text, #5b21b6); }
 
 .container { max-width: 960px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
 
 /* Загрузка файла */
 .card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-.card-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: var(--fw-bold); margin-bottom: 12px; }
 .upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 14px 20px; cursor: pointer; transition: all .15s; color: var(--text3); font-size: 13px; flex: 1; min-width: 200px; text-align: center; }
 .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: #f5f3ff; color: var(--accent); }
 .drop-zone.has-file { border-color: var(--green); background: #f0fdf4; color: #065f46; }
 .drop-zone input[type=file] { display: none; }
-.btn { padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.btn { padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: var(--fw-semibold); transition: all .15s; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-dark); }
 .btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
@@ -35,7 +35,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 /* Файлы в базе */
 .files-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .file-tag { display: flex; align-items: center; gap: 6px; background: #f3f4f6; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 12px; }
-.file-tag-name { font-weight: 600; }
+.file-tag-name { font-weight: var(--fw-semibold); }
 .file-tag-count { color: var(--text3); }
 .file-tag-date { color: var(--text3); font-size: 11px; }
 .file-tag-del { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 14px; line-height: 1; padding: 0 2px; }
@@ -50,13 +50,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 /* Таблица */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); background: #f9fafb; border-bottom: 1px solid var(--border); white-space: nowrap; }
+thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .5px; color: var(--text2); background: #f9fafb; border-bottom: 1px solid var(--border); white-space: nowrap; }
 tbody tr { border-bottom: 1px solid #f3f4f6; }
 tbody tr:hover { background: #f9fafb; }
 tbody td { padding: 10px 12px; vertical-align: top; }
-.td-name { font-weight: 500; line-height: 1.4; }
+.td-name { font-weight: var(--fw-medium); line-height: 1.4; }
 .td-article { font-family: monospace; font-size: 12px; color: var(--accent); }
-.td-price { font-weight: 700; color: var(--green); white-space: nowrap; }
+.td-price { font-weight: var(--fw-bold); color: var(--green); white-space: nowrap; }
 .td-supplier { font-size: 12px; color: var(--text2); }
 .td-file { font-size: 11px; color: var(--text3); }
 .empty { text-align: center; padding: 60px 20px; color: var(--text3); }
@@ -67,7 +67,7 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 .assign-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; }
 .assign-modal.open { display:flex; }
 .assign-box { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
-.assign-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.assign-title { font-size:15px; font-weight: var(--fw-bold); margin-bottom:4px; }
 .assign-ref { font-size:12px; color: var(--text2); margin-bottom:16px; padding:8px 12px; background:#f9fafb; border-radius:8px; line-height:1.5; }
 .assign-search { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
 .assign-search:focus { border-color:var(--accent); }
@@ -75,7 +75,7 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 .assign-item { padding:10px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer; transition:background .1s; }
 .assign-item:last-child { border-bottom:none; }
 .assign-item:hover { background:#f5f3ff; }
-.assign-item-name { font-size:13px; font-weight:500; }
+.assign-item-name { font-size:13px; font-weight: var(--fw-medium); }
 .assign-item-meta { font-size:11px; color: var(--text3); margin-top:2px; display:flex; gap:8px; }
 .assign-item.linked { background:#f0fdf4; }
 .assign-item.linked:hover { background:#dcfce7; }
@@ -86,7 +86,7 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 .btn-assign-row { background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-size:11px; color:var(--accent); cursor:pointer; white-space:nowrap; }
 .btn-assign-row:hover { background:#f5f3ff; border-color:#ede9fe; }
 
-.badge-new { display:inline-block; background:#dcfce7; color:#166534; font-size:10px; font-weight:700; padding:1px 6px; border-radius:8px; margin-left:4px; }
+.badge-new { display:inline-block; background:#dcfce7; color:#166534; font-size:10px; font-weight: var(--fw-bold); padding:1px 6px; border-radius:8px; margin-left:4px; }
 .highlight { background: #fef08a; border-radius: 2px; padding: 0 1px; }
 .pagination { display: flex; gap: 8px; align-items: center; padding: 14px 0 4px; flex-wrap: wrap; }
 .page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; font-family: inherit; }
@@ -97,19 +97,19 @@ tbody td { padding: 10px 12px; vertical-align: top; }
 
 /* Вкладки */
 .tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; }
-.tab { padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.tab { padding: 10px 20px; font-size: 14px; font-weight: var(--fw-semibold); cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* Таблица проверки цен */
-.diff-up   { color: #dc2626; font-weight: 700; }
-.diff-down { color: #16a34a; font-weight: 700; }
+.diff-up   { color: #dc2626; font-weight: var(--fw-bold); }
+.diff-down { color: #16a34a; font-weight: var(--fw-bold); }
 .diff-same { color: var(--text3); }
 .no-match  { color: var(--text3); font-style: italic; }
-.pct-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+.pct-badge { display: inline-block; font-size: 11px; font-weight: var(--fw-bold); padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
 .pct-up   { background: #fee2e2; color: #991b1b; }
 .pct-down { background: #d1fae5; color: #065f46; }
 .pc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
-.pc-filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+.pc-filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: var(--fw-semibold); cursor: pointer; }
 .pc-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .pc-stat { font-size: 13px; color: var(--text2); margin-left: auto; }
 </style>
@@ -480,7 +480,7 @@ function renderPriceCheck() {
       <td class="td-article">${r.article}</td>
       <td class="td-supplier">${r.supplier}</td>
       <td class="td-price">${refPriceStr}</td>
-      <td style="font-weight:500">${curPriceStr}</td>
+      <td style="font-weight: var(--fw-medium)">${curPriceStr}</td>
       <td>${diffCell}</td>
       <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${kaspiLink}</td>
     </tr>`;
@@ -557,7 +557,7 @@ async function doAssign(kaspiId, kaspiName) {
     closeAssign();
     // Показать уведомление
     const msg = document.createElement('div');
-    msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2)';
+    msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight: var(--fw-semibold);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2)';
     msg.textContent = `✅ Привязано к «${kaspiName}»`;
     document.body.appendChild(msg);
     setTimeout(() => msg.remove(), 3000);
@@ -585,11 +585,11 @@ async function doAssign(kaspiId, kaspiName) {
       <button onclick="closeAssign()" style="background:none;border:none;font-size:20px;cursor:pointer;color: var(--text3);line-height:1;padding:0">×</button>
     </div>
     <div class="assign-ref">
-      <div style="font-weight:600;font-size:13px" id="assign-ref-name"></div>
+      <div style="font-weight: var(--fw-semibold);font-size:13px" id="assign-ref-name"></div>
       <div style="font-size:11px;color: var(--text3);margin-top:3px" id="assign-ref-meta"></div>
     </div>
 
-    <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Что перенести:</div>
+    <div style="font-size:12px;font-weight: var(--fw-semibold);color:#374151;margin-bottom:6px">Что перенести:</div>
     <div class="assign-fields">
       <label class="assign-field-chk"><input type="checkbox" id="af-cost_price" checked> 💰 Цена закупа</label>
       <label class="assign-field-chk"><input type="checkbox" id="af-supplier" checked> 🏭 Поставщик</label>
@@ -597,7 +597,7 @@ async function doAssign(kaspiId, kaspiName) {
       <label class="assign-field-chk"><input type="checkbox" id="af-name"> 📝 Название</label>
     </div>
 
-    <div style="font-size:12px;font-weight:600;color:#374151;margin:14px 0 6px">Найти карточку в системе:</div>
+    <div style="font-size:12px;font-weight: var(--fw-semibold);color:#374151;margin:14px 0 6px">Найти карточку в системе:</div>
     <input class="assign-search" id="assign-search" type="text" placeholder="Введи название товара Kaspi..." oninput="onAssignSearch()">
     <div class="assign-results" id="assign-results">
       <div class="assign-empty">Начни вводить название товара</div>

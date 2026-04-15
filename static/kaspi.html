@@ -11,8 +11,8 @@
 /* Stats */
 .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
 .stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
-.stat-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; margin-bottom:6px; }
-.stat-value { font-size:28px; font-weight:800; color:var(--text); word-break:break-all; overflow-wrap:break-word; line-height:1.1; }
+.stat-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight: var(--fw-semibold); margin-bottom:6px; }
+.stat-value { font-size:28px; font-weight: var(--fw-extrabold); color:var(--text); word-break:break-all; overflow-wrap:break-word; line-height:1.1; }
 @media (max-width:600px) { .stat-value { font-size:18px; } }
 .stat-value.purple { color:var(--accent); }
 .stat-value.green { color:var(--green); }
@@ -21,16 +21,16 @@
 /* Status tabs */
 .status-tabs { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
 .status-tabs::-webkit-scrollbar { display:none; }
-.stab { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:5px; }
+.stab { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; font-weight: var(--fw-medium); color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:5px; }
 .stab:hover { border-color:var(--border); color:var(--text); }
 .stab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-.stab .cnt { background:rgba(0,0,0,.07); border-radius:10px; padding:1px 7px; font-size:11px; font-weight:700; }
+.stab .cnt { background:rgba(0,0,0,.07); border-radius:10px; padding:1px 7px; font-size:11px; font-weight: var(--fw-bold); }
 .stab.active .cnt { background:rgba(255,255,255,.25); }
 
 /* Orders header */
 .orders-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.orders-count { font-size:14px; font-weight:600; color:var(--text); }
-.orders-sum { font-size:14px; color:var(--green); font-weight:700; }
+.orders-count { font-size:14px; font-weight: var(--fw-semibold); color:var(--text); }
+.orders-sum { font-size:14px; color:var(--green); font-weight: var(--fw-bold); }
 .orders-info { display:flex; align-items:center; gap:12px; }
 
 /* Order cards */
@@ -41,11 +41,11 @@
 .order-card.order-cancelled { border-left-color:#ef4444; }
 .order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
 .order-left { flex:1; min-width:0; }
-.order-id { font-size:14px; font-weight:700; color:var(--text); }
+.order-id { font-size:14px; font-weight: var(--fw-bold); color:var(--text); }
 .order-customer { font-size:13px; color:var(--text2); margin-top:2px; }
 .order-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
-.order-total-top { font-size:16px; font-weight:800; color:var(--text); }
-.order-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
+.order-total-top { font-size:16px; font-weight: var(--fw-extrabold); color:var(--text); }
+.order-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight: var(--fw-semibold); white-space:nowrap; }
 .badge-accepted { background:#ede9fe; color:var(--accent); }
 .badge-completed { background:#dcfce7; color:var(--green); }
 .badge-cancelled { background:#fee2e2; color:var(--red); }
@@ -63,17 +63,17 @@
 .pmodal-overlay.open { display:flex; }
 .pmodal { background:#fff; border-radius:14px; width:100%; max-width:400px; padding:24px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
 .pmodal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
-.pmodal-name { font-size:16px; font-weight:700; color:var(--text); line-height:1.3; flex:1; padding-right:12px; }
+.pmodal-name { font-size:16px; font-weight: var(--fw-bold); color:var(--text); line-height:1.3; flex:1; padding-right:12px; }
 .pmodal-close { font-size:20px; color:var(--text3); cursor:pointer; line-height:1; }
 .pmodal-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border2); font-size:14px; }
 .pmodal-row:last-child { border-bottom:none; }
 .pmodal-label { color:var(--text2); }
-.pmodal-val { font-weight:600; color:var(--text); }
-.pmodal-stock { font-size:28px; font-weight:800; }
+.pmodal-val { font-weight: var(--fw-semibold); color:var(--text); }
+.pmodal-stock { font-size:28px; font-weight: var(--fw-extrabold); }
 .pmodal-stock.ok { color:var(--green); }
 .pmodal-stock.low { color:var(--red); }
 .item-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-top:1px; }
-.item-qty { font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap; }
+.item-qty { font-size:12px; font-weight: var(--fw-bold); color:var(--accent); white-space:nowrap; }
 .item-price { font-size:12px; color:var(--text3); white-space:nowrap; }
 
 .order-address { font-size:12px; color:var(--text2); margin-top:8px; }
@@ -88,24 +88,24 @@
 
 /* Pagination */
 .pagination { display:flex; align-items:center; justify-content:center; gap:6px; padding:20px 0 8px; flex-wrap:wrap; }
-.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 13px; font-size:13px; font-weight: var(--fw-medium); color:var(--text2); cursor:pointer; transition:all .15s; font-family:inherit; }
 .page-btn:hover { border-color:var(--border); color:var(--text); }
-.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight: var(--fw-semibold); }
 .page-btn:disabled { opacity:.4; cursor:default; }
 .page-info { font-size:13px; color:var(--text3); padding:0 6px; }
 
 /* Sync log */
 .sync-log-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; margin-top:28px; }
-.sync-log-title { font-size:15px; font-weight:700; margin-bottom:14px; color:var(--text); }
+.sync-log-title { font-size:15px; font-weight: var(--fw-bold); margin-bottom:14px; color:var(--text); }
 .sync-log-table { width:100%; border-collapse:collapse; font-size:13px; }
-.sync-log-table th { text-align:left; padding:6px 10px; font-size:11px; color:var(--text3); border-bottom:2px solid var(--border); font-weight:600; white-space:nowrap; }
+.sync-log-table th { text-align:left; padding:6px 10px; font-size:11px; color:var(--text3); border-bottom:2px solid var(--border); font-weight: var(--fw-semibold); white-space:nowrap; }
 .sync-log-table td { padding:7px 10px; border-bottom:1px solid var(--border2); vertical-align:middle; }
 .sync-log-table tr:last-child td { border-bottom:none; }
 .sync-log-table tr.log-error td { color:var(--red); }
-.log-num { font-weight:700; color:var(--accent); }
-.log-added { color:var(--green); font-weight:600; }
-.log-return { color:var(--orange); font-weight:600; }
-.log-deducted { color:var(--accent); font-weight:600; }
+.log-num { font-weight: var(--fw-bold); color:var(--accent); }
+.log-added { color:var(--green); font-weight: var(--fw-semibold); }
+.log-return { color:var(--orange); font-weight: var(--fw-semibold); }
+.log-deducted { color:var(--accent); font-weight: var(--fw-semibold); }
 .error-box { background:#fee2e2; border:1px solid #fca5a5; border-radius:12px; padding:16px; color:var(--red); font-size:14px; }
 @media (max-width: 768px) {
   .order-card { padding: 14px !important; }
@@ -147,7 +147,7 @@
   <!-- Прогресс импорта истории -->
   <div id="import-progress-box" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div style="font-size:14px;font-weight:600;color:#166534">📥 Импорт истории заказов</div>
+      <div style="font-size:14px;font-weight: var(--fw-semibold);color:#166534">📥 Импорт истории заказов</div>
       <button onclick="stopImport()" style="background:#ef44441a;border:1px solid #ef444440;color:#ef4444;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer">⏹ Остановить</button>
     </div>
     <div style="background:#dcfce7;border-radius:6px;height:8px;margin-bottom:8px;overflow:hidden">
@@ -483,7 +483,7 @@ async function openPModal(id) {
       ${p.price ? `<div class="pmodal-row"><span class="pmodal-label">Цена</span><span class="pmodal-val">${Number(p.price).toLocaleString('ru')} ₸</span></div>` : ''}
       ${p.min_stock != null ? `<div class="pmodal-row"><span class="pmodal-label">Мин. остаток</span><span class="pmodal-val">${p.min_stock}</span></div>` : ''}
       <div style="margin-top:16px">
-        <a href="/admin?open=${p.id}" style="display:block;width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;text-align:center;text-decoration:none">✏️ Редактировать карточку</a>
+        <a href="/admin?open=${p.id}" style="display:block;width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight: var(--fw-semibold);text-align:center;text-decoration:none">✏️ Редактировать карточку</a>
       </div>
     `;
   } catch(e) {

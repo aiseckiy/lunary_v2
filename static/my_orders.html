@@ -10,17 +10,17 @@
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 .store-header { background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
 .header-inner { max-width:800px; margin:0 auto; padding:0 20px; height:60px; display:flex; align-items:center; gap:16px; }
-.header-logo { font-size:20px; font-weight:700; color:var(--accent); letter-spacing:-.5px; text-decoration:none; }
+.header-logo { font-size:20px; font-weight: var(--fw-bold); color:var(--accent); letter-spacing:-.5px; text-decoration:none; }
 .header-back { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text2); text-decoration:none; margin-left:4px; }
 .header-back:hover { color:var(--text); }
 .container { max-width:800px; margin:0 auto; padding:32px 20px; }
-.page-title { font-size:22px; font-weight:700; margin-bottom:24px; }
+.page-title { font-size:22px; font-weight: var(--fw-bold); margin-bottom:24px; }
 
 .order-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
 .order-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
-.order-id { font-size:15px; font-weight:700; }
+.order-id { font-size:15px; font-weight: var(--fw-bold); }
 .order-date { font-size:13px; color:var(--text3); }
-.badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight: var(--fw-semibold); }
 .badge-new       { background:#fef3c7; color:#b45309; }
 .badge-confirmed { background:#dbeafe; color:#1d4ed8; }
 .badge-ready     { background:#d1fae5; color:#065f46; }
@@ -29,10 +29,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .order-items-list { margin-bottom:14px; }
 .order-item-row { display:flex; justify-content:space-between; font-size:14px; padding:5px 0; border-bottom:1px solid var(--bg); }
 .order-item-row:last-child { border-bottom:none; }
-.order-total { display:flex; justify-content:space-between; font-size:15px; font-weight:700; padding-top:12px; border-top:1px solid var(--border); }
+.order-total { display:flex; justify-content:space-between; font-size:15px; font-weight: var(--fw-bold); padding-top:12px; border-top:1px solid var(--border); }
 .empty-state { text-align:center; padding:60px 20px; color:var(--text3); }
 .empty-state .icon { font-size:56px; margin-bottom:14px; }
-.btn-shop { display:inline-block; margin-top:16px; padding:12px 28px; background:var(--accent); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; }
+.btn-shop { display:inline-block; margin-top:16px; padding:12px 28px; background:var(--accent); color:#fff; border-radius:12px; text-decoration:none; font-weight: var(--fw-semibold); font-size:15px; }
 </style>
 </head>
 <body>

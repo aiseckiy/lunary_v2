@@ -10,11 +10,11 @@
 body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
 
 .header { padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
-.header h1 { font-size:22px; font-weight:800; }
+.header h1 { font-size:22px; font-weight: var(--fw-extrabold); }
 .header p { font-size:12px; color: var(--text3); }
 
 .tabs { display:flex; border-bottom:1px solid var(--border); }
-.tab { flex:1; padding:12px; text-align:center; font-size:14px; font-weight:500; color: var(--text3); cursor:pointer; border-bottom:2px solid transparent; transition:.2s; }
+.tab { flex:1; padding:12px; text-align:center; font-size:14px; font-weight: var(--fw-medium); color: var(--text3); cursor:pointer; border-bottom:2px solid transparent; transition:.2s; }
 .tab.active { color:#6366f1; border-bottom-color:#6366f1; }
 
 /* СКАНЕР */
@@ -22,7 +22,7 @@ body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMa
 .scanner-section.active { display:block; }
 #reader { width:100%; max-width:400px; margin:0 auto 12px; border-radius:12px; overflow:hidden; }
 .scan-hint { text-align:center; color: var(--text3); font-size:13px; margin-bottom:16px; }
-.btn-start { width:100%; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; }
+.btn-start { width:100%; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:10px 18px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; }
 .btn-start:active { opacity:.85; }
 
 /* РУЧНОЙ ВВОД */
@@ -35,9 +35,9 @@ body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMa
 .search-results { margin-top:8px; }
 .result-item { background:#fff; border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:8px; cursor:pointer; }
 .result-item:active { border-color:#6366f1; }
-.result-name { font-size:14px; font-weight:500; }
+.result-name { font-size:14px; font-weight: var(--fw-medium); }
 .result-meta { font-size:12px; color: var(--text3); margin-top:4px; }
-.result-stock { font-size:16px; font-weight:700; }
+.result-stock { font-size:16px; font-weight: var(--fw-bold); }
 .result-stock.low { color:#ef4444; }
 .result-stock.ok { color:#22c55e; }
 
@@ -45,9 +45,9 @@ body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMa
 .product-card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; display:none; }
 .product-card.show { display:block; }
 .product-card.low { border-color:#ef4444; }
-.p-name { font-size:16px; font-weight:600; margin-bottom:4px; }
+.p-name { font-size:16px; font-weight: var(--fw-semibold); margin-bottom:4px; }
 .p-sku { font-size:12px; color: var(--text3); font-family:monospace; margin-bottom:14px; }
-.p-stock-big { font-size:28px; font-weight:800; line-height:1; margin-bottom:4px; }
+.p-stock-big { font-size:28px; font-weight: var(--fw-extrabold); line-height:1; margin-bottom:4px; }
 .p-unit { font-size:13px; color: var(--text3); margin-bottom:18px; }
 
 .qty-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; width:100%; }
@@ -56,7 +56,7 @@ body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMa
 .qty-input { flex:1; min-width:0; background:#f3f4f6; border:1px solid var(--border); border-radius:8px; padding:10px 6px; color:#fff; font-size:16px; text-align:center; outline:none; }
 
 .actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-.act-btn { padding:10px 8px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
+.act-btn { padding:10px 8px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight: var(--fw-semibold); }
 .act-sale { background:#ef44441a; color:#ef4444; }
 .act-income { background:#22c55e1a; color:#22c55e; }
 .act-writeoff { background:#f9731620; color:#f97316; }
@@ -64,7 +64,7 @@ body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMa
 .btn-reset { width:100%; background:#f3f4f6; color: var(--text2); border:none; border-radius:10px; padding:12px; font-size:14px; cursor:pointer; }
 
 /* Уведомление */
-.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; transition:opacity .3s; z-index:999; pointer-events:none; white-space:nowrap; }
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight: var(--fw-semibold); opacity:0; transition:opacity .3s; z-index:999; pointer-events:none; white-space:nowrap; }
 .toast.show { opacity:1; }
 .toast.error { background:#ef4444; }
 
@@ -89,7 +89,7 @@ body { background:#f4f4f5; color: var(--text); font-family:-apple-system,BlinkMa
 <div class="main-content"><div class="page-container" style="max-width:600px">
 
 <div style="margin-bottom:16px">
-  <div style="font-size:22px;font-weight:800">📷 Сканер</div>
+  <div style="font-size:22px;font-weight: var(--fw-extrabold)">📷 Сканер</div>
   <div style="font-size:13px;color: var(--text3)" id="status-text-desk">Готов к работе</div>
 </div>
 
@@ -312,7 +312,7 @@ function showNotFound(code) {
   wrap.innerHTML = `
     <div style="background:#ef44441a;border:1px solid #ef4444;border-radius:14px;padding:20px;margin-bottom:14px;text-align:center">
       <div style="font-size:28px;margin-bottom:8px">❌</div>
-      <div style="font-weight:600;margin-bottom:4px">Штрихкод не найден</div>
+      <div style="font-weight: var(--fw-semibold);margin-bottom:4px">Штрихкод не найден</div>
       <div style="font-size:13px;color: var(--text3);font-family:monospace;margin-bottom:16px">${code}</div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
         <button onclick="retryCamera()" style="background:#f3f4f6;color: var(--text);border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer">🔄 Сканировать снова</button>

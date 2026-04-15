@@ -9,9 +9,9 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 
 .header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
-.header h1 { font-size: 17px; font-weight: 700; }
+.header h1 { font-size: 17px; font-weight: var(--fw-bold); }
 .stats-chips { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; align-items: center; }
-.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: var(--fw-semibold); }
 .chip-blue  { background: #ede9fe; color: var(--purple-text, #5b21b6); }
 .chip-green { background: #d1fae5; color: #065f46; }
 .chip-red   { background: #fee2e2; color: #991b1b; }
@@ -20,7 +20,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .search-box { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; width: 240px; }
 .search-box:focus { border-color: var(--accent); }
 select.filter { padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; background: #fff; }
-.btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; }
+.btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: var(--fw-semibold); transition: all .15s; }
 .btn-green   { background: var(--green); color: #fff; }
 .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
 .btn-outline:hover { background: #f9fafb; }
@@ -38,12 +38,12 @@ select.filter { padding: 7px 10px; border: 1px solid var(--border); border-radiu
 .verify-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--green); flex-shrink: 0; }
 
 .p-info { flex: 1; min-width: 0; }
-.p-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-name { font-size: 13px; font-weight: var(--fw-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-sub  { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
 /* Поля-тэги */
 .fields { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
-.field-tag { font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 8px; white-space: nowrap; }
+.field-tag { font-size: 12px; font-weight: var(--fw-medium); padding: 3px 9px; border-radius: 8px; white-space: nowrap; }
 .ft-qty     { background: #ede9fe; color: var(--purple-text, #5b21b6); }
 .ft-price   { background: #d1fae5; color: #065f46; }
 .ft-article { background: #dbeafe; color: var(--blue-text, #1e40af); font-family: monospace; }
@@ -59,7 +59,7 @@ select.filter { padding: 7px 10px; border: 1px solid var(--border); border-radiu
 .ref-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; padding:20px; }
 .ref-modal.open { display:flex; }
 .ref-box { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:500px; box-shadow:0 20px 60px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto; }
-.ref-box-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.ref-box-title { font-size:15px; font-weight: var(--fw-bold); margin-bottom:4px; }
 .ref-target { font-size:12px; color: var(--text2); background:#f9fafb; border-radius:8px; padding:8px 12px; margin-bottom:14px; line-height:1.5; }
 .ref-search { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
 .ref-search:focus { border-color:var(--accent); }
@@ -67,7 +67,7 @@ select.filter { padding: 7px 10px; border: 1px solid var(--border); border-radiu
 .ref-item { padding:10px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer; transition:background .1s; }
 .ref-item:last-child { border-bottom:none; }
 .ref-item:hover { background:#f5f3ff; }
-.ref-item-name { font-size:13px; font-weight:500; }
+.ref-item-name { font-size:13px; font-weight: var(--fw-medium); }
 .ref-item-meta { font-size:11px; color: var(--text3); margin-top:2px; }
 .ref-empty { padding:20px; text-align:center; color: var(--text3); font-size:13px; }
 .ref-fields { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
@@ -80,15 +80,15 @@ select.filter { padding: 7px 10px; border: 1px solid var(--border); border-radiu
 .edit-form { display: none; background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-top: 4px; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
 .edit-form.open { display: flex; }
 .edit-field { display: flex; flex-direction: column; gap: 4px; }
-.edit-field label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; }
+.edit-field label { font-size: 11px; font-weight: var(--fw-semibold); color: var(--text2); text-transform: uppercase; letter-spacing: .4px; }
 .edit-field input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 7px; font-size: 13px; outline: none; width: 140px; }
 .edit-field input:focus { border-color: var(--accent); }
 .edit-field input.wide { width: 200px; }
-.btn-save   { padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; background: var(--accent); color: #fff; }
+.btn-save   { padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: var(--fw-bold); background: var(--accent); color: #fff; }
 .btn-save:hover { background: var(--accent-dark); }
 .btn-cancel { padding: 7px 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; font-size: 13px; }
 
-.section-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); padding: 10px 0 4px; }
+.section-header { font-size: 11px; font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .5px; color: var(--text2); padding: 10px 0 4px; }
 
 .pagination { display: flex; gap: 8px; align-items: center; padding: 16px 24px; justify-content: center; flex-wrap: wrap; }
 .page-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; cursor: pointer; }
@@ -420,7 +420,7 @@ async function doRefSearch() {
       <div class="ref-item-meta">
         ${i.article ? `<span style="font-family:monospace;color:var(--accent)">${i.article}</span> · ` : ''}
         ${i.supplier ? `<span>${i.supplier}</span> · ` : ''}
-        ${i.cost_price != null ? `<span style="color:var(--green);font-weight:600">${i.cost_price.toLocaleString()} ₸</span>` : ''}
+        ${i.cost_price != null ? `<span style="color:var(--green);font-weight: var(--fw-semibold)">${i.cost_price.toLocaleString()} ₸</span>` : ''}
       </div>
     </div>`).join('');
 }
@@ -445,7 +445,7 @@ async function applyRef(refId, refName) {
   if (r.ok && d.merged) {
     closeRef();
     const msg = document.createElement('div');
-    msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
+    msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight: var(--fw-semibold);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
     msg.textContent = `✅ Данные из «${refName}» применены`;
     document.body.appendChild(msg);
     setTimeout(() => msg.remove(), 3000);
@@ -464,7 +464,7 @@ async function fillBrands() {
   const d = await r.json();
   btn.disabled = false; btn.textContent = '🏷 Заполнить бренды';
   const msg = document.createElement('div');
-  msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--blue-text, #1e40af);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
+  msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--blue-text, #1e40af);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight: var(--fw-semibold);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
   msg.textContent = d.filled > 0 ? `✅ Заполнено брендов: ${d.filled}` : 'Новых брендов не найдено';
   document.body.appendChild(msg);
   setTimeout(() => msg.remove(), 3000);
@@ -484,7 +484,7 @@ Promise.all([loadStats(), loadSuppliers()]).then(() => load());
     </div>
     <div class="ref-target" id="ref-target-name"></div>
 
-    <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Что перенести:</div>
+    <div style="font-size:12px;font-weight: var(--fw-semibold);color:#374151;margin-bottom:6px">Что перенести:</div>
     <div class="ref-fields">
       <label class="ref-field-chk"><input type="checkbox" id="rf-cost_price" checked> 💰 Цена закупа</label>
       <label class="ref-field-chk"><input type="checkbox" id="rf-supplier" checked> 🏭 Поставщик</label>

@@ -11,11 +11,11 @@
 .s-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
 .s-card-danger { border-color: #fca5a5; }
 
-.s-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.s-title { font-size: 15px; font-weight: var(--fw-bold); margin-bottom: 4px; }
 .s-sub   { font-size: 13px; color: var(--text3); margin-bottom: 20px; line-height: 1.5; }
 
 .form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.form-field label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; display: block; }
+.form-field label { font-size: 12px; font-weight: var(--fw-semibold); color: var(--text3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; display: block; }
 .form-field input,
 .form-field textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 14px; color: var(--text); outline: none; font-family: inherit; transition: border-color .15s; }
 .form-field input:focus,
@@ -23,9 +23,9 @@
 .form-field textarea { resize: vertical; }
 .form-field.full { grid-column: 1 / -1; }
 
-.btn-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+.btn-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: var(--fw-semibold); cursor: pointer; font-family: inherit; transition: background .15s; }
 .btn-save:hover { background: #4f46e5; }
-.btn-danger { background: #dc2626; color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-danger { background: #dc2626; color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: var(--fw-semibold); cursor: pointer; font-family: inherit; }
 .btn-danger:hover { background: #b91c1c; }
 
 .msg { font-size: 13px; margin-top: 10px; display: none; }
@@ -34,16 +34,16 @@
 
 /* Пользователи */
 .users-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-.users-table th { text-align: left; padding: 9px 12px; font-size: 11px; color: var(--text3); border-bottom: 2px solid var(--border); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.users-table th { text-align: left; padding: 9px 12px; font-size: 11px; color: var(--text3); border-bottom: 2px solid var(--border); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .4px; }
 .users-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
 .users-table tr:last-child td { border-bottom: none; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-.avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: var(--fw-bold); }
 .role-select { border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 13px; background: var(--bg); color: var(--text); cursor: pointer; outline: none; }
 .role-select:focus { border-color: var(--accent); }
 
 /* Настройки сайта */
-.settings-group-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.settings-group-title { font-size: 12px; font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .5px; color: var(--text3); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
 .settings-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
 
 /* Опасная зона */
@@ -149,7 +149,7 @@
       <div class="s-card s-card-danger">
         <div class="s-title" style="color:#991b1b">⚠️ Опасная зона</div>
         <div class="s-sub">Удалить все товары и движения из базы — доступно на странице импорта.</div>
-        <a href="/import" style="display:inline-flex;align-items:center;gap:6px;color:#991b1b;font-size:13px;font-weight:600;text-decoration:none;background:#fee2e2;padding:8px 16px;border-radius:8px;border:1px solid #fca5a5">
+        <a href="/import" style="display:inline-flex;align-items:center;gap:6px;color:#991b1b;font-size:13px;font-weight: var(--fw-semibold);text-decoration:none;background:#fee2e2;padding:8px 16px;border-radius:8px;border:1px solid #fca5a5">
           → Перейти к импорту
         </a>
       </div>
@@ -222,7 +222,7 @@ async function loadUsers() {
   document.getElementById('users-tbody').innerHTML = users.map(u => `
     <tr>
       <td>${u.avatar ? `<img class="avatar" src="${u.avatar}" referrerpolicy="no-referrer">` : `<div class="avatar-placeholder">${(u.name||u.email||'?')[0].toUpperCase()}</div>`}</td>
-      <td style="font-weight:500">${u.name||'—'}</td>
+      <td style="font-weight: var(--fw-medium)">${u.name||'—'}</td>
       <td style="color:var(--text3);font-size:13px">${u.email}</td>
       <td>
         <select class="role-select" onchange="setRole(${u.id},this.value)">
@@ -263,7 +263,7 @@ function renderSettings() {
       const isSecret  = s.key.includes('token')||s.key.includes('key')||s.key.includes('password');
       const isToggle  = s.key.includes('_show');
       if (isToggle) {
-        html += `<div class="form-field full"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:14px;font-weight:500"><input type="checkbox" id="s-${s.key}" ${s.value==='1'?'checked':''} style="width:17px;height:17px;accent-color:var(--accent)">${s.label}</label></div>`;
+        html += `<div class="form-field full"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:14px;font-weight: var(--fw-medium)"><input type="checkbox" id="s-${s.key}" ${s.value==='1'?'checked':''} style="width:17px;height:17px;accent-color:var(--accent)">${s.label}</label></div>`;
       } else if (isLong) {
         html += `<div class="form-field full"><label>${s.label}</label><textarea id="s-${s.key}" rows="2">${s.value||''}</textarea></div>`;
       } else {

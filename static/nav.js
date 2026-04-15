@@ -9,6 +9,16 @@
   }).catch(() => {});
 
   const path = window.location.pathname;
+  const PAGE_META = {
+    '/admin': { label: 'Склад', title: 'Операционная панель склада', sub: 'Быстрый контроль остатков, карточек и повседневных действий по товарам.' },
+    '/admin/history': { label: 'Журнал', title: 'История движений', sub: 'Все изменения по складу в одном потоке: продажи, приход, списания и корректировки.' },
+    '/admin/analytics': { label: 'Аналитика', title: 'Продажи и динамика', sub: 'Смотри, что двигается быстрее всего, где проседает запас и какие категории приносят выручку.' },
+    '/admin/scanner': { label: 'Сканер', title: 'Быстрые складские действия', sub: 'Сканируй штрихкод, сразу находи товар и меняй остаток без лишних переходов.' },
+    '/admin/kaspi': { label: 'Продажи', title: 'Kaspi заказы', sub: 'Следи за потоком заказов, синхронизацией и оперативно реагируй на изменения статусов.' },
+    '/admin/shop-orders': { label: 'Магазин', title: 'Заказы сайта', sub: 'Новые обращения, контакты клиентов и обработка заказов в одном месте.' },
+    '/admin/settings': { label: 'Система', title: 'Настройки и доступы', sub: 'Управление профилем, сотрудниками, контентом магазина и ключевыми параметрами системы.' },
+    '/admin/theme': { label: 'Дизайн', title: 'Визуальная система', sub: 'Токены, цвета и визуальные настройки бренда без ручной правки кода.' },
+  };
 
   // ── Группы вкладок (переключение внутри секции) ──────────────
   const TAB_GROUPS = [
@@ -116,10 +126,9 @@
     .nav-tab-bar {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 8px;
       padding: 10px 0 0;
       margin-bottom: 18px;
-      border-bottom: 2px solid #e5e7eb;
       overflow-x: auto;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
@@ -130,24 +139,26 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 14px 9px;
+      padding: 9px 14px;
       font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
+      font-weight: 600;
+      color: #55645a;
       text-decoration: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
       white-space: nowrap;
-      border-radius: 6px 6px 0 0;
-      transition: color .15s, background .15s;
+      border-radius: 999px;
+      border: 1px solid #d7e0d7;
+      background: rgba(255,255,255,.72);
+      transition: color .15s, background .15s, border-color .15s, transform .15s;
     }
     .nav-tab-bar a:hover {
-      color: #111827;
-      background: #f3f4f6;
+      color: #16211b;
+      background: #fff;
+      transform: translateY(-1px);
     }
     .nav-tab-bar a.active {
-      color: var(--accent, #6c63ff);
-      border-bottom-color: var(--accent, #6c63ff);
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--accent, #0d7a5f), #0f5d50);
+      border-color: transparent;
       font-weight: 600;
     }
 
@@ -155,10 +166,9 @@
     .standalone-tab-bar {
       display: flex;
       align-items: center;
-      gap: 2px;
-      padding: 0 24px;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
+      gap: 8px;
+      padding: 12px 24px 0;
+      background: transparent;
       overflow-x: auto;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
@@ -170,22 +180,99 @@
       gap: 6px;
       padding: 10px 14px;
       font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
+      font-weight: 600;
+      color: #55645a;
       text-decoration: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
       white-space: nowrap;
-      transition: color .15s;
+      border-radius: 999px;
+      border: 1px solid #d7e0d7;
+      background: rgba(255,255,255,.72);
+      transition: color .15s, background .15s, transform .15s;
     }
-    .standalone-tab-bar a:hover { color: #111827; }
+    .standalone-tab-bar a:hover {
+      color: #16211b;
+      background: #fff;
+      transform: translateY(-1px);
+    }
     .standalone-tab-bar a.active {
-      color: var(--accent, #6c63ff);
-      border-bottom-color: var(--accent, #6c63ff);
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent, #0d7a5f), #0f5d50);
+      border-color: transparent;
       font-weight: 600;
     }
   `;
   document.head.appendChild(tabStyle);
+
+  function getCurrentMeta() {
+    const exact = PAGE_META[path];
+    if (exact) return exact;
+    for (const [prefix, meta] of Object.entries(PAGE_META)) {
+      if (prefix !== '/admin' && path.startsWith(prefix)) return meta;
+    }
+    return {
+      label: 'Lunary OS',
+      title: document.title.replace(/\s*[—-]\s*Lunary.*$/i, '').trim() || 'Рабочая область',
+      sub: 'Центральная панель для работы с ассортиментом, заказами, импортом и настройками магазина.'
+    };
+  }
+
+  function injectPageHero() {
+    const container = document.querySelector('.page-container');
+    if (!container || container.querySelector('.page-hero')) return;
+
+    const titleEl = container.querySelector('.page-title');
+    const subEl = container.querySelector('.page-sub');
+    if (!titleEl) return;
+
+    const meta = getCurrentMeta();
+    const hero = document.createElement('section');
+    hero.className = 'page-hero';
+
+    const kicker = document.createElement('div');
+    kicker.className = 'page-kicker';
+    kicker.textContent = meta.label;
+
+    hero.appendChild(kicker);
+    hero.appendChild(titleEl);
+    if (subEl) {
+      hero.appendChild(subEl);
+    } else if (meta.sub) {
+      const sub = document.createElement('div');
+      sub.className = 'page-sub';
+      sub.textContent = meta.sub;
+      hero.appendChild(sub);
+    }
+
+    container.insertBefore(hero, container.firstChild);
+  }
+
+  function injectStandaloneHero() {
+    const header = document.querySelector('.header');
+    if (!header || document.querySelector('.standalone-hero')) return;
+    const h1 = header.querySelector('h1');
+    if (!h1) return;
+
+    const meta = getCurrentMeta();
+    const hero = document.createElement('section');
+    hero.className = 'standalone-hero';
+
+    const kicker = document.createElement('div');
+    kicker.className = 'page-kicker';
+    kicker.textContent = meta.label;
+    hero.appendChild(kicker);
+    hero.appendChild(h1);
+
+    const p = header.querySelector('p, .page-sub');
+    if (p) {
+      hero.appendChild(p);
+    } else if (meta.sub) {
+      const sub = document.createElement('p');
+      sub.textContent = meta.sub;
+      hero.appendChild(sub);
+    }
+
+    header.parentNode.insertBefore(hero, header.nextSibling);
+  }
 
   // ── Рендер таб-бара ──────────────────────────────────────────
   function renderTabBar(group, className) {
@@ -209,6 +296,8 @@
   // ── Инжектировать таб-бар в нужное место ─────────────────────
   function injectTabs() {
     const group = currentTabGroup();
+    injectPageHero();
+    injectStandaloneHero();
     if (!group) return;
 
     // Вариант 1: sidebar страница — в начало .page-container
@@ -249,7 +338,15 @@
 
     function buildSidebar(role) {
       const isManagerOnly = role === 'manager';
+      const meta = getCurrentMeta();
       let html = `<div class="sidebar-logo">Lunary <span>OS</span></div>`;
+      html += `
+        <div class="sidebar-meta">
+          <div class="sidebar-meta-label">${meta.label}</div>
+          <div class="sidebar-meta-title">${meta.title}</div>
+          <div class="sidebar-meta-sub">${meta.sub}</div>
+        </div>
+      `;
 
       for (const group of GROUPS) {
         const visibleLinks = group.links.filter(l => !(isManagerOnly && _ADMIN_ONLY_LINKS.has(l.href)));

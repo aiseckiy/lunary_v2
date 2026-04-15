@@ -7,27 +7,160 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <link rel="stylesheet" href="/static/layout.css">
 <style>
+/* ── Hero ── */
+.inventory-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1.3fr .9fr;
+  gap: 18px;
+  padding: 24px;
+  margin-bottom: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(13,122,95,.12);
+  background:
+    radial-gradient(circle at top right, rgba(13,122,95,.16), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(208,169,95,.18), transparent 24%),
+    linear-gradient(135deg, rgba(255,255,255,.92), rgba(247,250,247,.86));
+  box-shadow: 0 24px 60px rgba(19,37,28,.08);
+}
+.inventory-hero::after {
+  content:"";
+  position:absolute;
+  inset:auto -70px -90px auto;
+  width:220px;
+  height:220px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(13,122,95,.12), transparent 68%);
+  pointer-events:none;
+}
+.hero-kicker {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(13,122,95,.08);
+  border:1px solid rgba(13,122,95,.12);
+  color:var(--accent);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.hero-title {
+  font-size:clamp(30px, 4vw, 42px);
+  line-height:1.02;
+  letter-spacing:-.04em;
+  font-weight:800;
+  color:var(--text);
+  max-width:620px;
+}
+.hero-sub {
+  margin-top:12px;
+  max-width:650px;
+  font-size:15px;
+  line-height:1.7;
+  color:var(--text2);
+}
+.hero-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+.hero-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:11px 16px;
+  border-radius:14px;
+  border:1px solid transparent;
+  font-size:14px;
+  font-weight:700;
+  text-decoration:none;
+  cursor:pointer;
+}
+.hero-btn.primary { background:var(--text); color:#fff; }
+.hero-btn.secondary { background:#fff; color:var(--text); border-color:var(--border); }
+.hero-metrics {
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+  align-self:start;
+}
+.hero-metric {
+  padding:16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(215,224,215,.9);
+}
+.hero-metric-label {
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--text3);
+  font-weight:700;
+  margin-bottom:8px;
+}
+.hero-metric-value {
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-.04em;
+}
+.hero-metric-sub {
+  margin-top:6px;
+  font-size:13px;
+  line-height:1.5;
+  color:var(--text2);
+}
 /* ── Stats ── */
-.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
-.stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:20px; }
+.stat { background:rgba(255,255,255,.84); border:1px solid rgba(215,224,215,.95); border-radius:18px; padding:18px; box-shadow:0 12px 28px rgba(19,37,28,.05); }
 .stat-label { font-size:11px; color:var(--text3); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
 .stat-value { font-size:28px; font-weight:800; color:var(--text); }
 .stat-value.red { color:var(--red); }
 .stat-value.green { color:var(--green); }
 .stat-value.purple { color:var(--accent); }
 /* ── Toolbar ── */
-.toolbar { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; align-items:center; width:100%; min-width:0; }
-.search-input { flex:1; min-width:200px; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
-.search-input:focus { border-color:var(--accent); background:var(--surface); }
+.toolbar-panel {
+  background:rgba(255,255,255,.76);
+  border:1px solid rgba(215,224,215,.95);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 12px 32px rgba(19,37,28,.06);
+  margin-bottom:12px;
+}
+.toolbar-label {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.toolbar-title {
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+}
+.toolbar-note {
+  font-size:12px;
+  color:var(--text3);
+}
+.toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; width:100%; min-width:0; }
+.search-input { flex:1; min-width:240px; background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px 14px; color:var(--text); font-size:14px; outline:none; transition:border-color .15s; font-family:inherit; }
+.search-input:focus { border-color:var(--accent); background:#fff; box-shadow:0 0 0 4px rgba(13,122,95,.08); }
 .search-input::placeholder { color:var(--text3); }
-.btn-add { background:var(--text); color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+.btn-add { background:var(--text); color:#fff; border:none; border-radius:14px; padding:11px 18px; font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
 .btn-add:hover { opacity:.85; }
-.sort-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 14px; font-size:14px; color:var(--text2); cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
+.sort-btn { background:#fff; border:1px solid var(--border); border-radius:14px; padding:11px 14px; font-size:14px; color:var(--text2); cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:6px; font-family:inherit; appearance:none; -webkit-appearance:none; transition:all .15s; }
 .sort-btn:hover { border-color:#d1d5db; color:var(--text); }
-.sort-btn:focus { outline:none; border-color:var(--accent); }
+.sort-btn:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 4px rgba(13,122,95,.08); }
 /* ── Filter dropdowns ── */
-.filter-rows { margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; }
-.filter-drop-btn { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:13px; color:var(--text2); cursor:pointer; white-space:nowrap; font-weight:500; display:inline-flex; align-items:center; gap:5px; transition:all .15s; position:relative; }
+.filter-rows { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-drop-btn { background:#fff; border:1px solid var(--border); border-radius:999px; padding:9px 14px; font-size:13px; color:var(--text2); cursor:pointer; white-space:nowrap; font-weight:600; display:inline-flex; align-items:center; gap:5px; transition:all .15s; position:relative; }
 .filter-drop-btn:hover { border-color:#d1d5db; color:var(--text); }
 .filter-drop-btn.active { background:var(--text); border-color:var(--text); color:#fff; }
 #f-low.active { background:#fee2e2; border-color:var(--red); color:var(--red); }
@@ -40,13 +173,13 @@
 .fdrop-item.active .fdrop-check { opacity:1; }
 .fdrop-cnt { font-size:11px; opacity:.5; margin-left:auto; }
 /* ── Product grid ── */
-.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
-.product-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
-.product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+.product-card { background:rgba(255,255,255,.88); border:1px solid rgba(215,224,215,.95); border-radius:20px; padding:18px; cursor:pointer; transition:all .18s; box-shadow:0 14px 30px rgba(19,37,28,.05); }
+.product-card:hover { border-color:rgba(13,122,95,.24); box-shadow:0 18px 36px rgba(19,37,28,.1); transform:translateY(-2px); }
 .product-card.low { border-color:#fca5a5; }
 .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
 .card-name { font-size:14px; font-weight:600; line-height:1.4; flex:1; color:var(--text); }
-.card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight:600; }
+.card-badge { font-size:11px; padding:4px 9px; border-radius:999px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight:700; }
 .badge-ok  { background:#dcfce7; color:var(--green); }
 .badge-low { background:#fee2e2; color:var(--red); }
 .card-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -57,9 +190,9 @@
 .card-stock.ok  { color:var(--green); }
 .card-unit { font-size:12px; color:var(--text3); margin-top:2px; }
 .card-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
-.card-tag { background:var(--bg); color:var(--text2); font-size:11px; padding:2px 8px; border-radius:6px; font-weight:500; }
-.card-btn { background:var(--bg); border:none; border-radius:6px; padding:6px 10px; color:var(--text2); font-size:13px; cursor:pointer; }
-.card-btn:hover { background:var(--border); }
+.card-tag { background:var(--surface-alt); color:var(--text2); font-size:11px; padding:4px 8px; border-radius:999px; font-weight:600; border:1px solid var(--border2); }
+.card-btn { background:var(--surface-alt); border:none; border-radius:10px; padding:8px 10px; color:var(--text2); font-size:13px; cursor:pointer; }
+.card-btn:hover { background:var(--border2); }
 .cat-header { font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin:20px 0 10px; grid-column:1/-1; }
 /* ── Tooltips ── */
 [data-tip] { position:relative; cursor:default; }
@@ -87,7 +220,7 @@
 /* ── Modals ── */
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
 .overlay.open { display:flex; }
-.modal { background:var(--surface); border:1px solid var(--border); border-radius:18px; width:520px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.12); }
+.modal { background:#fff; border:1px solid rgba(215,224,215,.95); border-radius:24px; width:520px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 64px rgba(0,0,0,.12); }
 .modal-header { padding:20px 20px 0; display:flex; justify-content:space-between; align-items:center; }
 .modal-title { font-size:17px; font-weight:700; color:var(--text); }
 .modal-close { background:var(--bg); border:none; border-radius:50%; width:32px; height:32px; min-width:32px; min-height:32px; color:var(--text2); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
@@ -129,6 +262,10 @@
 .btn-ai:hover { background:#ddd6fe; }
 .btn-ai.loading { opacity:.6; pointer-events:none; }
 @media (max-width: 768px) {
+  .inventory-hero { grid-template-columns:1fr !important; padding:18px !important; border-radius:20px !important; }
+  .hero-title { font-size:30px !important; }
+  .hero-sub { font-size:14px !important; }
+  .hero-metrics { grid-template-columns:1fr 1fr !important; }
   .products-grid { display:grid !important; grid-template-columns:calc(50% - 5px) calc(50% - 5px) !important; gap:10px !important; width:100% !important; }
   .card-stock { font-size:20px !important; }
   .card-name { font-size:12px !important; }
@@ -139,6 +276,7 @@
   .stat { padding:12px !important; }
   .stat-value { font-size:22px !important; }
   /* Toolbar: поиск на всю ширину, остальное в ряд */
+  .toolbar-panel { padding:14px !important; border-radius:18px !important; }
   .toolbar { flex-wrap:wrap !important; gap:8px !important; }
   .search-input { width:100% !important; flex:none !important; font-size:16px !important; }
   #sort-select { flex:1 !important; font-size:13px !important; min-width:0 !important; }
@@ -171,75 +309,122 @@
 
 <div class="main-content">
 <div class="page-container">
+  <section class="inventory-hero">
+    <div>
+      <div class="hero-kicker">Lunary OS</div>
+      <div class="hero-title">Склад, продажи и карточки товара в одном понятном рабочем пространстве</div>
+      <div class="hero-sub">
+        Я вижу эту панель как место для ежедневной операционки: быстро найти товар, сразу скорректировать остаток,
+        отфильтровать проблемные позиции и без трения переключиться к приёмке, закупкам и публикации в магазин.
+      </div>
+      <div class="hero-actions">
+        <button class="hero-btn primary" onclick="openAddModal()">➕ Добавить товар</button>
+        <button class="hero-btn secondary" onclick="openReceiptModal()">📦 Открыть приёмку</button>
+      </div>
+    </div>
+    <div class="hero-metrics">
+      <div class="hero-metric">
+        <div class="hero-metric-label">Сегодня важно</div>
+        <div class="hero-metric-value" id="hero-low-stock">0</div>
+        <div class="hero-metric-sub">позиции требуют внимания по остаткам</div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-label">Ассортимент</div>
+        <div class="hero-metric-value" id="hero-total-products">0</div>
+        <div class="hero-metric-sub">карточек товаров в системе</div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-label">Публикация</div>
+        <div class="hero-metric-value" id="hero-shop-products">0</div>
+        <div class="hero-metric-sub">товаров уже доступны в магазине</div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-label">Фокус</div>
+        <div class="hero-metric-value" id="hero-missing-data">0</div>
+        <div class="hero-metric-sub">карточек с неполными данными</div>
+      </div>
+    </div>
+  </section>
+
   <div class="stats" id="stats"></div>
 
-  <!-- Строка 1: поиск + сортировка + кнопки -->
-  <div class="toolbar">
-    <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу, штрихкоду..." oninput="currentPage=1;saveFilters();render()">
-    <select class="sort-btn" id="sort-select" onchange="currentPage=1;saveFilters();render()">
-      <option value="default">↕ По категориям</option>
-      <option value="stock-asc">↑ Остаток (меньше)</option>
-      <option value="stock-desc">↓ Остаток (больше)</option>
-      <option value="name-asc">А-Я Название</option>
-    </select>
-    <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
-    <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight:600">📦 Приёмка</button>
-    <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight:600">🛒 Закупки</button>
-    <a class="sort-btn" id="btn-xlsx" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
-    <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;font-weight:600">✨ AI описания</button>
+  <div class="toolbar-panel">
+    <div class="toolbar-label">
+      <div class="toolbar-title">Быстрые действия</div>
+      <div class="toolbar-note">Поиск, сортировка и массовые операции без лишних переходов</div>
+    </div>
+    <div class="toolbar">
+      <input class="search-input" id="search" type="text" placeholder="Поиск по названию, артикулу, штрихкоду..." oninput="currentPage=1;saveFilters();render()">
+      <select class="sort-btn" id="sort-select" onchange="currentPage=1;saveFilters();render()">
+        <option value="default">↕ По категориям</option>
+        <option value="stock-asc">↑ Остаток (меньше)</option>
+        <option value="stock-desc">↓ Остаток (больше)</option>
+        <option value="name-asc">А-Я Название</option>
+      </select>
+      <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
+      <button class="sort-btn" onclick="openReceiptModal()" style="background:#e7f7ef;border-color:#9dd9bf;color:var(--green);font-weight:700">📦 Приёмка</button>
+      <button class="sort-btn" onclick="openPurchasesModal()" style="background:#f9f1d6;border-color:#e8cb79;color:#8a6412;font-weight:700">🛒 Закупки</button>
+      <a class="sort-btn" id="btn-xlsx" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
+      <button class="sort-btn" id="btn-fill-desc" onclick="fillDescriptions()" style="background:#e9f7f2;border-color:#b8e0d2;color:#0d7a5f;font-weight:700">✨ AI описания</button>
+    </div>
   </div>
 
-  <!-- Строка 2: фильтры -->
-  <div class="filter-rows">
-    <button class="filter-drop-btn" id="f-low" onclick="toggleLow()">⚠️ Заканчивается</button>
-    <div style="position:relative">
-      <button class="filter-drop-btn" id="cat-btn" onclick="toggleDrop('cat')">
-        <span id="cat-label">Категория</span> <span style="font-size:10px">▼</span>
-      </button>
-      <div class="fdrop-menu" id="cat-menu">
-        <div class="fdrop-item active" id="cat-all-item" onclick="setCat(null)">Все категории</div>
-        <div style="height:1px;background:#f3f4f6;margin:4px 0"></div>
-      </div>
+  <div class="toolbar-panel">
+    <div class="toolbar-label">
+      <div class="toolbar-title">Фильтры каталога</div>
+      <div class="toolbar-note">Сосредоточься на дефиците, проблемных карточках и нужных поставщиках</div>
     </div>
-    <div style="position:relative">
-      <button class="filter-drop-btn" id="brand-btn" onclick="toggleDrop('brand')">
-        <span id="brand-label">Бренд</span> <span style="font-size:10px">▼</span>
-      </button>
-      <div class="fdrop-menu" id="brand-menu">
-        <div class="fdrop-item active" id="brand-all-item" onclick="setBrand(null)">Все бренды</div>
-        <div style="height:1px;background:#f3f4f6;margin:4px 0"></div>
+    <div class="filter-rows">
+      <button class="filter-drop-btn" id="f-low" onclick="toggleLow()">⚠️ Заканчивается</button>
+      <div style="position:relative">
+        <button class="filter-drop-btn" id="cat-btn" onclick="toggleDrop('cat')">
+          <span id="cat-label">Категория</span> <span style="font-size:10px">▼</span>
+        </button>
+        <div class="fdrop-menu" id="cat-menu">
+          <div class="fdrop-item active" id="cat-all-item" onclick="setCat(null)">Все категории</div>
+          <div style="height:1px;background:#f3f4f6;margin:4px 0"></div>
+        </div>
       </div>
-    </div>
-    <!-- Фильтр: не хватает данных -->
-    <div style="position:relative">
-      <button class="filter-drop-btn" id="missing-btn" onclick="toggleDrop('missing')">
-        <span id="missing-label">Не заполнено</span> <span style="font-size:10px">▼</span>
-      </button>
-      <div class="fdrop-menu" id="missing-menu" style="min-width:210px">
-        <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
-        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-price"   onchange="toggleMissing()" style="accent-color:#6c63ff"> Цены продажи
-        </label>
-        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-cost"    onchange="toggleMissing()" style="accent-color:#6c63ff"> Закупочной цены
-        </label>
-        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-article" onchange="toggleMissing()" style="accent-color:#6c63ff"> Артикула производителя
-        </label>
-        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-supplier" onchange="toggleMissing()" style="accent-color:#6c63ff"> Поставщика
-        </label>
-        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-barcode" onchange="toggleMissing()" style="accent-color:#6c63ff"> Штрихкода
-        </label>
-        <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="miss-stock"   onchange="toggleMissing()" style="accent-color:#6c63ff"> Остатка (= 0)
-        </label>
-        <div style="padding:8px 12px 4px">
-          <button onclick="clearMissing()" style="font-size:12px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:0">Сбросить всё</button>
+      <div style="position:relative">
+        <button class="filter-drop-btn" id="brand-btn" onclick="toggleDrop('brand')">
+          <span id="brand-label">Бренд</span> <span style="font-size:10px">▼</span>
+        </button>
+        <div class="fdrop-menu" id="brand-menu">
+          <div class="fdrop-item active" id="brand-all-item" onclick="setBrand(null)">Все бренды</div>
+          <div style="height:1px;background:#f3f4f6;margin:4px 0"></div>
+        </div>
+      </div>
+      <div style="position:relative">
+        <button class="filter-drop-btn" id="missing-btn" onclick="toggleDrop('missing')">
+          <span id="missing-label">Не заполнено</span> <span style="font-size:10px">▼</span>
+        </button>
+        <div class="fdrop-menu" id="missing-menu" style="min-width:210px">
+          <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px">Показать где нет:</div>
+          <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="miss-price"   onchange="toggleMissing()" style="accent-color:#0d7a5f"> Цены продажи
+          </label>
+          <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="miss-cost"    onchange="toggleMissing()" style="accent-color:#0d7a5f"> Закупочной цены
+          </label>
+          <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="miss-article" onchange="toggleMissing()" style="accent-color:#0d7a5f"> Артикула производителя
+          </label>
+          <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="miss-supplier" onchange="toggleMissing()" style="accent-color:#0d7a5f"> Поставщика
+          </label>
+          <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="miss-barcode" onchange="toggleMissing()" style="accent-color:#0d7a5f"> Штрихкода
+          </label>
+          <label class="fdrop-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="miss-stock"   onchange="toggleMissing()" style="accent-color:#0d7a5f"> Остатка (= 0)
+          </label>
+          <div style="padding:8px 12px 4px">
+            <button onclick="clearMissing()" style="font-size:12px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:0">Сбросить всё</button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- Баннер активного фильтра -->
@@ -634,9 +819,21 @@ function renderStats() {
   const low = allProducts.filter(p => p.low).length;
   const units = allProducts.reduce((s, p) => s + p.stock, 0);
   const totalValue = allProducts.reduce((s, p) => s + (p.price || 0) * p.stock, 0);
+  const shopVisible = allProducts.filter(p => p.show_in_shop).length;
+  const missingData = allProducts.filter(p =>
+    !p.price || !p.cost_price || !p.supplier_article || !p.supplier || !p.barcode
+  ).length;
   const totalValueFmt = totalValue >= 1000000
     ? (totalValue / 1000000).toFixed(1) + ' млн ₸'
     : totalValue.toLocaleString('ru-RU') + ' ₸';
+  const heroLow = document.getElementById('hero-low-stock');
+  const heroTotal = document.getElementById('hero-total-products');
+  const heroShop = document.getElementById('hero-shop-products');
+  const heroMissing = document.getElementById('hero-missing-data');
+  if (heroLow) heroLow.textContent = low;
+  if (heroTotal) heroTotal.textContent = allProducts.length;
+  if (heroShop) heroShop.textContent = shopVisible;
+  if (heroMissing) heroMissing.textContent = missingData;
   document.getElementById('stats').innerHTML = `
     <div class="stat"><div class="stat-label">Позиций</div><div class="stat-value purple">${allProducts.length}</div></div>
     <div class="stat"><div class="stat-label">Единиц</div><div class="stat-value">${units}</div></div>

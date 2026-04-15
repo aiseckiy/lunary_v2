@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, text, inspect
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import NullPool
 from datetime import datetime
@@ -6,19 +6,28 @@ from datetime import datetime
 import os
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL не задан. Добавь переменную в Railway.")
-# Railway отдаёт postgres://, SQLAlchemy требует postgresql://
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = "sqlite:///./lunary.db"
 
-try:
-    import psycopg2  # noqa
-    engine = create_engine(DATABASE_URL, poolclass=NullPool)
-except ImportError:
+if DATABASE_URL.startswith("sqlite:"):
     engine = create_engine(
-        DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1),
-        poolclass=NullPool,
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
     )
+else:
+    # Railway отдаёт postgres://, SQLAlchemy требует postgresql://
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    try:
+        import psycopg2  # noqa
+        engine = create_engine(DATABASE_URL, poolclass=NullPool)
+    except ImportError:
+        engine = create_engine(
+            DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1),
+            poolclass=NullPool,
+        )
+
+IS_SQLITE = engine.url.get_backend_name() == "sqlite"
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -230,13 +239,20 @@ def init_db():
         ("products", "meta_keywords", "TEXT"),
         ("price_list_items", "is_new", "BOOLEAN DEFAULT TRUE"),
     ]
+    inspector = inspect(engine)
     with engine.connect() as conn:
         for table, col, col_type in new_columns:
-            # IF NOT EXISTS — PostgreSQL 9.6+, не бросает исключение если колонка уже есть
-            col_def = col_type.split()[0]  # берём только тип без DEFAULT для IF NOT EXISTS
             try:
-                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_type}"))
-                conn.commit()
+                if IS_SQLITE:
+                    existing_cols = {c["name"] for c in inspector.get_columns(table)}
+                    if col in existing_cols:
+                        print(f"[init_db] SKIP {table}.{col}", flush=True)
+                        continue
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+                    conn.commit()
+                else:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_type}"))
+                    conn.commit()
                 print(f"[init_db] OK {table}.{col}", flush=True)
             except Exception as e:
                 print(f"[init_db] ОШИБКА {table}.{col}: {str(e)[:200]}", flush=True)

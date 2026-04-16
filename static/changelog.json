@@ -1,5 +1,10 @@
 [
   {
+    "hash": "5765cfd",
+    "date": "16.04.2026",
+    "message": "Fix: link endpoint — убрать Pydantic body, принимать raw dict"
+  },
+  {
     "hash": "8d9084a",
     "date": "16.04.2026",
     "message": "Fix: link-группа — типизация slave_ids + error handling + убрать dead code"

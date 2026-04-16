@@ -552,7 +552,7 @@ def low_stock(db: Session = Depends(get_db)):
 
 # ─── Link-группы (общий stock для дубликатов карточек) ─────
 @router.post("/api/products/link")
-def link_products(body: dict, request: Request, db: Session = Depends(get_db)):
+async def link_products(request: Request, db: Session = Depends(get_db)):
     """Объединить товары в link-группу с общим остатком."""
     import traceback
     from database import Product as _P, Movement as _M
@@ -562,6 +562,7 @@ def link_products(body: dict, request: Request, db: Session = Depends(get_db)):
     if not is_staff(user):
         raise HTTPException(status_code=403)
 
+    body = await request.json()
     master_id = body.get("master_id")
     slave_ids = body.get("slave_ids", [])
     if not master_id or not isinstance(master_id, int):

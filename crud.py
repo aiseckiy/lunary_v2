@@ -145,9 +145,21 @@ def get_low_stock_products(db: Session):
 # ─── Все остатки (один запрос вместо N+1) ────────────────────
 def get_all_stocks(db: Session):
     """Возвращает список {product, stock} для всех товаров (кроме накладных).
-    Для slave'ов в link-группе stock берётся у мастера группы."""
+    Для slave'ов в link-группе stock берётся у мастера группы.
+    Тяжёлые колонки (description, specs, images, meta_*) не загружаются —
+    они нужны только в detail endpoint'ах."""
+    from sqlalchemy.orm import defer
     rows = (
         db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
+        .options(
+            defer(Product.description),
+            defer(Product.specs),
+            defer(Product.images),
+            defer(Product.image_url),
+            defer(Product.meta_title),
+            defer(Product.meta_description),
+            defer(Product.meta_keywords),
+        )
         .outerjoin(Movement, Movement.product_id == Product.id)
         .filter(Product.category != "Накладные")
         .group_by(Product.id)

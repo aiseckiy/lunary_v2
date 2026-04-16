@@ -1,5 +1,10 @@
 [
   {
+    "hash": "0c09fd0",
+    "date": "16.04.2026",
+    "message": "Perf: убрать description/specs из /api/products list response"
+  },
+  {
     "hash": "ba4be15",
     "date": "16.04.2026",
     "message": "Убрать SKU cleanup из init_db (разовая чистка, не при каждом старте)"

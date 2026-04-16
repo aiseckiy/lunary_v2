@@ -1,5 +1,10 @@
 [
   {
+    "hash": "ba4be15",
+    "date": "16.04.2026",
+    "message": "Убрать SKU cleanup из init_db (разовая чистка, не при каждом старте)"
+  },
+  {
     "hash": "806104c",
     "date": "16.04.2026",
     "message": "SKU cleanup после каждого Kaspi XML импорта (не только при startup)"

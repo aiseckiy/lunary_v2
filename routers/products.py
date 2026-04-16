@@ -90,18 +90,16 @@ def list_products(db: Session = Depends(get_db)):
             "category": p.category,
             "unit": p.unit,
             "min_stock": p.min_stock,
-            "stock": s["stock"],      # для slaves уже подменён на stock мастера (см. crud.get_all_stocks)
+            "stock": s["stock"],
             "low": s["stock"] <= p.min_stock,
             "brand": p.brand or "",
-            "price": p.price,          # цена у каждого своя
+            "price": p.price,
             "kaspi_sku": p.kaspi_sku or "",
-            "cost_price": p.cost_price,  # закуп у каждого свой
+            "cost_price": p.cost_price,
             "supplier": p.supplier or "",
             "supplier_article": p.supplier_article or "",
-            "description": p.description or "",
-            "specs": p.specs or "[]",
             "link_master_id": p.link_master_id,
-            "link_group_size": group_size,  # >0 только у мастера
+            "link_group_size": group_size,
         })
     return result
 

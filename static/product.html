@@ -534,7 +534,7 @@ function renderProduct() {
   const isAdmin = currentUser && currentUser.role === 'admin';
 
   const mainImg = images.length
-    ? `<img id="gallery-main-img" src="${images[0]}" style="width:100%;height:100%;object-fit:cover">`
+    ? `<img id="gallery-main-img" src="${images[0]}" style="width:100%;height:100%;object-fit:contain;padding:12px">`
     : categoryEmoji(p.category);
   const thumbsHtml = images.length > 1
     ? images.map((src, i) => `<div class="gallery-thumb ${i===0?'active':''}" onclick="setGallery(${i})"><img src="${src}"></div>`).join('')
@@ -599,7 +599,7 @@ function setGallery(i) {
   const images = product.images && product.images.length ? product.images : (product.image_url ? [product.image_url] : []);
   galleryIndex = i;
   const main = document.getElementById('gallery-main');
-  if (main) main.innerHTML = `<img src="${images[i]}" style="width:100%;height:100%;object-fit:cover">`;
+  if (main) main.innerHTML = `<img src="${images[i]}" style="width:100%;height:100%;object-fit:contain;padding:12px">`;
   document.querySelectorAll('.gallery-thumb').forEach((el, idx) => el.classList.toggle('active', idx === i));
 }
 

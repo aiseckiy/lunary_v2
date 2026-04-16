@@ -1,5 +1,10 @@
 [
   {
+    "hash": "8d9084a",
+    "date": "16.04.2026",
+    "message": "Fix: link-группа — типизация slave_ids + error handling + убрать dead code"
+  },
+  {
     "hash": "2668ad9",
     "date": "16.04.2026",
     "message": "Склад тоже показывает причёсанные бренды из BrandAlias"

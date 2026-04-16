@@ -551,13 +551,8 @@ def low_stock(db: Session = Depends(get_db)):
 
 
 # ─── Link-группы (общий stock для дубликатов карточек) ─────
-class LinkGroupBody(BaseModel):
-    master_id: int
-    slave_ids: list[int]
-
-
 @router.post("/api/products/link")
-def link_products(body: LinkGroupBody, request: Request, db: Session = Depends(get_db)):
+def link_products(body: dict, request: Request, db: Session = Depends(get_db)):
     """Объединить товары в link-группу с общим остатком."""
     import traceback
     from database import Product as _P, Movement as _M
@@ -567,13 +562,18 @@ def link_products(body: LinkGroupBody, request: Request, db: Session = Depends(g
     if not is_staff(user):
         raise HTTPException(status_code=403)
 
-    if not body.slave_ids:
+    master_id = body.get("master_id")
+    slave_ids = body.get("slave_ids", [])
+    if not master_id or not isinstance(master_id, int):
+        raise HTTPException(status_code=400, detail="master_id обязателен (int)")
+    if not slave_ids:
         raise HTTPException(status_code=400, detail="Не выбраны товары для привязки")
-    if body.master_id in body.slave_ids:
+    slave_ids = [int(x) for x in slave_ids]
+    if master_id in slave_ids:
         raise HTTPException(status_code=400, detail="Мастер не может быть slave самому себе")
 
     try:
-        master = db.query(_P).filter(_P.id == body.master_id).first()
+        master = db.query(_P).filter(_P.id == master_id).first()
         if not master:
             raise HTTPException(status_code=404, detail="Мастер не найден")
         if master.link_master_id:
@@ -582,8 +582,8 @@ def link_products(body: LinkGroupBody, request: Request, db: Session = Depends(g
                 detail=f"Мастер уже привязан к другой группе (мастер id={master.link_master_id}). Сначала отвяжи его."
             )
 
-        slaves = db.query(_P).filter(_P.id.in_(body.slave_ids)).all()
-        if len(slaves) != len(body.slave_ids):
+        slaves = db.query(_P).filter(_P.id.in_(slave_ids)).all()
+        if len(slaves) != len(slave_ids):
             raise HTTPException(status_code=400, detail="Один или несколько товаров не найдены")
 
         total_transferred = 0

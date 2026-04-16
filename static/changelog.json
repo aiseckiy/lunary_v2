@@ -1,5 +1,10 @@
 [
   {
+    "hash": "2a5094e",
+    "date": "16.04.2026",
+    "message": "Fix: кнопка 'На Kaspi' только для полных SKU (с underscore)"
+  },
+  {
     "hash": "593d034",
     "date": "16.04.2026",
     "message": "Perf: defer тяжёлых колонок в get_all_stocks (description/specs/images/meta)"

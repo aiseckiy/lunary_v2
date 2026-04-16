@@ -34,6 +34,27 @@ def update_user_role(user_id: int, data: dict, request: Request, db: Session = D
     return {"ok": True, "role": u.role}
 
 
+@router.get("/api/admin/short-skus")
+def list_short_skus(request: Request, db: Session = Depends(get_db)):
+    """Товары с коротким SKU (без underscore) — кнопка 'На Kaspi' у них не работает."""
+    from database import Product as _P
+    user = get_user_from_session(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403)
+    products = db.query(_P).filter(
+        _P.kaspi_sku.isnot(None),
+        _P.kaspi_sku != "",
+        ~_P.kaspi_sku.contains("_"),
+    ).order_by(_P.name).all()
+    return {
+        "count": len(products),
+        "items": [
+            {"id": p.id, "name": p.name, "kaspi_sku": p.kaspi_sku, "brand": p.brand or ""}
+            for p in products
+        ],
+    }
+
+
 @router.get("/api/admin/kaspi/sync-log")
 def get_sync_log(request: Request, db: Session = Depends(get_db)):
     """Последние 50 запусков синхронизации Kaspi."""

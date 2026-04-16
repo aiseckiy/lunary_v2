@@ -378,6 +378,25 @@ def init_db():
     finally:
         db3.close()
 
+    # Чистка мульти-SKU: "sku1, sku2" → "sku1". Мульти-SKU было legacy-фичей,
+    # убрана из UI. Оставляем только первый SKU для чистоты ссылок и матчинга.
+    db_sku = SessionLocal()
+    try:
+        cleaned = db_sku.execute(
+            text("UPDATE products SET kaspi_sku = TRIM(SPLIT_PART(kaspi_sku, ',', 1)) WHERE kaspi_sku LIKE '%,%'")
+        )
+        db_sku.commit()
+        if cleaned.rowcount:
+            print(f"[init_db] multi-SKU cleanup: {cleaned.rowcount} товаров", flush=True)
+    except Exception as e:
+        print(f"[init_db] multi-SKU cleanup ошибка: {e}", flush=True)
+        try:
+            db_sku.rollback()
+        except Exception:
+            pass
+    finally:
+        db_sku.close()
+
     # Авто-сид BrandAlias и CategoryAlias из существующих distinct значений
     # Если раньше импортировали товары и уже есть brands/categories — создаём
     # для них записи с shop_name=NULL (пока не причёсаны). Идемпотентно.

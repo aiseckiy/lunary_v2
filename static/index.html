@@ -506,49 +506,67 @@
       <button class="modal-close" onclick="closeEditModal()">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Название</label>
-        <input class="form-input" id="em-name">
-      </div>
-      <div class="edit-modal field-row">
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Артикул производителя</label>
-          <input class="form-input" id="em-supplier-article" placeholder="040100060234">
+
+      <!-- Kaspi info (read-only для Kaspi-товаров) -->
+      <div id="em-kaspi-info" style="display:none;margin-bottom:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:11px;font-weight:var(--fw-bold);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Kaspi карточка (read-only)</div>
+        <div id="em-kaspi-name" style="font-size:15px;font-weight:var(--fw-bold);margin-bottom:8px;line-height:1.35"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px">
+          <div><span style="color:var(--text3)">Бренд:</span> <span id="em-kaspi-brand-display">—</span></div>
+          <div><span style="color:var(--text3)">Категория:</span> <span id="em-kaspi-cat-display">—</span></div>
+          <div><span style="color:var(--text3)">SKU:</span> <span id="em-kaspi-sku-display" style="font-family:monospace;font-size:11px">—</span></div>
+          <div><span style="color:var(--text3)">Единица:</span> <span id="em-kaspi-unit-display">—</span></div>
+          <div><span style="color:var(--text3)">Артикул:</span> <span id="em-kaspi-article-display">—</span></div>
+          <div><span style="color:var(--text3)">Штрихкод:</span> <span id="em-kaspi-barcode-display">—</span></div>
         </div>
       </div>
-      <div class="edit-modal field-row">
+
+      <!-- Для НЕ-Kaspi товаров: редактируемые базовые поля -->
+      <div id="em-basic-fields">
         <div class="form-group">
-          <label class="form-label">Штрихкод</label>
-          <div style="display:flex;gap:6px">
-            <input class="form-input" id="em-barcode" placeholder="—" style="flex:1">
-            <button type="button" onclick="startEditBarcodeScanner()" style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;padding:8px 12px;color:#e4e4e7;font-size:18px;cursor:pointer;flex-shrink:0" title="Сканировать камерой">📷</button>
+          <label class="form-label">Название</label>
+          <input class="form-input" id="em-name">
+        </div>
+        <div class="edit-modal field-row">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Артикул производителя</label>
+            <input class="form-input" id="em-supplier-article" placeholder="040100060234">
           </div>
-          <div id="edit-barcode-reader-wrap" style="display:none;margin-top:10px;border-radius:8px;overflow:hidden"></div>
+        </div>
+        <div class="edit-modal field-row">
+          <div class="form-group">
+            <label class="form-label">Штрихкод</label>
+            <div style="display:flex;gap:6px">
+              <input class="form-input" id="em-barcode" placeholder="—" style="flex:1">
+              <button type="button" onclick="startEditBarcodeScanner()" style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;padding:8px 12px;color:#e4e4e7;font-size:18px;cursor:pointer;flex-shrink:0" title="Сканировать камерой">📷</button>
+            </div>
+            <div id="edit-barcode-reader-wrap" style="display:none;margin-top:10px;border-radius:8px;overflow:hidden"></div>
+          </div>
+        </div>
+        <div class="edit-modal field-row">
+          <div class="form-group">
+            <label class="form-label">Категория</label>
+            <input class="form-input" id="em-category">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Единица</label>
+            <select class="form-input form-select" id="em-unit">
+              <option>шт</option><option>кг</option><option>л</option><option>м</option><option>уп</option>
+            </select>
+          </div>
+        </div>
+        <div class="edit-modal field-row">
+          <div class="form-group" style="position:relative">
+            <label class="form-label">Бренд</label>
+            <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX..." autocomplete="off"
+              oninput="filterBrandList(this.value)" onfocus="showBrandList()" onblur="setTimeout(hideBrandList,150)">
+            <div id="brand-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.1);z-index:400;max-height:200px;overflow-y:auto;margin-top:2px"></div>
+          </div>
         </div>
       </div>
-      <div class="edit-modal field-row">
-        <div class="form-group">
-          <label class="form-label">Категория</label>
-          <input class="form-input" id="em-category">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Единица</label>
-          <select class="form-input form-select" id="em-unit">
-            <option>шт</option><option>кг</option><option>л</option><option>м</option><option>уп</option>
-          </select>
-        </div>
-      </div>
-      <div class="edit-modal field-row">
-        <div class="form-group">
-          <label class="form-label">Мин. остаток</label>
-          <input class="form-input" id="em-min" type="number" min="0">
-        </div>
-        <div class="form-group" style="position:relative">
-          <label class="form-label">Бренд</label>
-          <input class="form-input" id="em-brand" placeholder="TYTAN, AKFIX..." autocomplete="off"
-            oninput="filterBrandList(this.value)" onfocus="showBrandList()" onblur="setTimeout(hideBrandList,150)">
-          <div id="brand-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.1);z-index:400;max-height:200px;overflow-y:auto;margin-top:2px"></div>
-        </div>
+
+      <!-- Всегда редактируемые поля (и для Kaspi, и для своих) -->
+      <div class="edit-modal field-row" style="margin-top:12px">
         <div class="form-group">
           <label class="form-label">Цена (₸)</label>
           <input class="form-input" id="em-price" type="number" placeholder="1500" min="0">
@@ -558,15 +576,20 @@
           <input class="form-input" id="em-cost-price" type="number" placeholder="900" min="0">
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Поставщик</label>
-        <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD" list="suppliers-list" autocomplete="off">
-        <datalist id="suppliers-list"></datalist>
+      <div class="edit-modal field-row">
+        <div class="form-group">
+          <label class="form-label">Мин. остаток</label>
+          <input class="form-input" id="em-min" type="number" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Поставщик</label>
+          <input class="form-input" id="em-supplier" placeholder="ТОО SMASH LTD" list="suppliers-list" autocomplete="off">
+          <datalist id="suppliers-list"></datalist>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Kaspi SKU <span style="font-size:11px;color: var(--text3);font-weight: var(--fw-normal)">(для заказов)</span></label>
-        <input class="form-input" id="em-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
-      </div>
+
+      <!-- Скрытые поля для submitEdit (Kaspi-товар → readonly, значения берутся из hidden) -->
+      <input type="hidden" id="em-kaspi-sku">
 
       <!-- Link-группа: статус + действия -->
       <div id="em-link-group" style="display:none;margin-bottom:14px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:12px"></div>
@@ -1506,23 +1529,52 @@ function openEditModal(id, fromMove = false) {
   const p = allProducts.find(x => x.id === id);
   editId = id;
   document.getElementById('em-back-btn').style.display = fromMove ? '' : 'none';
-  document.getElementById('em-name').value = p.name;
+
+  const isKaspi = !!(p.kaspi_sku);
+  const kaspiInfo = document.getElementById('em-kaspi-info');
+  const basicFields = document.getElementById('em-basic-fields');
+
+  if (isKaspi) {
+    // Kaspi-товар: показываем read-only блок, скрываем редактируемые базовые поля
+    kaspiInfo.style.display = 'block';
+    basicFields.style.display = 'none';
+    document.getElementById('em-kaspi-name').textContent = p.name;
+    document.getElementById('em-kaspi-brand-display').textContent = p.brand || '—';
+    document.getElementById('em-kaspi-cat-display').textContent = p.category || '—';
+    document.getElementById('em-kaspi-sku-display').textContent = p.kaspi_sku || '—';
+    document.getElementById('em-kaspi-unit-display').textContent = p.unit || 'шт';
+    document.getElementById('em-kaspi-article-display').textContent = p.supplier_article || '—';
+    document.getElementById('em-kaspi-barcode-display').textContent = p.barcode || '—';
+    // Скрытые значения для submitEdit
+    document.getElementById('em-name').value = p.name;
+    document.getElementById('em-barcode').value = p.barcode || '';
+    document.getElementById('em-category').value = p.category || '';
+    document.getElementById('em-unit').value = p.unit || 'шт';
+    document.getElementById('em-brand').value = p.brand || '';
+    document.getElementById('em-supplier-article').value = p.supplier_article || '';
+  } else {
+    // Свой товар: обычный редактор
+    kaspiInfo.style.display = 'none';
+    basicFields.style.display = 'block';
+    document.getElementById('em-name').value = p.name;
+    document.getElementById('em-barcode').value = p.barcode || '';
+    document.getElementById('em-category').value = p.category || '';
+    document.getElementById('em-unit').value = p.unit || 'шт';
+    document.getElementById('em-brand').value = p.brand || '';
+    document.getElementById('em-supplier-article').value = p.supplier_article || '';
+  }
+
   document.getElementById('em-sku').value = '';
-  document.getElementById('em-barcode').value = p.barcode || '';
-  document.getElementById('em-category').value = p.category || '';
-  document.getElementById('em-unit').value = p.unit || 'шт';
   document.getElementById('em-min').value = p.min_stock ?? 5;
-  document.getElementById('em-brand').value = p.brand || '';
   document.getElementById('em-price').value = p.price || '';
   document.getElementById('em-cost-price').value = p.cost_price || '';
   document.getElementById('em-supplier').value = p.supplier || '';
-  document.getElementById('em-supplier-article').value = p.supplier_article || '';
   document.getElementById('em-show-in-shop').checked = !!p.show_in_shop;
   document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
   document.getElementById('edit-modal').classList.add('open');
 
-  // Link-группа: загружаем детали через /api/products/{id}
-  renderLinkGroupBlock(null);  // скрываем сразу пока грузится
+  // Link-группа
+  renderLinkGroupBlock(null);
   fetch(`/api/products/${p.id}`).then(r => r.json()).then(data => {
     renderLinkGroupBlock(data.product || null);
   }).catch(() => {});

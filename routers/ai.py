@@ -193,12 +193,13 @@ def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
     if not is_admin(user):
         raise HTTPException(status_code=403)
 
-    products = db.query(_P).filter(
+    all_candidates = db.query(_P).filter(
         _P.kaspi_sku.isnot(None),
-        _P.kaspi_sku.contains("_"),
         (_P.images.is_(None)) | (_P.images == "") | (_P.images == "[]"),
         (_P.image_url.is_(None)) | (_P.image_url == ""),
-    ).limit(50).all()
+    ).all()
+    # contains("_") в SQL не работает — _ это wildcard в LIKE. Фильтруем в Python.
+    products = [p for p in all_candidates if "_" in (p.kaspi_sku or "")][:50]
 
     filled = 0
     failed = 0

@@ -45,6 +45,115 @@ def parse_images(product) -> list:
     return []
 
 
+# ══════════════════════════════════════════════════════
+# Shop resolver: склад-карточка → магазин-карточка
+# ══════════════════════════════════════════════════════
+def build_brand_map(db) -> dict:
+    """Возвращает {raw_name: BrandAlias} для быстрого lookup'а."""
+    from database import BrandAlias
+    return {a.raw_name: a for a in db.query(BrandAlias).all()}
+
+
+def build_category_map(db) -> dict:
+    """Возвращает {raw_name: CategoryAlias}."""
+    from database import CategoryAlias
+    return {a.raw_name: a for a in db.query(CategoryAlias).all()}
+
+
+def resolve_brand(raw_brand: str, brand_map: dict) -> str:
+    """Возвращает красивое имя бренда для магазина. Если alias с shop_name
+    не задан — возвращает raw (как есть в Kaspi)."""
+    if not raw_brand:
+        return ""
+    alias = brand_map.get(raw_brand)
+    if alias and alias.shop_name:
+        return alias.shop_name
+    return raw_brand
+
+
+def resolve_category(raw_category: str, category_map: dict) -> str:
+    """Возвращает красивое имя категории."""
+    if not raw_category:
+        return ""
+    alias = category_map.get(raw_category)
+    if alias and alias.shop_name:
+        return alias.shop_name
+    return raw_category
+
+
+def resolve_shop_view(product, db, brand_map=None, category_map=None, ref_item=None) -> dict:
+    """Возвращает shop-версию товара — что будет показано на /shop.
+
+    Правила:
+    - name, supplier, supplier_article, cost_price:
+        если product залинкован через linked_ref_id → берём из PriceListItem
+        (в накладной обычно чистые данные поставщика). Иначе из Product.
+    - brand: через BrandAlias.shop_name (нормализация)
+    - category: через CategoryAlias.shop_name
+    - description, specs, images, meta_*: из Product как есть (AI-generated)
+    - price, stock: всегда из Product (актуальные с Kaspi)
+
+    brand_map / category_map — опциональные индексы для batch-вызовов
+    (не делает N+1 запросов если передать индексы).
+    ref_item — уже-загруженный PriceListItem если есть (для batch оптимизации).
+    """
+    import json
+    from database import PriceListItem
+
+    if brand_map is None:
+        brand_map = build_brand_map(db)
+    if category_map is None:
+        category_map = build_category_map(db)
+
+    # Base: raw поля Product
+    name = product.name or ""
+    supplier = product.supplier or ""
+    supplier_article = product.supplier_article or ""
+    cost_price = product.cost_price
+
+    # Override через PriceListItem если залинкован
+    if product.linked_ref_id:
+        if ref_item is None:
+            ref_item = db.query(PriceListItem).filter(PriceListItem.id == product.linked_ref_id).first()
+        if ref_item:
+            if ref_item.name:
+                name = ref_item.name
+            if ref_item.supplier:
+                supplier = ref_item.supplier
+            if ref_item.article:
+                supplier_article = ref_item.article
+            if ref_item.cost_price:
+                cost_price = ref_item.cost_price
+
+    # Нормализация бренда и категории
+    brand = resolve_brand(product.brand or "", brand_map)
+    category = resolve_category(product.category or "", category_map)
+
+    try:
+        specs = json.loads(product.specs or "[]")
+    except Exception:
+        specs = []
+
+    return {
+        "id": product.id,
+        "name": name,
+        "brand": brand,
+        "category": category,
+        "price": product.price,
+        "unit": product.unit or "шт",
+        "description": product.description or "",
+        "specs": specs,
+        "images": parse_images(product),
+        "supplier": supplier,
+        "supplier_article": supplier_article,
+        "cost_price": cost_price,
+        "meta_title": product.meta_title or "",
+        "meta_description": product.meta_description or "",
+        "meta_keywords": product.meta_keywords or "",
+        "kaspi_sku": product.kaspi_sku or "",
+    }
+
+
 _parse_images = parse_images
 
 

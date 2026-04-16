@@ -20,8 +20,10 @@ BASE_URL = "https://www.lunary.kz"
 
 @router.get("/shop/product/{product_id}", response_class=HTMLResponse)
 def shop_product_page(product_id: int, db: Session = Depends(get_db)):
-    """Серверный рендер страницы товара с полными meta-тегами и schema.org."""
+    """Серверный рендер страницы товара с полными meta-тегами и schema.org.
+    Использует resolve_shop_view — имя/бренд/категория уже причёсанные."""
     from database import Product as _P, Movement as _M
+    from helpers import resolve_shop_view
 
     row = (
         db.query(_P, func.coalesce(func.sum(_M.quantity), 0).label("stock"))
@@ -38,53 +40,55 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
         return tmpl
 
     p, stock = row
-    name = _html.escape(p.name or "Товар")
-    brand = _html.escape(p.brand or "")
+    shop = resolve_shop_view(p, db)
+
+    name = _html.escape(shop["name"] or "Товар")
+    brand = _html.escape(shop["brand"] or "")
     canon = f"{BASE_URL}/shop/product/{product_id}"
     avail = "https://schema.org/InStock" if stock > 0 else "https://schema.org/OutOfStock"
-    price_str = str(int(p.price)) if p.price else ""
+    price_str = str(int(shop["price"])) if shop["price"] else ""
 
     # SEO meta: используем заполненные AI или авто-генерация
-    title = _html.escape(p.meta_title.strip()) if p.meta_title and p.meta_title.strip() \
+    title = _html.escape(shop["meta_title"].strip()) if shop["meta_title"] and shop["meta_title"].strip() \
         else f"{name} купить в Алматы | LUNARY"
 
-    desc_raw = (p.meta_description or "").strip()
+    desc_raw = (shop["meta_description"] or "").strip()
     if not desc_raw:
-        base = (p.description or f"{brand} {name}").strip()
-        price_part = f" Цена {int(p.price):,} ₸.".replace(",", " ") if p.price else ""
+        base = (shop["description"] or f"{brand} {name}").strip()
+        price_part = f" Цена {int(shop['price']):,} ₸.".replace(",", " ") if shop["price"] else ""
         desc_raw = base[:130] + price_part if price_part else base[:155]
     description = _html.escape(desc_raw[:165])
 
-    keywords_raw = (p.meta_keywords or "").strip()
+    keywords_raw = (shop["meta_keywords"] or "").strip()
     if not keywords_raw:
-        parts = [p.name or ""]
-        if p.brand:
-            parts.append(p.brand)
-        if p.category:
-            parts.append(p.category)
+        parts = [shop["name"] or ""]
+        if shop["brand"]:
+            parts.append(shop["brand"])
+        if shop["category"]:
+            parts.append(shop["category"])
         parts += ["купить", "цена", "Алматы", "Казахстан", "LUNARY"]
         keywords_raw = ", ".join(parts)
     keywords = _html.escape(keywords_raw[:300])
 
-    image = p.image_url or f"{BASE_URL}/static/og-default.jpg"
+    image = shop["images"][0] if shop["images"] else f"{BASE_URL}/static/og-default.jpg"
 
     schema = ""
-    if p.price:
+    if shop["price"]:
         # description с fallback: meta_description → description → auto-gen
-        desc = (p.meta_description or p.description or "").strip()
+        desc = (shop["meta_description"] or shop["description"] or "").strip()
         if not desc:
             parts = []
-            if p.brand:
-                parts.append(p.brand)
-            if p.name:
-                parts.append(p.name)
+            if shop["brand"]:
+                parts.append(shop["brand"])
+            if shop["name"]:
+                parts.append(shop["name"])
             base = " ".join(parts) or "Товар"
-            desc = f"{base}. Купить в Алматы, доставка по Казахстану. Цена {int(p.price):,} ₸.".replace(",", " ")
+            desc = f"{base}. Купить в Алматы, доставка по Казахстану. Цена {int(shop['price']):,} ₸.".replace(",", " ")
         desc = desc[:500]
 
         # Доставка: бесплатно от 5000 ₸, иначе 1000 ₸ (Алматы)
         free_threshold = 5000
-        shipping_rate = 0 if p.price >= free_threshold else 1000
+        shipping_rate = 0 if shop["price"] >= free_threshold else 1000
 
         shipping_details = {
             "@type": "OfferShippingDetails",
@@ -128,8 +132,8 @@ def shop_product_page(product_id: int, db: Session = Depends(get_db)):
         schema_data = {
             "@context": "https://schema.org/",
             "@type": "Product",
-            "name": p.name or "",
-            "brand": {"@type": "Brand", "name": p.brand or ""},
+            "name": shop["name"] or "",
+            "brand": {"@type": "Brand", "name": shop["brand"] or ""},
             "description": desc,
             "image": image,
             "url": canon,

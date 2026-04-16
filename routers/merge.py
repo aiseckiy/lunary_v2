@@ -152,20 +152,23 @@ def merge_preview(db: Session = Depends(get_db)):
 
 @router.post("/api/merge-confirm")
 def merge_confirm(body: dict, db: Session = Depends(get_db)):
-    """body: {"pairs": [{"kaspi_id": X, "other_id": Y}], "fields": [...], "force": bool}"""
+    """body: {"pairs": [{"kaspi_id": X, "other_id": Y}]}
+
+    Создаёт связь Product ↔ PriceListItem через linked_ref_id.
+    Поля НЕ копируются в Product — магазин читает их через resolve_shop_view
+    (name/supplier/article/cost_price подменяются на лету из PriceListItem).
+    Это значит:
+    - Kaspi-сторона Product нетронута (для feed/XML экспорта)
+    - Магазин-сторона отображает чистые данные из накладной через linked_ref_id
+
+    Если нужно реально "копировать" данные в Product (например удалить
+    PriceListItem после merge, сохранив данные) — старая логика сохранена
+    под флагом `force_copy=True` в body.
+    """
     from database import Product as _P, PriceListItem
     selected = body.get("pairs", [])
-    fields = set(body.get("fields", ["cost_price", "supplier", "supplier_article"]))
+    force_copy = body.get("force_copy", False)
 
-    def clean_article(val):
-        if not val:
-            return None
-        for prefix in ("KSP_", "PL-"):
-            if val.upper().startswith(prefix):
-                return None
-        return val
-
-    force = body.get("force", False)
     merged = 0
     for pair in selected:
         kaspi_p = db.query(_P).filter(_P.id == pair["kaspi_id"]).first()
@@ -173,21 +176,23 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
         if not kaspi_p or not ref_item:
             continue
 
-        if "name" in fields and ref_item.name:
-            if force or not kaspi_p.name:
-                kaspi_p.name = ref_item.name
-        if "cost_price" in fields and ref_item.cost_price:
-            if force or not kaspi_p.cost_price:
-                kaspi_p.cost_price = ref_item.cost_price
-        if "supplier" in fields and ref_item.supplier:
-            if force or not kaspi_p.supplier:
-                kaspi_p.supplier = ref_item.supplier
-        if "supplier_article" in fields:
-            article_val = clean_article(ref_item.article)
-            if article_val and (force or not kaspi_p.supplier_article):
-                kaspi_p.supplier_article = article_val
-
+        # Основное действие: установить link
         kaspi_p.linked_ref_id = ref_item.id
+
+        # Опциональное: скопировать поля в Product (legacy режим)
+        if force_copy:
+            if ref_item.name and not kaspi_p.name:
+                kaspi_p.name = ref_item.name
+            if ref_item.cost_price and not kaspi_p.cost_price:
+                kaspi_p.cost_price = ref_item.cost_price
+            if ref_item.supplier and not kaspi_p.supplier:
+                kaspi_p.supplier = ref_item.supplier
+            if ref_item.article and not kaspi_p.supplier_article:
+                # не копируем технические префиксы KSP_/PL-
+                val = ref_item.article
+                if not (val.upper().startswith("KSP_") or val.upper().startswith("PL-")):
+                    kaspi_p.supplier_article = val
+
         merged += 1
     db.commit()
     return {"merged": merged}

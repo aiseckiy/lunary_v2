@@ -1,5 +1,10 @@
 [
   {
+    "hash": "5d9cb6d",
+    "date": "16.04.2026",
+    "message": "Phase 1: убрать устаревший /api/fill-brands endpoint"
+  },
+  {
     "hash": "db9829e",
     "date": "16.04.2026",
     "message": "UI: улучшенная карточка товара — чекбокс и кнопка +/-"

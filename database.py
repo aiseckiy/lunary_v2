@@ -157,6 +157,38 @@ class PriceListItem(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class BrandAlias(Base):
+    """Нормализация брендов: raw (как пришло из Kaspi) → shop_name (чистое имя для магазина).
+
+    Пример: Tehnonikol-, TehnoNikol-Kz, Tehnonikol_stroi → "ТехноНиколь".
+    Несколько raw могут резолвиться в один shop_name — это и есть объединение
+    дубликатов одного бренда под чистым именем.
+
+    shop_name = NULL значит бренд ещё не причёсан — в магазине показывается raw.
+    hidden = True значит скрыть этот бренд в фильтрах магазина.
+    """
+    __tablename__ = "brand_aliases"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    raw_name   = Column(String, unique=True, nullable=False, index=True)
+    shop_name  = Column(String, nullable=True, index=True)
+    hidden     = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class CategoryAlias(Base):
+    """Нормализация категорий аналогично BrandAlias."""
+    __tablename__ = "category_aliases"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    raw_name   = Column(String, unique=True, nullable=False, index=True)
+    shop_name  = Column(String, nullable=True, index=True)
+    icon       = Column(String, nullable=True)   # emoji или URL
+    sort_order = Column(Integer, default=0)
+    hidden     = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class UploadedFile(Base):
     """История загруженных файлов."""
     __tablename__ = "uploaded_files"
@@ -345,4 +377,41 @@ def init_db():
         db3.rollback()
     finally:
         db3.close()
+
+    # Авто-сид BrandAlias и CategoryAlias из существующих distinct значений
+    # Если раньше импортировали товары и уже есть brands/categories — создаём
+    # для них записи с shop_name=NULL (пока не причёсаны). Идемпотентно.
+    db4 = SessionLocal()
+    try:
+        existing_brands = {b.raw_name for b in db4.query(BrandAlias).all()}
+        raw_brands = db4.execute(text(
+            "SELECT DISTINCT brand FROM products WHERE brand IS NOT NULL AND brand != ''"
+        )).fetchall()
+        added_brands = 0
+        for (raw,) in raw_brands:
+            if raw and raw not in existing_brands:
+                db4.add(BrandAlias(raw_name=raw))
+                added_brands += 1
+        if added_brands:
+            db4.commit()
+            print(f"[init_db] BrandAlias seeded: +{added_brands} raw brands", flush=True)
+
+        existing_cats = {c.raw_name for c in db4.query(CategoryAlias).all()}
+        raw_cats = db4.execute(text(
+            "SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != ''"
+        )).fetchall()
+        added_cats = 0
+        for (raw,) in raw_cats:
+            if raw and raw not in existing_cats:
+                db4.add(CategoryAlias(raw_name=raw))
+                added_cats += 1
+        if added_cats:
+            db4.commit()
+            print(f"[init_db] CategoryAlias seeded: +{added_cats} raw categories", flush=True)
+    except Exception as e:
+        print(f"[init_db] alias seed ошибка: {e}", flush=True)
+        db4.rollback()
+    finally:
+        db4.close()
+
     print("[init_db] Готово", flush=True)

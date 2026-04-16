@@ -67,8 +67,10 @@ class StockAdjust(BaseModel):
 def list_products(db: Session = Depends(get_db)):
     from database import Product as _P
     from sqlalchemy import func as sqlfunc
+    from helpers import build_brand_map, resolve_brand
 
     stocks = crud.get_all_stocks(db)
+    brand_map = build_brand_map(db)
 
     # Индекс master_id → количество slaves (для бэйджика "N в группе" у мастера)
     group_counts = dict(
@@ -81,7 +83,6 @@ def list_products(db: Session = Depends(get_db)):
     result = []
     for s in stocks:
         p = s["product"]
-        # group_size > 0 только у мастера (показывает количество slaves + сам мастер)
         group_size = group_counts.get(p.id, 0) + 1 if p.id in group_counts else 0
         result.append({
             "id": p.id,
@@ -92,7 +93,7 @@ def list_products(db: Session = Depends(get_db)):
             "min_stock": p.min_stock,
             "stock": s["stock"],
             "low": s["stock"] <= p.min_stock,
-            "brand": p.brand or "",
+            "brand": resolve_brand(p.brand or "", brand_map),
             "price": p.price,
             "kaspi_sku": p.kaspi_sku or "",
             "cost_price": p.cost_price,

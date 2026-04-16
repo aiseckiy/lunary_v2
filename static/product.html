@@ -249,8 +249,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 /* Images list */
 .imgs-list { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; min-height:0; }
-.img-item { position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:#f3f4f6; }
-.img-item img { width:100%; height:100%; object-fit:cover; }
+.img-item {
+  position:relative; width:72px; height:72px; border-radius:10px;
+  overflow:hidden; border:2px solid var(--border); background:#f3f4f6;
+  cursor:grab; transition:transform .15s, border-color .15s, opacity .15s;
+}
+.img-item:active { cursor:grabbing; }
+.img-item.dragging { opacity:.4; transform:scale(.9); }
+.img-item.drag-over { border-color:var(--accent); transform:scale(1.08); }
+.img-item img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
 .img-item-del { position:absolute; top:2px; right:2px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
 .img-item-main { position:absolute; bottom:2px; left:2px; background:rgba(99,102,241,.85); color:#fff; border-radius:4px; font-size:9px; font-weight: var(--fw-bold); padding:1px 4px; }
 
@@ -666,15 +673,53 @@ function switchImgTab(tab) {
   document.getElementById('img-panel-url').style.display = tab === 'url' ? '' : 'none';
 }
 
+let dragSrcIdx = null;
+
 function renderImgsList() {
   const list = document.getElementById('imgs-list');
-  if (!editImages.length) { list.innerHTML = '<span style="font-size:12px;color: var(--text3)">Нет фотографий</span>'; return; }
+  if (!editImages.length) { list.innerHTML = '<span style="font-size:12px;color: var(--text3)">Нет фотографий — перетащи чтобы изменить порядок</span>'; return; }
   list.innerHTML = editImages.map((src, i) => `
-    <div class="img-item">
+    <div class="img-item" draggable="true" data-idx="${i}"
+         ondragstart="imgDragStart(event,${i})"
+         ondragover="imgDragOver(event)"
+         ondragenter="imgDragEnter(event)"
+         ondragleave="imgDragLeave(event)"
+         ondrop="imgDrop(event,${i})"
+         ondragend="imgDragEnd(event)">
       <img src="${src}" onerror="this.style.display='none'">
       ${i === 0 ? '<div class="img-item-main">главное</div>' : ''}
-      <button class="img-item-del" onclick="removeImage(${i})">×</button>
+      <button class="img-item-del" onclick="event.stopPropagation();removeImage(${i})">×</button>
     </div>`).join('');
+}
+
+function imgDragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function imgDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function imgDragEnter(e) {
+  const item = e.target.closest('.img-item');
+  if (item) item.classList.add('drag-over');
+}
+function imgDragLeave(e) {
+  const item = e.target.closest('.img-item');
+  if (item) item.classList.remove('drag-over');
+}
+function imgDrop(e, targetIdx) {
+  e.preventDefault();
+  const item = e.target.closest('.img-item');
+  if (item) item.classList.remove('drag-over');
+  if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+  const moved = editImages.splice(dragSrcIdx, 1)[0];
+  editImages.splice(targetIdx, 0, moved);
+  renderImgsList();
+}
+function imgDragEnd(e) {
+  dragSrcIdx = null;
+  document.querySelectorAll('.img-item').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
 }
 
 function removeImage(i) {

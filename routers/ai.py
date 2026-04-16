@@ -202,15 +202,19 @@ def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
 
     filled = 0
     failed = 0
+    skipped_items = []
     for p in products:
         sku = p.kaspi_sku.split(",")[0].strip()
         url = f"https://kaspi.kz/shop/p/-{sku}/"
+        reason = ""
         try:
             r = req_lib.get(url, timeout=10, headers={
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
             })
             if r.status_code != 200:
+                reason = f"Kaspi HTTP {r.status_code}"
                 failed += 1
+                skipped_items.append({"id": p.id, "name": p.name[:60], "sku": sku, "reason": reason})
                 continue
             match = re.search(r'og:image.*?content="([^"]+)"', r.text)
             if match:
@@ -219,10 +223,14 @@ def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
                 p.image_url = image_url
                 filled += 1
             else:
+                reason = "og:image не найден на странице"
                 failed += 1
+                skipped_items.append({"id": p.id, "name": p.name[:60], "sku": sku, "reason": reason})
             _time.sleep(0.3)
-        except Exception:
+        except Exception as e:
+            reason = str(e)[:100]
             failed += 1
+            skipped_items.append({"id": p.id, "name": p.name[:60], "sku": sku, "reason": reason})
             _time.sleep(0.5)
 
     db.commit()
@@ -230,7 +238,12 @@ def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
         _P.kaspi_sku.isnot(None),
         (_P.images.is_(None)) | (_P.images == "") | (_P.images == "[]"),
     ).count()
-    return {"filled": filled, "failed": failed, "remaining": remaining}
+    return {
+        "filled": filled,
+        "failed": failed,
+        "remaining": remaining,
+        "skipped": skipped_items,
+    }
 
 
 @router.get("/api/products/{product_id}/search-images")

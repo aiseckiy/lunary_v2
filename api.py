@@ -1374,92 +1374,110 @@ async def kaspi_import_archive(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
-    """Импорт архивных товаров — добавляет только новые, существующие не трогает"""
+    """Импорт архивных товаров — добавляет только новые, существующие не трогает."""
     import xml.etree.ElementTree as ET
-    from database import Product as _P
     import re
+    import traceback
+    from database import Product as _P
 
-    if file:
-        content = await file.read()
-        original_name = file.filename or "ARCHIVE.xml"
-        root = ET.fromstring(content)
-    else:
-        path = os.path.join(os.path.dirname(__file__), 'ARCHIVE.xml')
-        if not os.path.exists(path):
-            raise HTTPException(status_code=404, detail="ARCHIVE.xml не найден. Загрузите файл.")
-        with open(path, "rb") as f:
-            content = f.read()
-        original_name = "ARCHIVE.xml"
-        root = ET.fromstring(content)
+    try:
+        if file:
+            content = await file.read()
+            original_name = file.filename or "ARCHIVE.xml"
+        else:
+            path = os.path.join(os.path.dirname(__file__), 'ARCHIVE.xml')
+            if not os.path.exists(path):
+                raise HTTPException(status_code=404, detail="ARCHIVE.xml не найден. Загрузите файл.")
+            with open(path, "rb") as f:
+                content = f.read()
+            original_name = "ARCHIVE.xml"
 
-    def tag(el):
-        return re.sub(r'\{[^}]+\}', '', el.tag)
+        try:
+            root = ET.fromstring(content)
+        except ET.ParseError as pe:
+            raise HTTPException(status_code=400, detail=f"Ошибка парсинга XML: {pe}")
 
-    def find_text(el, name):
-        for child in el:
-            if tag(child) == name:
-                return (child.text or "").strip()
-        return ""
+        def tag(el):
+            return re.sub(r'\{[^}]+\}', '', el.tag)
 
-    # Индекс существующих kaspi_sku
-    existing_skus = {p.kaspi_sku for p in db.query(_P).filter(_P.kaspi_sku != None).all()}
+        def find_text(el, name):
+            for child in el:
+                if tag(child) == name:
+                    return (child.text or "").strip()
+            return ""
 
-    offers_el = None
-    for child in root:
-        if tag(child) == "offers":
-            offers_el = child
-            break
+        # Индекс существующих kaspi_sku (поддерживает несколько SKU через запятую)
+        existing_skus: set = set()
+        for p in db.query(_P).filter(_P.kaspi_sku.isnot(None)).all():
+            for s in (p.kaspi_sku or "").split(","):
+                s = s.strip()
+                if s:
+                    existing_skus.add(s)
 
-    if offers_el is None:
-        raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
-
-    added = 0
-    skipped = 0
-
-    for offer in offers_el:
-        if tag(offer) != "offer":
-            continue
-        kaspi_sku = offer.attrib.get("sku", "").strip()
-        if not kaspi_sku:
-            continue
-
-        # Пропускаем если уже есть
-        if kaspi_sku in existing_skus:
-            skipped += 1
-            continue
-
-        model = find_text(offer, "model")
-        brand = find_text(offer, "brand")
-
-        price = None
-        for child in offer:
-            if tag(child) == "cityprices":
-                for cp in child:
-                    if tag(cp) == "cityprice":
-                        try:
-                            price = int(cp.text.strip())
-                        except Exception:
-                            pass
-                        break
+        offers_el = None
+        for child in root:
+            if tag(child) == "offers":
+                offers_el = child
                 break
 
-        new_p = _P(
-            name=model or kaspi_sku,
-            sku=sku,
-            kaspi_sku=kaspi_sku,
-            brand=brand or None,
-            price=price,
-            category="Kaspi",
-            unit="шт",
-            min_stock=1,
-        )
-        db.add(new_p)
-        existing_skus.add(kaspi_sku)
-        added += 1
+        if offers_el is None:
+            raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
 
-    db.commit()
-    _save_upload(content, original_name, "kaspi_archive", added, db)
-    return {"added": added, "skipped": skipped}
+        added = 0
+        skipped = 0
+
+        for offer in offers_el:
+            if tag(offer) != "offer":
+                continue
+            kaspi_sku = offer.attrib.get("sku", "").strip()
+            if not kaspi_sku:
+                continue
+
+            if kaspi_sku in existing_skus:
+                skipped += 1
+                continue
+
+            model = find_text(offer, "model")
+            brand = find_text(offer, "brand")
+
+            price = None
+            for child in offer:
+                if tag(child) == "cityprices":
+                    for cp in child:
+                        if tag(cp) == "cityprice":
+                            try:
+                                price = int(cp.text.strip())
+                            except Exception:
+                                pass
+                            break
+                    break
+
+            new_p = _P(
+                name=model or kaspi_sku,
+                kaspi_sku=kaspi_sku,
+                brand=brand or None,
+                price=price,
+                category="Kaspi",
+                unit="шт",
+                min_stock=1,
+            )
+            db.add(new_p)
+            existing_skus.add(kaspi_sku)
+            added += 1
+
+        db.commit()
+        try:
+            _save_upload(content, original_name, "kaspi_archive", added, db)
+        except Exception as ue:
+            print(f"[import-archive] save_upload warning: {ue}", flush=True)
+        return {"added": added, "skipped": skipped}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        tb = traceback.format_exc()
+        print(f"[import-archive] FAILED: {e}\n{tb}", flush=True)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {str(e)[:400]}")
 
 
 # ── Слияние накладных и Kaspi товаров ────────────────────────────────────────

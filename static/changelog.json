@@ -1,5 +1,10 @@
 [
   {
+    "hash": "1c6bb76",
+    "date": "16.04.2026",
+    "message": "Fix: legacy колонка products.sku с NOT NULL ломает INSERT"
+  },
+  {
     "hash": "8f10a5f",
     "date": "16.04.2026",
     "message": "Fix: UPSERT kaspi import — UnboundLocalError + proper JSON errors"

@@ -1,5 +1,10 @@
 [
   {
+    "hash": "a0473c8",
+    "date": "16.04.2026",
+    "message": "Revert дизайн страницы товара → оригинал + только фикс картинки (contain)"
+  },
+  {
     "hash": "690c687",
     "date": "16.04.2026",
     "message": "Fix: картинка товара обрезалась — inline object-fit:cover → contain"

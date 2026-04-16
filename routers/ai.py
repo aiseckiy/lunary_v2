@@ -181,7 +181,7 @@ def fetch_kaspi_image(product_id: int, request: Request, db: Session = Depends(g
         raise HTTPException(status_code=500, detail=f"Ошибка загрузки с Kaspi: {str(e)[:200]}")
 
 
-@router.post("/api/admin/fetch-kaspi-images")
+@router.get("/api/admin/fetch-kaspi-images")
 def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
     """Массовая загрузка картинок с Kaspi для товаров без фото."""
     import requests as req_lib

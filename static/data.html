@@ -199,6 +199,17 @@
       </a>
     </div>
 
+    <!-- Картинки -->
+    <div class="section-head">🖼 Картинки</div>
+    <div class="hub-grid">
+      <div class="hub-card" onclick="fetchKaspiImagesBulk(this)" style="cursor:pointer">
+        <div class="hub-icon">🛒</div>
+        <div class="hub-title">Загрузить картинки с Kaspi</div>
+        <div class="hub-sub">Автоматически скачает og:image со страницы Kaspi для товаров без фото (до 50 за раз).</div>
+        <div class="hub-stat" id="kaspi-img-result"></div>
+      </div>
+    </div>
+
     <!-- Файлы -->
     <div class="section-head">📁 История</div>
     <div class="hub-grid">
@@ -275,6 +286,27 @@ async function loadStats() {
 }
 
 loadStats();
+
+async function fetchKaspiImagesBulk(card) {
+  const result = document.getElementById('kaspi-img-result');
+  const title = card.querySelector('.hub-title');
+  title.textContent = '⏳ Загружаю...';
+  result.innerHTML = '';
+  try {
+    const r = await fetch('/api/admin/fetch-kaspi-images');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Ошибка');
+    const parts = [];
+    if (d.filled) parts.push(`✅ ${d.filled} загружено`);
+    if (d.failed) parts.push(`❌ ${d.failed} ошибок`);
+    parts.push(`📦 осталось без фото: ${d.remaining}`);
+    result.innerHTML = parts.join(' · ');
+    title.textContent = d.remaining > 0 ? '🛒 Нажми ещё раз' : '✅ Все картинки загружены';
+  } catch(e) {
+    result.innerHTML = '❌ ' + e.message;
+    title.textContent = '🛒 Загрузить картинки с Kaspi';
+  }
+}
 </script>
 
 <script src="/static/nav.js"></script>

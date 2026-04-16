@@ -1201,163 +1201,172 @@ async def kaspi_import_xml_products(
 
     Для каждого <offer>:
     - Если товар уже есть (по kaspi_sku) — обновляем только name/brand/price.
-      Всё остальное (cost_price, supplier, description, images, meta_*,
-      verified, linked_ref_id, show_in_shop, barcode) НЕ трогаем.
+      Всё остальное НЕ трогаем.
     - Если новый — создаём с category="Kaspi".
-
-    Остаток синхронизируется через корректирующее движение, чтобы история
-    продаж/приходов НЕ стиралась. Если текущий stock отличается от
-    stockCount из XML — добавляется Movement типа 'adjustment' с заметкой.
-
-    Товары в БД которых нет в XML — НЕ удаляются и НЕ помечаются.
+    - Stock синхронизируется через корректирующее движение (slaves пропускаются).
     """
     import xml.etree.ElementTree as ET
     import re
+    import traceback
     from database import Product as _P, Movement
 
-    if file:
-        content = await file.read()
-        original_name = file.filename or "ACTIVE.xml"
-        root = ET.fromstring(content)
-    else:
-        path = os.path.join(os.path.dirname(__file__), 'ACTIVE.xml')
-        if not os.path.exists(path):
-            raise HTTPException(status_code=404, detail="ACTIVE.xml не найден. Загрузите файл.")
-        with open(path, "rb") as f:
-            content = f.read()
-        original_name = "ACTIVE.xml"
-        root = ET.fromstring(content)
-
-    def tag(el):
-        return re.sub(r'\{[^}]+\}', '', el.tag)
-
-    def find_text(el, name):
-        for child in el:
-            if tag(child) == name:
-                return (child.text or "").strip()
-        return ""
-
-    offers_el = None
-    for child in root:
-        if tag(child) == "offers":
-            offers_el = child
-            break
-
-    if offers_el is None:
-        raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
-
-    # Индекс существующих Kaspi-товаров по kaspi_sku (один SELECT, быстрый lookup)
-    existing_by_sku: dict = {}
-    for p in db.query(_P).filter(_P.kaspi_sku.isnot(None)).all():
-        for s in (p.kaspi_sku or "").split(","):
-            s = s.strip()
-            if s and s not in existing_by_sku:
-                existing_by_sku[s] = p
-
-    # Текущие остатки одним запросом (избегаем crud.get_stock в цикле)
-    from sqlalchemy import func
-    stock_rows = db.query(Movement.product_id, func.coalesce(func.sum(Movement.quantity), 0)).group_by(Movement.product_id).all()
-    current_stock_map = {pid: int(s) for pid, s in stock_rows}
-
-    created = 0
-    updated = 0
-    unchanged = 0
-    stock_adjusted = 0
-    price_changed = 0
-
-    for offer in offers_el:
-        if tag(offer) != "offer":
-            continue
-        kaspi_sku = offer.attrib.get("sku", "").strip()
-        if not kaspi_sku:
-            continue
-
-        model = find_text(offer, "model") or kaspi_sku
-        brand = find_text(offer, "brand") or None
-
-        price = None
-        stock_count = 0
-        for child in offer:
-            t = tag(child)
-            if t == "cityprices":
-                for cp in child:
-                    if tag(cp) == "cityprice":
-                        try:
-                            price = int(cp.text.strip())
-                        except Exception:
-                            pass
-                        break
-            elif t == "availabilities":
-                for av in child:
-                    if tag(av) == "availability":
-                        try:
-                            stock_count = int(float(av.attrib.get("stockCount", 0)))
-                        except Exception:
-                            pass
-                        break
-
-        existing = existing_by_sku.get(kaspi_sku)
-
-        if existing:
-            # UPDATE: обновляем только то что пришло из XML. Остальное НЕ трогаем.
-            changed = False
-            if model and existing.name != model:
-                existing.name = model
-                changed = True
-            if brand and existing.brand != brand:
-                existing.brand = brand
-                changed = True
-            if price is not None and existing.price != price:
-                existing.price = price
-                price_changed += 1
-                changed = True
-
-            # Синхронизация остатка через корректирующее движение.
-            # ВАЖНО: для slave'ов в link-группе остаток общий через мастера —
-            # пропускаем stock-коррекцию чтобы избежать N-кратного дублирования
-            # дельты (все дубликаты карточек отдали бы свой stock_count мастеру).
-            if not existing.link_master_id:
-                cur_stock = current_stock_map.get(existing.id, 0)
-                delta = stock_count - cur_stock
-                if delta != 0:
-                    move_type = "income" if delta > 0 else "writeoff"
-                    crud.add_movement(
-                        existing.id, abs(delta), move_type, db,
-                        source="kaspi_xml_import",
-                        note=f"Коррекция остатка из Kaspi XML: было {cur_stock}, стало {stock_count}",
-                    )
-                    stock_adjusted += 1
-
-            if changed or delta != 0:
-                updated += 1
-            else:
-                unchanged += 1
+    try:
+        if file:
+            content = await file.read()
+            original_name = file.filename or "ACTIVE.xml"
         else:
-            # CREATE: новый товар
-            new_p = _P(
-                name=model,
-                kaspi_sku=kaspi_sku,
-                brand=brand,
-                price=price,
-                category="Kaspi",
-                unit="шт",
-                min_stock=1,
-            )
-            db.add(new_p)
-            db.flush()
-            if stock_count > 0:
-                crud.set_initial_stock(new_p.id, stock_count, db)
-            created += 1
+            path = os.path.join(os.path.dirname(__file__), 'ACTIVE.xml')
+            if not os.path.exists(path):
+                raise HTTPException(status_code=404, detail="ACTIVE.xml не найден. Загрузите файл.")
+            with open(path, "rb") as f:
+                content = f.read()
+            original_name = "ACTIVE.xml"
 
-    db.commit()
-    _save_upload(content, original_name, "kaspi_active", created + updated, db)
-    return {
-        "created": created,
-        "updated": updated,
-        "unchanged": unchanged,
-        "stock_adjusted": stock_adjusted,
-        "price_changed": price_changed,
-    }
+        try:
+            root = ET.fromstring(content)
+        except ET.ParseError as pe:
+            raise HTTPException(status_code=400, detail=f"Ошибка парсинга XML: {pe}")
+
+        def tag(el):
+            return re.sub(r'\{[^}]+\}', '', el.tag)
+
+        def find_text(el, name):
+            for child in el:
+                if tag(child) == name:
+                    return (child.text or "").strip()
+            return ""
+
+        offers_el = None
+        for child in root:
+            if tag(child) == "offers":
+                offers_el = child
+                break
+
+        if offers_el is None:
+            raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
+
+        # Индекс существующих Kaspi-товаров по kaspi_sku (один SELECT)
+        existing_by_sku: dict = {}
+        for p in db.query(_P).filter(_P.kaspi_sku.isnot(None)).all():
+            for s in (p.kaspi_sku or "").split(","):
+                s = s.strip()
+                if s and s not in existing_by_sku:
+                    existing_by_sku[s] = p
+
+        # Текущие остатки одним запросом
+        from sqlalchemy import func
+        stock_rows = db.query(Movement.product_id, func.coalesce(func.sum(Movement.quantity), 0)).group_by(Movement.product_id).all()
+        current_stock_map = {pid: int(s) for pid, s in stock_rows}
+
+        created = 0
+        updated = 0
+        unchanged = 0
+        stock_adjusted = 0
+        price_changed = 0
+
+        for offer in offers_el:
+            if tag(offer) != "offer":
+                continue
+            kaspi_sku = offer.attrib.get("sku", "").strip()
+            if not kaspi_sku:
+                continue
+
+            model = find_text(offer, "model") or kaspi_sku
+            brand = find_text(offer, "brand") or None
+
+            price = None
+            stock_count = 0
+            for child in offer:
+                t = tag(child)
+                if t == "cityprices":
+                    for cp in child:
+                        if tag(cp) == "cityprice":
+                            try:
+                                price = int(cp.text.strip())
+                            except Exception:
+                                pass
+                            break
+                elif t == "availabilities":
+                    for av in child:
+                        if tag(av) == "availability":
+                            try:
+                                stock_count = int(float(av.attrib.get("stockCount", 0)))
+                            except Exception:
+                                pass
+                            break
+
+            existing = existing_by_sku.get(kaspi_sku)
+
+            if existing:
+                # UPDATE: обновляем только то что пришло из XML. Остальное НЕ трогаем.
+                changed = False
+                if model and existing.name != model:
+                    existing.name = model
+                    changed = True
+                if brand and existing.brand != brand:
+                    existing.brand = brand
+                    changed = True
+                if price is not None and existing.price != price:
+                    existing.price = price
+                    price_changed += 1
+                    changed = True
+
+                # Stock-коррекция. Для slave'ов в link-группе пропускаем
+                # (иначе дельта N раз сбросится в мастера).
+                delta = 0
+                is_slave = bool(getattr(existing, "link_master_id", None))
+                if not is_slave:
+                    cur_stock = current_stock_map.get(existing.id, 0)
+                    delta = stock_count - cur_stock
+                    if delta != 0:
+                        move_type = "income" if delta > 0 else "writeoff"
+                        crud.add_movement(
+                            existing.id, abs(delta), move_type, db,
+                            source="kaspi_xml_import",
+                            note=f"Коррекция остатка из Kaspi XML: было {cur_stock}, стало {stock_count}",
+                        )
+                        stock_adjusted += 1
+
+                if changed or delta != 0:
+                    updated += 1
+                else:
+                    unchanged += 1
+            else:
+                # CREATE: новый товар
+                new_p = _P(
+                    name=model,
+                    kaspi_sku=kaspi_sku,
+                    brand=brand,
+                    price=price,
+                    category="Kaspi",
+                    unit="шт",
+                    min_stock=1,
+                )
+                db.add(new_p)
+                db.flush()
+                if stock_count > 0:
+                    crud.set_initial_stock(new_p.id, stock_count, db)
+                created += 1
+
+        db.commit()
+        try:
+            _save_upload(content, original_name, "kaspi_active", created + updated, db)
+        except Exception as ue:
+            print(f"[import-xml] save_upload warning: {ue}", flush=True)
+        return {
+            "created": created,
+            "updated": updated,
+            "unchanged": unchanged,
+            "stock_adjusted": stock_adjusted,
+            "price_changed": price_changed,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        tb = traceback.format_exc()
+        print(f"[import-xml] FAILED: {e}\n{tb}", flush=True)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {str(e)[:400]}")
 
 
 @app.post("/api/kaspi/import-archive")

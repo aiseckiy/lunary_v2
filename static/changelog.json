@@ -1,5 +1,10 @@
 [
   {
+    "hash": "fb923df",
+    "date": "16.04.2026",
+    "message": "Fix: import_xlsx.html layout — div#sidebar → aside.sidebar"
+  },
+  {
     "hash": "cce0869",
     "date": "16.04.2026",
     "message": "Data hub + чистка dead endpoints"

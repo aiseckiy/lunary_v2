@@ -1197,10 +1197,23 @@ async def kaspi_import_xml_products(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
-    """Импорт товаров из Kaspi каталога XML — через файл или ACTIVE.xml на сервере"""
+    """UPSERT-импорт Kaspi каталога из XML.
+
+    Для каждого <offer>:
+    - Если товар уже есть (по kaspi_sku) — обновляем только name/brand/price.
+      Всё остальное (cost_price, supplier, description, images, meta_*,
+      verified, linked_ref_id, show_in_shop, barcode) НЕ трогаем.
+    - Если новый — создаём с category="Kaspi".
+
+    Остаток синхронизируется через корректирующее движение, чтобы история
+    продаж/приходов НЕ стиралась. Если текущий stock отличается от
+    stockCount из XML — добавляется Movement типа 'adjustment' с заметкой.
+
+    Товары в БД которых нет в XML — НЕ удаляются и НЕ помечаются.
+    """
     import xml.etree.ElementTree as ET
-    from database import Product as _P
     import re
+    from database import Product as _P, Movement
 
     if file:
         content = await file.read()
@@ -1214,8 +1227,6 @@ async def kaspi_import_xml_products(
             content = f.read()
         original_name = "ACTIVE.xml"
         root = ET.fromstring(content)
-    # убираем namespace из тегов
-    ns = "kaspiShopping"
 
     def tag(el):
         return re.sub(r'\{[^}]+\}', '', el.tag)
@@ -1226,17 +1237,6 @@ async def kaspi_import_xml_products(
                 return (child.text or "").strip()
         return ""
 
-    # Удаляем только товары категории "Kaspi" и их движения (накладные не трогаем)
-    from database import Movement
-    old_products = db.query(_P).filter(_P.category == "Kaspi").all()
-    old_ids = [p.id for p in old_products]
-    if old_ids:
-        db.query(Movement).filter(Movement.product_id.in_(old_ids)).delete(synchronize_session=False)
-        db.query(_P).filter(_P.id.in_(old_ids)).delete(synchronize_session=False)
-        db.commit()
-
-    added = 0
-
     offers_el = None
     for child in root:
         if tag(child) == "offers":
@@ -1246,6 +1246,25 @@ async def kaspi_import_xml_products(
     if offers_el is None:
         raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
 
+    # Индекс существующих Kaspi-товаров по kaspi_sku (один SELECT, быстрый lookup)
+    existing_by_sku: dict = {}
+    for p in db.query(_P).filter(_P.kaspi_sku.isnot(None)).all():
+        for s in (p.kaspi_sku or "").split(","):
+            s = s.strip()
+            if s and s not in existing_by_sku:
+                existing_by_sku[s] = p
+
+    # Текущие остатки одним запросом (избегаем crud.get_stock в цикле)
+    from sqlalchemy import func
+    stock_rows = db.query(Movement.product_id, func.coalesce(func.sum(Movement.quantity), 0)).group_by(Movement.product_id).all()
+    current_stock_map = {pid: int(s) for pid, s in stock_rows}
+
+    created = 0
+    updated = 0
+    unchanged = 0
+    stock_adjusted = 0
+    price_changed = 0
+
     for offer in offers_el:
         if tag(offer) != "offer":
             continue
@@ -1253,12 +1272,14 @@ async def kaspi_import_xml_products(
         if not kaspi_sku:
             continue
 
-        model = find_text(offer, "model")
-        brand = find_text(offer, "brand")
+        model = find_text(offer, "model") or kaspi_sku
+        brand = find_text(offer, "brand") or None
 
         price = None
+        stock_count = 0
         for child in offer:
-            if tag(child) == "cityprices":
+            t = tag(child)
+            if t == "cityprices":
                 for cp in child:
                     if tag(cp) == "cityprice":
                         try:
@@ -1266,11 +1287,7 @@ async def kaspi_import_xml_products(
                         except Exception:
                             pass
                         break
-                break
-
-        stock_count = 0
-        for child in offer:
-            if tag(child) == "availabilities":
+            elif t == "availabilities":
                 for av in child:
                     if tag(av) == "availability":
                         try:
@@ -1278,29 +1295,65 @@ async def kaspi_import_xml_products(
                         except Exception:
                             pass
                         break
-                break
 
-        new_p = _P(
-            name=model or kaspi_sku,
-            sku=None,
-            kaspi_sku=kaspi_sku,
-            brand=brand or None,
-            price=price,
-            category="Kaspi",
-            unit="шт",
-            min_stock=1,
-        )
-        db.add(new_p)
-        db.flush()
+        existing = existing_by_sku.get(kaspi_sku)
 
-        if stock_count > 0:
-            crud.set_initial_stock(new_p.id, stock_count, db)
+        if existing:
+            # UPDATE: обновляем только то что пришло из XML. Остальное НЕ трогаем.
+            changed = False
+            if model and existing.name != model:
+                existing.name = model
+                changed = True
+            if brand and existing.brand != brand:
+                existing.brand = brand
+                changed = True
+            if price is not None and existing.price != price:
+                existing.price = price
+                price_changed += 1
+                changed = True
 
-        added += 1
+            # Синхронизация остатка через корректирующее движение
+            cur_stock = current_stock_map.get(existing.id, 0)
+            delta = stock_count - cur_stock
+            if delta != 0:
+                move_type = "income" if delta > 0 else "writeoff"
+                crud.add_movement(
+                    existing.id, abs(delta), move_type, db,
+                    source="kaspi_xml_import",
+                    note=f"Коррекция остатка из Kaspi XML: было {cur_stock}, стало {stock_count}",
+                )
+                stock_adjusted += 1
+
+            if changed or delta != 0:
+                updated += 1
+            else:
+                unchanged += 1
+        else:
+            # CREATE: новый товар
+            new_p = _P(
+                name=model,
+                kaspi_sku=kaspi_sku,
+                brand=brand,
+                price=price,
+                category="Kaspi",
+                unit="шт",
+                min_stock=1,
+            )
+            db.add(new_p)
+            db.flush()
+            if stock_count > 0:
+                crud.set_initial_stock(new_p.id, stock_count, db)
+            created += 1
 
     db.commit()
-    _save_upload(content, original_name, "kaspi_active", added, db)
-    return {"deleted": len(old_ids), "added": added}
+    _save_upload(content, original_name, "kaspi_active", created + updated, db)
+    return {
+        "created": created,
+        "updated": updated,
+        "unchanged": unchanged,
+        "stock_adjusted": stock_adjusted,
+        "price_changed": price_changed,
+    }
 
 
 @app.post("/api/kaspi/import-archive")

@@ -172,7 +172,13 @@ async function importKaspi() {
     const r = await fetch('/api/kaspi/import-xml-products', { method: 'POST', body: fd });
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail);
-    showResult('active', 'ok', `✅ Добавлено: ${d.added}, удалено старых: ${d.deleted}`);
+    const parts = [];
+    if (d.created) parts.push(`➕ ${d.created} новых`);
+    if (d.updated) parts.push(`🔄 ${d.updated} обновлено`);
+    if (d.unchanged) parts.push(`= ${d.unchanged} без изменений`);
+    if (d.stock_adjusted) parts.push(`📦 ${d.stock_adjusted} коррекций остатка`);
+    if (d.price_changed) parts.push(`💰 ${d.price_changed} смен цены`);
+    showResult('active', 'ok', '✅ ' + (parts.join(' · ') || 'Импорт завершён без изменений'));
   } catch(e) { showResult('active', 'err', '❌ ' + e.message); }
   btn.disabled = false; btn.textContent = '📥 Импортировать';
 }

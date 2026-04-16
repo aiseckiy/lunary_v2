@@ -211,14 +211,21 @@ def _build_kaspi_xml(db) -> str:
     ET.SubElement(root, "merchantid").text = merchant_id
     offers_el = ET.SubElement(root, "offers")
 
+    import html as _html
+    def clean_xml(s):
+        """Чистим строку для XML: unescape HTML entities → ET сам экранирует."""
+        if not s:
+            return ""
+        return _html.unescape(s).replace("\x00", "")
+
     products = db.query(Product).filter(Product.kaspi_sku.isnot(None)).all()
     for p in products:
         skus = [s.strip() for s in p.kaspi_sku.split(",") if s.strip()]
         stock = max(crud.get_stock(p.id, db), 0)
         for sku in skus:
             offer = ET.SubElement(offers_el, "offer", sku=sku)
-            ET.SubElement(offer, "model").text = p.name or ""
-            ET.SubElement(offer, "brand").text = p.brand or ""
+            ET.SubElement(offer, "model").text = clean_xml(p.name)
+            ET.SubElement(offer, "brand").text = clean_xml(p.brand)
             avails = ET.SubElement(offer, "availabilities")
             ET.SubElement(avails, "availability",
                           available="yes" if stock > 0 else "no",

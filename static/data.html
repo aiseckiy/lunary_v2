@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Данные — Lunary OS</title>
+<style>
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 28px; }
+
+.hub-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all .15s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.hub-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+}
+.hub-card .hub-icon { font-size: 28px; line-height: 1; margin-bottom: 8px; }
+.hub-card .hub-title { font-size: 16px; font-weight: var(--fw-bold); color: var(--text); }
+.hub-card .hub-sub { font-size: 13px; color: var(--text2); line-height: 1.45; margin-top: 4px; }
+.hub-card .hub-stat {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border2);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.hub-card .hub-stat b { font-weight: var(--fw-bold); color: var(--text); font-size: 13px; }
+.hub-card .hub-stat .label { color: var(--text3); margin-right: 4px; }
+.hub-card .hub-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  background: var(--bg);
+  color: var(--text2);
+}
+.hub-card .hub-badge.warn { background: #fef3c7; color: #92400e; }
+.hub-card .hub-badge.ok { background: #dcfce7; color: #047857; }
+.hub-card .hub-badge.danger { background: #fee2e2; color: #b91c1c; }
+
+.overview-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.overview-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.overview-cell .ov-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; font-weight: var(--fw-semibold); }
+.overview-cell .ov-value { font-size: 22px; font-weight: var(--fw-extrabold); color: var(--text); line-height: 1; }
+.overview-cell .ov-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 14px;
+  font-size: 13px;
+  font-weight: var(--fw-bold);
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.section-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.last-import-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.last-import-card .li-icon { font-size: 28px; }
+.last-import-card .li-body { flex: 1; }
+.last-import-card .li-title { font-size: 13px; color: var(--text2); }
+.last-import-card .li-name { font-size: 14px; font-weight: var(--fw-semibold); color: var(--text); margin-top: 2px; }
+.last-import-card .li-meta { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.skeleton { color: var(--text3); }
+</style>
+<link rel="stylesheet" href="/static/layout.css">
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<div class="mobile-header">
+  <div class="mobile-logo">Lunary <span>OS</span></div>
+</div>
+
+<div class="main-content">
+  <div class="page-container">
+    <div class="page-title">📂 Данные</div>
+    <div class="page-sub">Импорт, справочник, слияние, проверка и экспорт — всё в одном месте.</div>
+
+    <!-- Мини-сводка -->
+    <div class="overview-strip" id="overview-strip">
+      <div class="overview-cell"><div class="ov-label">Всего товаров</div><div class="ov-value skeleton">—</div></div>
+      <div class="overview-cell"><div class="ov-label">Kaspi</div><div class="ov-value skeleton">—</div></div>
+      <div class="overview-cell"><div class="ov-label">Не проверено</div><div class="ov-value skeleton">—</div></div>
+      <div class="overview-cell"><div class="ov-label">Справочник</div><div class="ov-value skeleton">—</div></div>
+    </div>
+
+    <!-- Последний импорт -->
+    <div class="last-import-card" id="last-import-card" style="display:none">
+      <div class="li-icon">🕐</div>
+      <div class="li-body">
+        <div class="li-title">Последний загруженный файл</div>
+        <div class="li-name" id="li-name">—</div>
+        <div class="li-meta" id="li-meta">—</div>
+      </div>
+      <a href="/uploads" class="btn btn-secondary btn-sm">Все файлы →</a>
+    </div>
+
+    <!-- Импорт -->
+    <div class="section-head">📥 Импорт</div>
+    <div class="hub-grid">
+      <a href="/admin/import-xlsx" class="hub-card">
+        <div class="hub-icon">📊</div>
+        <div class="hub-title">Импорт Excel</div>
+        <div class="hub-sub">Загрузить товары из XLSX-файла. Автоматическая маппировка колонок по названиям.</div>
+      </a>
+      <a href="/import" class="hub-card">
+        <div class="hub-icon">📄</div>
+        <div class="hub-title">Импорт XML</div>
+        <div class="hub-sub">Загрузить товары из XML-выгрузки поставщика (1С, МойСклад и т.д.).</div>
+      </a>
+      <a href="/pricelist" class="hub-card">
+        <div class="hub-icon">🗂️</div>
+        <div class="hub-title">Накладные поставщиков</div>
+        <div class="hub-sub">Справочник закупочных цен из накладных. Импорт XML, поиск, сравнение с текущими ценами.</div>
+        <div class="hub-stat" id="stat-pricelist">
+          <span><span class="label">Позиций:</span><b>—</b></span>
+          <span><span class="label">Поставщиков:</span><b>—</b></span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Обработка -->
+    <div class="section-head">⚙️ Обработка</div>
+    <div class="hub-grid">
+      <a href="/merge" class="hub-card">
+        <div class="hub-icon">🔀</div>
+        <div class="hub-title">Слияние с Kaspi</div>
+        <div class="hub-sub">Сопоставить товары из накладных с Kaspi-карточками по артикулу/названию. Перенести цены и поставщика.</div>
+      </a>
+      <a href="/review" class="hub-card">
+        <div class="hub-icon">✅</div>
+        <div class="hub-title">Ревью карточек</div>
+        <div class="hub-sub">Проверить и подтвердить товары после импорта. Отметить проверенные галочкой.</div>
+        <div class="hub-badge warn" id="badge-unverified" style="display:none">— не проверено</div>
+      </a>
+    </div>
+
+    <!-- Экспорт -->
+    <div class="section-head">📤 Экспорт</div>
+    <div class="hub-grid">
+      <a href="/admin/export-preview" class="hub-card">
+        <div class="hub-icon">🔍</div>
+        <div class="hub-title">Проверить Kaspi XML</div>
+        <div class="hub-sub">Предпросмотр данных перед автозагрузкой в Kaspi. Подсветка проблем (нет цены, бренда, имени).</div>
+      </a>
+      <a href="/api/kaspi/export-xml" class="hub-card" download>
+        <div class="hub-icon">⬇️</div>
+        <div class="hub-title">Скачать Kaspi XML</div>
+        <div class="hub-sub">Готовый ACTIVE.xml для ручной загрузки в Kaspi Merchant Portal.</div>
+      </a>
+      <a href="/api/products/export/xlsx" class="hub-card" download>
+        <div class="hub-icon">📋</div>
+        <div class="hub-title">Экспорт остатков в Excel</div>
+        <div class="hub-sub">Полные остатки со всеми колонками + вкладка в формате Kaspi.</div>
+      </a>
+    </div>
+
+    <!-- Файлы -->
+    <div class="section-head">📁 История</div>
+    <div class="hub-grid">
+      <a href="/uploads" class="hub-card">
+        <div class="hub-icon">🗃️</div>
+        <div class="hub-title">Загруженные файлы</div>
+        <div class="hub-sub">Все ранее импортированные файлы — с возможностью скачать заново или удалить.</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadStats() {
+  try {
+    const d = await fetch('/api/admin/data-stats').then(r => r.json());
+    const strip = document.getElementById('overview-strip');
+    strip.innerHTML = `
+      <div class="overview-cell">
+        <div class="ov-label">Всего товаров</div>
+        <div class="ov-value">${d.products.total.toLocaleString('ru')}</div>
+        <div class="ov-sub">${d.products.kaspi} в Kaspi</div>
+      </div>
+      <div class="overview-cell">
+        <div class="ov-label">Без цены</div>
+        <div class="ov-value" style="color:${d.products.without_price > 0 ? 'var(--red)' : 'var(--text)'}">${d.products.without_price}</div>
+        <div class="ov-sub">из ${d.products.kaspi} Kaspi</div>
+      </div>
+      <div class="overview-cell">
+        <div class="ov-label">Без закупа</div>
+        <div class="ov-value" style="color:${d.products.without_cost > 0 ? 'var(--orange)' : 'var(--text)'}">${d.products.without_cost}</div>
+        <div class="ov-sub">нет себестоимости</div>
+      </div>
+      <div class="overview-cell">
+        <div class="ov-label">Справочник</div>
+        <div class="ov-value">${d.pricelist.total.toLocaleString('ru')}</div>
+        <div class="ov-sub">${d.pricelist.suppliers} поставщиков</div>
+      </div>
+    `;
+
+    // Pricelist stat
+    const psEl = document.getElementById('stat-pricelist');
+    if (psEl) {
+      psEl.innerHTML = `
+        <span><span class="label">Позиций:</span><b>${d.pricelist.total.toLocaleString('ru')}</b></span>
+        <span><span class="label">Поставщиков:</span><b>${d.pricelist.suppliers}</b></span>
+      `;
+    }
+
+    // Unverified badge
+    const badge = document.getElementById('badge-unverified');
+    if (d.products.unverified > 0) {
+      badge.textContent = `${d.products.unverified} не проверено`;
+      badge.style.display = 'inline-block';
+    }
+
+    // Last import
+    if (d.last_import) {
+      const card = document.getElementById('last-import-card');
+      const TYPE_LABELS = {
+        "kaspi_active":  "Kaspi ACTIVE",
+        "kaspi_archive": "Kaspi ARCHIVE",
+        "price_list":    "Прайс (накладные)",
+        "pricelist_ref": "Справочник",
+      };
+      const typeLabel = TYPE_LABELS[d.last_import.type] || d.last_import.type || 'файл';
+      document.getElementById('li-name').textContent = d.last_import.name;
+      document.getElementById('li-meta').textContent = `${typeLabel} · ${d.last_import.records} записей · ${d.last_import.when}`;
+      card.style.display = 'flex';
+    }
+  } catch(e) {
+    console.error('data-stats loading error', e);
+  }
+}
+
+loadStats();
+</script>
+
+<script src="/static/nav.js"></script>
+<script src="/static/mobile.js"></script>
+</body>
+</html>

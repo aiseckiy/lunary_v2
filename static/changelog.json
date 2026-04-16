@@ -1,5 +1,10 @@
 [
   {
+    "hash": "752f6bb",
+    "date": "16.04.2026",
+    "message": "SEO: добавить shippingDetails, hasMerchantReturnPolicy, description fallback"
+  },
+  {
     "hash": "858c80a",
     "date": "16.04.2026",
     "message": "Sprint 1: 6 фиксов после senior code review"

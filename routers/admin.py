@@ -1,11 +1,9 @@
-"""Admin utility endpoints: пользователи + migrations + Kaspi debug/dedupe/sync-log."""
-import json
+"""Admin utility endpoints: пользователи + Kaspi sync log."""
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from database import get_db, init_db
+from database import get_db
 from helpers import get_user_from_session, is_admin
-import kaspi as kaspi_module
 
 router = APIRouter(tags=["admin"])
 
@@ -34,91 +32,6 @@ def update_user_role(user_id: int, data: dict, request: Request, db: Session = D
         u.role = data["role"]
     db.commit()
     return {"ok": True, "role": u.role}
-
-
-@router.post("/api/admin/run-migrations")
-def run_migrations():
-    """Принудительно применить все pending миграции БД."""
-    init_db()
-    return {"ok": True, "message": "Миграции применены"}
-
-
-@router.post("/api/admin/kaspi/backfill-entries")
-def backfill_kaspi_entries(request: Request, db: Session = Depends(get_db)):
-    """Загружает состав заказов у которых entries пустые."""
-    from database import KaspiOrder
-    user = get_user_from_session(request)
-    if not is_admin(user):
-        raise HTTPException(status_code=403)
-
-    orders = db.query(KaspiOrder).filter(
-        (KaspiOrder.entries.is_(None)) |
-        (KaspiOrder.entries == "[]") |
-        (KaspiOrder.entries == "")
-    ).all()
-
-    filled = 0
-    failed = 0
-    for o in orders:
-        try:
-            entries = kaspi_module.get_order_entries(o.order_id)
-            if entries:
-                o.entries = json.dumps(entries, ensure_ascii=False)
-                if not o.product_name and entries:
-                    o.product_name = entries[0].get("name")
-                    o.sku = entries[0].get("merchantSku", "")
-                    o.quantity = sum(e.get("qty", 1) for e in entries if isinstance(e, dict))
-                filled += 1
-            else:
-                failed += 1
-        except Exception:
-            failed += 1
-
-    db.commit()
-    return {"ok": True, "filled": filled, "failed": failed, "total": len(orders)}
-
-
-@router.get("/api/admin/kaspi/debug-entries/{order_id}")
-def debug_kaspi_entries(order_id: str, request: Request):
-    """Временный: посмотреть сырой ответ Kaspi для entries."""
-    user = get_user_from_session(request)
-    if not is_admin(user):
-        raise HTTPException(status_code=403)
-    raw = kaspi_module._proxy("get_order_entries", {"orderId": order_id})
-    return {"raw": raw}
-
-
-@router.post("/api/admin/dedupe-kaspi-orders")
-def dedupe_kaspi_orders(request: Request, db: Session = Depends(get_db)):
-    """Удаляет base64 дубли заказов Kaspi, оставляя числовые ID."""
-    import base64
-    from database import KaspiOrder
-    user = get_user_from_session(request)
-    if not is_admin(user):
-        raise HTTPException(status_code=403)
-
-    all_orders = db.query(KaspiOrder).all()
-    deleted = 0
-    migrated = 0
-
-    for o in all_orders:
-        oid = o.order_id
-        if not oid.isdigit():
-            try:
-                decoded = base64.b64decode(oid + "==").decode("utf-8").strip()
-                if decoded.isdigit():
-                    numeric = db.query(KaspiOrder).filter(KaspiOrder.order_id == decoded).first()
-                    if numeric:
-                        db.delete(o)
-                        deleted += 1
-                    else:
-                        o.order_id = decoded
-                        migrated += 1
-            except Exception:
-                pass
-
-    db.commit()
-    return {"ok": True, "deleted": deleted, "migrated": migrated}
 
 
 @router.get("/api/admin/kaspi/sync-log")

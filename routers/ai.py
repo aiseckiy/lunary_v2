@@ -177,30 +177,6 @@ def search_product_images(product_id: int, request: Request, db: Session = Depen
     return {"images": images, "query": query}
 
 
-@router.get("/api/admin/test-google-images")
-def test_google_images(request: Request):
-    """Тест SerpApi image search."""
-    import requests as req_lib
-    user = get_user_from_session(request)
-    if not is_admin(user):
-        raise HTTPException(status_code=403)
-    api_key = os.getenv("SERPAPI_KEY", "")
-    if not api_key:
-        return {"error": "SERPAPI_KEY не задан в Railway"}
-    try:
-        r = req_lib.get("https://serpapi.com/search", params={
-            "engine": "google_images", "q": "герметик tytan", "api_key": api_key,
-            "num": 2, "hl": "ru", "gl": "kz",
-        }, timeout=15)
-        data = r.json()
-        if "error" in data:
-            return {"error": data["error"]}
-        items = data.get("images_results", [])
-        return {"ok": True, "found": len(items), "first_image": items[0].get("original") if items else None}
-    except Exception as e:
-        return {"error": str(e)}
-
-
 @router.post("/api/products/{product_id}/ai-describe")
 def ai_describe_product(product_id: int, db: Session = Depends(get_db)):
     """Генерирует описание + характеристики + SEO meta через OpenAI."""

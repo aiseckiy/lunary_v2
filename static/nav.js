@@ -32,13 +32,14 @@
     {
       id: 'data',
       tabs: [
-        { href: '/import',                icon: '📥', label: 'Импорт XML' },
+        { href: '/admin/data',            icon: '📂', label: 'Обзор' },
         { href: '/admin/import-xlsx',     icon: '📊', label: 'Импорт Excel' },
+        { href: '/import',                icon: '📄', label: 'Импорт XML' },
         { href: '/pricelist',             icon: '🗂️', label: 'Накладные' },
         { href: '/merge',                 icon: '🔀', label: 'Слияние' },
-        { href: '/review',                icon: '✅', label: 'Проверка' },
+        { href: '/review',                icon: '✅', label: 'Ревью' },
+        { href: '/admin/export-preview',  icon: '🔍', label: 'Экспорт' },
         { href: '/uploads',               icon: '📁', label: 'Файлы' },
-        { href: '/admin/export-preview',  icon: '🔍', label: 'Проверка XML' },
       ]
     },
     {
@@ -73,15 +74,9 @@
       ]
     },
     {
-      label: 'Импорт и данные',
+      label: 'Данные',
       links: [
-        { href: '/import',           icon: '📥', label: 'Импорт XML' },
-        { href: '/admin/import-xlsx', icon: '📊', label: 'Импорт Excel' },
-        { href: '/pricelist', icon: '🗂️', label: 'Накладные' },
-        { href: '/merge',     icon: '🔀', label: 'Слияние товаров' },
-        { href: '/review',    icon: '✅', label: 'Проверка' },
-        { href: '/uploads',   icon: '📁', label: 'Файлы' },
-        { href: '/admin/export-preview', icon: '🔍', label: 'Проверка XML' },
+        { href: '/admin/data',    icon: '📂', label: 'Обзор данных' },
       ]
     },
     {

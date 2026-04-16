@@ -1564,8 +1564,6 @@ function openEditModal(id, fromMove = false) {
     document.getElementById('em-kaspi-cat-display').textContent = p.category || '—';
     document.getElementById('em-kaspi-sku-display').textContent = p.kaspi_sku || '—';
     document.getElementById('em-kaspi-unit-display').textContent = p.unit || 'шт';
-    document.getElementById('em-kaspi-article-display').textContent = p.supplier_article || '—';
-    document.getElementById('em-kaspi-barcode-display').textContent = p.barcode || '—';
     // Скрытые значения для submitEdit
     document.getElementById('em-name').value = p.name;
     document.getElementById('em-barcode').value = p.barcode || '';

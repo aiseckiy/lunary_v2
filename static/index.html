@@ -40,9 +40,29 @@
 .fdrop-cnt { font-size:11px; opacity:.5; margin-left:auto; }
 /* ── Product grid ── */
 .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
-.product-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; }
+.product-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; position:relative; }
 .product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }
+.product-card.selected { border-color:var(--accent); background:#eef2ff; box-shadow:0 0 0 3px rgba(99,102,241,.15); }
+.product-card .card-check { position:absolute; top:10px; right:10px; width:18px; height:18px; accent-color:var(--accent); cursor:pointer; opacity:.35; transition:opacity .15s; z-index:2; }
+.product-card:hover .card-check { opacity:1; }
+.product-card.selected .card-check { opacity:1; }
+.link-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:var(--fw-bold); white-space:nowrap; cursor:default; }
+.link-badge.link-master { background:#ede9fe; color:#6d28d9; }
+.link-badge.link-slave { background:var(--bg); color:var(--text2); border:1px solid var(--border); }
+
+/* Floating action bar для link-group выделения */
+.link-bar {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  background:var(--text); color:#fff;
+  border-radius:14px; padding:10px 14px;
+  display:flex; align-items:center; gap:12px;
+  box-shadow:0 16px 40px rgba(0,0,0,.25);
+  z-index:500;
+}
+.link-bar .lb-count { font-size:13px; padding:0 6px; }
+.link-bar .lb-count b { font-weight:var(--fw-bold); }
+.link-bar .btn { white-space:nowrap; }
 .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
 .card-name { font-size:14px; font-weight: var(--fw-semibold); line-height:1.4; flex:1; color:var(--text); }
 .card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight: var(--fw-semibold); }
@@ -512,9 +532,11 @@
       </div>
       <div class="form-group">
         <label class="form-label">Kaspi SKU <span style="font-size:11px;color: var(--text3);font-weight: var(--fw-normal)">(для заказов)</span></label>
-        <div id="em-kaspi-sku-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
-        <button type="button" onclick="addKaspiSkuField()" style="background:none;border:1px dashed var(--border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--accent);cursor:pointer;width:100%">+ Добавить SKU</button>
+        <input class="form-input" id="em-kaspi-sku" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px">
       </div>
+
+      <!-- Link-группа: статус + действия -->
+      <div id="em-link-group" style="display:none;margin-bottom:14px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:12px"></div>
       <label style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:4px">
         <input type="checkbox" id="em-show-in-shop" style="width:17px;height:17px;accent-color:var(--accent);flex-shrink:0">
         <span style="font-size:14px;font-weight: var(--fw-medium)">Показывать в магазине</span>
@@ -523,6 +545,21 @@
       <button class="btn-submit" onclick="submitEdit()">💾 Сохранить</button>
       <button class="btn-cancel-move" style="margin-top:8px" onclick="closeEditModal()">Отмена</button>
       <button onclick="deleteProduct()" class="admin-only" style="width:100%;margin-top:8px;background:#ef44441a;color:#ef4444;border:1px solid #ef444440;border-radius:10px;padding:12px;font-size:14px;cursor:pointer">🗑 Удалить товар</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link-group dialog: выбор мастера для объединения -->
+<div class="modal overlay" id="link-modal" onclick="closeLinkDialog(event)">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">🔗 Объединить в группу</div>
+      <button class="modal-close" onclick="closeLinkDialog()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="lm-body"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="confirmLinkGroup()">Создать группу</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeLinkDialog()">Отмена</button>
     </div>
   </div>
 </div>
@@ -537,6 +574,8 @@ let allProducts = [];
 let activeCats = new Set();
 let activeBrands = new Set();
 let showLow = false;
+// Link-group selection state: set of selected product ids
+let linkSelection = new Set();
 let missingFields = new Set(); // 'price','cost','article','supplier','barcode','stock'
 let selectedId = null;
 const PAGE_SIZE = 80;
@@ -893,11 +932,29 @@ function productCard(p) {
   const statusTip = p.low
     ? `Остаток ${p.stock} ниже минимума ${p.min_stock} ${p.unit} — нужно пополнить`
     : `Остаток в норме · Минимум: ${p.min_stock} ${p.unit}`;
+
+  // Link-group info
+  const isMaster = p.link_group_size > 0;
+  const isSlave = !!p.link_master_id;
+  let linkBadge = '';
+  if (isMaster) {
+    linkBadge = `<span class="link-badge link-master" data-tip="Мастер группы из ${p.link_group_size} карточек — остаток общий">🔗 ${p.link_group_size}</span>`;
+  } else if (isSlave) {
+    linkBadge = `<span class="link-badge link-slave" data-tip="Привязан к мастеру — остаток общий">🔗</span>`;
+  }
+
+  const checked = linkSelection.has(p.id) ? 'checked' : '';
+  const selectedClass = linkSelection.has(p.id) ? 'selected' : '';
+
   return `
-    <div class="product-card ${p.low?'low':''}" onclick="location.href='/shop/product/${p.id}'" style="cursor:pointer">
+    <div class="product-card ${p.low?'low':''} ${selectedClass}" data-pid="${p.id}" onclick="cardClick(event, ${p.id})" style="cursor:pointer">
+      <input type="checkbox" class="card-check" ${checked} onclick="event.stopPropagation();toggleLinkSelect(${p.id})" title="Выбрать для объединения">
       <div class="card-top">
         <div class="card-name">${p.name}</div>
-        <span class="card-badge ${p.low?'badge-low':'badge-ok'}" data-tip="${statusTip}">${p.low?'⚠️':'✓'}</span>
+        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+          ${linkBadge}
+          <span class="card-badge ${p.low?'badge-low':'badge-ok'}" data-tip="${statusTip}">${p.low?'⚠️':'✓'}</span>
+        </div>
       </div>
       ${p.supplier_article ? `<div class="card-sku">${p.supplier_article}</div>` : ''}
       ${p.kaspi_sku ? `<div class="card-kaspi-sku">${p.kaspi_sku}</div>` : ''}
@@ -914,6 +971,119 @@ function productCard(p) {
       </div>
     </div>
   `;
+}
+
+function cardClick(event, id) {
+  // Когда есть выбранные для объединения — клик на карточке переключает чекбокс.
+  // Иначе — открывает страницу товара.
+  if (linkSelection.size > 0) {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleLinkSelect(id);
+    return;
+  }
+  location.href = '/shop/product/' + id;
+}
+
+function toggleLinkSelect(id) {
+  if (linkSelection.has(id)) linkSelection.delete(id);
+  else linkSelection.add(id);
+  renderLinkBar();
+  // Перерисовать только статус выбранных карточек, без полного re-render'а
+  document.querySelectorAll('.product-card').forEach(el => {
+    const pid = parseInt(el.dataset.pid);
+    el.classList.toggle('selected', linkSelection.has(pid));
+    const cb = el.querySelector('.card-check');
+    if (cb) cb.checked = linkSelection.has(pid);
+  });
+}
+
+function renderLinkBar() {
+  let bar = document.getElementById('link-bar');
+  if (linkSelection.size === 0) {
+    if (bar) bar.remove();
+    return;
+  }
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'link-bar';
+    bar.className = 'link-bar';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = `
+    <div class="lb-count">Выбрано: <b>${linkSelection.size}</b></div>
+    <button class="btn btn-secondary btn-sm" onclick="clearLinkSelection()">Отмена</button>
+    <button class="btn btn-primary btn-sm" onclick="openLinkDialog()" ${linkSelection.size < 2 ? 'disabled' : ''}>🔗 Объединить в группу</button>
+  `;
+}
+
+function clearLinkSelection() {
+  linkSelection.clear();
+  renderLinkBar();
+  document.querySelectorAll('.product-card.selected').forEach(el => {
+    el.classList.remove('selected');
+    const cb = el.querySelector('.card-check');
+    if (cb) cb.checked = false;
+  });
+}
+
+function openLinkDialog() {
+  if (linkSelection.size < 2) return;
+  const selected = Array.from(linkSelection).map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+  const overlay = document.getElementById('link-modal');
+  const body = document.getElementById('lm-body');
+
+  body.innerHTML = `
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">
+      Выбери <b>главный товар</b> (мастера). У остальных остатки перейдут к мастеру, и они будут автоматически показывать его текущий запас.
+      <br><br>
+      <b>Цены у каждого останутся свои</b>. Картинки, описания, SEO — у каждого своё.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${selected.map(p => `
+        <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;background:var(--surface)">
+          <input type="radio" name="lm-master" value="${p.id}" style="width:17px;height:17px;accent-color:var(--accent)">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:var(--fw-semibold)">${p.name}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:monospace">${p.kaspi_sku || '—'} · остаток ${p.stock} ${p.unit}</div>
+          </div>
+        </label>
+      `).join('')}
+    </div>
+  `;
+  overlay.classList.add('open');
+}
+
+function closeLinkDialog(e) {
+  if (!e || e.target === document.getElementById('link-modal')) {
+    document.getElementById('link-modal').classList.remove('open');
+  }
+}
+
+async function confirmLinkGroup() {
+  const masterRadio = document.querySelector('input[name="lm-master"]:checked');
+  if (!masterRadio) {
+    toast('Выбери мастера', 'error');
+    return;
+  }
+  const master_id = parseInt(masterRadio.value);
+  const slave_ids = Array.from(linkSelection).filter(id => id !== master_id);
+
+  const res = await fetch('/api/products/link', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({master_id, slave_ids})
+  });
+  if (res.ok) {
+    const d = await res.json();
+    toast(`✅ Группа создана: мастер + ${d.slaves_linked} дубликат${d.slaves_linked === 1 ? '' : 'ов'}. Передано ${d.stock_transferred} шт.`, 'success');
+    closeLinkDialog();
+    clearLinkSelection();
+    load();
+  } else {
+    let msg = 'Ошибка объединения';
+    try { const e = await res.json(); msg = e.detail || msg; } catch {}
+    toast(msg, 'error');
+  }
 }
 
 // ── Move modal ──────────────────────────────────────────
@@ -1315,10 +1485,15 @@ function openEditModal(id, fromMove = false) {
   document.getElementById('em-supplier').value = p.supplier || '';
   document.getElementById('em-supplier-article').value = p.supplier_article || '';
   document.getElementById('em-show-in-shop').checked = !!p.show_in_shop;
-  // Kaspi SKU список
-  const skus = (p.kaspi_sku || '').split(',').map(s => s.trim()).filter(Boolean);
-  renderKaspiSkuList(skus.length ? skus : ['']);
+  document.getElementById('em-kaspi-sku').value = p.kaspi_sku || '';
   document.getElementById('edit-modal').classList.add('open');
+
+  // Link-группа: загружаем детали через /api/products/{id}
+  renderLinkGroupBlock(null);  // скрываем сразу пока грузится
+  fetch(`/api/products/${p.id}`).then(r => r.json()).then(data => {
+    renderLinkGroupBlock(data.product || null);
+  }).catch(() => {});
+
   fetch('/api/products/suppliers').then(r => r.json()).then(data => {
     const list = data.suppliers || data;
     const dl = document.getElementById('suppliers-list');
@@ -1326,28 +1501,83 @@ function openEditModal(id, fromMove = false) {
   }).catch(() => {});
 }
 
-function renderKaspiSkuList(skus) {
-  const container = document.getElementById('em-kaspi-sku-list');
-  container.innerHTML = skus.map((sku, i) => `
-    <div style="display:flex;gap:6px;align-items:center">
-      <input class="form-input em-kaspi-sku-input" value="${sku}" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0">
-      <button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color: var(--text3);cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>
-    </div>`).join('');
+function renderLinkGroupBlock(p) {
+  const el = document.getElementById('em-link-group');
+  if (!p) { el.style.display = 'none'; return; }
+
+  if (p.link_master_id && p.link_master) {
+    // Этот товар — slave
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:20px">🔗</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:var(--fw-bold);color:var(--text)">Привязан к группе</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Общий остаток с мастером:</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px;font-weight:var(--fw-semibold)">
+        ${p.link_master.name}
+        ${p.link_master.kaspi_sku ? `<div style="font-family:monospace;font-size:11px;color:var(--text3);margin-top:2px">${p.link_master.kaspi_sku}</div>` : ''}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Остатки общие. Цены у каждого товара свои. Удалять движения и править остаток нужно у мастера.</div>
+      <button type="button" onclick="unlinkProduct(${p.id})" class="btn btn-secondary btn-sm">Отвязать от мастера</button>
+    `;
+  } else if (p.is_link_master && p.link_slaves && p.link_slaves.length) {
+    // Этот товар — мастер группы
+    el.style.display = 'block';
+    const slavesHtml = p.link_slaves.map(s =>
+      `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+         <span style="flex:1;font-size:13px">${s.name}</span>
+         ${s.kaspi_sku ? `<span style="font-family:monospace;font-size:11px;color:var(--text3)">${s.kaspi_sku}</span>` : ''}
+       </div>`).join('');
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:20px">🔗</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:var(--fw-bold);color:var(--text)">Мастер группы</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${p.link_slaves.length} дубликат${p.link_slaves.length === 1 ? '' : (p.link_slaves.length < 5 ? 'а' : 'ов')} карточек используют этот остаток:</div>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">${slavesHtml}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Все движения склада (продажи, приходы) пишутся сюда. Дубликаты получают этот остаток автоматически.</div>
+      <button type="button" onclick="unlinkGroup(${p.link_slaves.map(s => s.id).join(',')})" class="btn btn-secondary btn-sm">Разбить группу</button>
+    `;
+  } else {
+    el.style.display = 'none';
+  }
 }
 
-function addKaspiSkuField() {
-  const container = document.getElementById('em-kaspi-sku-list');
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:6px;align-items:center';
-  div.innerHTML = `<input class="form-input em-kaspi-sku-input" placeholder="103965195_678470411" style="font-family:monospace;font-size:12px;flex:1;margin-bottom:0"><button type="button" onclick="removeKaspiSkuField(this)" style="background:none;border:none;font-size:18px;color: var(--text3);cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0" title="Удалить">✕</button>`;
-  container.appendChild(div);
-  div.querySelector('input').focus();
+async function unlinkProduct(id) {
+  if (!confirm('Отвязать этот товар от мастера? Остаток останется у мастера; у этого товара будет 0.')) return;
+  const res = await fetch('/api/products/unlink', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({product_ids: [id]})
+  });
+  if (res.ok) {
+    toast('✅ Отвязано', 'success');
+    closeEditModal();
+    load();
+  } else {
+    toast('Ошибка отвязки', 'error');
+  }
 }
 
-function removeKaspiSkuField(btn) {
-  const container = document.getElementById('em-kaspi-sku-list');
-  if (container.children.length > 1) btn.parentElement.remove();
-  else btn.previousElementSibling.value = '';
+async function unlinkGroup(idsCsv) {
+  const ids = idsCsv.split(',').map(Number).filter(Boolean);
+  if (!ids.length) return;
+  if (!confirm(`Разбить группу? ${ids.length} дубликатов станут независимыми, их остаток обнулится.`)) return;
+  const res = await fetch('/api/products/unlink', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({product_ids: ids})
+  });
+  if (res.ok) {
+    toast('✅ Группа разбита', 'success');
+    closeEditModal();
+    load();
+  } else {
+    toast('Ошибка', 'error');
+  }
 }
 
 function closeEditModal(e) {
@@ -1382,7 +1612,7 @@ async function submitEdit() {
   const cost_price = parseInt(document.getElementById('em-cost-price').value) || null;
   const supplier = document.getElementById('em-supplier').value.trim() || null;
   const supplier_article = document.getElementById('em-supplier-article').value.trim() || null;
-  const kaspi_sku = Array.from(document.querySelectorAll('.em-kaspi-sku-input')).map(i => i.value.trim()).filter(Boolean).join(',') || null;
+  const kaspi_sku = document.getElementById('em-kaspi-sku').value.trim() || null;
   const show_in_shop = document.getElementById('em-show-in-shop').checked;
   const res = await fetch(`/api/products/${editId}`, {
     method: 'PUT',

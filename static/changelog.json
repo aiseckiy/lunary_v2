@@ -1,5 +1,10 @@
 [
   {
+    "hash": "e40984a",
+    "date": "16.04.2026",
+    "message": "Link-группы товаров: общий остаток для дубликатов карточек"
+  },
+  {
     "hash": "b889b0f",
     "date": "16.04.2026",
     "message": "CRITICAL: переписать Kaspi XML import на UPSERT вместо destroy+recreate"

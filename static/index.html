@@ -1615,46 +1615,86 @@ function renderLinkGroupBlock(p) {
   const el = document.getElementById('em-link-group');
   if (!p) { el.style.display = 'none'; return; }
 
+  el.style.display = 'block';
+
   if (p.link_master_id && p.link_master) {
-    // Этот товар — slave
-    el.style.display = 'block';
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:20px">🔗</span>
+        <span style="font-size:18px">🔗</span>
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:var(--fw-bold);color:var(--text)">Привязан к группе</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px">Общий остаток с мастером:</div>
+          <div style="font-size:13px;font-weight:var(--fw-bold)">Привязан к мастеру</div>
+          <div style="font-size:12px;color:var(--text2)">Остатки общие, цены свои</div>
         </div>
+        <button type="button" onclick="unlinkProduct(${p.id})" class="btn btn-secondary btn-sm">Отвязать</button>
       </div>
-      <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px;font-weight:var(--fw-semibold)">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px">
         ${p.link_master.name}
-        ${p.link_master.kaspi_sku ? `<div style="font-family:monospace;font-size:11px;color:var(--text3);margin-top:2px">${p.link_master.kaspi_sku}</div>` : ''}
+        <span style="font-family:monospace;font-size:11px;color:var(--text3);margin-left:6px">${p.link_master.kaspi_sku || ''}</span>
       </div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Остатки общие. Цены у каждого товара свои. Удалять движения и править остаток нужно у мастера.</div>
-      <button type="button" onclick="unlinkProduct(${p.id})" class="btn btn-secondary btn-sm">Отвязать от мастера</button>
     `;
   } else if (p.is_link_master && p.link_slaves && p.link_slaves.length) {
-    // Этот товар — мастер группы
-    el.style.display = 'block';
-    const slavesHtml = p.link_slaves.map(s =>
-      `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-         <span style="flex:1;font-size:13px">${s.name}</span>
-         ${s.kaspi_sku ? `<span style="font-family:monospace;font-size:11px;color:var(--text3)">${s.kaspi_sku}</span>` : ''}
-       </div>`).join('');
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:20px">🔗</span>
+        <span style="font-size:18px">🔗</span>
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:var(--fw-bold);color:var(--text)">Мастер группы</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px">${p.link_slaves.length} дубликат${p.link_slaves.length === 1 ? '' : (p.link_slaves.length < 5 ? 'а' : 'ов')} карточек используют этот остаток:</div>
+          <div style="font-size:13px;font-weight:var(--fw-bold)">Мастер · ${p.link_slaves.length} дубликат${p.link_slaves.length < 5 ? (p.link_slaves.length === 1 ? '' : 'а') : 'ов'}</div>
+          <div style="font-size:12px;color:var(--text2)">Дубликаты показывают этот остаток</div>
         </div>
+        <button type="button" onclick="unlinkGroup(${p.link_slaves.map(s => s.id).join(',')})" class="btn btn-secondary btn-sm">Разбить</button>
       </div>
-      <div style="margin-bottom:10px">${slavesHtml}</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Все движения склада (продажи, приходы) пишутся сюда. Дубликаты получают этот остаток автоматически.</div>
-      <button type="button" onclick="unlinkGroup(${p.link_slaves.map(s => s.id).join(',')})" class="btn btn-secondary btn-sm">Разбить группу</button>
+      ${p.link_slaves.map(s => `<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 12px;margin-bottom:4px;font-size:12px">${s.name} <span style="color:var(--text3)">${s.kaspi_sku || ''}</span></div>`).join('')}
     `;
   } else {
-    el.style.display = 'none';
+    // Не привязан — показать поиск для привязки
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:18px">🔗</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:var(--fw-bold)">Объединить остатки</div>
+          <div style="font-size:12px;color:var(--text2)">Привязать к мастеру (у дубликатов будет общий остаток)</div>
+        </div>
+      </div>
+      <input type="text" class="form-input" id="link-search-input" placeholder="Поиск мастера по названию..." oninput="searchLinkMaster(this.value)" style="margin-bottom:4px;font-size:13px">
+      <div id="link-search-results" style="display:none;max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:#fff"></div>
+    `;
+  }
+}
+
+function searchLinkMaster(q) {
+  const res = document.getElementById('link-search-results');
+  if (!q || q.length < 2) { res.style.display = 'none'; return; }
+  const ql = q.toLowerCase();
+  const matches = allProducts.filter(p =>
+    p.id !== editId &&
+    (p.name.toLowerCase().includes(ql) || (p.kaspi_sku || '').includes(q))
+  ).slice(0, 8);
+  if (!matches.length) { res.style.display = 'block'; res.innerHTML = '<div style="padding:10px;color:var(--text3);font-size:12px">Не найдено</div>'; return; }
+  res.style.display = 'block';
+  res.innerHTML = matches.map(p => `
+    <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border2);font-size:13px;display:flex;justify-content:space-between" onclick="linkToMaster(${p.id})" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <span>${p.name}</span>
+      <span style="color:var(--text3);font-size:11px">${p.stock} шт</span>
+    </div>`).join('');
+}
+
+async function linkToMaster(masterId) {
+  if (!editId) return;
+  try {
+    const r = await fetch('/api/admin/link-products', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({master_id: masterId, slave_ids: [editId]})
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      toast(e.detail || 'Ошибка привязки', 'error');
+      return;
+    }
+    const d = await r.json();
+    toast(`✅ Привязано к мастеру · передано ${d.stock_transferred} шт`, 'success');
+    closeEditModal();
+    load();
+  } catch(e) {
+    toast('Ошибка: ' + e.message, 'error');
   }
 }
 

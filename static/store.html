@@ -859,6 +859,19 @@ body {
       </div>
       <button onclick="clearPrice()" id="btn-clear-price" style="display:none;width:100%;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:#fff;cursor:pointer;color:var(--text3)">Сбросить цену</button>
       <div class="filter-divider"></div>
+      <div class="filter-title">Фото</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:4px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="radio" name="photo-filter" value="all" checked onchange="setPhotoFilter('all')" style="accent-color:var(--accent)"> Все товары
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="radio" name="photo-filter" value="with" onchange="setPhotoFilter('with')" style="accent-color:var(--accent)"> С фото
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="radio" name="photo-filter" value="without" onchange="setPhotoFilter('without')" style="accent-color:var(--accent)"> Без фото
+        </label>
+      </div>
+      <div class="filter-divider"></div>
       <div class="filter-title">Бренды</div>
       <div class="brand-list" id="brand-list"></div>
     </div>
@@ -888,6 +901,13 @@ let searchQuery = '';
 let currentPage = 1;
 let priceMin = null;
 let priceMax = null;
+let photoFilter = 'all'; // 'all' | 'with' | 'without'
+
+function setPhotoFilter(val) {
+  photoFilter = val;
+  currentPage = 1;
+  render();
+}
 
 function applyPriceFilter() {
   const mn = document.getElementById('price-min').value;
@@ -1032,6 +1052,8 @@ function filtered() {
   if (activeBrands.size) list = list.filter(p => activeBrands.has((p.brand||'').toLowerCase()));
   if (priceMin !== null) list = list.filter(p => p.price && p.price >= priceMin);
   if (priceMax !== null) list = list.filter(p => p.price && p.price <= priceMax);
+  if (photoFilter === 'with') list = list.filter(p => p.image_url);
+  if (photoFilter === 'without') list = list.filter(p => !p.image_url);
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     list = list.filter(p =>

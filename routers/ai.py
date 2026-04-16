@@ -198,7 +198,7 @@ def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
         _P.kaspi_sku.contains("_"),
         (_P.images.is_(None)) | (_P.images == "") | (_P.images == "[]"),
         (_P.image_url.is_(None)) | (_P.image_url == ""),
-    ).limit(10).all()
+    ).limit(50).all()
 
     filled = 0
     failed = 0

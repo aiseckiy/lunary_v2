@@ -1,5 +1,10 @@
 [
   {
+    "hash": "ca0177e",
+    "date": "17.04.2026",
+    "message": "Drag & drop для порядка фото + логирование пропущенных при bulk-загрузке"
+  },
+  {
     "hash": "ba5f4bb",
     "date": "17.04.2026",
     "message": "Fix: fetch-kaspi-images POST→GET + кнопка на /admin/data"

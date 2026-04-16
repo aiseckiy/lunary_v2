@@ -34,6 +34,7 @@ class Product(Base):
     min_stock = Column(Integer, default=5)
     brand = Column(String, nullable=True, index=True)
     price = Column(Integer, nullable=True)  # цена в тенге
+    sku = Column(String, nullable=True)      # legacy-колонка (в старой БД может быть NOT NULL — снимаем в init_db)
     kaspi_sku = Column(String, nullable=True, index=True)   # ID для матчинга заказов (101602457_xxx)
     kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
     cost_price = Column(Integer, nullable=True)  # закупочная цена
@@ -242,6 +243,29 @@ def init_db():
                 print(f"[init_db] OK {table}.{col}", flush=True)
             except Exception as e:
                 print(f"[init_db] ОШИБКА {table}.{col}: {str(e)[:200]}", flush=True)
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+
+    # Снять NOT NULL с legacy колонок которые в текущей модели nullable.
+    # PostgreSQL: DROP NOT NULL идемпотентно (не падает если уже nullable).
+    nullable_relax = [
+        ("products", "sku"),
+    ]
+    with engine.connect() as conn:
+        for table, col in nullable_relax:
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ALTER COLUMN {col} DROP NOT NULL"))
+                conn.commit()
+                print(f"[init_db] OK drop NOT NULL {table}.{col}", flush=True)
+            except Exception as e:
+                # На SQLite этот синтаксис не работает — молча пропускаем
+                msg = str(e)[:150]
+                if "does not exist" in msg or "no such column" in msg:
+                    pass
+                else:
+                    print(f"[init_db] drop NOT NULL {table}.{col}: {msg}", flush=True)
                 try:
                     conn.rollback()
                 except Exception:

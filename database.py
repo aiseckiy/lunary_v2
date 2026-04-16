@@ -34,7 +34,6 @@ class Product(Base):
     min_stock = Column(Integer, default=5)
     brand = Column(String, nullable=True, index=True)
     price = Column(Integer, nullable=True)  # цена в тенге
-    sku = Column(String, nullable=True)      # legacy-колонка (в старой БД может быть NOT NULL — снимаем в init_db)
     kaspi_sku = Column(String, nullable=True, index=True)   # ID для матчинга заказов (101602457_xxx)
     kaspi_article = Column(String, nullable=True)  # Артикул в Kaspi кабинете (KSP_xxx)
     cost_price = Column(Integer, nullable=True)  # закупочная цена

@@ -991,6 +991,7 @@ def products_export_xlsx(db: Session = Depends(get_db), ids: str = None):
     q = (
         db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
         .outerjoin(Movement, Movement.product_id == Product.id)
+        .filter(Product.category != "Накладные")
         .group_by(Product.id)
         .order_by(Product.name)
     )

@@ -236,6 +236,7 @@
       <option value="name-asc">А-Я Название</option>
     </select>
     <button class="btn-add" onclick="openAddModal()">+ Добавить товар</button>
+    <button class="sort-btn" onclick="openImportPopup()" style="background:#eef2ff;border-color:#c7d2fe;color:var(--accent);font-weight: var(--fw-semibold)">📥 Импорт XML</button>
     <button class="sort-btn" onclick="openReceiptModal()" style="background:#dcfce7;border-color:#86efac;color:var(--green);font-weight: var(--fw-semibold)">📦 Приёмка</button>
     <button class="sort-btn" onclick="openPurchasesModal()" style="background:#fef9c3;border-color:#fde047;color:#854d0e;font-weight: var(--fw-semibold)">🛒 Закупки</button>
     <a class="sort-btn" id="btn-xlsx" href="/api/products/export/xlsx" download style="text-decoration:none">⬇ Excel</a>
@@ -616,6 +617,30 @@
       <div id="lm-body"></div>
       <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="confirmLinkGroup()">Создать группу</button>
       <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeLinkDialog()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import XML popup -->
+<div class="modal overlay" id="import-modal" onclick="if(event.target===this)closeImportPopup()">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">📥 Импорт Kaspi XML</div>
+      <button class="modal-close" onclick="closeImportPopup()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="import-drop" style="border:2px dashed var(--border);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px"
+           onclick="document.getElementById('import-file-input').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='#f5f3ff'"
+           ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+           ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handleImportFile(event.dataTransfer.files[0])">
+        <div style="font-size:32px;margin-bottom:8px">📄</div>
+        <div style="font-size:14px;font-weight:var(--fw-semibold)" id="import-file-label">Перетащи ACTIVE.xml сюда или нажми</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">Обновит цены, остатки, названия и бренды</div>
+        <input type="file" id="import-file-input" accept=".xml" style="display:none" onchange="handleImportFile(this.files[0])">
+      </div>
+      <button class="btn btn-primary btn-block" id="import-go-btn" onclick="runImport()" disabled>📥 Импортировать</button>
+      <div id="import-result" style="margin-top:12px;font-size:13px;display:none;padding:12px;border-radius:10px"></div>
     </div>
   </div>
 </div>
@@ -1874,6 +1899,65 @@ load().then(() => {
   }
 });
 setInterval(load, 30000);
+
+// ── Import XML popup ──────────────────────────────────
+let importFile = null;
+
+function openImportPopup() {
+  importFile = null;
+  document.getElementById('import-file-input').value = '';
+  document.getElementById('import-file-label').textContent = 'Перетащи ACTIVE.xml сюда или нажми';
+  document.getElementById('import-go-btn').disabled = true;
+  document.getElementById('import-result').style.display = 'none';
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function closeImportPopup() {
+  document.getElementById('import-modal').classList.remove('open');
+}
+
+function handleImportFile(file) {
+  if (!file) return;
+  importFile = file;
+  document.getElementById('import-file-label').textContent = '📄 ' + file.name;
+  document.getElementById('import-go-btn').disabled = false;
+}
+
+async function runImport() {
+  if (!importFile) return;
+  const btn = document.getElementById('import-go-btn');
+  const result = document.getElementById('import-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Импортирую...';
+  result.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('file', importFile);
+  try {
+    const r = await fetch('/api/kaspi/import-xml-products', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Ошибка');
+    const parts = [];
+    if (d.created) parts.push(`➕ ${d.created} новых`);
+    if (d.updated) parts.push(`🔄 ${d.updated} обновлено`);
+    if (d.unchanged) parts.push(`= ${d.unchanged} без изменений`);
+    if (d.stock_adjusted) parts.push(`📦 ${d.stock_adjusted} коррекций остатка`);
+    if (d.price_changed) parts.push(`💰 ${d.price_changed} смен цены`);
+    result.style.display = 'block';
+    result.style.background = '#dcfce7';
+    result.style.color = '#15803d';
+    result.innerHTML = '✅ ' + (parts.join(' · ') || 'Без изменений');
+    load(); // обновить карточки на странице
+  } catch(e) {
+    result.style.display = 'block';
+    result.style.background = '#fee2e2';
+    result.style.color = '#b91c1c';
+    result.innerHTML = '❌ ' + e.message;
+  }
+  btn.disabled = false;
+  btn.textContent = '📥 Импортировать';
+}
+
 </script>
 <script src="/static/nav.js"></script>
 <script src="/static/mobile.js"></script>

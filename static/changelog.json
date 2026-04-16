@@ -1,5 +1,10 @@
 [
   {
+    "hash": "ba6d130",
+    "date": "16.04.2026",
+    "message": "Fix: kaspi_import_archive endpoint — NameError sku + отсутствие try/except"
+  },
+  {
     "hash": "1c6bb76",
     "date": "16.04.2026",
     "message": "Fix: legacy колонка products.sku с NOT NULL ломает INSERT"

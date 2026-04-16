@@ -1374,7 +1374,14 @@ async def kaspi_import_archive(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
-    """Импорт архивных товаров — добавляет только новые, существующие не трогает."""
+    """UPSERT-импорт архивных товаров Kaspi.
+
+    - Новые товары (отсутствующие в БД) — создаются.
+    - Существующие — обновляются name/brand/price если что-то изменилось.
+    - Stock НЕ трогается: в архиве stockCount=0, но физически товар может
+      ещё лежать на складе. Остатки обновит следующий импорт ACTIVE.xml
+      или Kaspi sync loop.
+    """
     import xml.etree.ElementTree as ET
     import re
     import traceback
@@ -1406,13 +1413,13 @@ async def kaspi_import_archive(
                     return (child.text or "").strip()
             return ""
 
-        # Индекс существующих kaspi_sku (поддерживает несколько SKU через запятую)
-        existing_skus: set = set()
+        # Индекс существующих Kaspi-товаров по kaspi_sku
+        existing_by_sku: dict = {}
         for p in db.query(_P).filter(_P.kaspi_sku.isnot(None)).all():
             for s in (p.kaspi_sku or "").split(","):
                 s = s.strip()
-                if s:
-                    existing_skus.add(s)
+                if s and s not in existing_by_sku:
+                    existing_by_sku[s] = p
 
         offers_el = None
         for child in root:
@@ -1423,8 +1430,10 @@ async def kaspi_import_archive(
         if offers_el is None:
             raise HTTPException(status_code=400, detail="Тег <offers> не найден в XML")
 
-        added = 0
-        skipped = 0
+        created = 0
+        updated = 0
+        unchanged = 0
+        price_changed = 0
 
         for offer in offers_el:
             if tag(offer) != "offer":
@@ -1433,12 +1442,8 @@ async def kaspi_import_archive(
             if not kaspi_sku:
                 continue
 
-            if kaspi_sku in existing_skus:
-                skipped += 1
-                continue
-
-            model = find_text(offer, "model")
-            brand = find_text(offer, "brand")
+            model = find_text(offer, "model") or kaspi_sku
+            brand = find_text(offer, "brand") or None
 
             price = None
             for child in offer:
@@ -1452,25 +1457,54 @@ async def kaspi_import_archive(
                             break
                     break
 
-            new_p = _P(
-                name=model or kaspi_sku,
-                kaspi_sku=kaspi_sku,
-                brand=brand or None,
-                price=price,
-                category="Kaspi",
-                unit="шт",
-                min_stock=1,
-            )
-            db.add(new_p)
-            existing_skus.add(kaspi_sku)
-            added += 1
+            existing = existing_by_sku.get(kaspi_sku)
+
+            if existing:
+                # UPDATE: обновляем name/brand/price. Stock и всё остальное НЕ трогаем.
+                changed = False
+                if model and existing.name != model:
+                    existing.name = model
+                    changed = True
+                if brand and existing.brand != brand:
+                    existing.brand = brand
+                    changed = True
+                if price is not None and existing.price != price:
+                    existing.price = price
+                    price_changed += 1
+                    changed = True
+                if changed:
+                    updated += 1
+                else:
+                    unchanged += 1
+            else:
+                # CREATE: новый товар без начального stock (архивный = продан в Kaspi)
+                new_p = _P(
+                    name=model,
+                    kaspi_sku=kaspi_sku,
+                    brand=brand,
+                    price=price,
+                    category="Kaspi",
+                    unit="шт",
+                    min_stock=1,
+                )
+                db.add(new_p)
+                existing_by_sku[kaspi_sku] = new_p
+                created += 1
 
         db.commit()
         try:
-            _save_upload(content, original_name, "kaspi_archive", added, db)
+            _save_upload(content, original_name, "kaspi_archive", created + updated, db)
         except Exception as ue:
             print(f"[import-archive] save_upload warning: {ue}", flush=True)
-        return {"added": added, "skipped": skipped}
+        return {
+            "created": created,
+            "updated": updated,
+            "unchanged": unchanged,
+            "price_changed": price_changed,
+            # Совместимость со старым фронтом
+            "added": created,
+            "skipped": unchanged,
+        }
     except HTTPException:
         raise
     except Exception as e:

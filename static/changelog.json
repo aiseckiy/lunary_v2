@@ -1,5 +1,10 @@
 [
   {
+    "hash": "593d034",
+    "date": "16.04.2026",
+    "message": "Perf: defer тяжёлых колонок в get_all_stocks (description/specs/images/meta)"
+  },
+  {
     "hash": "0c09fd0",
     "date": "16.04.2026",
     "message": "Perf: убрать description/specs из /api/products list response"

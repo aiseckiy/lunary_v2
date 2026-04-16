@@ -548,7 +548,7 @@ function renderProduct() {
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           ${addBtn}
-          ${p.kaspi_sku ? `<a href="https://kaspi.kz/shop/p/-${p.kaspi_sku.split(',')[0].trim()}/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:13px 18px;border:1.5px solid #ef4444;border-radius:12px;color:#ef4444;font-size:14px;font-weight: var(--fw-semibold);text-decoration:none;transition:background .15s" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background=''">🛒 На Kaspi</a>` : ''}
+          ${p.kaspi_sku && p.kaspi_sku.includes('_') ? `<a href="https://kaspi.kz/shop/p/-${p.kaspi_sku.split(',')[0].trim()}/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:13px 18px;border:1.5px solid #ef4444;border-radius:12px;color:#ef4444;font-size:14px;font-weight: var(--fw-semibold);text-decoration:none;transition:background .15s" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background=''">🛒 На Kaspi</a>` : ''}
         </div>
         ${isAdmin ? `
           <div style="display:flex;gap:8px;margin-top:12px">

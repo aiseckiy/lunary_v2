@@ -40,16 +40,25 @@
 .fdrop-cnt { font-size:11px; opacity:.5; margin-left:auto; }
 /* ── Product grid ── */
 .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
-.product-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .15s; position:relative; }
-.product-card:hover { border-color:#d1d5db; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px); }
+.product-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 18px 16px; cursor:pointer; transition:all .15s; }
+.product-card:hover { border-color:#c4c8d0; box-shadow:0 4px 16px rgba(0,0,0,.06); transform:translateY(-1px); }
 .product-card.low { border-color:#fca5a5; }
-.product-card.selected { border-color:var(--accent); background:#eef2ff; box-shadow:0 0 0 3px rgba(99,102,241,.15); }
-.product-card .card-check { position:absolute; top:10px; right:10px; width:18px; height:18px; accent-color:var(--accent); cursor:pointer; opacity:.35; transition:opacity .15s; z-index:2; }
-.product-card:hover .card-check { opacity:1; }
+.product-card.selected { border-color:var(--accent); background:#f5f6ff; box-shadow:0 0 0 3px rgba(99,102,241,.18); }
+.product-card .card-check {
+  width:18px; height:18px;
+  accent-color:var(--accent);
+  cursor:pointer;
+  opacity:.25;
+  transition:opacity .15s;
+  flex-shrink:0;
+  margin-top:3px;
+}
+.product-card:hover .card-check { opacity:.9; }
 .product-card.selected .card-check { opacity:1; }
-.link-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:var(--fw-bold); white-space:nowrap; cursor:default; }
+.link-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:var(--fw-bold); white-space:nowrap; cursor:default; line-height:1.4; }
 .link-badge.link-master { background:#ede9fe; color:#6d28d9; }
 .link-badge.link-slave { background:var(--bg); color:var(--text2); border:1px solid var(--border); }
+.card-badges-right { display:flex; gap:4px; align-items:center; flex-shrink:0; }
 
 /* Floating action bar для link-group выделения */
 .link-bar {
@@ -63,22 +72,46 @@
 .link-bar .lb-count { font-size:13px; padding:0 6px; }
 .link-bar .lb-count b { font-weight:var(--fw-bold); }
 .link-bar .btn { white-space:nowrap; }
-.card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
-.card-name { font-size:14px; font-weight: var(--fw-semibold); line-height:1.4; flex:1; color:var(--text); }
-.card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-left:8px; flex-shrink:0; font-weight: var(--fw-semibold); }
-.badge-ok  { background:#dcfce7; color:var(--green); }
-.badge-low { background:#fee2e2; color:var(--red); }
-.card-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.card-kaspi-sku { font-size:10px; color:#6366f1; font-family:monospace; margin-bottom:10px; opacity:.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.card-bottom { display:flex; align-items:flex-end; justify-content:space-between; }
-.card-stock { font-size:28px; font-weight: var(--fw-extrabold); }
+.card-top { display:flex; align-items:flex-start; gap:10px; margin-bottom:6px; }
+.card-name { font-size:14px; font-weight: var(--fw-semibold); line-height:1.4; flex:1; min-width:0; color:var(--text); }
+.card-badge { font-size:11px; padding:2px 8px; border-radius:20px; white-space:nowrap; flex-shrink:0; font-weight: var(--fw-semibold); line-height:1.5; }
+.badge-ok  { background:#dcfce7; color:#047857; }
+.badge-low { background:#fee2e2; color:#b91c1c; }
+.card-sku { font-size:11px; color:var(--text3); font-family:monospace; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:28px; }
+.card-kaspi-sku { font-size:10px; color:var(--accent); font-family:monospace; margin-bottom:14px; opacity:.75; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:28px; }
+.card-bottom { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-left:28px; }
+.card-stock { font-size:30px; font-weight: var(--fw-extrabold); line-height:1; letter-spacing:-.5px; }
 .card-stock.low { color:var(--red); }
 .card-stock.ok  { color:var(--green); }
-.card-unit { font-size:12px; color:var(--text3); margin-top:2px; }
-.card-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
-.card-tag { background:var(--bg); color:var(--text2); font-size:11px; padding:2px 8px; border-radius:6px; font-weight: var(--fw-medium); }
-.card-btn { background:var(--bg); border:none; border-radius:6px; padding:6px 10px; color:var(--text2); font-size:13px; cursor:pointer; }
-.card-btn:hover { background:var(--border); }
+.card-unit { font-size:12px; color:var(--text3); margin-top:4px; }
+.card-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:12px; margin-left:28px; }
+.card-tag { background:var(--bg); color:var(--text2); font-size:11px; padding:3px 9px; border-radius:7px; font-weight: var(--fw-medium); }
+
+/* Кнопка "Движение склада" в углу карточки — акцентная, круглая, заметная */
+.card-btn {
+  background: var(--accent-bg, #eef2ff);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s ease;
+  font-family: inherit;
+}
+.card-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(99,102,241,.35);
+}
+.card-btn:active { transform: scale(.98); }
 .cat-header { font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; font-weight: var(--fw-semibold); margin:20px 0 10px; grid-column:1/-1; }
 /* ── Tooltips ── */
 [data-tip] { position:relative; cursor:default; }
@@ -948,10 +981,10 @@ function productCard(p) {
 
   return `
     <div class="product-card ${p.low?'low':''} ${selectedClass}" data-pid="${p.id}" onclick="cardClick(event, ${p.id})" style="cursor:pointer">
-      <input type="checkbox" class="card-check" ${checked} onclick="event.stopPropagation();toggleLinkSelect(${p.id})" title="Выбрать для объединения">
       <div class="card-top">
+        <input type="checkbox" class="card-check" ${checked} onclick="event.stopPropagation();toggleLinkSelect(${p.id})" title="Выбрать для объединения">
         <div class="card-name">${p.name}</div>
-        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+        <div class="card-badges-right">
           ${linkBadge}
           <span class="card-badge ${p.low?'badge-low':'badge-ok'}" data-tip="${statusTip}">${p.low?'⚠️':'✓'}</span>
         </div>
@@ -963,7 +996,7 @@ function productCard(p) {
           <div class="card-stock ${p.low?'low':'ok'}" data-tip="${statusTip}">${p.stock} <span style="font-size:14px;font-weight: var(--fw-medium);color: var(--text3)">${p.unit}</span></div>
           ${p.price ? `<div class="card-unit">${p.price.toLocaleString('ru')} ₸${margin !== null ? ` <span style="color:var(--green);font-size:11px;font-weight: var(--fw-medium)" data-tip="${marginTip}">+${margin}%</span>` : (p.price && !p.cost_price ? ` <span style="color:#d1d5db;font-size:11px" data-tip="Закупочная цена не указана">—%</span>` : '')}</div>` : ''}
         </div>
-        <button class="card-btn" onclick="event.stopPropagation();openMoveModal(${p.id})" title="Движение склада">⇅</button>
+        <button class="card-btn" onclick="event.stopPropagation();openMoveModal(${p.id})" title="Движение склада" data-tip="Движение склада">±</button>
       </div>
       <div class="card-tags">
         ${p.category ? `<span class="card-tag">${p.category}</span>` : ''}

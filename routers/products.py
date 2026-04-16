@@ -65,28 +65,45 @@ class StockAdjust(BaseModel):
 # ══════════════════════════════════════════════════════
 @router.get("/api/products")
 def list_products(db: Session = Depends(get_db)):
+    from database import Product as _P
+    from sqlalchemy import func as sqlfunc
+
     stocks = crud.get_all_stocks(db)
-    return [
-        {
-            "id": s["product"].id,
-            "name": s["product"].name,
-            "barcode": s["product"].barcode,
-            "category": s["product"].category,
-            "unit": s["product"].unit,
-            "min_stock": s["product"].min_stock,
-            "stock": s["stock"],
-            "low": s["stock"] <= s["product"].min_stock,
-            "brand": s["product"].brand or "",
-            "price": s["product"].price,
-            "kaspi_sku": s["product"].kaspi_sku or "",
-            "cost_price": s["product"].cost_price,
-            "supplier": s["product"].supplier or "",
-            "supplier_article": s["product"].supplier_article or "",
-            "description": s["product"].description or "",
-            "specs": s["product"].specs or "[]"
-        }
-        for s in stocks
-    ]
+
+    # Индекс master_id → количество slaves (для бэйджика "N в группе" у мастера)
+    group_counts = dict(
+        db.query(_P.link_master_id, sqlfunc.count(_P.id))
+        .filter(_P.link_master_id.isnot(None))
+        .group_by(_P.link_master_id)
+        .all()
+    )
+
+    result = []
+    for s in stocks:
+        p = s["product"]
+        # group_size > 0 только у мастера (показывает количество slaves + сам мастер)
+        group_size = group_counts.get(p.id, 0) + 1 if p.id in group_counts else 0
+        result.append({
+            "id": p.id,
+            "name": p.name,
+            "barcode": p.barcode,
+            "category": p.category,
+            "unit": p.unit,
+            "min_stock": p.min_stock,
+            "stock": s["stock"],      # для slaves уже подменён на stock мастера (см. crud.get_all_stocks)
+            "low": s["stock"] <= p.min_stock,
+            "brand": p.brand or "",
+            "price": p.price,          # цена у каждого своя
+            "kaspi_sku": p.kaspi_sku or "",
+            "cost_price": p.cost_price,  # закуп у каждого свой
+            "supplier": p.supplier or "",
+            "supplier_article": p.supplier_article or "",
+            "description": p.description or "",
+            "specs": p.specs or "[]",
+            "link_master_id": p.link_master_id,
+            "link_group_size": group_size,  # >0 только у мастера
+        })
+    return result
 
 
 @router.post("/api/products/import/xlsx")
@@ -286,6 +303,10 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     p = db.query(_P).filter(_P.id == product_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
+    # Если удаляем master link-группы — отвязываем всех slaves (становятся independent)
+    db.query(_P).filter(_P.link_master_id == product_id).update(
+        {"link_master_id": None}, synchronize_session=False
+    )
     db.query(_M).filter(_M.product_id == product_id).delete()
     db.delete(p)
     db.commit()
@@ -310,10 +331,29 @@ def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(g
 
 @router.get("/api/products/{product_id}")
 def get_product(product_id: int, db: Session = Depends(get_db)):
+    from database import Product as _P
+
     p = crud.get_product_by_id(product_id, db)
     if not p:
         raise HTTPException(status_code=404, detail="Товар не найден")
-    stock = crud.get_stock(product_id, db)
+    stock = crud.get_stock(product_id, db)  # для slave уже вернёт stock мастера
+
+    # Link-группа: master отдаёт список slaves, slave — инфу о мастере.
+    # Цены у каждого свои — не подменяем.
+    master_info = None
+    slaves_info = []
+
+    if p.link_master_id:
+        master = db.query(_P).filter(_P.id == p.link_master_id).first()
+        if master:
+            master_info = {"id": master.id, "name": master.name, "kaspi_sku": master.kaspi_sku or ""}
+    else:
+        slaves = db.query(_P).filter(_P.link_master_id == p.id).all()
+        slaves_info = [
+            {"id": s.id, "name": s.name, "kaspi_sku": s.kaspi_sku or "", "price": s.price}
+            for s in slaves
+        ]
+
     return {"product": {
         "id": p.id, "name": p.name, "kaspi_sku": p.kaspi_sku or "", "kaspi_article": p.kaspi_article or "",
         "category": p.category or "", "unit": p.unit or "шт",
@@ -329,6 +369,11 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         "meta_title": p.meta_title or "",
         "meta_description": p.meta_description or "",
         "meta_keywords": p.meta_keywords or "",
+        # Link-group info
+        "link_master_id": p.link_master_id,
+        "link_master": master_info,        # если slave: {id, name, kaspi_sku}
+        "link_slaves": slaves_info,        # если master: список slaves
+        "is_link_master": bool(slaves_info),
     }}
 
 
@@ -504,3 +549,122 @@ def low_stock(db: Session = Depends(get_db)):
         {"id": p.id, "name": p.name, "stock": stock, "min_stock": p.min_stock}
         for p, stock in items
     ]
+
+
+# ─── Link-группы (общий stock для дубликатов карточек) ─────
+class LinkGroupBody(BaseModel):
+    master_id: int
+    slave_ids: list  # list[int]
+
+
+@router.post("/api/products/link")
+def link_products(body: LinkGroupBody, request: Request, db: Session = Depends(get_db)):
+    """Объединить товары в link-группу с общим остатком.
+
+    master_id — главный товар (физически существующий на складе).
+    slave_ids — зеркала (дубликаты карточек в Kaspi). Их текущие остатки
+    переносятся мастеру через корректирующие движения (чтобы история stock'а
+    нигде не терялась).
+    """
+    from database import Product as _P, Movement as _M
+    from sqlalchemy import func as sqlfunc
+
+    user = get_user_from_session(request)
+    if not is_staff(user):
+        raise HTTPException(status_code=403)
+
+    if not body.slave_ids:
+        raise HTTPException(status_code=400, detail="Не выбраны товары для привязки")
+    if body.master_id in body.slave_ids:
+        raise HTTPException(status_code=400, detail="Мастер не может быть slave самому себе")
+
+    master = db.query(_P).filter(_P.id == body.master_id).first()
+    if not master:
+        raise HTTPException(status_code=404, detail="Мастер не найден")
+    # Мастер не может сам быть slave'ом другой группы — иначе разбивать сначала
+    if master.link_master_id:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Мастер уже привязан к другой группе (мастер id={master.link_master_id}). Сначала отвяжи его."
+        )
+
+    slaves = db.query(_P).filter(_P.id.in_(body.slave_ids)).all()
+    if len(slaves) != len(body.slave_ids):
+        raise HTTPException(status_code=400, detail="Один или несколько товаров не найдены")
+
+    # Каждый slave отдаёт свои текущие остатки мастеру. Минус у slave
+    # (чтобы на нём стало 0) и плюс у мастера (чтобы он получил все остатки).
+    total_transferred = 0
+    for s in slaves:
+        if s.id == master.id:
+            continue
+        # Если slave сам был мастером группы — его slaves тоже переподвязываем к новому мастеру
+        if db.query(_M).filter(False).first() is not None:
+            pass  # no-op (оставлено чтоб не забыть; реальная обработка ниже)
+        nested_slaves = db.query(_P).filter(_P.link_master_id == s.id).all()
+        for ns in nested_slaves:
+            ns.link_master_id = master.id
+
+        # Считаем текущий stock у slave (читаем напрямую по movements — до того как привяжем)
+        cur = db.query(sqlfunc.coalesce(sqlfunc.sum(_M.quantity), 0)).filter(
+            _M.product_id == s.id
+        ).scalar() or 0
+        cur = int(cur)
+
+        if cur != 0:
+            # Снимаем со slave
+            db.add(_M(
+                product_id=s.id,
+                quantity=-cur,
+                type="adjustment",
+                source="link_group",
+                note=f"Объединение с мастером #{master.id}: остаток передан мастеру",
+            ))
+            # Зачисляем мастеру
+            db.add(_M(
+                product_id=master.id,
+                quantity=cur,
+                type="income",
+                source="link_group",
+                note=f"Получен остаток от слейва #{s.id} ({s.name[:40]}) при объединении",
+            ))
+            total_transferred += cur
+
+        s.link_master_id = master.id
+
+    db.commit()
+
+    group_size = db.query(sqlfunc.count(_P.id)).filter(_P.link_master_id == master.id).scalar() or 0
+
+    return {
+        "ok": True,
+        "master_id": master.id,
+        "master_name": master.name,
+        "slaves_linked": len(slaves),
+        "group_size": group_size + 1,  # +1 = сам мастер
+        "stock_transferred": total_transferred,
+    }
+
+
+@router.post("/api/products/unlink")
+def unlink_products(body: dict, request: Request, db: Session = Depends(get_db)):
+    """Отвязать товары от их master'ов. Остатки мастера НЕ перераспределяются —
+    остаются на мастере. Если slave нужен с собственным остатком — руками
+    сделай set-stock после unlink."""
+    from database import Product as _P
+
+    user = get_user_from_session(request)
+    if not is_staff(user):
+        raise HTTPException(status_code=403)
+
+    ids = body.get("product_ids") or []
+    if not ids:
+        raise HTTPException(status_code=400, detail="Не выбраны товары")
+
+    count = db.query(_P).filter(
+        _P.id.in_(ids),
+        _P.link_master_id.isnot(None)
+    ).update({"link_master_id": None}, synchronize_session=False)
+    db.commit()
+
+    return {"ok": True, "unlinked": count}

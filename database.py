@@ -49,6 +49,7 @@ class Product(Base):
     meta_title = Column(String, nullable=True)       # SEO: заголовок страницы (50-60 символов)
     meta_description = Column(Text, nullable=True)   # SEO: описание для поиска (150-160 символов)
     meta_keywords = Column(Text, nullable=True)      # SEO: ключевые слова через запятую
+    link_master_id = Column(Integer, nullable=True, index=True)  # FK→products.id; если задан — этот товар slave в группе с общими stock/price
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -228,6 +229,7 @@ def init_db():
         ("products", "meta_title", "TEXT"),
         ("products", "meta_description", "TEXT"),
         ("products", "meta_keywords", "TEXT"),
+        ("products", "link_master_id", "INTEGER"),
         ("price_list_items", "is_new", "BOOLEAN DEFAULT TRUE"),
     ]
     with engine.connect() as conn:
@@ -248,9 +250,10 @@ def init_db():
     # Индексы: create_all не создаёт индексы на уже существующих таблицах,
     # поэтому создаём вручную через CREATE INDEX IF NOT EXISTS
     new_indexes = [
-        ("ix_products_kaspi_sku",   "products",     "kaspi_sku"),
-        ("ix_kaspi_orders_order_id","kaspi_orders", "order_id"),
-        ("ix_movements_product_id", "movements",    "product_id"),
+        ("ix_products_kaspi_sku",       "products",     "kaspi_sku"),
+        ("ix_products_link_master_id",  "products",     "link_master_id"),
+        ("ix_kaspi_orders_order_id",    "kaspi_orders", "order_id"),
+        ("ix_movements_product_id",     "movements",    "product_id"),
     ]
     with engine.connect() as conn:
         for idx_name, table, col in new_indexes:

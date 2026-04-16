@@ -1312,17 +1312,21 @@ async def kaspi_import_xml_products(
                 price_changed += 1
                 changed = True
 
-            # Синхронизация остатка через корректирующее движение
-            cur_stock = current_stock_map.get(existing.id, 0)
-            delta = stock_count - cur_stock
-            if delta != 0:
-                move_type = "income" if delta > 0 else "writeoff"
-                crud.add_movement(
-                    existing.id, abs(delta), move_type, db,
-                    source="kaspi_xml_import",
-                    note=f"Коррекция остатка из Kaspi XML: было {cur_stock}, стало {stock_count}",
-                )
-                stock_adjusted += 1
+            # Синхронизация остатка через корректирующее движение.
+            # ВАЖНО: для slave'ов в link-группе остаток общий через мастера —
+            # пропускаем stock-коррекцию чтобы избежать N-кратного дублирования
+            # дельты (все дубликаты карточек отдали бы свой stock_count мастеру).
+            if not existing.link_master_id:
+                cur_stock = current_stock_map.get(existing.id, 0)
+                delta = stock_count - cur_stock
+                if delta != 0:
+                    move_type = "income" if delta > 0 else "writeoff"
+                    crud.add_movement(
+                        existing.id, abs(delta), move_type, db,
+                        source="kaspi_xml_import",
+                        note=f"Коррекция остатка из Kaspi XML: было {cur_stock}, стало {stock_count}",
+                    )
+                    stock_adjusted += 1
 
             if changed or delta != 0:
                 updated += 1

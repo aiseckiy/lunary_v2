@@ -16,10 +16,21 @@ def detect_brand(name: str) -> str:
     return ""
 
 
+def resolve_master_id(product_id: int, db: Session) -> int:
+    """Если товар — slave в link-группе, возвращает id мастера. Иначе сам id.
+    Используется для роутинга stock/price операций на мастера группы."""
+    p = db.query(Product.link_master_id).filter(Product.id == product_id).first()
+    if p and p[0]:
+        return p[0]
+    return product_id
+
+
 # ─── Остаток ────────────────────────────────────────────────
 def get_stock(product_id: int, db: Session) -> int:
+    """Возвращает остаток товара. Для slave'ов возвращает остаток мастера."""
+    effective_id = resolve_master_id(product_id, db)
     result = db.query(func.sum(Movement.quantity)).filter(
-        Movement.product_id == product_id
+        Movement.product_id == effective_id
     ).scalar()
     return result or 0
 
@@ -86,9 +97,12 @@ def create_product(name: str, db: Session, barcode=None, category="Общее", 
 
 # ─── Движение склада ─────────────────────────────────────────
 def add_movement(product_id: int, quantity: int, move_type: str, db: Session, source="manual", note=None, user_id=None, user_name=None):
+    # Slave → пишем движение на мастера группы. Аналитика и история всегда
+    # хранятся у одного физического товара.
+    effective_id = resolve_master_id(product_id, db)
     signed_qty = quantity if move_type in ("income", "return", "adjustment") else -quantity
     movement = Movement(
-        product_id=product_id,
+        product_id=effective_id,
         quantity=signed_qty,
         type=move_type,
         source=source,
@@ -130,7 +144,8 @@ def get_low_stock_products(db: Session):
 
 # ─── Все остатки (один запрос вместо N+1) ────────────────────
 def get_all_stocks(db: Session):
-    from sqlalchemy import outerjoin
+    """Возвращает список {product, stock} для всех товаров (кроме накладных).
+    Для slave'ов в link-группе stock берётся у мастера группы."""
     rows = (
         db.query(Product, func.coalesce(func.sum(Movement.quantity), 0).label("stock"))
         .outerjoin(Movement, Movement.product_id == Product.id)
@@ -138,7 +153,13 @@ def get_all_stocks(db: Session):
         .group_by(Product.id)
         .all()
     )
-    return [{"product": p, "stock": int(stock)} for p, stock in rows]
+    # Индекс master_id → stock для быстрого lookup
+    stock_by_id = {p.id: int(stock) for p, stock in rows}
+    result = []
+    for p, stock in rows:
+        effective = stock_by_id.get(p.link_master_id, int(stock)) if p.link_master_id else int(stock)
+        result.append({"product": p, "stock": effective})
+    return result
 
 
 # ─── Обновить товар ──────────────────────────────────────────

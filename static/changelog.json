@@ -1,5 +1,10 @@
 [
   {
+    "hash": "cce0869",
+    "date": "16.04.2026",
+    "message": "Data hub + чистка dead endpoints"
+  },
+  {
     "hash": "752f6bb",
     "date": "16.04.2026",
     "message": "SEO: добавить shippingDetails, hasMerchantReturnPolicy, description fallback"

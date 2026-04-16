@@ -1,5 +1,10 @@
 [
   {
+    "hash": "0eb676c",
+    "date": "16.04.2026",
+    "message": "Debug: добавить logging в /api/products/link для диагностики 500"
+  },
+  {
     "hash": "bd33f12",
     "date": "16.04.2026",
     "message": "Fix: link endpoint — async + request.json() вместо body: dict"

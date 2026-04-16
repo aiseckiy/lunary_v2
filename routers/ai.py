@@ -136,6 +136,103 @@ def save_product_images(product_id: int, data: ProductImagesBody, request: Reque
     return {"ok": True}
 
 
+@router.get("/api/products/{product_id}/kaspi-image")
+def fetch_kaspi_image(product_id: int, request: Request, db: Session = Depends(get_db)):
+    """Достаёт картинку товара со страницы Kaspi по kaspi_sku (og:image)."""
+    import requests as req_lib
+    import re
+    from database import Product as _P
+
+    user = get_user_from_session(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403)
+
+    p = db.query(_P).filter(_P.id == product_id).first()
+    if not p:
+        raise HTTPException(status_code=404)
+    if not p.kaspi_sku or "_" not in p.kaspi_sku:
+        raise HTTPException(status_code=400, detail="Нет полного kaspi_sku (нужен формат productId_offerId)")
+
+    sku = p.kaspi_sku.split(",")[0].strip()
+    url = f"https://kaspi.kz/shop/p/-{sku}/"
+
+    try:
+        r = req_lib.get(url, timeout=10, headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        })
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"Kaspi вернул {r.status_code}")
+
+        match = re.search(r'og:image.*?content="([^"]+)"', r.text)
+        if not match:
+            return {"ok": False, "detail": "og:image не найден на странице Kaspi", "images": []}
+
+        image_url = match.group(1)
+
+        # Сохраняем сразу
+        p.images = json.dumps([image_url], ensure_ascii=False)
+        p.image_url = image_url
+        db.commit()
+
+        return {"ok": True, "image_url": image_url, "images": [image_url]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка загрузки с Kaspi: {str(e)[:200]}")
+
+
+@router.post("/api/admin/fetch-kaspi-images")
+def fetch_kaspi_images_bulk(request: Request, db: Session = Depends(get_db)):
+    """Массовая загрузка картинок с Kaspi для товаров без фото."""
+    import requests as req_lib
+    import re
+    import time as _time
+    from database import Product as _P
+
+    user = get_user_from_session(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403)
+
+    products = db.query(_P).filter(
+        _P.kaspi_sku.isnot(None),
+        _P.kaspi_sku.contains("_"),
+        (_P.images.is_(None)) | (_P.images == "") | (_P.images == "[]"),
+        (_P.image_url.is_(None)) | (_P.image_url == ""),
+    ).limit(50).all()
+
+    filled = 0
+    failed = 0
+    for p in products:
+        sku = p.kaspi_sku.split(",")[0].strip()
+        url = f"https://kaspi.kz/shop/p/-{sku}/"
+        try:
+            r = req_lib.get(url, timeout=10, headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            })
+            if r.status_code != 200:
+                failed += 1
+                continue
+            match = re.search(r'og:image.*?content="([^"]+)"', r.text)
+            if match:
+                image_url = match.group(1)
+                p.images = json.dumps([image_url], ensure_ascii=False)
+                p.image_url = image_url
+                filled += 1
+            else:
+                failed += 1
+            _time.sleep(0.3)
+        except Exception:
+            failed += 1
+            _time.sleep(0.5)
+
+    db.commit()
+    remaining = db.query(_P).filter(
+        _P.kaspi_sku.isnot(None),
+        (_P.images.is_(None)) | (_P.images == "") | (_P.images == "[]"),
+    ).count()
+    return {"filled": filled, "failed": failed, "remaining": remaining}
+
+
 @router.get("/api/products/{product_id}/search-images")
 def search_product_images(product_id: int, request: Request, db: Session = Depends(get_db)):
     """Ищет картинки через SerpApi (Google Images)."""

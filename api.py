@@ -1351,6 +1351,18 @@ async def kaspi_import_xml_products(
                 created += 1
 
         db.commit()
+
+        # Чистка мульти-SKU после импорта
+        try:
+            from sqlalchemy import text as _text
+            sku_cleaned = db.execute(_text(
+                "UPDATE products SET kaspi_sku = TRIM(SPLIT_PART(kaspi_sku, ',', 1)) WHERE kaspi_sku LIKE '%,%'"
+            ))
+            db.commit()
+            sku_cleaned_count = sku_cleaned.rowcount
+        except Exception:
+            sku_cleaned_count = 0
+
         try:
             _save_upload(content, original_name, "kaspi_active", created + updated, db)
         except Exception as ue:
@@ -1361,6 +1373,7 @@ async def kaspi_import_xml_products(
             "unchanged": unchanged,
             "stock_adjusted": stock_adjusted,
             "price_changed": price_changed,
+            "sku_cleaned": sku_cleaned_count,
         }
     except HTTPException:
         raise
@@ -1494,6 +1507,18 @@ async def kaspi_import_archive(
                 created += 1
 
         db.commit()
+
+        # Чистка мульти-SKU после импорта
+        try:
+            from sqlalchemy import text as _text
+            sku_cleaned = db.execute(_text(
+                "UPDATE products SET kaspi_sku = TRIM(SPLIT_PART(kaspi_sku, ',', 1)) WHERE kaspi_sku LIKE '%,%'"
+            ))
+            db.commit()
+            sku_cleaned_count = sku_cleaned.rowcount
+        except Exception:
+            sku_cleaned_count = 0
+
         try:
             _save_upload(content, original_name, "kaspi_archive", created + updated, db)
         except Exception as ue:

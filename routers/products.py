@@ -551,7 +551,7 @@ def low_stock(db: Session = Depends(get_db)):
 
 
 # ─── Link-группы (общий stock для дубликатов карточек) ─────
-@router.post("/api/products/link")
+@router.post("/api/admin/link-products")
 async def link_products(request: Request, db: Session = Depends(get_db)):
     """Объединить товары в link-группу с общим остатком."""
     import traceback
@@ -653,7 +653,7 @@ async def link_products(request: Request, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/api/products/unlink")
+@router.post("/api/admin/unlink-products")
 def unlink_products(body: dict, request: Request, db: Session = Depends(get_db)):
     """Отвязать товары от их master'ов. Остатки мастера НЕ перераспределяются —
     остаются на мастере. Если slave нужен с собственным остатком — руками

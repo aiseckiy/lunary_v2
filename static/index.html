@@ -1150,7 +1150,7 @@ async function confirmLinkGroup() {
   const master_id = parseInt(masterRadio.value);
   const slave_ids = Array.from(linkSelection).filter(id => id !== master_id);
 
-  const res = await fetch('/api/products/link', {
+  const res = await fetch('/api/admin/link-products', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({master_id, slave_ids})
   });
@@ -1660,7 +1660,7 @@ function renderLinkGroupBlock(p) {
 
 async function unlinkProduct(id) {
   if (!confirm('Отвязать этот товар от мастера? Остаток останется у мастера; у этого товара будет 0.')) return;
-  const res = await fetch('/api/products/unlink', {
+  const res = await fetch('/api/admin/unlink-products', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({product_ids: [id]})
   });
@@ -1677,7 +1677,7 @@ async function unlinkGroup(idsCsv) {
   const ids = idsCsv.split(',').map(Number).filter(Boolean);
   if (!ids.length) return;
   if (!confirm(`Разбить группу? ${ids.length} дубликатов станут независимыми, их остаток обнулится.`)) return;
-  const res = await fetch('/api/products/unlink', {
+  const res = await fetch('/api/admin/unlink-products', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({product_ids: ids})
   });

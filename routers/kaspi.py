@@ -229,6 +229,7 @@ def _build_kaspi_xml(db) -> str:
                 cityprices = ET.SubElement(offer, "cityprices")
                 ET.SubElement(cityprices, "cityprice", cityId=city_id).text = str(p.price)
 
+    ET.indent(root, space="    ")
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
 
 

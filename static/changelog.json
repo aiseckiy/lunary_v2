@@ -1,5 +1,10 @@
 [
   {
+    "hash": "2668ad9",
+    "date": "16.04.2026",
+    "message": "Склад тоже показывает причёсанные бренды из BrandAlias"
+  },
+  {
     "hash": "cd792e8",
     "date": "16.04.2026",
     "message": "Endpoint /api/admin/short-skus — список товаров с коротким SKU"

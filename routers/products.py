@@ -553,18 +553,13 @@ def low_stock(db: Session = Depends(get_db)):
 # ─── Link-группы (общий stock для дубликатов карточек) ─────
 class LinkGroupBody(BaseModel):
     master_id: int
-    slave_ids: list  # list[int]
+    slave_ids: list[int]
 
 
 @router.post("/api/products/link")
 def link_products(body: LinkGroupBody, request: Request, db: Session = Depends(get_db)):
-    """Объединить товары в link-группу с общим остатком.
-
-    master_id — главный товар (физически существующий на складе).
-    slave_ids — зеркала (дубликаты карточек в Kaspi). Их текущие остатки
-    переносятся мастеру через корректирующие движения (чтобы история stock'а
-    нигде не терялась).
-    """
+    """Объединить товары в link-группу с общим остатком."""
+    import traceback
     from database import Product as _P, Movement as _M
     from sqlalchemy import func as sqlfunc
 
@@ -577,61 +572,62 @@ def link_products(body: LinkGroupBody, request: Request, db: Session = Depends(g
     if body.master_id in body.slave_ids:
         raise HTTPException(status_code=400, detail="Мастер не может быть slave самому себе")
 
-    master = db.query(_P).filter(_P.id == body.master_id).first()
-    if not master:
-        raise HTTPException(status_code=404, detail="Мастер не найден")
-    # Мастер не может сам быть slave'ом другой группы — иначе разбивать сначала
-    if master.link_master_id:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Мастер уже привязан к другой группе (мастер id={master.link_master_id}). Сначала отвяжи его."
-        )
+    try:
+        master = db.query(_P).filter(_P.id == body.master_id).first()
+        if not master:
+            raise HTTPException(status_code=404, detail="Мастер не найден")
+        if master.link_master_id:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Мастер уже привязан к другой группе (мастер id={master.link_master_id}). Сначала отвяжи его."
+            )
 
-    slaves = db.query(_P).filter(_P.id.in_(body.slave_ids)).all()
-    if len(slaves) != len(body.slave_ids):
-        raise HTTPException(status_code=400, detail="Один или несколько товаров не найдены")
+        slaves = db.query(_P).filter(_P.id.in_(body.slave_ids)).all()
+        if len(slaves) != len(body.slave_ids):
+            raise HTTPException(status_code=400, detail="Один или несколько товаров не найдены")
 
-    # Каждый slave отдаёт свои текущие остатки мастеру. Минус у slave
-    # (чтобы на нём стало 0) и плюс у мастера (чтобы он получил все остатки).
-    total_transferred = 0
-    for s in slaves:
-        if s.id == master.id:
-            continue
-        # Если slave сам был мастером группы — его slaves тоже переподвязываем к новому мастеру
-        if db.query(_M).filter(False).first() is not None:
-            pass  # no-op (оставлено чтоб не забыть; реальная обработка ниже)
-        nested_slaves = db.query(_P).filter(_P.link_master_id == s.id).all()
-        for ns in nested_slaves:
-            ns.link_master_id = master.id
+        total_transferred = 0
+        for s in slaves:
+            if s.id == master.id:
+                continue
 
-        # Считаем текущий stock у slave (читаем напрямую по movements — до того как привяжем)
-        cur = db.query(sqlfunc.coalesce(sqlfunc.sum(_M.quantity), 0)).filter(
-            _M.product_id == s.id
-        ).scalar() or 0
-        cur = int(cur)
+            # Если slave сам был мастером — переподвязываем его slaves к новому мастеру
+            nested_slaves = db.query(_P).filter(_P.link_master_id == s.id).all()
+            for ns in nested_slaves:
+                ns.link_master_id = master.id
 
-        if cur != 0:
-            # Снимаем со slave
-            db.add(_M(
-                product_id=s.id,
-                quantity=-cur,
-                type="adjustment",
-                source="link_group",
-                note=f"Объединение с мастером #{master.id}: остаток передан мастеру",
-            ))
-            # Зачисляем мастеру
-            db.add(_M(
-                product_id=master.id,
-                quantity=cur,
-                type="income",
-                source="link_group",
-                note=f"Получен остаток от слейва #{s.id} ({s.name[:40]}) при объединении",
-            ))
-            total_transferred += cur
+            # Считаем текущий stock у slave напрямую по movements
+            cur = db.query(sqlfunc.coalesce(sqlfunc.sum(_M.quantity), 0)).filter(
+                _M.product_id == s.id
+            ).scalar() or 0
+            cur = int(cur)
 
-        s.link_master_id = master.id
+            if cur != 0:
+                db.add(_M(
+                    product_id=s.id,
+                    quantity=-cur,
+                    type="adjustment",
+                    source="link_group",
+                    note=f"Объединение с мастером #{master.id}: остаток передан мастеру",
+                ))
+                db.add(_M(
+                    product_id=master.id,
+                    quantity=cur,
+                    type="income",
+                    source="link_group",
+                    note=f"Получен остаток от слейва #{s.id} ({s.name[:40]}) при объединении",
+                ))
+                total_transferred += cur
 
-    db.commit()
+            s.link_master_id = master.id
+
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"[link] FAILED: {e}\n{traceback.format_exc()}", flush=True)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {str(e)[:300]}")
 
     group_size = db.query(sqlfunc.count(_P.id)).filter(_P.link_master_id == master.id).scalar() or 0
 

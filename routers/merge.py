@@ -193,20 +193,6 @@ def merge_confirm(body: dict, db: Session = Depends(get_db)):
     return {"merged": merged}
 
 
-@router.post("/api/fill-brands")
-def fill_brands(db: Session = Depends(get_db)):
-    """Авто-заполнение бренда по названию товара для всех у кого бренд пустой."""
-    from database import Product as _P
-    filled = 0
-    for p in db.query(_P).filter(_P.brand.is_(None)).all():
-        brand = crud.detect_brand(p.name)
-        if brand:
-            p.brand = brand
-            filled += 1
-    db.commit()
-    return {"filled": filled}
-
-
 @router.get("/merge")
 def merge_page():
     return FileResponse("static/merge.html")

@@ -123,7 +123,6 @@ select.filter { padding: 7px 10px; border: 1px solid var(--border); border-radiu
   </select>
   <button class="btn btn-green" onclick="markAllVisible()">Отметить все ✓</button>
   <button class="btn btn-outline" onclick="unmarkAllVisible()">Снять отметки</button>
-  <button class="btn btn-outline" onclick="fillBrands()" id="btn-brands" title="Авто-заполнить бренды по названию">🏷 Заполнить бренды</button>
 </div>
 
 <div class="list-container" id="list-container">
@@ -454,21 +453,6 @@ async function applyRef(refId, refName) {
   } else {
     alert('Ошибка');
   }
-}
-
-// ── Авто-заполнение брендов ────────────────────────────────────────────────
-async function fillBrands() {
-  const btn = document.getElementById('btn-brands');
-  btn.disabled = true; btn.textContent = '⏳ Заполняю...';
-  const r = await fetch('/api/fill-brands', { method: 'POST' });
-  const d = await r.json();
-  btn.disabled = false; btn.textContent = '🏷 Заполнить бренды';
-  const msg = document.createElement('div');
-  msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--blue-text, #1e40af);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight: var(--fw-semibold);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15)';
-  msg.textContent = d.filled > 0 ? `✅ Заполнено брендов: ${d.filled}` : 'Новых брендов не найдено';
-  document.body.appendChild(msg);
-  setTimeout(() => msg.remove(), 3000);
-  if (d.filled > 0) load();
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────

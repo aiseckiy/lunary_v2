@@ -80,6 +80,13 @@
       ]
     },
     {
+      label: 'Магазин',
+      links: [
+        { href: '/admin/brands',     icon: '🏷️', label: 'Бренды' },
+        { href: '/admin/categories', icon: '📂', label: 'Категории' },
+      ]
+    },
+    {
       label: 'Система',
       links: [
         { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },

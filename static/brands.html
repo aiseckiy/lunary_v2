@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бренды — Lunary OS</title>
+<style>
+.aliases-table {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.aliases-table thead th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: var(--fw-bold);
+  color: var(--text2);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.aliases-table tbody tr { border-bottom: 1px solid var(--border2); transition: background .1s; }
+.aliases-table tbody tr:last-child { border-bottom: none; }
+.aliases-table tbody tr:hover { background: var(--bg); }
+.aliases-table td { padding: 12px 16px; vertical-align: middle; }
+
+.row-raw {
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.row-raw.unresolved { color: #b45309; }
+.row-raw.hidden-label { color: var(--text3); text-decoration: line-through; }
+
+.shop-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color .12s, background .12s;
+}
+.shop-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.shop-input.saved { background: #f0fdf4; border-color: #86efac; }
+.shop-input::placeholder { color: var(--text3); }
+
+.products-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg);
+  color: var(--text2);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: var(--fw-semibold);
+}
+.products-count.big { background: var(--accent-bg, #eef2ff); color: var(--accent); }
+
+.hidden-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text2);
+  user-select: none;
+}
+.hidden-toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
+
+.summary-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.summary-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 140px;
+}
+.summary-pill .num { font-size: 22px; font-weight: var(--fw-extrabold); line-height: 1; }
+.summary-pill .lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; font-weight: var(--fw-semibold); }
+.summary-pill .num.warn { color: #b45309; }
+.summary-pill .num.ok { color: var(--green); }
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.search-input {
+  flex: 1;
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+}
+.search-input:focus { border-color: var(--accent); }
+.filter-pills {
+  display: flex;
+  gap: 6px;
+}
+.filter-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: var(--fw-medium);
+}
+.filter-pill.active { background: var(--text); border-color: var(--text); color: #fff; font-weight: var(--fw-semibold); }
+
+.empty { text-align: center; padding: 60px; color: var(--text3); }
+</style>
+<link rel="stylesheet" href="/static/layout.css">
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<div class="mobile-header">
+  <div class="mobile-logo">Lunary <span>OS</span></div>
+</div>
+
+<div class="main-content">
+  <div class="page-container">
+    <div class="page-title">🏷️ Справочник брендов</div>
+    <div class="page-sub">
+      Приведи кривые Kaspi-бренды к чистым именам для витрины магазина.
+      Напиши одно и то же «ТехноНиколь» во всех вариантах (<code>Tehnonikol-</code>, <code>TehnoNikol-Kz</code>) —
+      все товары автоматически покажутся под единым брендом на <a href="/shop" target="_blank">lunary.kz/shop</a>.
+      Для Kaspi ничего не меняется.
+    </div>
+
+    <div class="summary-bar" id="summary-bar"></div>
+
+    <div class="toolbar">
+      <input class="search-input" id="search" type="text" placeholder="Поиск по raw или shop имени...">
+      <div class="filter-pills">
+        <span class="filter-pill active" data-f="all" onclick="setFilter('all')">Все</span>
+        <span class="filter-pill" data-f="unresolved" onclick="setFilter('unresolved')">Не причёсанные</span>
+        <span class="filter-pill" data-f="resolved" onclick="setFilter('resolved')">Причёсанные</span>
+      </div>
+    </div>
+
+    <table class="aliases-table">
+      <thead>
+        <tr>
+          <th>Raw из Kaspi</th>
+          <th>Чистое имя для магазина</th>
+          <th>Товаров</th>
+          <th>Скрыть</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text3)">Загрузка...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<datalist id="shop-names-list"></datalist>
+
+<script>
+let allItems = [];
+let shopNames = [];
+let filter = 'all';
+let search = '';
+
+async function load() {
+  const r = await fetch('/api/admin/brand-aliases').then(r => r.json());
+  allItems = r.items || [];
+  shopNames = r.shop_names || [];
+  document.getElementById('shop-names-list').innerHTML = shopNames.map(n => `<option value="${n}">`).join('');
+  render();
+}
+
+function setFilter(f) {
+  filter = f;
+  document.querySelectorAll('.filter-pill').forEach(el => {
+    el.classList.toggle('active', el.dataset.f === f);
+  });
+  render();
+}
+
+function render() {
+  // Summary
+  const total = allItems.length;
+  const resolved = allItems.filter(i => i.shop_name).length;
+  const unresolved = total - resolved;
+  const totalProducts = allItems.reduce((s, i) => s + i.products_count, 0);
+  const resolvedProducts = allItems.filter(i => i.shop_name).reduce((s, i) => s + i.products_count, 0);
+  const bar = document.getElementById('summary-bar');
+  bar.innerHTML = `
+    <div class="summary-pill"><div class="num">${total}</div><div class="lbl">Всего raw-брендов</div></div>
+    <div class="summary-pill"><div class="num ok">${resolved}</div><div class="lbl">Причёсано</div></div>
+    <div class="summary-pill"><div class="num warn">${unresolved}</div><div class="lbl">Не причёсано</div></div>
+    <div class="summary-pill"><div class="num">${resolvedProducts}/${totalProducts}</div><div class="lbl">Товаров покрыто</div></div>
+  `;
+
+  let items = allItems;
+  if (filter === 'unresolved') items = items.filter(i => !i.shop_name);
+  if (filter === 'resolved') items = items.filter(i => i.shop_name);
+  if (search) {
+    const s = search.toLowerCase();
+    items = items.filter(i =>
+      (i.raw_name || '').toLowerCase().includes(s) ||
+      (i.shop_name || '').toLowerCase().includes(s)
+    );
+  }
+
+  const tbody = document.getElementById('tbody');
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Ничего не найдено</td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.map(item => `
+    <tr data-id="${item.id}">
+      <td><div class="row-raw ${item.shop_name ? '' : 'unresolved'} ${item.hidden ? 'hidden-label' : ''}">${escapeHtml(item.raw_name)}</div></td>
+      <td>
+        <input class="shop-input" list="shop-names-list"
+          value="${escapeHtml(item.shop_name)}"
+          placeholder="${escapeHtml(item.raw_name)}"
+          onblur="saveShopName(${item.id}, this)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      </td>
+      <td><span class="products-count ${item.products_count > 10 ? 'big' : ''}">${item.products_count}</span></td>
+      <td>
+        <label class="hidden-toggle">
+          <input type="checkbox" ${item.hidden ? 'checked' : ''} onchange="saveHidden(${item.id}, this.checked)">
+          <span>скрыть в магазине</span>
+        </label>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function saveShopName(id, input) {
+  const val = input.value.trim();
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  if (item.shop_name === val) return;  // no change
+  const r = await fetch(`/api/admin/brand-aliases/${id}`, {
+    method: 'PATCH', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({shop_name: val})
+  });
+  if (r.ok) {
+    item.shop_name = val;
+    input.classList.add('saved');
+    setTimeout(() => input.classList.remove('saved'), 800);
+    // Обновляем summary и shop_names list
+    if (val && !shopNames.includes(val)) {
+      shopNames.push(val); shopNames.sort();
+      document.getElementById('shop-names-list').innerHTML = shopNames.map(n => `<option value="${n}">`).join('');
+    }
+    render();
+  }
+}
+
+async function saveHidden(id, hidden) {
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  const r = await fetch(`/api/admin/brand-aliases/${id}`, {
+    method: 'PATCH', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({hidden})
+  });
+  if (r.ok) {
+    item.hidden = hidden;
+    render();
+  }
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  search = e.target.value;
+  render();
+});
+
+load();
+</script>
+
+<script src="/static/nav.js"></script>
+<script src="/static/mobile.js"></script>
+</body>
+</html>

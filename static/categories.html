@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Категории — Lunary OS</title>
+<style>
+.aliases-table { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; border-collapse: collapse; }
+.aliases-table thead th { text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; font-weight: var(--fw-bold); color: var(--text2); background: var(--bg); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.aliases-table tbody tr { border-bottom: 1px solid var(--border2); transition: background .1s; }
+.aliases-table tbody tr:last-child { border-bottom: none; }
+.aliases-table tbody tr:hover { background: var(--bg); }
+.aliases-table td { padding: 12px 16px; vertical-align: middle; }
+
+.row-raw { font-family: monospace; font-size: 13px; color: var(--text); font-weight: var(--fw-semibold); }
+.row-raw.unresolved { color: #b45309; }
+.row-raw.hidden-label { color: var(--text3); text-decoration: line-through; }
+
+.shop-input, .icon-input, .order-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+}
+.shop-input { width: 100%; }
+.icon-input { width: 60px; text-align: center; font-size: 18px; }
+.order-input { width: 60px; text-align: center; }
+.shop-input:focus, .icon-input:focus, .order-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.shop-input.saved, .icon-input.saved, .order-input.saved { background: #f0fdf4; border-color: #86efac; }
+
+.products-count { display: inline-flex; background: var(--bg); color: var(--text2); padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: var(--fw-semibold); }
+.products-count.big { background: var(--accent-bg, #eef2ff); color: var(--accent); }
+
+.hidden-toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: var(--text2); user-select: none; }
+.hidden-toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
+
+.summary-bar { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.summary-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; min-width: 140px; }
+.summary-pill .num { font-size: 22px; font-weight: var(--fw-extrabold); line-height: 1; }
+.summary-pill .lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; font-weight: var(--fw-semibold); }
+.summary-pill .num.warn { color: #b45309; }
+.summary-pill .num.ok { color: var(--green); }
+</style>
+<link rel="stylesheet" href="/static/layout.css">
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<div class="mobile-header"><div class="mobile-logo">Lunary <span>OS</span></div></div>
+
+<div class="main-content">
+  <div class="page-container">
+    <div class="page-title">📂 Справочник категорий</div>
+    <div class="page-sub">
+      Причесать названия категорий для магазина. У категории можно задать эмодзи-иконку и порядок сортировки.
+      Для Kaspi ничего не меняется.
+    </div>
+
+    <div class="summary-bar" id="summary-bar"></div>
+
+    <table class="aliases-table">
+      <thead>
+        <tr>
+          <th>Raw из Kaspi</th>
+          <th>Имя для магазина</th>
+          <th>Иконка</th>
+          <th>Порядок</th>
+          <th>Товаров</th>
+          <th>Скрыть</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Загрузка...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<datalist id="shop-names-list"></datalist>
+
+<script>
+let allItems = [];
+
+async function load() {
+  const r = await fetch('/api/admin/category-aliases').then(r => r.json());
+  allItems = r.items || [];
+  const shopNames = r.shop_names || [];
+  document.getElementById('shop-names-list').innerHTML = shopNames.map(n => `<option value="${n}">`).join('');
+  render();
+}
+
+function render() {
+  const total = allItems.length;
+  const resolved = allItems.filter(i => i.shop_name).length;
+  const unresolved = total - resolved;
+  const totalProducts = allItems.reduce((s, i) => s + i.products_count, 0);
+  const bar = document.getElementById('summary-bar');
+  bar.innerHTML = `
+    <div class="summary-pill"><div class="num">${total}</div><div class="lbl">Всего категорий</div></div>
+    <div class="summary-pill"><div class="num ok">${resolved}</div><div class="lbl">Причёсано</div></div>
+    <div class="summary-pill"><div class="num warn">${unresolved}</div><div class="lbl">Не причёсано</div></div>
+    <div class="summary-pill"><div class="num">${totalProducts}</div><div class="lbl">Всего товаров</div></div>
+  `;
+
+  const tbody = document.getElementById('tbody');
+  if (!allItems.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px">Нет категорий</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allItems.map(item => `
+    <tr data-id="${item.id}">
+      <td><div class="row-raw ${item.shop_name ? '' : 'unresolved'} ${item.hidden ? 'hidden-label' : ''}">${esc(item.raw_name)}</div></td>
+      <td>
+        <input class="shop-input" list="shop-names-list" value="${esc(item.shop_name)}" placeholder="${esc(item.raw_name)}"
+          onblur="saveField(${item.id}, 'shop_name', this.value, this)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      </td>
+      <td>
+        <input class="icon-input" value="${esc(item.icon)}" placeholder="📂"
+          onblur="saveField(${item.id}, 'icon', this.value, this)">
+      </td>
+      <td>
+        <input class="order-input" type="number" value="${item.sort_order || 0}"
+          onblur="saveField(${item.id}, 'sort_order', parseInt(this.value) || 0, this)">
+      </td>
+      <td><span class="products-count ${item.products_count > 50 ? 'big' : ''}">${item.products_count}</span></td>
+      <td>
+        <label class="hidden-toggle">
+          <input type="checkbox" ${item.hidden ? 'checked' : ''} onchange="saveField(${item.id}, 'hidden', this.checked)">
+          <span>скрыть</span>
+        </label>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function esc(s) {
+  return (s || '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function saveField(id, field, value, input) {
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  if (item[field] === value) return;
+  const r = await fetch(`/api/admin/category-aliases/${id}`, {
+    method: 'PATCH', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({[field]: value})
+  });
+  if (r.ok) {
+    item[field] = value;
+    if (input) {
+      input.classList.add('saved');
+      setTimeout(() => input.classList.remove('saved'), 800);
+    }
+    render();
+  }
+}
+
+load();
+</script>
+
+<script src="/static/nav.js"></script>
+<script src="/static/mobile.js"></script>
+</body>
+</html>

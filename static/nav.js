@@ -19,6 +19,7 @@
         { href: '/admin/history',   icon: '📋', label: 'История' },
         { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
         { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
+        { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
       ]
     },
     {
@@ -63,6 +64,7 @@
         { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
         { href: '/admin/history',   icon: '📋', label: 'История' },
         { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
+        { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
       ]
     },
     {

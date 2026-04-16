@@ -1,5 +1,10 @@
 [
   {
+    "hash": "953ccea",
+    "date": "17.04.2026",
+    "message": "Popup импорт Kaspi XML прямо на /admin"
+  },
+  {
     "hash": "a87d6d4",
     "date": "17.04.2026",
     "message": "Fix: XML feed — clean HTML entities в name/brand перед записью"

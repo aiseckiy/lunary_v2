@@ -141,6 +141,34 @@ class SyncLog(Base):
     error = Column(String, nullable=True)      # текст ошибки если была
 
 
+class Audit(Base):
+    """Сессия инвентаризации — аудит остатков на складе."""
+    __tablename__ = "audits"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    started_at = Column(DateTime, default=datetime.utcnow)
+    finished_at= Column(DateTime, nullable=True)
+    status     = Column(String, default="active")  # active | completed
+    note       = Column(String, nullable=True)
+    user_name  = Column(String, nullable=True)     # кто проводил
+    total_checked = Column(Integer, default=0)
+    total_delta   = Column(Integer, default=0)     # суммарная разница
+
+
+class AuditItem(Base):
+    """Проверенный товар в рамках аудита."""
+    __tablename__ = "audit_items"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    audit_id   = Column(Integer, nullable=False, index=True)
+    product_id = Column(Integer, nullable=False, index=True)
+    system_qty = Column(Integer, nullable=False)   # было в системе
+    actual_qty = Column(Integer, nullable=False)   # посчитали
+    delta      = Column(Integer, nullable=False)   # actual - system
+    checked_at = Column(DateTime, default=datetime.utcnow)
+    note       = Column(String, nullable=True)
+
+
 class PriceListItem(Base):
     """Справочник накладных/прайс-листов — только для поиска, не товары на складе."""
     __tablename__ = "price_list_items"

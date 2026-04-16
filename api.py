@@ -85,6 +85,7 @@ from routers.admin import router as admin_router  # noqa: E402
 from routers.ai import router as ai_router  # noqa: E402
 from routers.seo import router as seo_router  # noqa: E402
 from routers.aliases import router as aliases_router  # noqa: E402
+from routers.audit import router as audit_router  # noqa: E402
 app.include_router(analytics_router)
 app.include_router(uploads_router)
 app.include_router(pricelist_router)
@@ -100,6 +101,7 @@ app.include_router(admin_router)
 app.include_router(ai_router)
 app.include_router(seo_router)
 app.include_router(aliases_router)
+app.include_router(audit_router)
 
 
 if _slowapi_ok:

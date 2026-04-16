@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Проверка остатков — Lunary OS</title>
+<style>
+.audit-status {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.audit-status .icon { font-size: 32px; }
+.audit-status .info { flex: 1; }
+.audit-status .title { font-size: 15px; font-weight: var(--fw-bold); }
+.audit-status .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+.check-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.check-form .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.check-form .form-group { flex: 1; min-width: 140px; }
+.check-form .form-group label { font-size: 12px; color: var(--text2); font-weight: var(--fw-semibold); display: block; margin-bottom: 4px; }
+.check-form input, .check-form select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; background: var(--bg); }
+.check-form input:focus { border-color: var(--accent); background: #fff; }
+
+.check-result {
+  display: none;
+  padding: 14px;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+}
+.check-result.ok { background: #dcfce7; color: #15803d; display: block; }
+.check-result.diff { background: #fef3c7; color: #92400e; display: block; }
+.check-result.neg { background: #fee2e2; color: #b91c1c; display: block; }
+
+.history-table {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.history-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: var(--fw-bold);
+  color: var(--text2);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.history-table td { padding: 12px 16px; border-bottom: 1px solid var(--border2); font-size: 13px; }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: var(--bg); }
+
+.delta-pos { color: var(--green); font-weight: var(--fw-bold); }
+.delta-neg { color: var(--red); font-weight: var(--fw-bold); }
+.delta-zero { color: var(--text3); }
+
+.progress-bar-wrap { background: var(--bg); border-radius: 6px; height: 8px; overflow: hidden; margin-top: 8px; }
+.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 6px; transition: width .3s; }
+
+.section-title { font-size: 14px; font-weight: var(--fw-bold); margin: 24px 0 12px; }
+</style>
+<link rel="stylesheet" href="/static/layout.css">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="mobile-header"><div class="mobile-logo">Lunary <span>OS</span></div></div>
+<div class="main-content"><div class="page-container">
+  <div class="page-title">📝 Проверка остатков</div>
+  <div class="page-sub">Инвентаризация: сканируй или выбери товар, введи фактический остаток</div>
+
+  <!-- Статус аудита -->
+  <div class="audit-status" id="audit-status">
+    <div class="icon">📋</div>
+    <div class="info">
+      <div class="title">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- Форма проверки -->
+  <div class="check-form" id="check-form" style="display:none">
+    <div style="font-size:14px;font-weight:var(--fw-bold);margin-bottom:12px">Проверить товар</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:3">
+        <label>Товар (поиск или штрихкод)</label>
+        <input type="text" id="check-search" placeholder="Начни вводить название или отсканируй штрихкод..." oninput="searchForCheck(this.value)">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Факт. остаток</label>
+        <input type="number" id="check-qty" placeholder="0" min="0">
+      </div>
+      <div class="form-group" style="flex:0 0 auto">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" onclick="submitCheck()">✓ Записать</button>
+      </div>
+    </div>
+    <div id="check-product-info" style="display:none;margin-top:8px;font-size:13px;color:var(--text2)"></div>
+    <div id="search-results" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;max-height:200px;overflow-y:auto"></div>
+    <div class="check-result" id="check-result"></div>
+  </div>
+
+  <!-- Проверенные товары -->
+  <div class="section-title" id="checked-title" style="display:none">Проверенные товары</div>
+  <table class="history-table" id="checked-table" style="display:none">
+    <thead>
+      <tr><th>Товар</th><th>В системе</th><th>Факт</th><th>Разница</th><th>Время</th></tr>
+    </thead>
+    <tbody id="checked-body"></tbody>
+  </table>
+
+  <!-- История аудитов -->
+  <div class="section-title">История проверок</div>
+  <table class="history-table" id="history-table">
+    <thead>
+      <tr><th>#</th><th>Дата</th><th>Проверено</th><th>Расхождений</th><th>Статус</th><th>Кто</th></tr>
+    </thead>
+    <tbody id="history-body">
+      <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Загрузка...</td></tr>
+    </tbody>
+  </table>
+
+</div></div></div>
+
+<div class="toast-container"><div class="toast" id="toast"></div></div>
+
+<script>
+let activeAudit = null;
+let selectedProductId = null;
+let allProductsCache = [];
+
+async function loadAll() {
+  await Promise.all([loadStatus(), loadHistory(), loadProducts()]);
+}
+
+async function loadProducts() {
+  try {
+    const r = await fetch('/api/products');
+    allProductsCache = await r.json();
+  } catch {}
+}
+
+async function loadStatus() {
+  const el = document.getElementById('audit-status');
+  try {
+    const d = await fetch('/api/audit/active').then(r => r.json());
+    activeAudit = d.audit;
+    if (activeAudit) {
+      const pct = activeAudit.total > 0 ? Math.round(activeAudit.checked / activeAudit.total * 100) : 0;
+      el.innerHTML = `
+        <div class="icon">🔍</div>
+        <div class="info" style="flex:1">
+          <div class="title">Проверка #${activeAudit.id} в процессе</div>
+          <div class="sub">Начата ${activeAudit.started_at} · ${activeAudit.user_name}</div>
+          <div class="sub" style="margin-top:4px"><b>${activeAudit.checked}</b> из <b>${activeAudit.total}</b> проверено (${pct}%) · осталось <b>${activeAudit.remaining}</b></div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="finishAudit(false)">Завершить</button>
+        <button class="btn btn-primary btn-sm" onclick="finishAudit(true)">✅ Завершить + применить</button>
+      `;
+      document.getElementById('check-form').style.display = 'block';
+      loadChecked();
+    } else {
+      el.innerHTML = `
+        <div class="icon">📋</div>
+        <div class="info">
+          <div class="title">Нет активной проверки</div>
+          <div class="sub">Начни новую инвентаризацию чтобы проверить остатки на складе</div>
+        </div>
+        <button class="btn btn-primary" onclick="startAudit()">📝 Начать проверку</button>
+      `;
+      document.getElementById('check-form').style.display = 'none';
+      document.getElementById('checked-title').style.display = 'none';
+      document.getElementById('checked-table').style.display = 'none';
+    }
+  } catch {
+    el.innerHTML = '<div class="info"><div class="title" style="color:var(--red)">Ошибка загрузки</div></div>';
+  }
+}
+
+async function startAudit() {
+  const r = await fetch('/api/audit/start', { method: 'POST' });
+  if (r.ok) {
+    toast('📝 Проверка начата', 'success');
+    loadAll();
+  }
+}
+
+async function finishAudit(apply) {
+  if (!activeAudit) return;
+  const msg = apply
+    ? 'Завершить проверку И применить корректировки остатков?'
+    : 'Завершить проверку БЕЗ корректировок? Расхождения не будут исправлены.';
+  if (!confirm(msg)) return;
+  const r = await fetch(`/api/audit/${activeAudit.id}/finish`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ apply_corrections: apply })
+  });
+  if (r.ok) {
+    const d = await r.json();
+    toast(apply
+      ? `✅ Проверка завершена · ${d.corrections_applied} корректировок применено`
+      : '✅ Проверка завершена', 'success');
+    loadAll();
+  }
+}
+
+function searchForCheck(q) {
+  const results = document.getElementById('search-results');
+  if (!q || q.length < 2) { results.style.display = 'none'; selectedProductId = null; return; }
+  const ql = q.toLowerCase();
+  const matches = allProductsCache.filter(p =>
+    p.name.toLowerCase().includes(ql) ||
+    (p.barcode || '').includes(q) ||
+    (p.kaspi_sku || '').includes(q) ||
+    (p.supplier_article || '').includes(ql)
+  ).slice(0, 10);
+
+  if (!matches.length) {
+    results.style.display = 'block';
+    results.innerHTML = '<div style="padding:12px;color:var(--text3);font-size:13px">Ничего не найдено</div>';
+    return;
+  }
+  results.style.display = 'block';
+  results.innerHTML = matches.map(p => `
+    <div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border2);font-size:13px;display:flex;justify-content:space-between" onclick="selectProduct(${p.id})">
+      <span style="flex:1">${p.name}</span>
+      <span style="color:var(--text3);flex-shrink:0;margin-left:8px">${p.stock} ${p.unit}</span>
+    </div>`).join('');
+}
+
+function selectProduct(id) {
+  selectedProductId = id;
+  const p = allProductsCache.find(x => x.id === id);
+  document.getElementById('search-results').style.display = 'none';
+  document.getElementById('check-search').value = p.name;
+  document.getElementById('check-product-info').style.display = 'block';
+  document.getElementById('check-product-info').innerHTML =
+    `Выбран: <b>${p.name}</b> · В системе: <b>${p.stock} ${p.unit}</b>`;
+  document.getElementById('check-qty').value = '';
+  document.getElementById('check-qty').focus();
+}
+
+async function submitCheck() {
+  if (!activeAudit || !selectedProductId) {
+    toast('Выбери товар', 'error'); return;
+  }
+  const qty = parseInt(document.getElementById('check-qty').value);
+  if (isNaN(qty) || qty < 0) {
+    toast('Введи корректный остаток', 'error'); return;
+  }
+  const r = await fetch(`/api/audit/${activeAudit.id}/check`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ product_id: selectedProductId, actual_qty: qty })
+  });
+  if (r.ok) {
+    const d = await r.json();
+    const res = document.getElementById('check-result');
+    if (d.delta === 0) {
+      res.className = 'check-result ok';
+      res.textContent = `✅ ${d.product_name}: совпадает (${d.actual_qty} шт)`;
+    } else if (d.delta > 0) {
+      res.className = 'check-result diff';
+      res.textContent = `⚠️ ${d.product_name}: излишек +${d.delta} (система ${d.system_qty}, факт ${d.actual_qty})`;
+    } else {
+      res.className = 'check-result neg';
+      res.textContent = `❌ ${d.product_name}: недостача ${d.delta} (система ${d.system_qty}, факт ${d.actual_qty})`;
+    }
+    // Сброс формы
+    selectedProductId = null;
+    document.getElementById('check-search').value = '';
+    document.getElementById('check-product-info').style.display = 'none';
+    loadStatus();
+  } else {
+    const e = await r.json().catch(() => ({}));
+    toast(e.detail || 'Ошибка', 'error');
+  }
+}
+
+async function loadChecked() {
+  if (!activeAudit) return;
+  try {
+    const d = await fetch(`/api/audit/${activeAudit.id}`).then(r => r.json());
+    const items = d.checked || [];
+    if (!items.length) {
+      document.getElementById('checked-title').style.display = 'none';
+      document.getElementById('checked-table').style.display = 'none';
+      return;
+    }
+    document.getElementById('checked-title').style.display = 'block';
+    document.getElementById('checked-table').style.display = 'table';
+    document.getElementById('checked-body').innerHTML = items.map(i => {
+      const dc = i.delta === 0 ? 'delta-zero' : (i.delta > 0 ? 'delta-pos' : 'delta-neg');
+      const sign = i.delta > 0 ? '+' : '';
+      return `<tr>
+        <td>${i.product_name}</td>
+        <td>${i.system_qty}</td>
+        <td>${i.actual_qty}</td>
+        <td class="${dc}">${sign}${i.delta}</td>
+        <td style="color:var(--text3)">${i.checked_at}</td>
+      </tr>`;
+    }).join('');
+  } catch {}
+}
+
+async function loadHistory() {
+  try {
+    const items = await fetch('/api/audit/history').then(r => r.json());
+    const body = document.getElementById('history-body');
+    if (!items.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Проверок пока не было</td></tr>';
+      return;
+    }
+    body.innerHTML = items.map(a => `
+      <tr>
+        <td><b>#${a.id}</b></td>
+        <td>${a.started_at}${a.finished_at ? ' → ' + a.finished_at : ''}</td>
+        <td>${a.total_checked}</td>
+        <td>${a.total_delta || 0}</td>
+        <td><span style="padding:3px 9px;border-radius:999px;font-size:11px;font-weight:var(--fw-semibold);${a.status === 'active' ? 'background:#fef3c7;color:#92400e' : 'background:#dcfce7;color:#15803d'}">${a.status === 'active' ? '🔍 Активная' : '✅ Завершена'}</span></td>
+        <td style="color:var(--text2)">${a.user_name || '—'}</td>
+      </tr>
+    `).join('');
+  } catch {}
+}
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+loadAll();
+</script>
+
+<script src="/static/nav.js"></script>
+<script src="/static/mobile.js"></script>
+</body>
+</html>

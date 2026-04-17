@@ -1104,12 +1104,19 @@ function renderPagination(total) {
   if (pages <= 1) { el.innerHTML = ''; return; }
 
   let html = `<button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
-  for (let i = 1; i <= pages; i++) {
-    if (pages > 7 && i > 2 && i < pages - 1 && Math.abs(i - currentPage) > 1) {
-      if (i === 3 || i === pages - 2) html += `<span class="page-ellipsis">…</span>`;
-      continue;
-    }
+  // Показываем больше страниц: 3 вокруг текущей + первая + последняя
+  const show = new Set();
+  show.add(1); show.add(pages);
+  for (let d = -3; d <= 3; d++) {
+    const p = currentPage + d;
+    if (p >= 1 && p <= pages) show.add(p);
+  }
+  const sorted = [...show].sort((a,b) => a - b);
+  let prev = 0;
+  for (const i of sorted) {
+    if (i - prev > 1) html += `<span class="page-ellipsis">…</span>`;
     html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goToPage(${i})">${i}</button>`;
+    prev = i;
   }
   html += `<button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
   el.innerHTML = html;

@@ -227,6 +227,14 @@ function searchForCheck(q) {
   const results = document.getElementById('search-results');
   if (!q || q.length < 2) { results.style.display = 'none'; selectedProductId = null; return; }
   const ql = q.toLowerCase();
+
+  // Точное совпадение по штрихкоду → автовыбор
+  const byBarcode = allProductsCache.find(p => p.barcode && p.barcode === q);
+  if (byBarcode) {
+    selectProduct(byBarcode.id);
+    return;
+  }
+
   const matches = allProductsCache.filter(p =>
     p.name.toLowerCase().includes(ql) ||
     (p.barcode || '').includes(q) ||

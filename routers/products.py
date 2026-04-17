@@ -552,30 +552,18 @@ def low_stock(db: Session = Depends(get_db)):
 
 # ─── Link-группы (общий stock для дубликатов карточек) ─────
 @router.post("/api/admin/link-products")
-async def link_products(request: Request, db: Session = Depends(get_db)):
+def link_products(data: dict, request: Request, db: Session = Depends(get_db)):
     """Объединить товары в link-группу с общим остатком."""
     import traceback
-    import json as _json
     from database import Product as _P, Movement as _M
     from sqlalchemy import func as sqlfunc
 
-    print("[link] ENTER endpoint", flush=True)
-
     user = get_user_from_session(request)
-    print(f"[link] user={user}", flush=True)
     if not is_staff(user):
         raise HTTPException(status_code=403)
 
-    try:
-        raw_body = await request.body()
-        print(f"[link] raw_body={raw_body[:300]}", flush=True)
-        body = _json.loads(raw_body)
-    except Exception as e:
-        print(f"[link] body parse FAILED: {e}", flush=True)
-        raise HTTPException(status_code=400, detail=f"JSON parse error: {e}")
-
-    master_id = body.get("master_id")
-    slave_ids = body.get("slave_ids", [])
+    master_id = data.get("master_id")
+    slave_ids = data.get("slave_ids", [])
     if not master_id or not isinstance(master_id, int):
         raise HTTPException(status_code=400, detail="master_id обязателен (int)")
     if not slave_ids:

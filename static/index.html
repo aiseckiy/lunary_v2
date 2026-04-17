@@ -45,16 +45,8 @@
 .product-card.low { border-color:#fca5a5; }
 .product-card.selected { border-color:var(--accent); background:#f5f6ff; box-shadow:0 0 0 3px rgba(99,102,241,.18); }
 .product-card .card-check {
-  width:18px; height:18px;
-  accent-color:var(--accent);
-  cursor:pointer;
-  opacity:.25;
-  transition:opacity .15s;
-  flex-shrink:0;
-  margin-top:3px;
+  display:none; /* убраны — link-группы теперь через модалку редактирования */
 }
-.product-card:hover .card-check { opacity:.9; }
-.product-card.selected .card-check { opacity:1; }
 .link-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:var(--fw-bold); white-space:nowrap; cursor:default; line-height:1.4; }
 .link-badge.link-master { background:#ede9fe; color:#6d28d9; }
 .link-badge.link-slave { background:var(--bg); color:var(--text2); border:1px solid var(--border); }

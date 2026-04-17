@@ -75,7 +75,12 @@ def list_brand_aliases(request: Request, db: Session = Depends(get_db)):
     # Группировка для UI: какие shop_name уже существуют (для autocomplete)
     shop_names = sorted({r["shop_name"] for r in result if r["shop_name"]})
 
-    return {"items": result, "shop_names": shop_names}
+    # Товары совсем без бренда
+    no_brand_count = db.query(sqlfunc.count(Product.id)).filter(
+        (Product.brand.is_(None)) | (Product.brand == "")
+    ).filter(Product.category != "Накладные").scalar() or 0
+
+    return {"items": result, "shop_names": shop_names, "no_brand_count": no_brand_count}
 
 
 @router.patch("/api/admin/brand-aliases/{alias_id}")

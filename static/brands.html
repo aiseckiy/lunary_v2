@@ -201,6 +201,7 @@ async function load() {
   const r = await fetch('/api/admin/brand-aliases').then(r => r.json());
   allItems = r.items || [];
   shopNames = r.shop_names || [];
+  window._noBrandCount = r.no_brand_count || 0;
   document.getElementById('shop-names-list').innerHTML = shopNames.map(n => `<option value="${n}">`).join('');
   render();
 }
@@ -221,11 +222,13 @@ function render() {
   const totalProducts = allItems.reduce((s, i) => s + i.products_count, 0);
   const resolvedProducts = allItems.filter(i => i.shop_name).reduce((s, i) => s + i.products_count, 0);
   const bar = document.getElementById('summary-bar');
+  const noBrand = window._noBrandCount || 0;
   bar.innerHTML = `
     <div class="summary-pill"><div class="num">${total}</div><div class="lbl">Всего raw-брендов</div></div>
     <div class="summary-pill"><div class="num ok">${resolved}</div><div class="lbl">Причёсано</div></div>
     <div class="summary-pill"><div class="num warn">${unresolved}</div><div class="lbl">Не причёсано</div></div>
     <div class="summary-pill"><div class="num">${resolvedProducts}/${totalProducts}</div><div class="lbl">Товаров покрыто</div></div>
+    ${noBrand > 0 ? `<div class="summary-pill"><div class="num warn">${noBrand}</div><div class="lbl">Без бренда</div></div>` : ''}
   `;
 
   let items = allItems;

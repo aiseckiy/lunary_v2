@@ -1,5 +1,10 @@
 [
   {
+    "hash": "be0da2e",
+    "date": "17.04.2026",
+    "message": "Mobile nav sync + фиолетовый accent вместо синего"
+  },
+  {
     "hash": "156ea25",
     "date": "17.04.2026",
     "message": "Fix: link-groups — sync def вместо async + скрыть чекбоксы"

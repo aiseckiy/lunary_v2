@@ -14,7 +14,7 @@
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 :root {
-  --accent: #0082EC; --accent-dark: #006DC5;
+  --accent: #6366f1; --accent-dark: #4f46e5;
   --bg: #f8f8fb; --surface: #ffffff; --border: #e5e7eb;
   --text: #111827; --text2: #6b7280; --text3: #9ca3af;
   --green: #16a34a; --red: #ef4444;
@@ -84,18 +84,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .specs-editor { margin-top:12px; }
 .spec-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; }
 .spec-row input { flex:1; border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); }
-.spec-row input:focus { border-color:#0082EC; }
+.spec-row input:focus { border-color:#6366f1; }
 .spec-del { background:none; border:none; font-size:16px; color:var(--text3); cursor:pointer; padding:4px; flex-shrink:0; }
 .spec-del:hover { color:var(--red); }
 .btn-add-spec { background:none; border:1px dashed var(--border); border-radius:8px; padding:7px 14px; font-size:13px; color:var(--text3); cursor:pointer; font-family:inherit; width:100%; margin-top:4px; }
-.btn-add-spec:hover { border-color:#0082EC; color:#0082EC; }
+.btn-add-spec:hover { border-color:#6366f1; color:#6366f1; }
 
 /* Image search grid */
 .img-search-item { aspect-ratio:1; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid transparent; background:#f3f4f6; position:relative; }
-.img-search-item:hover { border-color:#0082EC; }
-.img-search-item.selected { border-color:#0082EC; }
+.img-search-item:hover { border-color:#6366f1; }
+.img-search-item.selected { border-color:#6366f1; }
 .img-search-item img { width:100%; height:100%; object-fit:cover; }
-.img-search-item .added-mark { position:absolute; top:2px; right:2px; background:#0082EC; color:#fff; border-radius:50%; width:18px; height:18px; font-size:11px; display:none; align-items:center; justify-content:center; }
+.img-search-item .added-mark { position:absolute; top:2px; right:2px; background:#6366f1; color:#fff; border-radius:50%; width:18px; height:18px; font-size:11px; display:none; align-items:center; justify-content:center; }
 .img-search-item.selected .added-mark { display:flex; }
 
 /* ── Похожие товары ── */
@@ -216,13 +216,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .stock-modal h3 { font-size:16px; font-weight: var(--fw-bold); margin-bottom:16px; }
 .move-tabs { display:flex; gap:0; border:1px solid var(--border,#e5e7eb); border-radius:10px; overflow:hidden; margin-bottom:16px; }
 .move-tab { flex:1; padding:9px; text-align:center; font-size:13px; font-weight: var(--fw-semibold); cursor:pointer; background:#f9fafb; color: var(--text2); transition:all .15s; }
-.move-tab.active { background:#0082EC; color:#fff; }
+.move-tab.active { background:#6366f1; color:#fff; }
 .move-input { width:100%; border:1px solid var(--border,#e5e7eb); border-radius:10px; padding:10px 12px; font-size:16px; font-family:inherit; outline:none; text-align:center; font-weight: var(--fw-bold); margin-bottom:10px; }
-.move-input:focus { border-color:#0082EC; }
+.move-input:focus { border-color:#6366f1; }
 .move-note { width:100%; border:1px solid var(--border,#e5e7eb); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; resize:none; }
-.move-note:focus { border-color:#0082EC; }
+.move-note:focus { border-color:#6366f1; }
 .move-actions { display:flex; gap:8px; margin-top:14px; }
-.btn-move-confirm { flex:1; background:#0082EC; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
+.btn-move-confirm { flex:1; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
 .btn-move-cancel { flex:1; background:#f3f4f6; color:#374151; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
 
 /* Edit modal */
@@ -233,19 +233,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .edit-field { margin-bottom:14px; }
 .edit-label { display:block; font-size:13px; font-weight: var(--fw-medium); color:#374151; margin-bottom:5px; }
 .edit-input { width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; }
-.edit-input:focus { border-color:#0082EC; }
+.edit-input:focus { border-color:#6366f1; }
 
 /* Image section */
 .img-section-title { font-size:13px; font-weight: var(--fw-semibold); color:#374151; margin-bottom:10px; }
 .img-add-tabs { display:flex; gap:0; margin-bottom:12px; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
 .img-add-tab { flex:1; padding:8px; text-align:center; font-size:13px; font-weight: var(--fw-medium); cursor:pointer; color: var(--text2); background:#f9fafb; transition:all .15s; }
-.img-add-tab.active { background:#0082EC; color:#fff; }
+.img-add-tab.active { background:#6366f1; color:#fff; }
 .img-drop { border:2px dashed #e5e7eb; border-radius:10px; padding:22px; text-align:center; cursor:pointer; color: var(--text3); font-size:13px; transition:border-color .15s; }
-.img-drop:hover, .img-drop.drag { border-color:#0082EC; color:#0082EC; }
+.img-drop:hover, .img-drop.drag { border-color:#6366f1; color:#6366f1; }
 .img-url-row { display:flex; gap:8px; }
 .img-url-input { flex:1; border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:14px; font-family:inherit; outline:none; }
-.img-url-input:focus { border-color:#0082EC; }
-.btn-add-url { background:#0082EC; color:#fff; border:none; border-radius:10px; padding:9px 16px; font-size:13px; font-weight: var(--fw-semibold); cursor:pointer; white-space:nowrap; }
+.img-url-input:focus { border-color:#6366f1; }
+.btn-add-url { background:#6366f1; color:#fff; border:none; border-radius:10px; padding:9px 16px; font-size:13px; font-weight: var(--fw-semibold); cursor:pointer; white-space:nowrap; }
 
 /* Images list */
 .imgs-list { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; min-height:0; }
@@ -262,8 +262,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .img-item-main { position:absolute; bottom:2px; left:2px; background:rgba(99,102,241,.85); color:#fff; border-radius:4px; font-size:9px; font-weight: var(--fw-bold); padding:1px 4px; }
 
 .edit-actions { display:flex; gap:10px; margin-top:18px; }
-.btn-save { flex:1; background:#0082EC; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
-.btn-save:hover { background:#006DC5; }
+.btn-save { flex:1; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
+.btn-save:hover { background:#4f46e5; }
 .btn-cancel-edit { flex:1; background:#f3f4f6; color:#374151; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
 .btn-edit-product { display:none; margin-top:12px; width:100%; padding:10px; background:#f3f4f6; color:#374151; border:1px solid var(--border); border-radius:10px; font-size:14px; font-weight: var(--fw-semibold); cursor:pointer; font-family:inherit; }
 .btn-edit-product:hover { background:#e5e7eb; }
@@ -390,7 +390,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <button class="btn-add-spec" id="btn-kaspi-image" onclick="fetchKaspiImage()" style="border-color:#ef4444;color:#ef4444;flex:1">
         🛒 Загрузить с Kaspi
       </button>
-      <button class="btn-add-spec" id="btn-search-images" onclick="searchImages()" style="border-color:#0082EC;color:#0082EC;flex:1">
+      <button class="btn-add-spec" id="btn-search-images" onclick="searchImages()" style="border-color:#6366f1;color:#6366f1;flex:1">
         🔍 Поиск Google
       </button>
     </div>
@@ -509,7 +509,7 @@ function categoryEmoji(cat) {
 async function loadProduct() {
   try {
     const res = await fetch(`/api/store/products/${productId}`);
-    if (!res.ok) { document.getElementById('container').innerHTML = '<div style="text-align:center;padding:60px 0;color: var(--text3)"><div style="font-size:48px;margin-bottom:12px">😕</div><div>Товар не найден</div><a href="/shop" style="color:#0082EC;text-decoration:none;margin-top:12px;display:block">← В каталог</a></div>'; return; }
+    if (!res.ok) { document.getElementById('container').innerHTML = '<div style="text-align:center;padding:60px 0;color: var(--text3)"><div style="font-size:48px;margin-bottom:12px">😕</div><div>Товар не найден</div><a href="/shop" style="color:#6366f1;text-decoration:none;margin-top:12px;display:block">← В каталог</a></div>'; return; }
     product = await res.json();
     document.title = `${product.name} — LUNARY`;
     renderProduct();

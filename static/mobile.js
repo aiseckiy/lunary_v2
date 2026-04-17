@@ -4,14 +4,29 @@
    ============================================ */
 
 (function() {
-  const NAV_ITEMS = [
-    { href: '/admin',             icon: '🏠', label: 'Товары' },
-    { href: '/admin/scanner',     icon: '📷', label: 'Сканер' },
-    { href: '/admin/history',     icon: '📋', label: 'История' },
-    { href: '/admin/analytics',   icon: '📊', label: 'Аналитика' },
-    { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi' },
-    { href: '/admin/shop-orders',  icon: '🛍️', label: 'Заказы' },
-    { href: '/admin/settings',    icon: '⚙️', label: 'Настройки' },
+  const NAV_GROUPS = [
+    { label: 'Склад', items: [
+      { href: '/admin',           icon: '📦', label: 'Товары' },
+      { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
+      { href: '/admin/history',   icon: '📋', label: 'История' },
+      { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
+      { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
+    ]},
+    { label: 'Продажи', items: [
+      { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi заказы' },
+      { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы магазина' },
+    ]},
+    { label: 'Данные', items: [
+      { href: '/admin/data',  icon: '📂', label: 'Обзор данных' },
+    ]},
+    { label: 'Магазин', items: [
+      { href: '/admin/brands',     icon: '🏷️', label: 'Бренды' },
+      { href: '/admin/categories', icon: '📂', label: 'Категории' },
+    ]},
+    { label: 'Система', items: [
+      { href: '/admin/settings', icon: '⚙️', label: 'Настройки' },
+      { href: '/admin/theme',    icon: '🎨', label: 'Тема' },
+    ]},
   ];
 
   function currentPath() {
@@ -186,11 +201,14 @@
     drawer.className = 'nav-drawer';
     drawer.id = 'lunary-drawer';
 
-    const navLinks = NAV_ITEMS.map(item => `
-      <a class="drawer-link ${isActive(item.href) ? 'active' : ''}" href="${item.href}">
-        <span class="drawer-link-icon">${item.icon}</span>
-        ${item.label}
-      </a>
+    const navHtml = NAV_GROUPS.map(g => `
+      <div class="drawer-section">${g.label}</div>
+      ${g.items.map(item => `
+        <a class="drawer-link ${isActive(item.href) ? 'active' : ''}" href="${item.href}">
+          <span class="drawer-link-icon">${item.icon}</span>
+          ${item.label}
+        </a>
+      `).join('')}
     `).join('');
 
     drawer.innerHTML = `
@@ -199,8 +217,7 @@
         <button class="drawer-close" onclick="window.__lunaryCloseDrawer()">✕</button>
       </div>
       <div class="drawer-nav">
-        <div class="drawer-section">Управление</div>
-        ${navLinks}
+        ${navHtml}
       </div>
       <div class="drawer-footer">
         <a class="drawer-store-link" href="/shop">

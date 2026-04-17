@@ -1,5 +1,10 @@
 [
   {
+    "hash": "e7d7133",
+    "date": "17.04.2026",
+    "message": "Fix: фиолетовый accent + font-weight vars на my_orders.html и import_xlsx.html"
+  },
+  {
     "hash": "0df7613",
     "date": "17.04.2026",
     "message": "Админ панель — в dropdown по клику на имя (убрать отдельную кнопку)"

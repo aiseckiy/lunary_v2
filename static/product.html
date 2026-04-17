@@ -995,14 +995,16 @@ function renderAuthArea() {
   const area = document.getElementById('auth-area');
   if (!currentUser) { area.innerHTML = `<button class="btn-auth" onclick="openAuth()">Войти</button>`; return; }
   const initial = (currentUser.name || currentUser.email || '?')[0].toUpperCase();
-  const adminBtn = currentUser.role === 'admin' ? `<a class="admin-badge" href="/admin">Админ панель</a>` : '';
-  area.innerHTML = `<div style="display:flex;align-items:center;gap:8px">${adminBtn}
+  const adminLink = currentUser.role === 'admin'
+    ? `<a class="dropdown-item" href="/admin">⚙️ Админ панель</a>` : '';
+  area.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
     <div class="user-chip-wrap">
       <div class="user-chip" onclick="toggleDropdown()">
         <div class="user-avatar">${currentUser.avatar ? `<img src="${currentUser.avatar}" referrerpolicy="no-referrer">` : initial}</div>
         ${currentUser.name || currentUser.email}
       </div>
       <div class="user-dropdown" id="user-dropdown">
+        ${adminLink}
         <div class="dropdown-item" onclick="location.href='/shop/my-orders'">📦 Мои заказы</div>
         <div class="dropdown-item red" onclick="doLogout()">🚪 Выйти</div>
       </div>

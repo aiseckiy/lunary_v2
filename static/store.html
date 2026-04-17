@@ -1481,7 +1481,7 @@ async function loadSiteSettings() {
     const res = await fetch('/api/settings');
     if (!res.ok) return;
     const s = await res.json();
-    if (s.shop_name) document.querySelector('.header-logo').textContent = s.shop_name;
+    // Не перезаписываем logo — используем SVG из HTML
     if (s.shop_tagline) document.querySelector('.header-tagline').textContent = s.shop_tagline;
     if (s.banner_show === '0') {
       document.getElementById('store-banner').style.display = 'none';

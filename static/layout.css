@@ -321,6 +321,7 @@ h3 { font-weight: var(--fw-semibold);  font-size: var(--fs-md); letter-spacing: 
   .mobile-header { display: flex !important; }
   .bottom-nav { display: none !important; }
   .page-container { padding: 12px 12px 32px !important; }
+
   /* Bottom sheet modals */
   .modal-box {
     width: 100% !important;
@@ -332,6 +333,45 @@ h3 { font-weight: var(--fw-semibold);  font-size: var(--fs-md); letter-spacing: 
     max-height: 92vh !important;
   }
   .overlay { align-items: flex-end !important; padding: 0 !important; }
+
+  /* ── Глобальные мобильные стили для новых страниц ── */
+  .page-title { font-size: 18px !important; }
+  .page-sub { font-size: 12px !important; margin-bottom: 12px !important; }
+
+  /* Stats/overview strips */
+  .stats-grid, .overview-strip { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .stat-card, .overview-cell { padding: 12px !important; }
+  .stat-value { font-size: 20px !important; }
+
+  /* Hub grids (data.html и подобные) */
+  .hub-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .hub-card { padding: 16px !important; }
+
+  /* Таблицы — горизонтальный скролл */
+  .table-wrap { border-radius: 10px !important; }
+  .aliases-table, .history-table { font-size: 13px !important; }
+  .aliases-table th, .aliases-table td,
+  .history-table th, .history-table td { padding: 10px 10px !important; }
+
+  /* Summary bars */
+  .summary-bar { gap: 8px !important; }
+  .summary-pill { padding: 10px 12px !important; min-width: 100px !important; }
+  .summary-pill .num { font-size: 18px !important; }
+
+  /* Audit check form */
+  .check-form .form-row { flex-direction: column !important; }
+  .check-form .form-group { min-width: 100% !important; }
+
+  /* Buttons */
+  .btn-block { width: 100% !important; }
+  .btn-sm { font-size: 12px !important; padding: 6px 10px !important; }
+
+  /* Link bar (floating) */
+  .link-bar { left: 12px !important; right: 12px !important; transform: none !important; border-radius: 12px !important; }
+
+  /* Forms */
+  .edit-modal.field-row { grid-template-columns: 1fr !important; }
+  .form-input, .form-select { font-size: 16px !important; }
 }
 
 /* ---- COMMON COMPONENTS ---- */

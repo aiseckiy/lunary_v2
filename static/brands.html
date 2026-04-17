@@ -134,6 +134,15 @@
 .filter-pill.active { background: var(--text); border-color: var(--text); color: #fff; font-weight: var(--fw-semibold); }
 
 .empty { text-align: center; padding: 60px; color: var(--text3); }
+
+@media (max-width: 768px) {
+  .aliases-table { display: block; overflow-x: auto; }
+  .toolbar { flex-direction: column; }
+  .search-input { width: 100% !important; min-width: 0 !important; font-size: 16px; }
+  .filter-pills { overflow-x: auto; flex-wrap: nowrap; }
+  .summary-bar { flex-wrap: wrap; }
+  .summary-pill { flex: 1; min-width: 80px !important; }
+}
 </style>
 <link rel="stylesheet" href="/static/layout.css">
 </head>

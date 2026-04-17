@@ -43,6 +43,12 @@
 .summary-pill .lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; font-weight: var(--fw-semibold); }
 .summary-pill .num.warn { color: #b45309; }
 .summary-pill .num.ok { color: var(--green); }
+
+@media (max-width: 768px) {
+  .aliases-table { display: block; overflow-x: auto; }
+  .summary-bar { flex-wrap: wrap; }
+  .summary-pill { flex: 1; min-width: 80px !important; }
+}
 </style>
 <link rel="stylesheet" href="/static/layout.css">
 </head>

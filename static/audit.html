@@ -77,6 +77,14 @@
 .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 6px; transition: width .3s; }
 
 .section-title { font-size: 14px; font-weight: var(--fw-bold); margin: 24px 0 12px; }
+
+@media (max-width: 768px) {
+  .audit-status { flex-direction: column; text-align: center; gap: 10px; padding: 16px; }
+  .audit-status .icon { font-size: 24px; }
+  .audit-status .info { text-align: left; }
+  .check-form { padding: 14px; }
+  .history-table { display: block; overflow-x: auto; }
+}
 </style>
 <link rel="stylesheet" href="/static/layout.css">
 </head>

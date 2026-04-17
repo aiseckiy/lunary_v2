@@ -60,15 +60,20 @@ def build_category_map(db) -> dict:
     return {a.raw_name: a for a in db.query(CategoryAlias).all()}
 
 
+def _capitalize_brand(s: str) -> str:
+    """Первая буква заглавная, остальное как есть."""
+    return s[0].upper() + s[1:] if s else s
+
+
 def resolve_brand(raw_brand: str, brand_map: dict) -> str:
     """Возвращает красивое имя бренда для магазина. Если alias с shop_name
-    не задан — возвращает raw (как есть в Kaspi)."""
+    не задан — возвращает raw (как есть в Kaspi). Первая буква всегда заглавная."""
     if not raw_brand:
         return ""
     alias = brand_map.get(raw_brand)
     if alias and alias.shop_name:
-        return alias.shop_name
-    return raw_brand
+        return _capitalize_brand(alias.shop_name)
+    return _capitalize_brand(raw_brand)
 
 
 def resolve_category(raw_category: str, category_map: dict) -> str:

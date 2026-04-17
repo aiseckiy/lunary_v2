@@ -1,5 +1,10 @@
 [
   {
+    "hash": "9600f2c",
+    "date": "17.04.2026",
+    "message": "Fix: жирность шрифтов в магазине — var(--fw-*) были undefined!"
+  },
+  {
     "hash": "be0da2e",
     "date": "17.04.2026",
     "message": "Mobile nav sync + фиолетовый accent вместо синего"

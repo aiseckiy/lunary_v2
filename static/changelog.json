@@ -1,5 +1,10 @@
 [
   {
+    "hash": "8279baa",
+    "date": "17.04.2026",
+    "message": "Обновить favicon на новые иконки"
+  },
+  {
     "hash": "dc58043",
     "date": "17.04.2026",
     "message": "Favicon + PWA manifest для всех страниц"

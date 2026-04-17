@@ -218,7 +218,11 @@ def _build_kaspi_xml(db) -> str:
             return ""
         return _html.unescape(s).replace("\x00", "")
 
-    products = db.query(Product).filter(Product.kaspi_sku.isnot(None)).all()
+    products = db.query(Product).filter(
+        Product.kaspi_sku.isnot(None),
+        Product.price.isnot(None),
+        Product.price > 0,
+    ).all()
     for p in products:
         skus = [s.strip() for s in p.kaspi_sku.split(",") if s.strip()]
         stock = max(crud.get_stock(p.id, db), 0)
@@ -232,9 +236,8 @@ def _build_kaspi_xml(db) -> str:
                           storeId=store_id,
                           preOrder="0",
                           stockCount=str(float(stock)))
-            if p.price:
-                cityprices = ET.SubElement(offer, "cityprices")
-                ET.SubElement(cityprices, "cityprice", cityId=city_id).text = str(p.price)
+            cityprices = ET.SubElement(offer, "cityprices")
+            ET.SubElement(cityprices, "cityprice", cityId=city_id).text = str(p.price)
 
     ET.indent(root, space="    ")
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")

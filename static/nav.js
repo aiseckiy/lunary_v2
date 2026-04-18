@@ -1,16 +1,7 @@
 /**
- * nav.js — единая боковая навигация + группированные вкладки + мобильная нижняя панель.
- *
- * Структура (5 групп):
- *   📦 Каталог  · 🏭 Склад  · 💰 Продажи  · 📥 Данные  · ⚙️ Система
- *
- * Рендерит:
- *   - sidebar (#sidebar)       — десктоп
- *   - bottom-nav (#bottom-nav) — мобилка, 5 иконок под каждую группу
- *   - tab-bar в page-container — переключение между разделами внутри группы
+ * nav.js — единая боковая навигация + группированные вкладки для всех страниц.
  */
 (function () {
-  // Загрузка кастомной темы
   fetch('/api/admin/theme/css').then(r => r.text()).then(css => {
     const style = document.createElement('style');
     style.textContent = css;
@@ -19,127 +10,256 @@
 
   const path = window.location.pathname;
 
-  // ── Embed-режим: страница загружена в iframe на unified-странице.
-  // Скрываем всю навигацию (sidebar, bottom nav, tab-bar, header).
-  const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
-  if (isEmbed) {
-    const embedStyle = document.createElement('style');
-    embedStyle.textContent = `
-      #sidebar, #bottom-nav, .sidebar, .bottom-nav,
-      .nav-tab-bar, .standalone-tab-bar,
-      .mobile-header, .app-nav { display: none !important; }
-      body { padding-left: 0 !important; padding-bottom: 0 !important; padding-top: 0 !important; }
-      .layout, .main-content, .page-container { margin-left: 0 !important; padding-top: 0 !important; }
-      .header { display: none !important; }
-    `;
-    document.head.appendChild(embedStyle);
-    document.body && document.body.classList.add('embed-mode');
-    return; // Embed-режим — сайдбар/bottom-nav/tab-bar не рендерим
-  }
+  // ── Группы вкладок (переключение внутри секции) ──────────────
+  const TAB_GROUPS = [
+    {
+      id: 'warehouse',
+      tabs: [
+        { href: '/admin',           icon: '📦', label: 'Товары' },
+        { href: '/admin/history',   icon: '📋', label: 'История' },
+        { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
+        { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
+        { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
+      ]
+    },
+    {
+      id: 'sales',
+      tabs: [
+        { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi заказы' },
+        { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы магазина' },
+        { href: '/shop',              icon: '🏪', label: 'Магазин' },
+      ]
+    },
+    {
+      id: 'data',
+      tabs: [
+        { href: '/admin/data',            icon: '📂', label: 'Обзор' },
+        { href: '/admin/import-xlsx',     icon: '📊', label: 'Импорт Excel' },
+        { href: '/import',                icon: '📄', label: 'Импорт XML' },
+        { href: '/pricelist',             icon: '🗂️', label: 'Накладные' },
+        { href: '/merge',                 icon: '🔀', label: 'Слияние' },
+        { href: '/review',                icon: '✅', label: 'Ревью' },
+        { href: '/admin/export-preview',  icon: '🔍', label: 'Экспорт' },
+        { href: '/uploads',               icon: '📁', label: 'Файлы' },
+      ]
+    },
+    {
+      id: 'system',
+      tabs: [
+        { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },
+        { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
+        { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
+        { href: '/admin/sitemap',   icon: '🗺️', label: 'Карта сайта' },
+        { href: '/admin/bizmap',    icon: '🧭', label: 'Бизнес-процессы' },
+      ]
+    },
+  ];
 
   // ── Навигационные группы (сайдбар) ───────────────────────────
-  // Каждая группа = одна объединённая страница с табами внутри.
-  // Старые URL (/admin/kaspi, /merge, /admin/theme…) продолжают работать,
-  // но в сайдбаре больше не показываются — они доступны через табы
-  // внутри unified-страниц.
-  // 5 групп — по одной ссылке, всё остальное внутри как табы.
   const GROUPS = [
     {
-      id: 'catalog', label: 'Каталог',
-      links: [{
-        href: '/admin/catalog', icon: '📦', label: 'Каталог',
-        matchPrefix: ['/admin/catalog', '/admin/brands', '/admin/categories'],
-        matchExact: ['/admin'],
-      }]
+      label: 'Склад',
+      links: [
+        { href: '/admin',           icon: '📦', label: 'Товары' },
+        { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
+        { href: '/admin/history',   icon: '📋', label: 'История' },
+        { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
+        { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
+      ]
     },
     {
-      id: 'warehouse', label: 'Склад',
-      links: [{
-        href: '/admin/warehouse', icon: '🏭', label: 'Склад',
-        matchPrefix: ['/admin/warehouse', '/admin/scanner', '/admin/history', '/admin/audit'],
-      }]
+      label: 'Продажи',
+      links: [
+        { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi заказы' },
+        { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы магазина', badge: 'orders-badge' },
+        { href: '/shop',              icon: '🏪', label: 'Магазин' },
+      ]
     },
     {
-      id: 'sales', label: 'Продажи',
-      links: [{
-        href: '/admin/orders', icon: '💰', label: 'Заказы',
-        badge: 'orders-badge',
-        matchPrefix: ['/admin/orders', '/admin/kaspi', '/admin/shop-orders', '/admin/analytics'],
-      }]
+      label: 'Данные',
+      links: [
+        { href: '/admin/data',    icon: '📂', label: 'Обзор данных' },
+      ]
     },
     {
-      id: 'data', label: 'Данные',
-      links: [{
-        href: '/admin/io', icon: '📥', label: 'Данные',
-        matchPrefix: ['/admin/io', '/admin/quality', '/admin/import-xlsx', '/admin/export-preview', '/import', '/pricelist', '/uploads', '/merge', '/review'],
-      }]
+      label: 'Магазин',
+      links: [
+        { href: '/admin/brands',     icon: '🏷️', label: 'Бренды' },
+        { href: '/admin/categories', icon: '📂', label: 'Категории' },
+      ]
     },
     {
-      id: 'system', label: 'Настройки',
-      admin_only: true,
-      links: [{
-        href: '/admin/system', icon: '⚙️', label: 'Настройки',
-        matchPrefix: ['/admin/system', '/admin/settings', '/admin/theme', '/admin/changelog', '/admin/sitemap', '/admin/bizmap'],
-      }]
+      label: 'Система',
+      links: [
+        { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },
+        { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
+        { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
+        { href: '/admin/sitemap',   icon: '🗺️', label: 'Карта сайта' },
+        { href: '/admin/bizmap',    icon: '🧭', label: 'Бизнес-процессы' },
+      ]
     },
   ];
 
-  // ── Mobile bottom nav — 5 иконок под каждую группу ───────────
-  const BNAV_LINKS = [
-    { id: 'catalog',   href: '/admin/catalog',   icon: '📦', label: 'Каталог' },
-    { id: 'warehouse', href: '/admin/warehouse', icon: '🏭', label: 'Склад' },
-    { id: 'sales',     href: '/admin/orders',    icon: '💰', label: 'Продажи' },
-    { id: 'data',      href: '/admin/io',        icon: '📥', label: 'Данные' },
-    { id: 'system',    href: '/admin/system',    icon: '⚙️', label: 'Ещё' },
-  ];
-
-  function isActive(link) {
-    // Для объектов links из GROUPS
-    if (typeof link === 'object') {
-      if (link.matchExact && link.matchExact.includes(path)) return true;
-      if (link.matchPrefix) {
-        return link.matchPrefix.some(p => path === p || path.startsWith(p + '/') || path.startsWith(p + '?'));
-      }
-      return pathMatchesHref(link.href);
-    }
-    // Для простых строк (href)
-    return pathMatchesHref(link);
-  }
-
-  function pathMatchesHref(href) {
+  function isActive(href) {
     if (href === '/admin') return path === '/admin';
-    if (href === '/shop') return path === '/shop';
-    return path === href || path.startsWith(href + '/');
+    return path.startsWith(href);
   }
 
-  function currentGroupId() {
-    for (const g of GROUPS) {
-      for (const l of g.links) {
-        if (isActive(l)) return g.id;
+  function currentTabGroup() {
+    for (const g of TAB_GROUPS) {
+      for (const t of g.tabs) {
+        if (isActive(t.href)) return g;
       }
     }
     return null;
   }
 
-  // Таб-бар больше не инжектируется — он теперь часть unified-страниц
-  // (catalog.html, orders.html, io.html, quality.html, system.html).
+  // ── Стили таб-бара (инжектируем один раз) ────────────────────
+  const tabStyle = document.createElement('style');
+  tabStyle.textContent = `
+    .nav-tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 0 0;
+      margin-bottom: 18px;
+      border-bottom: 2px solid #e5e7eb;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
+    }
+    .nav-tab-bar::-webkit-scrollbar { display: none; }
+    .nav-tab-bar a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px 9px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7280;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      border-radius: 6px 6px 0 0;
+      transition: color .15s, background .15s;
+    }
+    .nav-tab-bar a:hover {
+      color: #111827;
+      background: #f3f4f6;
+    }
+    .nav-tab-bar a.active {
+      color: var(--accent, #6c63ff);
+      border-bottom-color: var(--accent, #6c63ff);
+      font-weight: 600;
+    }
+
+    /* Для standalone страниц (без sidebar) — таб-бар в header */
+    .standalone-tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 24px;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .standalone-tab-bar::-webkit-scrollbar { display: none; }
+    .standalone-tab-bar a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7280;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      transition: color .15s;
+    }
+    .standalone-tab-bar a:hover { color: #111827; }
+    .standalone-tab-bar a.active {
+      color: var(--accent, #6c63ff);
+      border-bottom-color: var(--accent, #6c63ff);
+      font-weight: 600;
+    }
+  `;
+  document.head.appendChild(tabStyle);
+
+  // ── Рендер таб-бара ──────────────────────────────────────────
+  function renderTabBar(group, className) {
+    const div = document.createElement('nav');
+    div.className = className;
+    div.setAttribute('role', 'tablist');
+    div.setAttribute('aria-label', 'Навигация по разделу');
+    group.tabs.forEach(t => {
+      const a = document.createElement('a');
+      a.href = t.href;
+      a.innerHTML = `<span>${t.icon}</span>${t.label}`;
+      if (isActive(t.href)) {
+        a.className = 'active';
+        a.setAttribute('aria-current', 'page');
+      }
+      div.appendChild(a);
+    });
+    return div;
+  }
+
+  // ── Инжектировать таб-бар в нужное место ─────────────────────
+  function injectTabs() {
+    const group = currentTabGroup();
+    if (!group) return;
+
+    // Вариант 1: sidebar страница — в начало .page-container
+    const pageContainer = document.querySelector('.page-container');
+    if (pageContainer) {
+      const bar = renderTabBar(group, 'nav-tab-bar');
+      pageContainer.insertBefore(bar, pageContainer.firstChild);
+      return;
+    }
+
+    // Вариант 2: standalone страница — после .header
+    const header = document.querySelector('.header');
+    if (header) {
+      const bar = renderTabBar(group, 'standalone-tab-bar');
+      header.insertAdjacentElement('afterend', bar);
+      return;
+    }
+  }
+
+  // Инжектируем после загрузки DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectTabs);
+  } else {
+    injectTabs();
+  }
 
   // ── Сайдбар ──────────────────────────────────────────────────
   const sidebar = document.getElementById('sidebar');
   if (sidebar) {
-    let userRole = 'admin';
+    // Определяем роль пользователя — для скрытия admin-only пунктов
+    const _ADMIN_ONLY_LINKS = new Set(['/admin/settings', '/admin/theme', '/admin/changelog', '/admin/sitemap', '/admin/bizmap']);
+    let userRole = 'admin'; // по умолчанию показываем всё
+
     fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(me => {
       if (me) userRole = me.role;
       buildSidebar(userRole);
     }).catch(() => buildSidebar('admin'));
 
     function buildSidebar(role) {
-      const isAdmin = role === 'admin';
+      const isManagerOnly = role === 'manager';
       let html = `<div class="sidebar-logo">Lunary <span>OS</span></div>`;
+
       for (const group of GROUPS) {
-        if (group.admin_only && !isAdmin) continue;
+        const visibleLinks = group.links.filter(l => !(isManagerOnly && _ADMIN_ONLY_LINKS.has(l.href)));
+        if (!visibleLinks.length) continue;
         html += `<div class="sidebar-section">${group.label}</div>`;
-        for (const l of group.links) {
+        for (const l of visibleLinks) {
           const active = isActive(l.href) ? ' active' : '';
           const badgeHtml = l.badge
             ? `<span id="${l.badge}" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span>`
@@ -147,24 +267,30 @@
           html += `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
         }
       }
+
       html += `<div class="sidebar-spacer"></div><div class="sidebar-footer">Lunary OS v2</div>`;
       sidebar.innerHTML = html;
     }
   }
 
-  // ── Нижняя панель (мобильная) — по 1 иконке на группу ────────
+  // ── Нижняя панель (мобильная) ─────────────────────────────────
+  const BNAV_LINKS = [
+    { href: '/admin',             icon: '📦', label: 'Склад' },
+    { href: '/admin/scanner',     icon: '📷', label: 'Сканер' },
+    { href: '/admin/history',     icon: '📋', label: 'История' },
+    { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi' },
+    { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы' },
+    { href: '/shop',              icon: '🏪', label: 'Магазин' },
+  ];
+
   const bottomNav = document.getElementById('bottom-nav');
   if (bottomNav) {
-    const activeGroupId = currentGroupId();
     bottomNav.className = 'bottom-nav';
     bottomNav.innerHTML = `<div class="bottom-nav-inner">
       ${BNAV_LINKS.map(l => {
-        const isActiveGroup = l.id === activeGroupId;
-        return `<a class="bnav-item${isActiveGroup ? ' active' : ''}" href="${l.href}" data-group="${l.id}">
-          <span style="font-size:20px;line-height:1">${l.icon}</span>
-          <span style="font-size:10px;margin-top:3px">${l.label}</span>
-        </a>`;
-      }).join('')}
+        const active = isActive(l.href) ? ' active' : '';
+        return `<a class="bnav-item${active}" href="${l.href}">${l.icon} ${l.label}</a>`;
+      }).join('\n      ')}
     </div>`;
   }
 })();

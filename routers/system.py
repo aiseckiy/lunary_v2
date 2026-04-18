@@ -22,43 +22,6 @@ def about_page():
         return f.read()
 
 
-# ─── Unified-страницы (по одной на группу в сайдбаре) ───
-@router.get("/admin/catalog", response_class=HTMLResponse)
-def catalog_unified():
-    with open("static/catalog.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@router.get("/admin/warehouse", response_class=HTMLResponse)
-def warehouse_unified():
-    with open("static/warehouse.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@router.get("/admin/orders", response_class=HTMLResponse)
-def orders_unified():
-    with open("static/orders.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@router.get("/admin/io", response_class=HTMLResponse)
-def io_unified():
-    with open("static/io.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@router.get("/admin/quality", response_class=HTMLResponse)
-def quality_unified():
-    with open("static/quality.html", encoding="utf-8") as f:
-        return f.read()
-
-
-@router.get("/admin/system", response_class=HTMLResponse)
-def system_unified():
-    with open("static/system.html", encoding="utf-8") as f:
-        return f.read()
-
-
 # ─── Admin HTML-страницы (простые file readers) ─────────
 @router.get("/admin", response_class=HTMLResponse)
 def dashboard():

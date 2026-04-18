@@ -25,29 +25,17 @@
 - SEO страницы товаров рендерятся сервером в `shop_product_page()`
 
 ### Frontend (static/*.html)
-- Все страницы подключают `static/components.js` + `static/nav.js` (в таком порядке)
+- Все страницы используют `static/nav.js` для сайдбара и таб-баров
 - Стили пишутся inline или в `<style>` тега внутри файла — нет общего CSS файла
 - Переменные CSS: `--accent` (фиолетовый), `--green`, `--text`, `--surface`
-- **UI-компоненты**: `window.LX` (из components.js) — `LX.drawer()`, `LX.modal()`, `LX.confirm()`, `LX.dropdown()`, `LX.skeleton()`, `LX.empty()`, `LX.errorState()`, `LX.fab()`, `LX.toast()`, `LX.url.get/set()`
-- На мобилке `LX.drawer` и `LX.dropdown` автоматически превращаются в bottom sheet
-- Toast: предпочтительно `LX.toast()` (старый `toast()` работает через обратную совместимость)
+- Toast уведомления: `toast('сообщение', 'success'|'error')`
 
 ## Архитектура навигации
-5 групп в сайдбаре + 5 иконок в мобильном bottom nav:
-- **📦 Каталог**: /admin · /admin/brands · /admin/categories
-- **🏭 Склад**: /admin/scanner · /admin/history · /admin/audit
-- **💰 Продажи**: /admin/kaspi · /admin/shop-orders · /admin/analytics · /admin/export-preview · /shop
-- **📥 Данные**: /admin/import-xlsx · /import · /pricelist · /merge · /review · /uploads
-- **⚙️ Система (admin only)**: /admin/settings · /admin/theme · /admin/changelog · /admin/sitemap · /admin/bizmap
-
-UI-паттерны (утверждены):
-- **Страница** — разделы верхнего уровня
-- **Drawer справа (bottom sheet на мобилке)** — редактирование одной сущности
-- **Модалка** — подтверждения / создание (использовать `LX.confirm()` для yes/no)
-- **Dropdown по клику** — меню действий (`LX.dropdown`)
-- **Inline edit** — быстрая правка в таблице
-- **Toast** — уведомления успех/ошибка
-- **FAB** — главное действие раздела на мобилке
+4 группы с вкладками:
+- **Склад**: /admin, /admin/history, /admin/analytics, /admin/scanner
+- **Продажи**: /admin/kaspi, /admin/shop-orders, /shop
+- **Данные**: /import, /admin/import-xlsx, /pricelist, /merge, /review, /uploads, /admin/export-preview
+- **Система**: /admin/settings, /admin/theme, /admin/changelog, /admin/sitemap, /admin/bizmap
 
 ## Важные решения (почему так)
 - `time.sleep(8)` в run.py — Railway убивает старый процесс при деплое, боту нужно время пока API поднимется

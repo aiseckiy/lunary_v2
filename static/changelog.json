@@ -1,5 +1,10 @@
 [
   {
+    "hash": "99e666d",
+    "date": "18.04.2026",
+    "message": "Nav: новая структура из 5 групп + улучшенный mobile bottom nav"
+  },
+  {
     "hash": "4ab4d34",
     "date": "18.04.2026",
     "message": "Add: components.js — единая библиотека UI (Drawer, Modal, Dropdown, Skeleton, FAB, Toast, URL-state)"

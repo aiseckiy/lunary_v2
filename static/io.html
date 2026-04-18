@@ -7,27 +7,137 @@
 <link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="/static/layout.css">
 <style>
-  .uni-wrap { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-  .uni-header { display: flex; align-items: center; gap: 18px; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .uni-title { font-size: 20px; font-weight: var(--fw-bold); color: var(--text); }
-  .uni-tabs { display: flex; gap: 2px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
-  .uni-tabs::-webkit-scrollbar { display: none; }
-  .uni-tab { display: inline-flex; align-items: center; gap: 6px; padding: 11px 16px; font-size: 14px; font-weight: var(--fw-medium); color: var(--text2); background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; white-space: nowrap; transition: color .15s; }
-  .uni-tab:hover { color: var(--text); }
-  .uni-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: var(--fw-semibold); }
-  .uni-frame-container { flex: 1; overflow: hidden; background: var(--bg); position: relative; }
-  .uni-frame { width: 100%; height: 100%; border: none; display: block; background: var(--bg); }
-  .uni-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--text3); font-size: 14px; pointer-events: none; opacity: 0; transition: opacity .2s; }
-  .uni-loading.show { opacity: 1; }
-  .uni-spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin-right: 10px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  body { background: var(--bg); padding-left: 240px; }
+  .io-wrap { max-width: 1100px; padding: 24px 28px 90px; margin: 0 auto; }
+  .io-title { font-size: 22px; font-weight: var(--fw-bold); margin-bottom: 4px; }
+  .io-subtitle { font-size: 14px; color: var(--text3); margin-bottom: 26px; }
 
-  @media (min-width: 769px) { body { margin-left: 240px; } .uni-wrap { height: 100vh; } }
+  .io-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .io-section-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .io-section-title { font-size: 16px; font-weight: var(--fw-bold); color: var(--text); }
+  .io-section-desc { font-size: 13px; color: var(--text3); margin-bottom: 16px; }
+
+  /* Drop-zone */
+  .io-drop {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #fafafa;
+    transition: border-color .15s, background .15s;
+  }
+  .io-drop:hover, .io-drop.drag { border-color: var(--accent); background: #f5f3ff; }
+  .io-drop-icon { font-size: 36px; margin-bottom: 10px; }
+  .io-drop-title { font-size: 15px; font-weight: var(--fw-semibold); margin-bottom: 4px; }
+  .io-drop-hint { font-size: 12px; color: var(--text3); }
+  .io-drop input { display: none; }
+
+  /* Format hints */
+  .io-formats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .io-fmt {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; font-size: 12px;
+    background: #f3f4f6; border-radius: 8px; color: var(--text2);
+  }
+  .io-fmt b { color: var(--text); }
+
+  /* Actions row */
+  .io-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .io-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 14px; font-weight: var(--fw-semibold);
+    cursor: pointer; text-decoration: none;
+    transition: opacity .15s, transform .1s;
+  }
+  .io-btn:hover { opacity: .92; }
+  .io-btn:active { transform: scale(.97); }
+  .io-btn.secondary {
+    background: #fff; color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .io-btn.secondary:hover { background: #f9fafb; }
+  .io-btn.ghost {
+    background: transparent; color: var(--accent);
+    border: 1px solid transparent;
+    padding: 10px 14px;
+  }
+  .io-btn.ghost:hover { background: #f5f3ff; }
+
+  /* Result pill */
+  .io-result {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-top: 14px;
+  }
+  .io-result.success { background: #dcfce7; color: #166534; }
+  .io-result.error { background: #fee2e2; color: #991b1b; }
+  .io-result pre { white-space: pre-wrap; font-family: inherit; font-size: 12px; margin-top: 6px; }
+
+  /* Feed URL */
+  .io-feed { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .io-feed input {
+    flex: 1; padding: 9px 12px;
+    font-size: 12px; font-family: monospace;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f9fafb; color: var(--text2);
+    outline: none;
+  }
+
+  /* Tools grid */
+  .io-tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .io-tool {
+    display: flex; flex-direction: column;
+    padding: 14px 16px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none; color: inherit;
+    transition: border-color .15s, transform .1s;
+  }
+  .io-tool:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .io-tool-icon { font-size: 22px; margin-bottom: 6px; }
+  .io-tool-title { font-size: 14px; font-weight: var(--fw-semibold); color: var(--text); }
+  .io-tool-desc { font-size: 12px; color: var(--text3); margin-top: 2px; line-height: 1.4; }
+
+  /* History table */
+  .io-history { max-height: 380px; overflow-y: auto; }
+  .io-history-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto;
+    align-items: center; gap: 12px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .io-history-row:last-child { border-bottom: none; }
+  .io-history-icon { font-size: 20px; text-align: center; }
+  .io-history-name { color: var(--text); font-weight: var(--fw-medium); }
+  .io-history-meta { color: var(--text3); font-size: 11px; margin-top: 2px; }
+  .io-history-size { color: var(--text3); font-size: 12px; white-space: nowrap; }
+  .io-history-date { color: var(--text3); font-size: 12px; white-space: nowrap; }
+
+  /* Mobile */
   @media (max-width: 768px) {
-    body { margin: 0; padding-bottom: 70px; }
-    .uni-wrap { height: calc(100vh - 70px); }
-    .uni-header { padding: 10px 14px; } .uni-title { font-size: 16px; }
-    .uni-tabs { padding: 0 10px; } .uni-tab { padding: 10px 12px; font-size: 13px; }
+    body { padding-left: 0; padding-bottom: 80px; }
+    .io-wrap { padding: 16px 14px 90px; }
+    .io-title { font-size: 19px; }
+    .io-section { padding: 16px; }
+    .io-history-row { grid-template-columns: 32px 1fr auto; font-size: 12px; }
+    .io-history-size { display: none; }
   }
 </style>
 </head>
@@ -35,14 +145,100 @@
 
 <nav id="sidebar" class="sidebar"></nav>
 
-<div class="uni-wrap">
-  <div class="uni-header">
-    <div class="uni-title">📥 Данные</div>
+<div class="io-wrap">
+  <div class="io-title">📥 Данные</div>
+  <div class="io-subtitle">Импорт, экспорт и обслуживание каталога товаров</div>
+
+  <!-- ИМПОРТ -->
+  <div class="io-section">
+    <div class="io-section-head">
+      <span style="font-size:22px">⬆️</span>
+      <div class="io-section-title">Загрузить файл</div>
+    </div>
+    <div class="io-section-desc">
+      Перетащи файл сюда или кликни чтобы выбрать. Тип импорта определится автоматически по содержимому.
+    </div>
+
+    <label class="io-drop" id="drop">
+      <div class="io-drop-icon">📁</div>
+      <div class="io-drop-title">Выбрать файл или перетащить</div>
+      <div class="io-drop-hint">Excel, Kaspi XML (ACTIVE.xml), накладная PDF</div>
+      <input type="file" id="file-input" accept=".xlsx,.xml,.pdf,.jpg,.jpeg,.png">
+    </label>
+
+    <div class="io-formats">
+      <div class="io-fmt">📊 <b>.xlsx</b> — товары из Excel</div>
+      <div class="io-fmt">📄 <b>.xml</b> — каталог Kaspi (остатки + цены)</div>
+      <div class="io-fmt">📑 <b>.pdf / .jpg</b> — накладная поставщика</div>
+    </div>
+
+    <div id="import-result" style="display:none"></div>
+
+    <div class="io-actions" style="margin-top:14px">
+      <a href="/api/products/export/xlsx?template=1" class="io-btn ghost">⬇️ Скачать шаблон Excel</a>
+    </div>
   </div>
-  <div class="uni-tabs" role="tablist" id="tabs"></div>
-  <div class="uni-frame-container">
-    <div class="uni-loading" id="loading"><div class="uni-spinner"></div>Загрузка…</div>
-    <iframe class="uni-frame" id="frame" src="about:blank"></iframe>
+
+  <!-- ЭКСПОРТ -->
+  <div class="io-section">
+    <div class="io-section-head">
+      <span style="font-size:22px">⬇️</span>
+      <div class="io-section-title">Экспорт для Kaspi</div>
+    </div>
+    <div class="io-section-desc">
+      Скачай XML для ручной загрузки в Kaspi Merchant Portal, или используй прямой URL
+      чтобы Kaspi тянул каталог автоматически.
+    </div>
+
+    <div class="io-actions">
+      <a href="/api/kaspi/export-xml" class="io-btn" download="ACTIVE.xml">📥 Скачать ACTIVE.xml</a>
+      <a href="/admin/export-preview?embed=1" class="io-btn secondary" target="_blank">🔍 Превью перед выгрузкой</a>
+    </div>
+
+    <div class="io-feed">
+      <input id="feed-url" readonly value="">
+      <button class="io-btn secondary" onclick="copyFeed()">📋</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:6px">
+      Прямой URL для автоматической синхронизации Kaspi с каталогом
+    </div>
+  </div>
+
+  <!-- ИНСТРУМЕНТЫ -->
+  <div class="io-section">
+    <div class="io-section-head">
+      <span style="font-size:22px">🛠️</span>
+      <div class="io-section-title">Обслуживание каталога</div>
+    </div>
+    <div class="io-tools">
+      <a href="/merge" class="io-tool">
+        <div class="io-tool-icon">🔀</div>
+        <div class="io-tool-title">Слияние дублей</div>
+        <div class="io-tool-desc">Объединить дублирующиеся карточки</div>
+      </a>
+      <a href="/review" class="io-tool">
+        <div class="io-tool-icon">✅</div>
+        <div class="io-tool-title">Ревью товаров</div>
+        <div class="io-tool-desc">Проверить карточки на проблемы</div>
+      </a>
+      <a href="/pricelist" class="io-tool">
+        <div class="io-tool-icon">🗂️</div>
+        <div class="io-tool-title">Накладные</div>
+        <div class="io-tool-desc">Прайс-листы от поставщиков</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ИСТОРИЯ -->
+  <div class="io-section">
+    <div class="io-section-head">
+      <span style="font-size:22px">📋</span>
+      <div class="io-section-title">История операций</div>
+      <a href="/uploads" class="io-btn ghost" style="margin-left:auto;font-size:12px;padding:5px 10px">все файлы →</a>
+    </div>
+    <div class="io-history" id="history">
+      <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Загрузка…</div>
+    </div>
   </div>
 </div>
 
@@ -51,55 +247,164 @@
 <script src="/static/components.js"></script>
 <script src="/static/nav.js"></script>
 <script>
-const TABS = [
-  { id: 'xlsx',      icon: '📊', label: 'Импорт Excel',   src: '/admin/import-xlsx' },
-  { id: 'xml',       icon: '📄', label: 'Импорт Kaspi XML', src: '/import' },
-  { id: 'pricelist', icon: '🗂️', label: 'Накладные',      src: '/pricelist' },
-  { id: 'files',     icon: '📁', label: 'Файлы',          src: '/uploads' },
-];
-
-const tabsEl = document.getElementById('tabs');
-const frameEl = document.getElementById('frame');
-const loadEl = document.getElementById('loading');
-
-function getTabId() {
-  const id = new URLSearchParams(location.search).get('tab');
-  return TABS.find(t => t.id === id) ? id : TABS[0].id;
+// ── Feed URL ──
+const origin = location.origin;
+document.getElementById('feed-url').value = `${origin}/api/kaspi/feed.xml`;
+function copyFeed() {
+  const input = document.getElementById('feed-url');
+  input.select();
+  document.execCommand('copy');
+  LX.toast('Скопировано', 'success');
 }
 
-function renderTabs() {
-  const active = getTabId();
-  tabsEl.innerHTML = '';
-  TABS.forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'uni-tab' + (t.id === active ? ' active' : '');
-    btn.setAttribute('role', 'tab');
-    btn.innerHTML = `<span>${t.icon}</span><span>${t.label}</span>`;
-    btn.onclick = () => setTab(t.id);
-    tabsEl.appendChild(btn);
-  });
+// ── Drop zone ──
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('file-input');
+const resultBox = document.getElementById('import-result');
+
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+drop.addEventListener('drop', e => {
+  e.preventDefault();
+  drop.classList.remove('drag');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+async function handleFile(file) {
+  const name = file.name.toLowerCase();
+  resultBox.style.display = 'block';
+  resultBox.className = 'io-result';
+  resultBox.innerHTML = `<div>⏳ Загружаю <b>${file.name}</b>…</div>`;
+
+  try {
+    if (name.endsWith('.xlsx')) {
+      await importXlsx(file);
+    } else if (name.endsWith('.xml')) {
+      await importKaspiXml(file);
+    } else if (/\.(pdf|jpe?g|png)$/.test(name)) {
+      await importPricelist(file);
+    } else {
+      resultBox.className = 'io-result error';
+      resultBox.innerHTML = `<div>❌ Неподдерживаемый формат. Используй .xlsx, .xml или .pdf/.jpg.</div>`;
+      return;
+    }
+    loadHistory();
+  } catch (e) {
+    resultBox.className = 'io-result error';
+    resultBox.innerHTML = `<div>❌ Ошибка: ${e.message || e}</div>`;
+  }
 }
 
-function setTab(id) {
-  if (id === getTabId()) return;
-  const params = new URLSearchParams(location.search);
-  params.set('tab', id);
-  history.pushState({ tab: id }, '', location.pathname + '?' + params.toString());
-  loadFrame();
-  renderTabs();
+async function importXlsx(file) {
+  const form = new FormData();
+  form.append('file', file);
+  const r = await fetch('/api/products/import/xlsx', { method: 'POST', body: form });
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  const errs = (data.errors || []).slice(0, 5).join('\n');
+  resultBox.className = 'io-result success';
+  resultBox.innerHTML = `
+    <div><b>✅ Excel импортирован</b></div>
+    <div style="margin-top:6px">
+      Создано: <b>${data.created}</b> · Обновлено: <b>${data.updated}</b>
+      ${data.skipped ? ` · Пропущено: <b>${data.skipped}</b>` : ''}
+    </div>
+    ${errs ? `<pre>${errs}</pre>` : ''}
+    <div style="margin-top:8px"><a href="/admin" style="color:inherit;text-decoration:underline">→ Открыть каталог</a></div>
+  `;
+  LX.toast(`Excel: создано ${data.created}, обновлено ${data.updated}`, 'success');
 }
 
-function loadFrame() {
-  const tab = TABS.find(t => t.id === getTabId()) || TABS[0];
-  loadEl.classList.add('show');
-  frameEl.src = tab.src + '?embed=1';
-  frameEl.onload = () => loadEl.classList.remove('show');
+async function importKaspiXml(file) {
+  const form = new FormData();
+  form.append('file', file);
+  const r = await fetch('/api/kaspi/import-xml-products', { method: 'POST', body: form });
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  resultBox.className = 'io-result success';
+  resultBox.innerHTML = `
+    <div><b>✅ Kaspi XML импортирован</b></div>
+    <div style="margin-top:6px">
+      Создано: <b>${data.created}</b> · Обновлено: <b>${data.updated}</b> · Без изменений: <b>${data.unchanged}</b>
+      ${data.stock_adjusted ? ` · Остатки: <b>${data.stock_adjusted}</b>` : ''}
+      ${data.price_changed ? ` · Цены: <b>${data.price_changed}</b>` : ''}
+    </div>
+  `;
+  LX.toast(`Kaspi XML: создано ${data.created}, обновлено ${data.updated}`, 'success');
 }
 
-window.addEventListener('popstate', () => { renderTabs(); loadFrame(); });
+async function importPricelist(file) {
+  const form = new FormData();
+  form.append('file', file);
+  const r = await fetch('/api/pricelist/import', { method: 'POST', body: form });
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  resultBox.className = 'io-result success';
+  resultBox.innerHTML = `
+    <div><b>✅ Накладная загружена</b></div>
+    <div style="margin-top:6px">Позиций распознано: <b>${data.items_count || 0}</b></div>
+    <div style="margin-top:8px"><a href="/pricelist" style="color:inherit;text-decoration:underline">→ Открыть накладные</a></div>
+  `;
+  LX.toast('Накладная загружена', 'success');
+}
 
-renderTabs();
-loadFrame();
+// ── История ──
+async function loadHistory() {
+  const box = document.getElementById('history');
+  try {
+    const r = await fetch('/api/uploads');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const items = await r.json();
+    if (!items.length) {
+      LX.empty(box, { icon: '📭', title: 'Пока нет загрузок', desc: 'Загрузи первый файл выше' });
+      return;
+    }
+    box.innerHTML = items.slice(0, 20).map(u => {
+      const icon = u.kind === 'kaspi_active' ? '📄'
+                 : u.kind === 'xlsx' ? '📊'
+                 : u.kind === 'pricelist' ? '🗂️'
+                 : '📁';
+      const size = u.size ? formatSize(u.size) : '';
+      const date = u.created_at ? formatDate(u.created_at) : '';
+      return `
+        <a href="/api/uploads/${u.id}/download" class="io-history-row" style="text-decoration:none;color:inherit">
+          <div class="io-history-icon">${icon}</div>
+          <div>
+            <div class="io-history-name">${u.filename || u.kind || 'file'}</div>
+            <div class="io-history-meta">${u.records ? `${u.records} записей · ` : ''}${u.kind || ''}</div>
+          </div>
+          <div class="io-history-size">${size}</div>
+          <div class="io-history-date">${date}</div>
+        </a>
+      `;
+    }).join('');
+  } catch (e) {
+    LX.errorState(box, { title: 'Не удалось загрузить историю', desc: String(e.message || e), onRetry: loadHistory });
+  }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' Б';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+  return (bytes / 1024 / 1024).toFixed(1) + ' МБ';
+}
+function formatDate(str) {
+  try {
+    const d = new Date(str);
+    const now = new Date();
+    const diff = (now - d) / 1000;
+    if (diff < 60) return 'сейчас';
+    if (diff < 3600) return Math.floor(diff / 60) + ' мин';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' ч';
+    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+  } catch (e) { return str; }
+}
+
+loadHistory();
 </script>
 
 </body>

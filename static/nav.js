@@ -42,44 +42,45 @@
   // Старые URL (/admin/kaspi, /merge, /admin/theme…) продолжают работать,
   // но в сайдбаре больше не показываются — они доступны через табы
   // внутри unified-страниц.
+  // 5 групп — по одной ссылке, всё остальное внутри как табы.
   const GROUPS = [
     {
-      id: 'catalog',
-      label: 'Каталог',
-      links: [
-        { href: '/admin/catalog', icon: '📦', label: 'Каталог товаров', matchPrefix: ['/admin/catalog', '/admin/brands', '/admin/categories'], matchExact: ['/admin'] },
-      ]
+      id: 'catalog', label: 'Каталог',
+      links: [{
+        href: '/admin/catalog', icon: '📦', label: 'Каталог',
+        matchPrefix: ['/admin/catalog', '/admin/brands', '/admin/categories'],
+        matchExact: ['/admin'],
+      }]
     },
     {
-      id: 'warehouse',
-      label: 'Склад',
-      links: [
-        { href: '/admin/warehouse', icon: '🏭', label: 'Склад', matchPrefix: ['/admin/warehouse', '/admin/scanner', '/admin/history', '/admin/audit'] },
-      ]
+      id: 'warehouse', label: 'Склад',
+      links: [{
+        href: '/admin/warehouse', icon: '🏭', label: 'Склад',
+        matchPrefix: ['/admin/warehouse', '/admin/scanner', '/admin/history', '/admin/audit'],
+      }]
     },
     {
-      id: 'sales',
-      label: 'Продажи',
-      links: [
-        { href: '/admin/orders', icon: '💰', label: 'Заказы', badge: 'orders-badge', matchPrefix: ['/admin/orders', '/admin/kaspi', '/admin/shop-orders', '/admin/analytics', '/admin/export-preview'] },
-        { href: '/shop',         icon: '🏪', label: 'Витрина магазина' },
-      ]
+      id: 'sales', label: 'Продажи',
+      links: [{
+        href: '/admin/orders', icon: '💰', label: 'Заказы',
+        badge: 'orders-badge',
+        matchPrefix: ['/admin/orders', '/admin/kaspi', '/admin/shop-orders', '/admin/analytics'],
+      }]
     },
     {
-      id: 'data',
-      label: 'Данные',
-      links: [
-        { href: '/admin/io',      icon: '📥', label: 'Импорт/Экспорт', matchPrefix: ['/admin/io', '/admin/import-xlsx', '/admin/export-preview', '/import', '/pricelist', '/uploads'] },
-        { href: '/admin/quality', icon: '🧹', label: 'Качество данных', matchPrefix: ['/admin/quality', '/merge', '/review'] },
-      ]
+      id: 'data', label: 'Данные',
+      links: [{
+        href: '/admin/io', icon: '📥', label: 'Данные',
+        matchPrefix: ['/admin/io', '/admin/quality', '/admin/import-xlsx', '/admin/export-preview', '/import', '/pricelist', '/uploads', '/merge', '/review'],
+      }]
     },
     {
-      id: 'system',
-      label: 'Система',
+      id: 'system', label: 'Настройки',
       admin_only: true,
-      links: [
-        { href: '/admin/system', icon: '⚙️', label: 'Настройки', matchPrefix: ['/admin/system', '/admin/settings', '/admin/theme', '/admin/changelog', '/admin/sitemap', '/admin/bizmap'] },
-      ]
+      links: [{
+        href: '/admin/system', icon: '⚙️', label: 'Настройки',
+        matchPrefix: ['/admin/system', '/admin/settings', '/admin/theme', '/admin/changelog', '/admin/sitemap', '/admin/bizmap'],
+      }]
     },
   ];
 

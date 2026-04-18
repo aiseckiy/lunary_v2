@@ -1,7 +1,16 @@
 /**
- * nav.js — единая боковая навигация + группированные вкладки для всех страниц.
+ * nav.js — единая боковая навигация + группированные вкладки + мобильная нижняя панель.
+ *
+ * Структура (5 групп):
+ *   📦 Каталог  · 🏭 Склад  · 💰 Продажи  · 📥 Данные  · ⚙️ Система
+ *
+ * Рендерит:
+ *   - sidebar (#sidebar)       — десктоп
+ *   - bottom-nav (#bottom-nav) — мобилка, 5 иконок под каждую группу
+ *   - tab-bar в page-container — переключение между разделами внутри группы
  */
 (function () {
+  // Загрузка кастомной темы
   fetch('/api/admin/theme/css').then(r => r.text()).then(css => {
     const style = document.createElement('style');
     style.textContent = css;
@@ -10,44 +19,49 @@
 
   const path = window.location.pathname;
 
-  // ── Группы вкладок (переключение внутри секции) ──────────────
+  // ── Группы вкладок (tab-bar внутри секции) ───────────────────
   const TAB_GROUPS = [
+    {
+      id: 'catalog',
+      tabs: [
+        { href: '/admin',            icon: '📦', label: 'Товары' },
+        { href: '/admin/brands',     icon: '🏷️', label: 'Бренды' },
+        { href: '/admin/categories', icon: '📂', label: 'Категории' },
+      ]
+    },
     {
       id: 'warehouse',
       tabs: [
-        { href: '/admin',           icon: '📦', label: 'Товары' },
-        { href: '/admin/history',   icon: '📋', label: 'История' },
-        { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
         { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
-        { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
+        { href: '/admin/history',   icon: '📋', label: 'История' },
+        { href: '/admin/audit',     icon: '📝', label: 'Инвентаризация' },
       ]
     },
     {
       id: 'sales',
       tabs: [
-        { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi заказы' },
-        { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы магазина' },
-        { href: '/shop',              icon: '🏪', label: 'Магазин' },
+        { href: '/admin/kaspi',          icon: '🛒', label: 'Kaspi заказы' },
+        { href: '/admin/shop-orders',    icon: '🛍️', label: 'Магазин заказы' },
+        { href: '/admin/analytics',      icon: '📊', label: 'Аналитика' },
+        { href: '/admin/export-preview', icon: '📤', label: 'Экспорт Kaspi' },
       ]
     },
     {
       id: 'data',
       tabs: [
-        { href: '/admin/data',            icon: '📂', label: 'Обзор' },
-        { href: '/admin/import-xlsx',     icon: '📊', label: 'Импорт Excel' },
-        { href: '/import',                icon: '📄', label: 'Импорт XML' },
-        { href: '/pricelist',             icon: '🗂️', label: 'Накладные' },
-        { href: '/merge',                 icon: '🔀', label: 'Слияние' },
-        { href: '/review',                icon: '✅', label: 'Ревью' },
-        { href: '/admin/export-preview',  icon: '🔍', label: 'Экспорт' },
-        { href: '/uploads',               icon: '📁', label: 'Файлы' },
+        { href: '/admin/import-xlsx', icon: '📊', label: 'Импорт Excel' },
+        { href: '/import',            icon: '📄', label: 'Импорт XML' },
+        { href: '/pricelist',         icon: '🗂️', label: 'Накладные' },
+        { href: '/merge',             icon: '🔀', label: 'Слияние' },
+        { href: '/review',            icon: '✅', label: 'Ревью' },
+        { href: '/uploads',           icon: '📁', label: 'Файлы' },
       ]
     },
     {
       id: 'system',
       tabs: [
         { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },
-        { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
+        { href: '/admin/theme',     icon: '🎨', label: 'Темы' },
         { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
         { href: '/admin/sitemap',   icon: '🗺️', label: 'Карта сайта' },
         { href: '/admin/bizmap',    icon: '🧭', label: 'Бизнес-процессы' },
@@ -58,41 +72,58 @@
   // ── Навигационные группы (сайдбар) ───────────────────────────
   const GROUPS = [
     {
-      label: 'Склад',
+      id: 'catalog',
+      label: 'Каталог',
+      icon: '📦',
       links: [
-        { href: '/admin',           icon: '📦', label: 'Товары' },
-        { href: '/admin/scanner',   icon: '📷', label: 'Сканер' },
-        { href: '/admin/history',   icon: '📋', label: 'История' },
-        { href: '/admin/analytics', icon: '📊', label: 'Аналитика' },
-        { href: '/admin/audit',     icon: '📝', label: 'Проверка' },
-      ]
-    },
-    {
-      label: 'Продажи',
-      links: [
-        { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi заказы' },
-        { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы магазина', badge: 'orders-badge' },
-        { href: '/shop',              icon: '🏪', label: 'Магазин' },
-      ]
-    },
-    {
-      label: 'Данные',
-      links: [
-        { href: '/admin/data',    icon: '📂', label: 'Обзор данных' },
-      ]
-    },
-    {
-      label: 'Магазин',
-      links: [
+        { href: '/admin',            icon: '📦', label: 'Товары' },
         { href: '/admin/brands',     icon: '🏷️', label: 'Бренды' },
         { href: '/admin/categories', icon: '📂', label: 'Категории' },
       ]
     },
     {
+      id: 'warehouse',
+      label: 'Склад',
+      icon: '🏭',
+      links: [
+        { href: '/admin/scanner',  icon: '📷', label: 'Сканер' },
+        { href: '/admin/history',  icon: '📋', label: 'История' },
+        { href: '/admin/audit',    icon: '📝', label: 'Инвентаризация' },
+      ]
+    },
+    {
+      id: 'sales',
+      label: 'Продажи',
+      icon: '💰',
+      links: [
+        { href: '/admin/kaspi',          icon: '🛒', label: 'Kaspi заказы' },
+        { href: '/admin/shop-orders',    icon: '🛍️', label: 'Магазин заказы', badge: 'orders-badge' },
+        { href: '/admin/analytics',      icon: '📊', label: 'Аналитика' },
+        { href: '/admin/export-preview', icon: '📤', label: 'Экспорт Kaspi' },
+        { href: '/shop',                 icon: '🏪', label: 'Витрина' },
+      ]
+    },
+    {
+      id: 'data',
+      label: 'Данные',
+      icon: '📥',
+      links: [
+        { href: '/admin/import-xlsx', icon: '📊', label: 'Импорт Excel' },
+        { href: '/import',            icon: '📄', label: 'Импорт XML' },
+        { href: '/pricelist',         icon: '🗂️', label: 'Накладные' },
+        { href: '/merge',             icon: '🔀', label: 'Слияние дублей' },
+        { href: '/review',            icon: '✅', label: 'Ревью' },
+        { href: '/uploads',           icon: '📁', label: 'Файлы' },
+      ]
+    },
+    {
+      id: 'system',
       label: 'Система',
+      icon: '⚙️',
+      admin_only: true,
       links: [
         { href: '/admin/settings',  icon: '⚙️', label: 'Настройки' },
-        { href: '/admin/theme',     icon: '🎨', label: 'Тема' },
+        { href: '/admin/theme',     icon: '🎨', label: 'Темы' },
         { href: '/admin/changelog', icon: '🚀', label: 'Обновления' },
         { href: '/admin/sitemap',   icon: '🗺️', label: 'Карта сайта' },
         { href: '/admin/bizmap',    icon: '🧭', label: 'Бизнес-процессы' },
@@ -100,96 +131,95 @@
     },
   ];
 
+  // ── Mobile bottom nav — 5 иконок под каждую группу ───────────
+  // Href — первая ссылка внутри группы (дефолтная точка входа)
+  const BNAV_LINKS = [
+    { id: 'catalog',   href: '/admin',            icon: '📦', label: 'Каталог' },
+    { id: 'warehouse', href: '/admin/scanner',    icon: '📷', label: 'Склад' },
+    { id: 'sales',     href: '/admin/kaspi',      icon: '💰', label: 'Продажи' },
+    { id: 'data',      href: '/admin/import-xlsx', icon: '📥', label: 'Данные' },
+    { id: 'system',    href: '/admin/settings',   icon: '⚙️', label: 'Ещё' },
+  ];
+
   function isActive(href) {
     if (href === '/admin') return path === '/admin';
+    if (href === '/shop') return path === '/shop';
     return path.startsWith(href);
   }
 
-  function currentTabGroup() {
-    for (const g of TAB_GROUPS) {
-      for (const t of g.tabs) {
-        if (isActive(t.href)) return g;
+  function currentGroupId() {
+    for (const g of GROUPS) {
+      for (const l of g.links) {
+        if (isActive(l.href)) return g.id;
       }
     }
     return null;
   }
 
-  // ── Стили таб-бара (инжектируем один раз) ────────────────────
-  const tabStyle = document.createElement('style');
-  tabStyle.textContent = `
+  function currentTabGroup() {
+    const gid = currentGroupId();
+    return TAB_GROUPS.find(g => g.id === gid) || null;
+  }
+
+  // ── Стили nav (инжектируем один раз) ─────────────────────────
+  const navStyle = document.createElement('style');
+  navStyle.textContent = `
+    /* Tab-bar в sidebar-страницах */
     .nav-tab-bar {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      padding: 10px 0 0;
-      margin-bottom: 18px;
-      border-bottom: 2px solid #e5e7eb;
-      overflow-x: auto;
-      scrollbar-width: none;
+      display: flex; align-items: center; gap: 2px;
+      padding: 10px 0 0; margin-bottom: 18px;
+      border-bottom: 2px solid var(--border, #e5e7eb);
+      overflow-x: auto; scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
       flex-shrink: 0;
     }
     .nav-tab-bar::-webkit-scrollbar { display: none; }
     .nav-tab-bar a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      display: inline-flex; align-items: center; gap: 6px;
       padding: 7px 14px 9px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
+      font-size: 13px; font-weight: var(--fw-medium, 500);
+      color: var(--text2, #6b7280);
       text-decoration: none;
       border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      white-space: nowrap;
+      margin-bottom: -2px; white-space: nowrap;
       border-radius: 6px 6px 0 0;
       transition: color .15s, background .15s;
     }
-    .nav-tab-bar a:hover {
-      color: #111827;
-      background: #f3f4f6;
-    }
+    .nav-tab-bar a:hover { color: var(--text, #111); background: #f3f4f6; }
     .nav-tab-bar a.active {
-      color: var(--accent, #6c63ff);
-      border-bottom-color: var(--accent, #6c63ff);
-      font-weight: 600;
+      color: var(--accent, #6366f1);
+      border-bottom-color: var(--accent, #6366f1);
+      font-weight: var(--fw-semibold, 600);
     }
 
-    /* Для standalone страниц (без sidebar) — таб-бар в header */
+    /* Tab-bar в standalone страницах (без sidebar) */
     .standalone-tab-bar {
-      display: flex;
-      align-items: center;
-      gap: 2px;
+      display: flex; align-items: center; gap: 2px;
       padding: 0 24px;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      overflow-x: auto;
-      scrollbar-width: none;
+      background: var(--surface, #fff);
+      border-bottom: 1px solid var(--border, #e5e7eb);
+      overflow-x: auto; scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
     }
     .standalone-tab-bar::-webkit-scrollbar { display: none; }
     .standalone-tab-bar a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      display: inline-flex; align-items: center; gap: 6px;
       padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
+      font-size: 13px; font-weight: var(--fw-medium, 500);
+      color: var(--text2, #6b7280);
       text-decoration: none;
       border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      white-space: nowrap;
+      margin-bottom: -1px; white-space: nowrap;
       transition: color .15s;
     }
-    .standalone-tab-bar a:hover { color: #111827; }
+    .standalone-tab-bar a:hover { color: var(--text, #111); }
     .standalone-tab-bar a.active {
-      color: var(--accent, #6c63ff);
-      border-bottom-color: var(--accent, #6c63ff);
-      font-weight: 600;
+      color: var(--accent, #6366f1);
+      border-bottom-color: var(--accent, #6366f1);
+      font-weight: var(--fw-semibold, 600);
     }
   `;
-  document.head.appendChild(tabStyle);
+  document.head.appendChild(navStyle);
 
   // ── Рендер таб-бара ──────────────────────────────────────────
   function renderTabBar(group, className) {
@@ -210,29 +240,22 @@
     return div;
   }
 
-  // ── Инжектировать таб-бар в нужное место ─────────────────────
   function injectTabs() {
     const group = currentTabGroup();
-    if (!group) return;
+    if (!group || group.tabs.length <= 1) return;
 
-    // Вариант 1: sidebar страница — в начало .page-container
     const pageContainer = document.querySelector('.page-container');
     if (pageContainer) {
-      const bar = renderTabBar(group, 'nav-tab-bar');
-      pageContainer.insertBefore(bar, pageContainer.firstChild);
+      pageContainer.insertBefore(renderTabBar(group, 'nav-tab-bar'), pageContainer.firstChild);
       return;
     }
-
-    // Вариант 2: standalone страница — после .header
     const header = document.querySelector('.header');
     if (header) {
-      const bar = renderTabBar(group, 'standalone-tab-bar');
-      header.insertAdjacentElement('afterend', bar);
+      header.insertAdjacentElement('afterend', renderTabBar(group, 'standalone-tab-bar'));
       return;
     }
   }
 
-  // Инжектируем после загрузки DOM
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectTabs);
   } else {
@@ -242,24 +265,19 @@
   // ── Сайдбар ──────────────────────────────────────────────────
   const sidebar = document.getElementById('sidebar');
   if (sidebar) {
-    // Определяем роль пользователя — для скрытия admin-only пунктов
-    const _ADMIN_ONLY_LINKS = new Set(['/admin/settings', '/admin/theme', '/admin/changelog', '/admin/sitemap', '/admin/bizmap']);
-    let userRole = 'admin'; // по умолчанию показываем всё
-
+    let userRole = 'admin';
     fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(me => {
       if (me) userRole = me.role;
       buildSidebar(userRole);
     }).catch(() => buildSidebar('admin'));
 
     function buildSidebar(role) {
-      const isManagerOnly = role === 'manager';
+      const isAdmin = role === 'admin';
       let html = `<div class="sidebar-logo">Lunary <span>OS</span></div>`;
-
       for (const group of GROUPS) {
-        const visibleLinks = group.links.filter(l => !(isManagerOnly && _ADMIN_ONLY_LINKS.has(l.href)));
-        if (!visibleLinks.length) continue;
+        if (group.admin_only && !isAdmin) continue;
         html += `<div class="sidebar-section">${group.label}</div>`;
-        for (const l of visibleLinks) {
+        for (const l of group.links) {
           const active = isActive(l.href) ? ' active' : '';
           const badgeHtml = l.badge
             ? `<span id="${l.badge}" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px"></span>`
@@ -267,30 +285,24 @@
           html += `<a class="nav-link${active}" href="${l.href}">${l.icon} ${l.label}${badgeHtml}</a>`;
         }
       }
-
       html += `<div class="sidebar-spacer"></div><div class="sidebar-footer">Lunary OS v2</div>`;
       sidebar.innerHTML = html;
     }
   }
 
-  // ── Нижняя панель (мобильная) ─────────────────────────────────
-  const BNAV_LINKS = [
-    { href: '/admin',             icon: '📦', label: 'Склад' },
-    { href: '/admin/scanner',     icon: '📷', label: 'Сканер' },
-    { href: '/admin/history',     icon: '📋', label: 'История' },
-    { href: '/admin/kaspi',       icon: '🛒', label: 'Kaspi' },
-    { href: '/admin/shop-orders', icon: '🛍️', label: 'Заказы' },
-    { href: '/shop',              icon: '🏪', label: 'Магазин' },
-  ];
-
+  // ── Нижняя панель (мобильная) — по 1 иконке на группу ────────
   const bottomNav = document.getElementById('bottom-nav');
   if (bottomNav) {
+    const activeGroupId = currentGroupId();
     bottomNav.className = 'bottom-nav';
     bottomNav.innerHTML = `<div class="bottom-nav-inner">
       ${BNAV_LINKS.map(l => {
-        const active = isActive(l.href) ? ' active' : '';
-        return `<a class="bnav-item${active}" href="${l.href}">${l.icon} ${l.label}</a>`;
-      }).join('\n      ')}
+        const isActiveGroup = l.id === activeGroupId;
+        return `<a class="bnav-item${isActiveGroup ? ' active' : ''}" href="${l.href}" data-group="${l.id}">
+          <span style="font-size:20px;line-height:1">${l.icon}</span>
+          <span style="font-size:10px;margin-top:3px">${l.label}</span>
+        </a>`;
+      }).join('')}
     </div>`;
   }
 })();

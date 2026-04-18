@@ -1,5 +1,10 @@
 [
   {
+    "hash": "4ab4d34",
+    "date": "18.04.2026",
+    "message": "Add: components.js — единая библиотека UI (Drawer, Modal, Dropdown, Skeleton, FAB, Toast, URL-state)"
+  },
+  {
     "hash": "cb1e18e",
     "date": "17.04.2026",
     "message": "Fix: Kaspi XML экспорт — исключать товары без цены"
